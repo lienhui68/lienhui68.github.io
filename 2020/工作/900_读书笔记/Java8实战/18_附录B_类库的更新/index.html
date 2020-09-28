@@ -1,0 +1,584 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本附录会审视Java 8方法库中重要的更新。                     集合        Collection API在Java 8中最重大的更新就是引入了流，我们已经在第4章到6章进行了介绍。 当然，除此之外，Collection API还有一部分更新，本附录会简要地讨论。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="附录B_类库的更新">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/18_%E9%99%84%E5%BD%95B_%E7%B1%BB%E5%BA%93%E7%9A%84%E6%9B%B4%E6%96%B0/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本附录会审视Java 8方法库中重要的更新。                     集合        Collection API在Java 8中最重大的更新就是引入了流，我们已经在第4章到6章进行了介绍。 当然，除此之外，Collection API还有一部分更新，本附录会简要地讨论。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200819145155.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200819145821.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200819151224.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200819152735.png">
+<meta property="article:published_time" content="2020-07-01T01:04:18.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.830Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="java8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200819145155.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>附录B_类库的更新 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/18_%E9%99%84%E5%BD%95B_%E7%B1%BB%E5%BA%93%E7%9A%84%E6%9B%B4%E6%96%B0/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">附录B_类库的更新</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.9k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">23分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>本附录会审视Java 8方法库中重要的更新。</p>
+
+        <h1 id="集合"   >
+          <a href="#集合" class="heading-link"><i class="fas fa-link"></i></a>集合</h1>
+      
+<p>Collection API在Java 8中最重大的更新就是引入了流，我们已经在第4章到6章进行了介绍。 当然，除此之外，Collection API还有一部分更新，本附录会简要地讨论。</p>
+<a id="more"></a>
+
+        <h2 id="其他新增的方法"   >
+          <a href="#其他新增的方法" class="heading-link"><i class="fas fa-link"></i></a>其他新增的方法</h2>
+      
+<p>Java API的设计者们充分利用默认方法，为集合接口和类新增了多个新的方法。这些新增的 方法我们已经列在表B-1中了。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200819145155.png"  alt="" />
+      </p>
+
+        <h3 id="collection"   >
+          <a href="#collection" class="heading-link"><i class="fas fa-link"></i></a>Collection</h3>
+      
+<p>removeIf 方法可以移除集合中满足某个谓词的所有元素。 注意， 这一方法与我们在介绍 Stream API时提到的filter方法不大一样。Stream API中的filter方法会产生一个新的流，不会 对当前作为数据源的流做任何变更。</p>
+
+        <h3 id="map"   >
+          <a href="#map" class="heading-link"><i class="fas fa-link"></i></a>Map</h3>
+      
+
+        <h4 id="getordefault"   >
+          <a href="#getordefault" class="heading-link"><i class="fas fa-link"></i></a>getOrDefault</h4>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> V <span class="title">getOrDefault</span><span class="params">(Object key, V defaultValue)</span> </span>&#123;</span><br></pre></td></tr></table></div></figure>
+<p>Map接口的变化最大，它增加了多个新方法，利用这些新方法能更加便利地操纵Map中的数 据。比如，getOrDefault方法就可以替换现在检测Map中是否包含给定键映射的惯用方法。如 果Map中不存在这样的键映射，你可以提供一个默认值，方法会返回该默认值。使用之前版本的 Java，要实现这一目的，你可能会如下编这段代码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Integer&gt; carInventory = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">Integer count = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">if</span> (carInventory.containsKey(<span class="string">"Aston Martin"</span>)) &#123;</span><br><span class="line">    count = carInventory.get(<span class="string">"Aston Martin"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>使用新的Map接口之后，你只需要简单地编写一行代码就能实现这一功能，代码如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Integer&gt; carInventory = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">Integer count = carInventory.getOrDefault(<span class="string">"Aston Martin"</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></div></figure>
+<p>注意，这一方法仅在没有映射时才生效。比如，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果键被显式地映射到了空值，那么该方法是不会返回你设定的默认值的。</span></p>
+
+        <h4 id="computeifabsent"   >
+          <a href="#computeifabsent" class="heading-link"><i class="fas fa-link"></i></a>computeIfAbsent</h4>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> V <span class="title">computeIfAbsent</span><span class="params">(K key,</span></span></span><br><span class="line"><span class="function"><span class="params">        Function&lt;? <span class="keyword">super</span> K, ? extends V&gt; mappingFunction)</span> </span>&#123;</span><br></pre></td></tr></table></div></figure>
+<p>另一个特别有用的方法是computeIfAbsent，这个方法在第14章解释记忆表时曾经简要地 提到过。它能帮助你非常方便地使用缓存模式。比如，我们假设你需要从不同的网站抓取和处理 数据。这种场景下，如果能够缓存数据是非常有帮助的，这样你就不需要每次都执行（代价极高 的）数据抓取操作了：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200819145821.png"  alt="" />
+      </p>
+<p>这段代码，你现在可以通过computeIfAbsent用更加精炼的方式实现，代码如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getData</span><span class="params">(String url)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> cache.computeIfAbsent(url, <span class="keyword">this</span>::getData);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>上面介绍的这些方法， 其更详细的内容都能在Java API的官方文档中找到。 注意， ConcurrentHashMap也进行了更新，提供了新的方法。我们会在B.2节讨论。</p>
+
+        <h3 id="list"   >
+          <a href="#list" class="heading-link"><i class="fas fa-link"></i></a>List</h3>
+      
+<p>replaceAll方法会对列表中的每一个元素执行特定的操作，并用处理的结果替换该元素。 它的功能和Stream中的map方法非常相似，不过replaceAll会修改列表中的元素。与此相反， map方法会生成新的元素。</p>
+<p>比如，下面这段代码会打印输出[2,4,6,8,10]，因为列表中的元素被原地修改了：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; numbers = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line">    numbers.replaceAll(x -&gt; x * <span class="number">2</span>);</span><br><span class="line">    System.out.println(numbers);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">[<span class="number">2</span>，<span class="number">4</span>，<span class="number">6</span>，<span class="number">8</span>，<span class="number">10</span>]</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="collections类"   >
+          <a href="#collections类" class="heading-link"><i class="fas fa-link"></i></a>Collections类</h2>
+      
+<p>Collections类已经存在了很长的时间，它的主要功能是操作或者返回集合。Java 8中它又 新增了一个方法，该方法可以返回不可修改的、同步的、受检查的或者是空的NavigableMap或 NavigableSet。除此之外，它还引入了checkedQueue方法，该方法返回一个队列视图，可以 扩展进行动态类型检查。</p>
+
+        <h2 id="comparator"   >
+          <a href="#comparator" class="heading-link"><i class="fas fa-link"></i></a>Comparator</h2>
+      
+<p>Comparator接口现在同时包含了默认方法和静态方法。你可以使用第3章中介绍的静态方 法Comparator.comparing返回一个Comparator对象，该对象提供了一个函数可以提取排序关键字。 新的实例方法(<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>对实现类来说是实例方法，对接口来说是默认方法</span>)包含了下面这些。</p>
+<ul>
+<li>reversed—— 对 当 前 的 Comparator 对 象 进 行 逆 序 排 序 ， 并 返 回 排 序 之 后 新 的 Comparator对象。</li>
+<li>thenComparing——当两个对象相同时， 返回使用另一个 Comparator 进行比较的 Comparator对象。</li>
+<li>thenComparingInt、thenComparingDouble、thenComparingLong——这些方法的 工作方式和thenComparing方法类似，不过它们的处理函数是特别针对某些基本数据类 型（分别对应于ToIntFunction、ToDoubleFunction和ToLongFunction）的。</li>
+</ul>
+<p>新的静态方法包括下面这些。</p>
+<ul>
+<li>comparingInt、comparingDouble、comparingLong——它们的工作方式和compa- ring类似，但接受的函数特别针对某些基本数据类型（分别对应于 ToIntFunction、 ToDoubleFunction和ToLongFunction）。</li>
+<li>naturalOrder——对Comparable对象进行自然排序，返回一个Comparator对象。</li>
+<li>nullsFirst、nullsLast——对空对象和非空对象进行比较，你可以指定空对象（null） 比非空对象（non-null）小或者比非空对象大，返回值是一个Comparator对象。</li>
+<li>reverseOrder——和naturalOrder().reversed()方法类似。</li>
+</ul>
+
+        <h1 id="并发"   >
+          <a href="#并发" class="heading-link"><i class="fas fa-link"></i></a>并发</h1>
+      
+<p>Java 8中引入了多个与并发相关的更新。首当其冲的当然是并行流，我们在第7章详细讨论过。 另外一个就是第11章中介绍的CompletableFuture类。</p>
+<p>除此之外，还有一些值得注意的更新。比如，Arrays类现在支持并发操作了。我们会在B.3 节讨论这些内容。</p>
+<p>这一节，我们想要围绕java.util.concurrent.atomic包的更新展开讨论。这个包的主 要功能是处理原子变量（atomic variable）。除此之外，我们还会讨论ConcurrentHashMap类的 更新，它现在又新增了几个方法。</p>
+
+        <h2 id="原子操作"   >
+          <a href="#原子操作" class="heading-link"><i class="fas fa-link"></i></a>原子操作</h2>
+      
+<p>java.util.concurrent.atomic包提供了多个对数字类型进行操作的类，比如Atomic- Integer和AtomicLong，它们支持对单一变量的原子操作。这些类在Java 8中新增了更多的方 法支持。</p>
+<ul>
+<li>
+<p>getAndUpdate——以原子方式用给定的方法更新当前值，并返回变更之前的值。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getAndUpdate</span><span class="params">(IntUnaryOperator updateFunction)</span> </span>&#123;</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>updateAndGet——以原子方式用给定的方法更新当前值，并返回变更之后的值。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">updateAndGet</span><span class="params">(IntUnaryOperator updateFunction)</span> </span>&#123;</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>getAndAccumulate——以原子方式用给定的方法对当前及给定的值进行更新，并返回变更之前的值。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getAndAccumulate</span><span class="params">(<span class="keyword">int</span> x,</span></span></span><br><span class="line"><span class="function"><span class="params">                                  IntBinaryOperator accumulatorFunction)</span> </span>&#123;</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>accumulateAndGet——以原子方式用给定的方法对当前及给定的值进行更新，并返回变更之后的值。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">accumulateAndGet</span><span class="params">(<span class="keyword">int</span> x,</span></span></span><br><span class="line"><span class="function"><span class="params">                                  IntBinaryOperator accumulatorFunction)</span> </span>&#123;</span><br></pre></td></tr></table></div></figure>
+</li>
+</ul>
+<p>下面的例子向我们展示了如何以原子方式比较一个现存的原子整型值和一个给定的观测值 （比如10），并将变量设定为二者中较小的一个。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> min = atomicInteger.accumulateAndGet(<span class="number">10</span>, Integer::min);</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="adder和accumulator"   >
+          <a href="#adder和accumulator" class="heading-link"><i class="fas fa-link"></i></a>Adder和Accumulator</h3>
+      
+<p>多线程的环境中，如果多个线程需要频繁地进行更新操作，且很少有读取的动作（比如，在 统计计算的上下文中），Java API文档中推荐大家使用新的类LongAdder、LongAccumulator、 DoubleAdder以及DoubleAccumulator，尽量避免使用它们对应的原子类型。这些新的类在设计之初就考虑了动态增长的需求，可以有效地减少线程间的竞争。</p>
+<p>LongAddr 和 DoubleAdder 类都支持加法操作， 而 LongAccumulator 和 DoubleAccu- mulator可以使用给定的方法整合多个值。比如，可以像下面这样使用LongAdder计算多个值的总和。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200819151224.png"  alt="" />
+      </p>
+
+        <h2 id="concurrenthashmap"   >
+          <a href="#concurrenthashmap" class="heading-link"><i class="fas fa-link"></i></a>ConcurrentHashMap</h2>
+      
+<p>ConcurrentHashMap类的引入极大地提升了HashMap现代化的程度，新引入的ConcurrentHashMap对并发的支持非常友好。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>ConcurrentHashMap允许并发地进行新增和更新操作，因为它仅对内部数据结构的某些部分上锁。因此，和另一种选择，即同步式的Hashtable比较起来，它 具有更高的读写性能。</span></p>
+
+        <h3 id="性能"   >
+          <a href="#性能" class="heading-link"><i class="fas fa-link"></i></a>性能</h3>
+      
+<p>为了改善性能，要对ConcurrentHashMap的内部数据结构进行调整。典型情况下，map的 条目会被存储在桶中，依据键生成哈希值进行访问。但是，如果大量键返回相同的哈希值，由于桶是由List实现的，它的查询复杂度为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>，这种情况下性能会恶化。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在Java 8中，当桶过于臃肿时，它们会被动态地替换为排序树（sorted tree），新的数据结构具有更好的查询性能（排序树 的查询复杂度为<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(log(n))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mclose">)</span></span></span></span>）。注意，这种优化只有当键是可以比较的（比如String或者Number 类）时才可能发生。</span></p>
+
+        <h3 id="类流操作"   >
+          <a href="#类流操作" class="heading-link"><i class="fas fa-link"></i></a>类流操作</h3>
+      
+<p>ConcurrentHashMap支持三种新的操作，这些操作和你之前在流中所见的很像：</p>
+<ul>
+<li>forEach——对每个键值对进行特定的操作</li>
+<li>reduce——使用给定的精简函数（reduction function），将所有的键值对整合出一个结果</li>
+<li>search——对每一个键值对执行一个函数，直到函数的返回值为一个非空值</li>
+</ul>
+<p>以上每一种操作都支持四种形式，接受使用键、值、Map.Entry以及键值对的函数：</p>
+<ul>
+<li>使用键和值的操作（forEach、reduce、search）</li>
+<li>使用键的操作（forEachKey、reduceKeys、searchKeys）</li>
+<li>使用值的操作 （forEachValue、reduceValues、searchValues）</li>
+<li>使用Map.Entry对象的操作（forEachEntry、reduceEntries、searchEntries）</li>
+</ul>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>注意，这些操作不会对ConcurrentHashMap的状态上锁。它们只会在运行过程中对元素进行操作。应用到这些操作上的函数不应该对任何的顺序，或者其他对象，抑或在计算过程发生变化的值，有依赖。</span></p>
+<p>除此之外，你需要为这些操作指定一个并发阈值。如果经过预估当前map的大小小于设定的 阈值，操作会顺序执行。使用值1开启基于通用线程池的最大并行。使用值Long.MAX_VALUE设 定程序以单线程执行操作。 下面这个例子中，我们使用reduceValues试图找出map中的最大值：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ConcurrentHashMap&lt;String, Integer&gt; map = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;(); </span><br><span class="line">Optional&lt;Integer&gt; maxValue = Optional.of(map.reduceValues(<span class="number">1</span>, Integer::max));</span><br></pre></td></tr></table></div></figure>
+<p>注意，对int、long和double，它们的reduce操作各有不同（比如reduceValuesToInt、 reduceKeysToLong等）。</p>
+
+        <h3 id="计数"   >
+          <a href="#计数" class="heading-link"><i class="fas fa-link"></i></a>计数</h3>
+      
+<p>ConcurrentHashMap类提供了一个新的方法，名叫mappingCount，它以长整型long返回 map中映射的数目。我们应该尽量使用这个新方法，而不是老的size方法，size方法返回的类 型为int。这是因为映射的数量可能是int无法表示的。</p>
+
+        <h3 id="集合视图"   >
+          <a href="#集合视图" class="heading-link"><i class="fas fa-link"></i></a>集合视图</h3>
+      
+<p>ConcurrentHashMap 类还提供了一个名为 KeySet 的新方法， <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>该方法以 Set 的形式返回 ConcurrentHashMap的一个视图（对map的修改会反映在该Set中，反之亦然）</span>。你也可以使用 新的静态方法newKeySet，由ConcurrentHashMap创建一个Set。</p>
+
+        <h1 id="arrays"   >
+          <a href="#arrays" class="heading-link"><i class="fas fa-link"></i></a>Arrays</h1>
+      
+<p>Arrays类提供了不同的静态方法对数组进行操作。现在，它又包括了四个新的方法（它们都有特别重载的变量）。</p>
+
+        <h2 id="使用parallelsort"   >
+          <a href="#使用parallelsort" class="heading-link"><i class="fas fa-link"></i></a>使用parallelSort</h2>
+      
+<p>parallelSort方法会以并发的方式对指定的数组进行排序，你可以使用自然顺序，也可以 为数组对象定义特别的Comparator。</p>
+
+        <h2 id="使用setall和parallelsetall"   >
+          <a href="#使用setall和parallelsetall" class="heading-link"><i class="fas fa-link"></i></a>使用setAll和parallelSetAll</h2>
+      
+<p>setAll和parallelSetAll方法可以以顺序的方式也可以用并发的方式，使用提供的函数 计算每一个元素的值，对指定数组中的所有元素进行设置。该函数接受元素的索引，返回该索引 元素对应的值。由于parallelSetAll需要并发执行，所以提供的函数必须没有任何副作用，就 如第7章和第13章中介绍的那样。</p>
+<p>举例来说，你可以使用setAll方法生成一个值为0, 2, 4, 6, …的数组：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] evenNumbers = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">10</span>]; </span><br><span class="line">Arrays.setAll(evenNumbers, i -&gt; i * <span class="number">2</span>);</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="使用parallelprefix"   >
+          <a href="#使用parallelprefix" class="heading-link"><i class="fas fa-link"></i></a>使用parallelPrefix</h2>
+      
+<p>parallelPrefix方法以并发的方式，用用户提供的二进制操作符对给定数组中的每个元素 进行累积计算。通过下面这段代码，你会得到这样的一些值：1, 2, 3, 4, 5, 6, 7, …。</p>
+<p><strong>使用parallelPrefix并发地累积数组中的元素</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200819152735.png"  alt="" />
+      </p>
+<blockquote>
+<p>使用数组的前一个值和自己相加再原位更新</p>
+</blockquote>
+
+        <h1 id="number和math"   >
+          <a href="#number和math" class="heading-link"><i class="fas fa-link"></i></a>Number和Math</h1>
+      
+<p>Java 8 API对Number和Math也做了改进，为它们增加了新的方法。</p>
+
+        <h2 id="number"   >
+          <a href="#number" class="heading-link"><i class="fas fa-link"></i></a>Number</h2>
+      
+<p>Number类中新增的方法如下。</p>
+<ul>
+<li>Short、Integer、Long、Float和Double类提供了静态方法sum、min和max。在第5 章介绍reduce操作时，你已经见过这些方法。</li>
+<li>Integer和Long类提供了compareUnsigned、divideUnsigned、remainderUnsigned 和toUnsignedLong方法来处理无符号数。</li>
+<li>Integer和 Long类也分别提供了静态方法parseUnsignedInt和parseUnsignedLong 将字符解析为无符号int或者long类型。</li>
+<li>Byte 和 Short 类提供了 toUnsignedInt 和 toUnsignedLong 方法通过无符号转换将参数转化为int 或者 long 的无符号类型 。 类似地 ， Integer 类现在也提供了静态方法 toUnsignedLong。</li>
+<li>Double和Float类提供了静态方法isFinite，可以检查参数是否为有限浮点数。</li>
+<li>Boolean类现在提供了静态方法logicalAnd、logicalOr和logicalXor，可以在两个 boolean之间执行and、or和xor操作。</li>
+<li>BigInteger 类 提 供 了 byteValueExact 、 shortValueExact 、 intValueExact 和 longValueExact，可以将BigInteger类型的值转换为对应的基础类型。不过，如果在转换过程中有信息的丢失，方法会抛出算术异常。</li>
+</ul>
+
+        <h2 id="math"   >
+          <a href="#math" class="heading-link"><i class="fas fa-link"></i></a>Math</h2>
+      
+<p>如果Math中的方法在操作中出现溢出，Math类提供了新的方法可以抛出算术异常。支持这 一异常的方法包括使用 int 和 long 参数的 addExact 、 subtractExact 、 multipleExact 、 incrementExact、decrementExact和negateExact。此外，Math类还新增了一个静态方法 toIntExact，可以将long值转换为int值。其他的新增内容包括静态方法floorMod、floorDiv 和nextDown。</p>
+<blockquote>
+<p>exact表示精确的，如果出现溢出则抛出异常</p>
+</blockquote>
+
+        <h1 id="files"   >
+          <a href="#files" class="heading-link"><i class="fas fa-link"></i></a>Files</h1>
+      
+<p>Files类最引人注目的改变是，你现在可以用文件直接产生流。第5章中提到过新的静态方 法Files.lines，通过该方法你可以以延迟方式读取文件的内容，并将其作为一个流。此外， 还有一些非常有用的静态方法可以返回流。</p>
+<ul>
+<li>
+<p>Files.list——生成由指定目录中所有条目构成的<code>Stream&lt;Path&gt;</code>。这个列表不是递归包含的。由于流是延迟消费的，处理包含内容非常庞大的目录时，这个方法非常有用。</p>
+</li>
+<li>
+<p>Files.walk——和 Files.list 有些类似， 它也生成包含给定目录中所有条目的 <code>Stream&lt;Path&gt;</code>。不过这个列表是递归的，你可以设定递归的深度。注意，该遍历是依照 深度优先进行的。</p>
+</li>
+<li>
+<p>Files.find—— 通 过 递 归 地 遍 历 一 个 目 录 找 到 符 合 条 件 的 条 目 ， 并 生 成 一 个<code>Stream&lt;Path&gt;</code>对象。</p>
+<blockquote>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Path&gt; <span class="title">find</span><span class="params">(Path start,</span></span></span><br><span class="line"><span class="function"><span class="params">                                <span class="keyword">int</span> maxDepth,</span></span></span><br><span class="line"><span class="function"><span class="params">                                BiPredicate&lt;Path, BasicFileAttributes&gt; matcher,</span></span></span><br><span class="line"><span class="function"><span class="params">                                FileVisitOption... options)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> IOException</span></span><br><span class="line"><span class="function"></span>&#123;</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+</li>
+</ul>
+
+        <h1 id="reflection"   >
+          <a href="#reflection" class="heading-link"><i class="fas fa-link"></i></a>Reflection</h1>
+      
+<p>附录A中已经讨论过Java 8中注解机制的几个变化。Reflection API的变化就是为了支撑这些 改变。</p>
+<p>除此之外，Relection接口的另一个变化是新增了可以查询方法参数信息的API，比如，你现 在可以使用新增的java.lang.reflect.Parameter类查询方法参数的名称和修饰符，这个类 被新的java.lang.reflect.Executable类所引用，而java.lang.reflect.Executable通 用函数和构造函数共享的父类。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Method</span> <span class="keyword">extends</span> <span class="title">Executable</span> </span>&#123;</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="string"   >
+          <a href="#string" class="heading-link"><i class="fas fa-link"></i></a>String</h1>
+      
+<p>String类也新增了一个静态方法，名叫join。你大概已经猜出它的功能了，它可以用一个 分隔符将多个字符串连接起来。你可以像下面这样使用它：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    String authors = String.join(<span class="string">", "</span>, <span class="string">"Raoul"</span>, <span class="string">"Mario"</span>, <span class="string">"Alan"</span>);</span><br><span class="line">    System.out.println(authors);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">Raoul, Mario, Alan</span><br></pre></td></tr></table></div></figure>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/18_%E9%99%84%E5%BD%95B_%E7%B1%BB%E5%BA%93%E7%9A%84%E6%9B%B4%E6%96%B0/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/18_%E9%99%84%E5%BD%95B_%E7%B1%BB%E5%BA%93%E7%9A%84%E6%9B%B4%E6%96%B0/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/java8/">java8</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/19_%E9%99%84%E5%BD%95C_%E5%A6%82%E4%BD%95%E4%BB%A5%E5%B9%B6%E5%8F%91%E6%96%B9%E5%BC%8F%E5%9C%A8%E5%90%8C%E4%B8%80%E4%B8%AA%E6%B5%81%E4%B8%8A%E6%89%A7%E8%A1%8C%E5%A4%9A%E7%A7%8D%E6%93%8D%E4%BD%9C/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">附录C_如何以并发方式在同一个流上执行多种操作</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/17_%E9%99%84%E5%BD%95A_%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7%E7%9A%84%E6%9B%B4%E6%96%B0/"><span class="paginator-prev__text">附录A_其他语言特性的更新</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#集合"><span class="toc-number">1.</span> <span class="toc-text">
+          集合</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#其他新增的方法"><span class="toc-number">1.1.</span> <span class="toc-text">
+          其他新增的方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#collection"><span class="toc-number">1.1.1.</span> <span class="toc-text">
+          Collection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#map"><span class="toc-number">1.1.2.</span> <span class="toc-text">
+          Map</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#getordefault"><span class="toc-number">1.1.2.1.</span> <span class="toc-text">
+          getOrDefault</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#computeifabsent"><span class="toc-number">1.1.2.2.</span> <span class="toc-text">
+          computeIfAbsent</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#list"><span class="toc-number">1.1.3.</span> <span class="toc-text">
+          List</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#collections类"><span class="toc-number">1.2.</span> <span class="toc-text">
+          Collections类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#comparator"><span class="toc-number">1.3.</span> <span class="toc-text">
+          Comparator</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#并发"><span class="toc-number">2.</span> <span class="toc-text">
+          并发</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#原子操作"><span class="toc-number">2.1.</span> <span class="toc-text">
+          原子操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#adder和accumulator"><span class="toc-number">2.1.1.</span> <span class="toc-text">
+          Adder和Accumulator</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#concurrenthashmap"><span class="toc-number">2.2.</span> <span class="toc-text">
+          ConcurrentHashMap</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#性能"><span class="toc-number">2.2.1.</span> <span class="toc-text">
+          性能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#类流操作"><span class="toc-number">2.2.2.</span> <span class="toc-text">
+          类流操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#计数"><span class="toc-number">2.2.3.</span> <span class="toc-text">
+          计数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#集合视图"><span class="toc-number">2.2.4.</span> <span class="toc-text">
+          集合视图</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#arrays"><span class="toc-number">3.</span> <span class="toc-text">
+          Arrays</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#使用parallelsort"><span class="toc-number">3.1.</span> <span class="toc-text">
+          使用parallelSort</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用setall和parallelsetall"><span class="toc-number">3.2.</span> <span class="toc-text">
+          使用setAll和parallelSetAll</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用parallelprefix"><span class="toc-number">3.3.</span> <span class="toc-text">
+          使用parallelPrefix</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#number和math"><span class="toc-number">4.</span> <span class="toc-text">
+          Number和Math</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#number"><span class="toc-number">4.1.</span> <span class="toc-text">
+          Number</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#math"><span class="toc-number">4.2.</span> <span class="toc-text">
+          Math</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#files"><span class="toc-number">5.</span> <span class="toc-text">
+          Files</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#reflection"><span class="toc-number">6.</span> <span class="toc-text">
+          Reflection</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#string"><span class="toc-number">7.</span> <span class="toc-text">
+          String</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

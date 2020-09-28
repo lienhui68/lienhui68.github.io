@@ -1,0 +1,649 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="并发编程模型的两个关键问题  线程间如何通信？即：线程之间以何种机制来交换信息 线程间如何同步？即：线程以何种机制来控制不同线程间操作发生的相对顺序">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java内存模型JMM">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BJMM/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="并发编程模型的两个关键问题  线程间如何通信？即：线程之间以何种机制来交换信息 线程间如何同步？即：线程以何种机制来控制不同线程间操作发生的相对顺序">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807152729.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200907062402.png">
+<meta property="og:image" content="https://img-blog.csdn.net/20170506185336093?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMjY4NDkyMzM=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200726080018.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200726080804.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200726082540.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200726090602.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200726093210.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.207Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.341Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="并发编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807152729.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Java内存模型JMM | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BJMM/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Java内存模型JMM</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">6k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">32分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>并发编程模型的两个关键问题</strong></p>
+<ul>
+<li>线程间如何通信？即：线程之间以何种机制来交换信息</li>
+<li>线程间如何同步？即：线程以何种机制来控制不同线程间操作发生的相对顺序</li>
+</ul>
+<a id="more"></a>
+<p>有两种并发模型可以解决这两个问题：</p>
+<ul>
+<li>消息传递并发模型</li>
+<li>共享内存并发模型</li>
+</ul>
+<p>这两种模型之间的区别如下表所示：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807152729.png"  alt="" />
+      </p>
+<p><strong>在Java中，使用的是共享内存并发模型</strong>。</p>
+
+        <h1 id="jmm产生背景和定义"   >
+          <a href="#jmm产生背景和定义" class="heading-link"><i class="fas fa-link"></i></a>JMM产生背景和定义</h1>
+      
+<p>JMM(Java内存模型)源于物理机器CPU架构的内存模型，最初用于解决MP(多处理器架构)系统中的缓存一致性问题，而JVM为了屏蔽各个硬件平台和操作系统对内存访问机制的差异化，提出了JMM的概念。Java内存模型是一种虚拟机规范，JMM规范了Java虚拟机与计算机内存是如何协同工作的：<span style='color:red;background:背景颜色;font-size:文字大小;'>规定了一个线程如何和何时可以看到由其他线程修改过后的共享变量的值，以及在必须时如何同步的访问共享变量</span>。</p>
+<p>完整定义：JMM(Java Memory Model)是一系列的Java虚拟机平台对开发者提供的多线程环境下的内存可见性、是否可以重排序等问题的无关具体平台的统一的保证。(可能在术语上与<strong>Java运行时内存分布</strong>有歧义，后者指堆、方法区、线程栈等内存区域)。</p>
+
+        <h1 id="计算机系统硬件组成"   >
+          <a href="#计算机系统硬件组成" class="heading-link"><i class="fas fa-link"></i></a>计算机系统硬件组成</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200907062402.png"  alt="" />
+      </p>
+<p>上面这张图是Inter Pentium系列产品的模型，主要包括****总线、I/O设备、主存、处理器****这四个部分，下面详细解释着四个部分：</p>
+<ol>
+<li>I/O设备</li>
+</ol>
+<p>首先介绍I/O设备，这也是我们经常操作的计算机硬件，上图标出了鼠标、键盘、显示器和硬盘这四个I/O设备，每个I/O设备都通过一个<strong>控制器或适配器</strong>与I/O总线相连。</p>
+<p><em><strong>*控制器和适配器的相同与不同：相同是指他们都是用来I/O设备与计算机其他硬件（总线）进行数据信息传递用的，不同在于控制器是一个芯片组，内置于I/O设备或主板，而适配器是一块插在主板上的卡，如显卡。*</strong></em></p>
+<ol start="2">
+<li>总线</li>
+</ol>
+<p>贯穿整个计算机硬件系统的一组电子管道，****携带位信息或字节信息在计算机各个部件之间传递***<em>，但是总线一次能携带的位数或字节数是固定的，这称为****总线*</em>*<em>宽度*</em>**，<strong>如32为Windows系统总线宽度是4个字节，即32位信息。</strong></p>
+<ol start="3">
+<li>主存</li>
+</ol>
+<p><em><strong>*也就是我们所指的运行内存****，注意与硬盘不同，一般是指内存条，它</strong></em>*主要用来存储程序和程序处理的数据*<em><strong>，以什么样的形式存储呢？这个后面会讲，现在</strong>一定要记住主存逻辑上是一个字节数组</em>*****，什么是字节数组，首先它是一个数组，这个数组以字节为单位进行计算，如我们一般在C语言中定义的整数数组****</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> arr[<span class="number">10</span>];</span><br></pre></td></tr></table></div></figure>
+<p>这表示一个含有10个整数的数组，每个整数有4个字节，对应来说，主存（内存）就是一个形如下面的数组</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RAM_type RAM[N];</span><br></pre></td></tr></table></div></figure>
+<p>****其中RAM_type是一个字节类型的数据类型，与char类似，在内存中占一个字节，RAM[N]表示主存数组，N为数组长度，即表示主存能包含多少个字节，*<em><strong>那到底</strong></em>*N****为多少呢？****它与总线宽度有关****，**如果按照上面说的总线宽度是32位，那么N = 4GB（2的32次方），也就是说主存数组的索引值从0到4GB-1，这就是指的主存的地址，**怎么理解呢？要解释这个问题需要理解两个点：</p>
+<p>（1）什么是机器指令？我们写的一行C语言代码与机器指令的关系？主存怎么存储机器指令？</p>
+<p>机器指令肯定是机器能执行的一条命令，如读取内存中一个变量的值等；</p>
+<p>一行C语言代码可能对应一条机器指令也可能是多条；</p>
+<p>一般来说，组成程序的每条机器指令都由不同数量的字节构成，那刚好主车就是一个字节数组，一条机器指令可能存在主存中的一个字节中或者多个字节中。</p>
+<p>（2）怎么理解总线宽度与主存数组长度相等？</p>
+<p>要解释这个问题，需要说明一个在处理器中的核心存储设备，即<strong>程序计数器（PC）</strong>，在任何时刻PC都指向内存中的一条指令，即可以理解为PC就是一个指向一条机器语言指令的指针，指针的值就是这条指令在主存中的地址（索引值），最重要的一点就是PC的容量是一个字（4个字节），所以</p>
+<p><em><strong>*PC = 总线宽度 = 主存（数组）长度*</strong></em></p>
+<p><em><strong>*现在再来理解总线宽度与主存数组长度相等，最重要的是你要理解内存寻址的意思，PC和总线宽度都是32位，则可以把总线理解为32根地址线，那32根地址线最多能寻址的范围是多少呢？那就是4GB啊，难道不是吗？如果是2根地址线，能寻址的范围是0（二进制00）~4（二进制11），所以主存数组长度就是 与总线宽度相等。*</strong></em></p>
+<p>
+        <img     class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://img-blog.csdn.net/20170506185336093?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMjY4NDkyMzM=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center"  style="width: /font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMApx;"  alt="img" />
+      </p>
+<p>另外，这也说明了Windows 32位系统最多能识别4GB的内存，就算你安装8GB的内存条，它也只能用4GB</p>
+<ol start="4">
+<li>处理器</li>
+</ol>
+<p>****处理器即计算机中央处理单元（CPU），它主要用来解释（或执行）存储在主存中指令的引擎，*<em><strong>上面也说明了处理器的</strong></em>*核心是一个字长的存储设备，即*<em><strong><strong>PC（程序计数器）</strong>，但同时处理器还包括</strong></em>*寄存器文件（一组长度为字长的寄存器）、算术逻辑单元ALU（主要计算新的数据和地址值）****，CPU在指令要求下一般会执行以下这些命令：</p>
+<p>（1）**加载：从主存到寄存器，**把一个字节或者一个字从主存复制到寄存器文件，以覆盖寄存器原来的内容；</p>
+<p>（2）<strong>存储：从寄存器到主存；</strong></p>
+<p>（3）<strong>操作：先寄存器到算术逻辑单元ALU进行计算，然后结果再从ALU到寄存器；</strong></p>
+<p>（4）<strong>跳转：主存到PC，用于更新PC的值。</strong></p>
+<blockquote>
+<p>来自于《深入理解计算机系统》</p>
+</blockquote>
+
+        <h1 id="java线程与处理器"   >
+          <a href="#java线程与处理器" class="heading-link"><i class="fas fa-link"></i></a>Java线程与处理器</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200726080018.png"  alt="" />
+      </p>
+<blockquote>
+<p>超线程：比如4核8线程，这里的4核8线程是指有4个内核，每个内核一个运算单元(ALU)对应两套寄存器(pc|register)，线程切换时只需要切换alu指向的寄存器即可，无需保护现场。</p>
+</blockquote>
+
+        <h1 id="java内存模型和操作系统内存模型的关系"   >
+          <a href="#java内存模型和操作系统内存模型的关系" class="heading-link"><i class="fas fa-link"></i></a>Java内存模型和操作系统内存模型的关系</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200726080804.png"  alt="" />
+      </p>
+<p><strong>Java内存模型的主要目标是定义程序中各个变量的访问规则</strong>。此处提到的变量只包含了<strong>实例对象</strong>、<strong>静态对象</strong>和<strong>构成数组对象的元素</strong>。<strong>局部变量和方法参数是线程私有的，不会共享</strong>，当然不存在数据竞争问题（如果局部变量是一个reference引用类型，它引用的对象在Java堆中可被各个线程共享，但是reference引用本身在Java栈的局部变量表中，是线程私有的）。为了获得较高的执行性能，Java内存模型并没有限制执行引擎使用处理器的特定寄存器或者缓存来和主内存进行交互(<strong>可见性</strong>)，也没有限制即时编译器进行调整代码执行顺序这类优化措施(<strong>有序性</strong>)。</p>
+<p>JMM规定了所有的变量都存储在<strong>主内存</strong>（Main Memory）中。每个线程还有自己的<strong>工作内存</strong>（Working Memory）,<span style='color:red;background:背景颜色;font-size:文字大小;'>线程的工作内存其实是cpu寄存器和高速缓存的抽象</span>。线程的工作内存中保存了该线程使用到的变量的主内存的副本拷贝，线程对变量的所有操作（读取、赋值等）都必须在工作内存中进行，而不能直接读写主内存中的变量（<strong>volatile变量仍然有工作内存的拷贝，但是由于它特殊的操作顺序性规定，所以看起来如同直接在主内存中读写访问一般</strong>）。<strong>不同的线程之间也无法直接访问对方工作内存中的变量，线程之间值的传递都需要通过主内存来完成</strong>。</p>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;'>栈顶缓存（Top-of-StackCashing）工作</span></p>
+<p>基于栈式架构得虚拟机所使用的零地址指令更加紧凑，但完成一项操作的时候必然使用更多的入栈和出栈指令，这同时也就意味着将需要更多的指令分派次数和内存读写次数。由于操作数是存储在内存中的，因此频繁地执行内存读/写操作必然影响速度。</p>
+<p>综上所述，jvm是将栈顶元素全部缓存在物理CPU地寄存器当中，从此降低对内存地读/写次数，提升执行引擎地执行效率。</p>
+<p>要注意区分栈顶缓存与线程工作内存，一个是存的堆内容的副本。一个是存的栈内容(副本压栈)</p>
+</blockquote>
+<p>对于JMM与JVM本身的内存模型，参照《深入理解Java虚拟机》的解释，主内存、工作内存与Java内存区域中的Java堆、栈、方法区等并<strong>不是同一个层次</strong>的内存划分。如果两者一定要勉强对应起来，那从变量、主内存、工作内存的定义来看，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'><strong>主内存主要对应于Java堆中对象的实例数据部分，而工作内存则对应于虚拟机栈中的部分区域</strong>。</span><strong>从更低的层次来说，主内存就是硬件的内存，而为了获取更好的运行速度，虚拟机及硬件系统可能会让工作内存优先存储于寄存器和高速缓存中</strong>，<strong>因为运行时主要访问——读写的是工作内存</strong>。</p>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>JMM与Java内存区域划分的区别与联系</span></p>
+<ul>
+<li>
+<p>区别</p>
+<p>两者是不同的概念层次。JMM是抽象的，他是用来描述一组规则，通过这个规则来控制各个变量的访问方式，围绕原子性、有序性、可见性等展开的。而Java运行时内存的划分是具体的，是JVM运行Java程序时，必要的内存划分。</p>
+</li>
+<li>
+<p>联系</p>
+<p>都存在私有数据区域和共享数据区域。一般来说，JMM中的主内存属于共享数据区域，他是包含了堆和方法区；同样，JMM中的本地内存属于私有数据区域，包含了程序计数器、本地方法栈、虚拟机栈。</p>
+</li>
+</ul>
+<p><strong>实际上，他们表达的是同一种含义，这里不做区分</strong>。</p>
+</blockquote>
+
+        <h1 id="java内存模型的抽象结构"   >
+          <a href="#java内存模型的抽象结构" class="heading-link"><i class="fas fa-link"></i></a>Java内存模型的抽象结构</h1>
+      
+<p>在Java中，所有实例域、静态域和数组元素都存储在堆内存中，堆内存在线程之间共享（本章用“<strong>共享变量</strong>”这个术语代指实例域，静态域和数组元素）。局部变量（Local Variables），方法定义参数（Java语言规范称之为Formal Method Parameters）和异常处理器参数（Exception Handler Parameters）不会在线程之间共享，它们不会有内存可见性问题，也不受内存模型的影响。</p>
+<p>Java线程之间的通信由Java内存模型（本文简称为JMM）控制，<strong>JMM决定一个线程对共享变量的写入何时对另一个线程可见</strong>。从抽象的角度来看，<strong>JMM定义了线程和主内存之间的抽象关系</strong>：<strong>线程之间的共享变量存储在主内存（Main Memory）中，每个线程都有一个私有的本地内存（Local Memory），本地内存中存储了该线程以读/写共享变量的副本</strong>。<span style='color:red;background:背景颜色;font-size:文字大小;'>本地内存是JMM的一个抽象概念，并不真实存在。它涵盖了缓存、写缓冲区、寄存器以及其他的硬件和编译器优化</span>。Java内存模型的抽象示意如图所示：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200726082540.png"  alt="" />
+      </p>
+<p>从图来看，如果线程A与线程B之间要通信的话，必须要经历下面2个步骤。</p>
+<ol>
+<li>线程A把本地内存A中更新过的共享变量刷新到主内存中去。</li>
+<li>线程B到主内存中去读取线程A之前已更新过的共享变量。</li>
+</ol>
+<p><strong>所以，线程A无法直接访问线程B的工作内存，线程间通信必须经过主内存</strong>。</p>
+<p>下面通过示意图来说明这两个步骤。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200726090602.png"  alt="" />
+      </p>
+<p>如上图所示，本地内存A和本地内存B由主内存中共享变量x的副本。假设初始时，这3个内存中的x值都为0。线程A在执行时，把更新后的x值（假设值为1）临时存放在自己的本地内存A中。当线程A和线程B需要通信时，线程A首先会把自己本地内存中修改后的x值刷新到主内存中，此时主内存中的x值变为了1。随后，线程B到主内存中去读取线程A更新后的x值，此时线程B的本地内存的x值也变为了1。从整体来看，这两个步骤实质上是线程A在向线程B发送消息，而且这个通信过程必须要经过主内存。<span style='color:red;background:背景颜色;font-size:文字大小;'>JMM通过控制主内存与每个线程的本地内存之间的交互，来为Java程序员提供内存可见性保证</span>。</p>
+<blockquote>
+<p>jmm是虚拟机规范，底层可以由缓存一致性协议比如mesi、原子语句、总线锁等来实现。</p>
+</blockquote>
+<p>注意，根据JMM的规定，<strong>线程对共享变量的所有操作都必须在自己的本地内存中进行，不能直接从主内存中读取</strong>。</p>
+<p>所以线程B并不是直接去主内存中读取共享变量的值，而是先在本地内存B中找到这个共享变量，发现这个共享变量已经被更新了，然后本地内存B去主内存中读取这个共享变量的新值，并拷贝到本地内存B中，最后线程B再读取本地内存B中的新值。</p>
+<p>那么怎么知道这个共享变量的被其他线程更新了呢？这就是JMM的功劳了，也是JMM存在的必要性之一。<strong>JMM通过控制主内存与每个线程的本地内存之间的交互，来提供内存可见性保证</strong>。</p>
+<blockquote>
+<p>Java中的volatile关键字可以保证多线程操作共享变量的可见性以及禁止指令重排序，synchronized关键字不仅保证可见性，同时也保证了原子性（互斥性）。在更底层，JMM通过内存屏障来实现内存的可见性以及禁止重排序。为了程序员的方便理解，提出了happens-before，它更加的简单易懂，从而避免了程序员为了理解内存可见性而去学习复杂的重排序规则以及这些规则的具体实现方法。这里涉及到的所有内容后面都会有专门的章节介绍。</p>
+</blockquote>
+
+        <h1 id="工作内存与主内存交互协议"   >
+          <a href="#工作内存与主内存交互协议" class="heading-link"><i class="fas fa-link"></i></a>工作内存与主内存交互协议</h1>
+      
+<p>关于主内存与工作内存之间的<strong>具体交互协议</strong>，即一个变量如何从主内存拷贝到工作内存、如何从工作内存同步到主内存之间的实现细节，Java内存模型定义了以下<strong>八种原子操作来</strong>完成：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200726093210.png"  alt="" />
+      </p>
+
+        <h2 id="八大交互指令"   >
+          <a href="#八大交互指令" class="heading-link"><i class="fas fa-link"></i></a>八大交互指令</h2>
+      
+<ol>
+<li>
+<p>lock 锁定</p>
+<p>作用于主内存的变量，把一个变量标识为一条线程独占状态。</p>
+</li>
+<li>
+<p>unlock 解锁</p>
+<p>作用于主内存变量，把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定。</p>
+</li>
+<li>
+<p>read 读取</p>
+<p>作用于主内存变量，把一个变量值从主内存传输到线程的工作内存中，以便随后的load操作使用</p>
+</li>
+<li>
+<p>load（载入）：作用于工作内存的变量，它把read操作从主内存中得到的变量值放入工作内存的变量副本中。</p>
+<blockquote>
+<p>read 是从堆读出数据(一份拷贝)到cache中(一个个cache line)<br />
+load 是从cache中获取变量的引用写入到局部变量表(也存放在cache)中<br />
+use 是将这份数据在需要执行的时候从局部变量表传递到操作数栈(可能存放在寄存器)</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;'>以上占用的cache区域、寄存器等可以抽象地理解为线程的工作空间(或者叫本地内存)</span></p>
+</blockquote>
+</li>
+<li>
+<p>use 使用</p>
+<p>作用于工作内存的变量，把工作内存中的一个变量值传递给执行引擎，每当虚拟机遇到一个需要使用变量的值的字节码指令时将会执行这个操作。</p>
+</li>
+<li>
+<p>assign 赋值</p>
+<p>作用于工作内存的变量，它把一个从执行引擎接收到的值赋值给工作内存的变量，每当虚拟机遇到一个给变量赋值的字节码指令时执行这个操作。</p>
+<blockquote>
+<p>volatile修饰的变量，jvm字节码会加上acc_lock修饰，汇编码是lock 前缀，它会锁定变量所在cache line，当对变量执行assign操作时，lock指令会做两件事</p>
+<ol>
+<li>
+<p>将当前cache line的数据<strong>立即</strong>回写到系统内存</p>
+</li>
+<li>
+<p>这个回写操作会引起在其他内核里缓存了该内存地址的数据失效(MESI)</p>
+<blockquote>
+<p>对比下总线锁，从一开始read就加总线索，性能必然大大降低</p>
+</blockquote>
+</li>
+</ol>
+</blockquote>
+</li>
+<li>
+<p>store存储</p>
+<p>作用于工作内存的变量，把工作内存中的一个变量的值传送到主内存中，以便随后的write的操作。</p>
+</li>
+<li>
+<p>write 写入</p>
+<p>作用于主内存的变量，它把store操作从工作内存中一个变量的值传送到主内存的变量中</p>
+</li>
+</ol>
+<p>同步操作规则</p>
+
+        <h2 id="交互指令约束"   >
+          <a href="#交互指令约束" class="heading-link"><i class="fas fa-link"></i></a>交互指令约束</h2>
+      
+<p>如果要把一个变量从主内存中复制到工作内存，就需要按顺寻地执行read和load操作，如果把变量从工作内存中同步回主内存中，就要按顺序地执行store和write操作。</p>
+<p>Java内存模型只要求上述操作必须按顺序执行，而没有保证必须是连续执行。也就是read和load之间，store和write之间是可以插入其他指令的，如对主内存中的变量a、b进行访问时，可能的顺序是read a，read b，load b， load a。</p>
+<p>Java内存模型还规定了在执行上述八种基本操作时，必须满足如下规则：</p>
+<ol>
+<li>
+<p>不允许read和load、store和write操作之一单独出现</p>
+</li>
+<li>
+<p>不允许一个线程丢弃它的最近assign的操作，即变量在工作内存中改变了之后必须同步到主内存中。</p>
+</li>
+<li>
+<p>不允许一个线程无原因地（没有发生过任何assign操作）把数据从工作内存同步回主内存中。</p>
+</li>
+<li>
+<p>一个新的变量只能在主内存中诞生，不允许在工作内存中直接使用一个未被初始化（load或assign）的变量。即就是对一个变量实施use和store操作之前，必须先执行过了assign和load操作。</p>
+</li>
+<li>
+<p>一个变量在同一时刻只允许一条线程对其进行lock操作，lock和unlock必须成对出现</p>
+</li>
+<li>
+<p>如果对一个变量执行lock操作，将会清空工作内存中此变量的值，在执行引擎使用这个变量前需要重新执行load或assign操作初始化变量的值</p>
+</li>
+<li>
+<p>如果一个变量事先没有被lock操作锁定，则不允许对它执行unlock操作；也不允许去unlock一个被其他线程锁定的变量。</p>
+</li>
+<li>
+<p>对一个变量执行unlock操作之前，必须先把此变量同步到主内存中（执行store和write操作）。</p>
+</li>
+</ol>
+
+        <h1 id="java内存模型对并发特征的保证"   >
+          <a href="#java内存模型对并发特征的保证" class="heading-link"><i class="fas fa-link"></i></a>Java内存模型对并发特征的保证</h1>
+      
+
+        <h2 id="java并发编程的三个重要特征"   >
+          <a href="#java并发编程的三个重要特征" class="heading-link"><i class="fas fa-link"></i></a>Java并发编程的三个重要特征</h2>
+      
+<ul>
+<li>原子性: 不可分割的操作</li>
+<li>有序性: 次序,java代码中的次序 和 CPU中的执行顺序(不是一样的)</li>
+<li>可见性: 线程内部的私有数据对其他的线程是不可见的</li>
+</ul>
+
+        <h2 id="jmm对三大特征的保证"   >
+          <a href="#jmm对三大特征的保证" class="heading-link"><i class="fas fa-link"></i></a>jmm对三大特征的保证</h2>
+      
+
+        <h3 id="volatile关键字"   >
+          <a href="#volatile关键字" class="heading-link"><i class="fas fa-link"></i></a>volatile关键字</h3>
+      
+<p><strong>可见性</strong></p>
+<p>对一个volatile变量的读，总是能看到（任意线程）对这个volatile变量最后的写入。</p>
+<p><strong>原子性</strong></p>
+<p>对任意单个volatile变量的读/写具有原子性，但类似于volatile++这种复合操作不具有原子性。</p>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;'>volatile可以保证内存可见性，不能保证并发有序性</span></p>
+</blockquote>
+
+        <h3 id="synchronized同步机制"   >
+          <a href="#synchronized同步机制" class="heading-link"><i class="fas fa-link"></i></a>synchronized同步机制</h3>
+      
+<p>一个线程执行互斥代码过程如下：</p>
+<ol>
+<li>
+<p>获得同步锁</p>
+</li>
+<li>
+<p>清空工作内存</p>
+</li>
+<li>
+<p>从主内存拷贝对象副本到工作内存</p>
+</li>
+<li>
+<p>执行代码(计算或者输出等)</p>
+</li>
+<li>
+<p>刷新主内存数据</p>
+</li>
+<li>
+<p>释放同步锁</p>
+</li>
+</ol>
+<blockquote>
+<p>synchronized既保证了多线程的并发有序性，又保证了多线程的内存可见性。</p>
+</blockquote>
+
+        <h1 id="既然cpu有缓存一致性协议为什么还需要volatile"   >
+          <a href="#既然cpu有缓存一致性协议为什么还需要volatile" class="heading-link"><i class="fas fa-link"></i></a>既然cpu有缓存一致性协议，为什么还需要volatile</h1>
+      
+<p>volatile是java语言层面给出的保证，MSEI协议是多核cpu保证cache一致性的一种方法</p>
+<p>volatile和MESI差着好几层抽象，中间会经历java编译器，java虚拟机和JIT，操作系统，CPU核心。</p>
+<p>volatile在Java中的意图是保证变量的可见性。为了实现这个功能，必须保证 1.编译器不能乱序优化；2.指令执行在CPU上要保证读写的fence。</p>
+<p>对于x86的体系结构，voltile变量的访问代码会被java编译器生成不乱序的，带有lock指令前缀的机器码。而lock的实现还要区分，这个数据在不在CPU核心的专有缓存中（一般是指L1/L2）。如果在，MESI才有用武之地。如果不满足就会要用其他手段。而这些手段是虚拟机开发者，以及操作系统开发者需要考虑的问题。简而言之，CPU里的缓存，buffer，queue有很多种。<strong>MESI只能在一种情况下解决核心专有Cache之间不一致的问题</strong>。</p>
+<p>此外，如果有些CPU不支持MESI协议，那么必须用其他办法来实现等价的效果，比如总是用锁总线的方式，或者明确的fence指令来保证volatile想达到的目标。</p>
+<p>如果CPU是单核心的，cache是专供这个核心的，MESI理论上也就没有用了。但是依然要考虑主存和Cache被多个线程切换访问时带来的不一致问题。</p>
+<p>总之，volatile是一个高层的表达意图的“抽象”，而MESI是为了实现这个抽象，在某种特定情况下需要使用的一个实现细节。</p>
+<p>可以把JSR-133看作是一套UT的规范。不管底下CPU/编译器怎么折腾，只要voltile修饰的变量满足JSR-133所描述的所有场景，就算是一个好的java实现。而基于这个规范，java开发人员才能安心的开发并发代码，而不至于被底层细节搞疯。</p>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="http://tutorials.jenkov.com/java-concurrency/java-memory-model.html"  target="_blank" rel="noopener">Java Memory Model</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/a525390802/article/details/80509457"  target="_blank" rel="noopener">JVM之内存模型JMM中本地内存的理解</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/296949412/answer/760347883"  target="_blank" rel="noopener">既然CPU有缓存一致性协议（MESI），为什么JMM还需要volatile关键字？</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/qq_31865983/article/details/103079839"  target="_blank" rel="noopener">Hotspot 字节码执行与栈顶缓存实现 源码解析</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BJMM/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8BJMM/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/Thread/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">Thread</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/volatile/"><span class="paginator-prev__text">volatile</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#jmm产生背景和定义"><span class="toc-number">1.</span> <span class="toc-text">
+          JMM产生背景和定义</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#计算机系统硬件组成"><span class="toc-number">2.</span> <span class="toc-text">
+          计算机系统硬件组成</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#java线程与处理器"><span class="toc-number">3.</span> <span class="toc-text">
+          Java线程与处理器</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#java内存模型和操作系统内存模型的关系"><span class="toc-number">4.</span> <span class="toc-text">
+          Java内存模型和操作系统内存模型的关系</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#java内存模型的抽象结构"><span class="toc-number">5.</span> <span class="toc-text">
+          Java内存模型的抽象结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#工作内存与主内存交互协议"><span class="toc-number">6.</span> <span class="toc-text">
+          工作内存与主内存交互协议</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#八大交互指令"><span class="toc-number">6.1.</span> <span class="toc-text">
+          八大交互指令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#交互指令约束"><span class="toc-number">6.2.</span> <span class="toc-text">
+          交互指令约束</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#java内存模型对并发特征的保证"><span class="toc-number">7.</span> <span class="toc-text">
+          Java内存模型对并发特征的保证</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#java并发编程的三个重要特征"><span class="toc-number">7.1.</span> <span class="toc-text">
+          Java并发编程的三个重要特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jmm对三大特征的保证"><span class="toc-number">7.2.</span> <span class="toc-text">
+          jmm对三大特征的保证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#volatile关键字"><span class="toc-number">7.2.1.</span> <span class="toc-text">
+          volatile关键字</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#synchronized同步机制"><span class="toc-number">7.2.2.</span> <span class="toc-text">
+          synchronized同步机制</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#既然cpu有缓存一致性协议为什么还需要volatile"><span class="toc-number">8.</span> <span class="toc-text">
+          既然cpu有缓存一致性协议，为什么还需要volatile</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">9.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

@@ -1,0 +1,792 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章内容  Lambda管中窥豹 在哪里以及如何使用Lambda 环绕执行模式 函数式接口 类型推断 方法引用 Lambda复合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lambda表达式">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/3_Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章内容  Lambda管中窥豹 在哪里以及如何使用Lambda 环绕执行模式 函数式接口 类型推断 方法引用 Lambda复合">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807115453.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121006.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121155.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121206.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121222.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121242.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807122339.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123105.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123744.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123758.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123947.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807125859.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807130503.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807130758.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807130815.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131738.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131812.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131829.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131952.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807132107.png">
+<meta property="article:published_time" content="2020-07-01T01:04:03.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.813Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="java8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807115453.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Lambda表达式 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/3_Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Lambda表达式</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">7.2k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">42分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章内容</strong></p>
+<ul>
+<li>Lambda管中窥豹</li>
+<li>在哪里以及如何使用Lambda</li>
+<li>环绕执行模式</li>
+<li>函数式接口</li>
+<li>类型推断</li>
+<li>方法引用</li>
+<li>Lambda复合</li>
+</ul>
+<a id="more"></a>
+
+        <h1 id="lambda-管中窥豹"   >
+          <a href="#lambda-管中窥豹" class="heading-link"><i class="fas fa-link"></i></a>Lambda 管中窥豹</h1>
+      
+<p>可以把Lambda表达式理解为简洁地表示可传递的匿名函数的一种方式：它没有名称，但它 有参数列表、函数主体、返回类型，可能还有一个可以抛出的异常列表。这个定义够大的，让我 们慢慢道来。</p>
+<ul>
+<li>匿名——我们说匿名， 是因为它不像普通的方法那样有一个明确的名称：写得少而想得多！</li>
+<li>函数——我们说它是函数，是因为Lambda函数不像方法那样属于某个特定的类。但和方法一样，Lambda有参数列表、函数主体、返回类型，还可能有可以抛出的异常列表。</li>
+<li>传递——Lambda表达式可以作为参数传递给方法或存储在变量中。</li>
+<li>简洁——无需像匿名类那样写很多模板代码。</li>
+</ul>
+<p>你是不是好奇Lambda这个词是从哪儿来的？其实它来自于学术界开发出来的一套用来描述 计算的λ演算法。</p>
+<blockquote>
+<p>可以参考<span class="exturl"><a class="exturl__link"   href="https://www.jianshu.com/p/c22db2a91989"  target="_blank" rel="noopener">【闭包】你真的理解闭包和lambda表达式吗</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>Java语言设计者选择这样的语法，是因为C#和Scala等语言中的类似功能广受欢迎。Lambda 的基本语法是</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(parameters) -&gt; expression</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p>此处的语句表达式特指 <span class="exturl"><a class="exturl__link"   href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.8"  target="_blank" rel="noopener">§14.8. Expression Statements</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>.</p>
+<p>StatementExpression:<br />
+Assignment <strong>赋值</strong><br />
+PreIncrementExpression <strong>自增</strong><br />
+PreDecrementExpression <strong>自减</strong><br />
+PostIncrementExpression<br />
+PostDecrementExpression<br />
+MethodInvocation <strong>方法调用</strong><br />
+ClassInstanceCreationExpression <strong>对象创建</strong></p>
+</blockquote>
+<p>或（请注意语句的花括号）</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(parameters) -&gt; &#123; statements; &#125;</span><br></pre></td></tr></table></div></figure>
+<p>表3-1提供了一些Lambda的例子和使用案例。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807115453.png"  alt="" />
+      </p>
+
+        <h1 id="在哪里以及如何使用lambda"   >
+          <a href="#在哪里以及如何使用lambda" class="heading-link"><i class="fas fa-link"></i></a>在哪里以及如何使用Lambda</h1>
+      
+
+        <h2 id="函数式接口"   >
+          <a href="#函数式接口" class="heading-link"><i class="fas fa-link"></i></a>函数式接口</h2>
+      
+<p>一言以蔽之，函数式接口就是只定义一个抽象方法的接口。你已经知道了Java API中的一些 其他函数式接口，如我们在第2章中谈到的Comparator和Runnable。</p>
+<blockquote>
+<p>你将会在第9章中看到，接口现在还可以拥有默认方法（即在类没有对方法进行实现时， 其主体为方法提供默认实现的方法）。哪怕有很多默认方法，只要接口只定义了一个抽象 方法，它就仍然是一个函数式接口。</p>
+</blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>Lambda表达式允许你直接以内联的形式为函数式接口的抽象方法提供实现，并把整个表达式作为函数式接口的实例（具体说来，是函数式接口一个具体实现 的实例）</span>。你用匿名内部类也可以完成同样的事情，只不过比较笨拙：需要提供一个实现，然后 再直接内联将它实例化。</p>
+<blockquote>
+<p><strong>内联</strong>：把函数调用的方法直接内嵌到方法内部，减少函数调用的次数，JIT探测到是热点代码就会对方法进行内联，同样的还有循环语句。</p>
+<p>参考：<span class="exturl"><a class="exturl__link"   href="https://www.jianshu.com/p/8c207a5f2774"  target="_blank" rel="noopener">java 方法内联</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h2 id="函数描述符"   >
+          <a href="#函数描述符" class="heading-link"><i class="fas fa-link"></i></a>函数描述符</h2>
+      
+<p>函数式接口的抽象方法的签名基本上就是Lambda表达式的签名。我们将这种抽象方法叫作 函数描述符。</p>
+<p>我们在本章中使用了一个特殊表示法来描述Lambda和函数式接口的签名。() -&gt; void代表 了参数列表为空，且返回void的函数。这正是Runnable接口所代表的。</p>
+<p>现在，只要知道Lambda表达式可以被赋给一个 变量，或传递给一个接受函数式接口作为参数的方法就好了，当然这个Lambda表达式的签名要 和函数式接口的抽象方法一样。</p>
+<hr />
+<p><strong>@FunctionalInterface又是怎么回事</strong>？</p>
+<p>如果你去看看新的Java API，会发现函数式接口带有@FunctionalInterface的标注（3.4节中会深入研究函数式接口，并会给出一个长长的列表）。这个标注用于表示该接口会设计成一个函数式接口。如果你用@FunctionalInterface定义了一个接口，而它却不是函数式接口的话，编译器将返回一个提示原因的错误。例如，错误消息可能是“Multiple non-overriding abstract methods found in interface Foo”，表明存在多个抽象方法。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>请注意，@FunctionalInter-face不是必需的，但对于为此设计的接口而言，使用它是比较好的做法。它就像是@Override 标注表示方法被重写了。</span></p>
+<hr />
+
+        <h1 id="把-lambda-付诸实践环绕执行模式"   >
+          <a href="#把-lambda-付诸实践环绕执行模式" class="heading-link"><i class="fas fa-link"></i></a>把 Lambda 付诸实践：环绕执行模式</h1>
+      
+<p>让我们通过一个例子，看看在实践中如何利用Lambda和行为参数化来让代码更为灵活，更 为简洁。资源处理（例如处理文件或数据库）时一个常见的模式就是打开一个资源，做一些处理， 然后关闭资源。这个设置和清理阶段总是很类似，并且会围绕着执行处理的那些重要代码。这就 是所谓的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>环绕执行（execute around）模式</span>，如图3-2所示。例如，在以下代码中，高亮显示的就 是从一个文件中读取一行所需的模板代码（注意你使用了Java 7中的带资源的try语句，它已经 简化了代码，因为你不需要显式地关闭资源了）：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121006.png"  alt="" />
+      </p>
+<blockquote>
+<p><strong>jdk1.7中try-with-resources语法糖详解:主要是针对所有凡是继承了Closeable这个类，系统在方法退出的时候都会自动的关闭资源</strong>。</p>
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/FANGAOHUA200/article/details/52980200"  target="_blank" rel="noopener">jdk1.7中try-with-resources语法糖详解</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>现在这段代码是有局限的。你只能读文件的第一行。如果你想要返回头两行，甚至是返回使 用最频繁的词， 该怎么办呢？</p>
+<p><strong>步骤</strong>：</p>
+<ol>
+<li>
+<p>行为参数化</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121155.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>使用函数式接口来传递行为</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121206.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>执行一个行为</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121222.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>第 4 步：传递 Lambda</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807121242.png"  alt="" />
+      </p>
+</li>
+</ol>
+
+        <h1 id="使用函数式接口"   >
+          <a href="#使用函数式接口" class="heading-link"><i class="fas fa-link"></i></a>使用函数式接口</h1>
+      
+<p>函数式接口很有用， 因为抽象方法的签名可以描述Lambda表达式的签名。函数式接口的抽象方法的签名称为函数描 述符。所以为了应用不同的Lambda表达式，你需要一套能够描述常见函数描述符的函数式接口。 Java API中已经有了几个函数式接口， 比如你在3.2节中见到的 Comparable 、 Runnable 和 Callable。</p>
+<p>Java 8的库设计师帮你在java.util.function包中引入了几个新的函数式接口。我们接下 来会介绍Predicate、Consumer和Function，更完整的列表可见本节结尾处的表3-2。</p>
+
+        <h2 id="predicate"   >
+          <a href="#predicate" class="heading-link"><i class="fas fa-link"></i></a>Predicate</h2>
+      
+<p><code>java.util.function.Predicate&lt;T&gt;</code>接口定义了一个名叫test的抽象方法，它接受泛型 T对象，并返回一个boolean。</p>
+
+        <h2 id="consumer"   >
+          <a href="#consumer" class="heading-link"><i class="fas fa-link"></i></a>Consumer</h2>
+      
+<p><code>java.util.function.Consumer&lt;T&gt;</code>定义了一个名叫 accept 的抽象方法， 它接受泛型 T 的对象，没有返回（void）。你如果需要访问类型T的对象，并对其执行某些操作，就可以使用 这个接口。比如，你可以用它来创建一个forEach方法，接受一个Integers的列表，并对其中 每个元素执行操作。</p>
+
+        <h2 id="function"   >
+          <a href="#function" class="heading-link"><i class="fas fa-link"></i></a>Function</h2>
+      
+<p>java.util.function.Function&lt;T, R&gt;接口定义了一个叫作apply的方法，它接受一个泛型T的对象，并返回一个泛型R的对象。如果你需要定义一个Lambda，将输入对象的信息映射 到输出，就可以使用这个接口。</p>
+
+        <h2 id="原始类型特化"   >
+          <a href="#原始类型特化" class="heading-link"><i class="fas fa-link"></i></a>原始类型特化</h2>
+      
+<p><strong>自动装箱机制</strong>在性能方面是要付出代价的。装箱后的值本质上就是把原始类型包裹起来，并保存在堆里。因此，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>装箱后的值需要更多的内存，并需要额外的内存搜索来获取被包裹的原始值</span>。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Java 8为我们前面所说的函数式接口带来了一个专门的版本，以便在输入和输出都是原始类 型时避免自动装箱的操作。</span></p>
+<p>一般来说，针对专门的输入参数类型的函数式接口的名称都要加上对应的原始类型前缀，比 如DoublePredicate、IntConsumer、LongBinaryOperator、IntFunction等。Function 接口还有针对输出参数类型的变种：ToIntFunction<T>、IntToDoubleFunction等。</p>
+<p>表3-2总结了Java API中提供的最常用的函数式接口及其函数描述符。请记得这只是一个起 点。如果有需要，你可以自己设计一个。请记住，(T,U) -&gt; R的表达方式展示了应当如何思考 一个函数描述符。表的左侧代表了参数类型。这里它代表一个函数，具有两个参数，分别为泛型 T和U，返回类型为R。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807122339.png"  alt="" />
+      </p>
+
+        <h2 id="异常-lambda还有函数式接口又是怎么回事呢"   >
+          <a href="#异常-lambda还有函数式接口又是怎么回事呢" class="heading-link"><i class="fas fa-link"></i></a>异常、Lambda，还有函数式接口又是怎么回事呢？</h2>
+      
+<p>请注意，任何函数式接口都不允许抛出受检异常（checked exception）。如果你需要Lambda表达式来抛出异常，有两种办法：定义一个自己的函数式接口，并声明受检异常，或者把Lambda包在一个try/catch块中。</p>
+<p>比如，在3.3节我们介绍了一个新的函数式接口BufferedReaderProcessor，它显式声明了一个IOException：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BufferedReaderProcessor</span> </span>&#123;</span><br><span class="line">	<span class="function">String <span class="title">process</span><span class="params">(BufferedReader b)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">&#125;</span><br><span class="line">BufferedReaderProcessor p = (BufferedReader br) -&gt; br.readLine();</span><br></pre></td></tr></table></div></figure>
+<p>但是你可能是在使用一个接受函数式接口的API，比如Function&lt;T, R&gt;，没有办法自己创建一个（你会在下一章看到，Stream API中大量使用表3-2中的函数式接口）。这种情况下，你可以显式捕捉受检异常：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Function&lt;BufferedReader, String&gt; f = (BufferedReader b) -&gt; &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">	  <span class="keyword">return</span> b.readLine();</span><br><span class="line">  &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="非法抛出异常"   >
+          <a href="#非法抛出异常" class="heading-link"><i class="fas fa-link"></i></a>非法抛出异常</h3>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">InterfaceWithException</span> </span>&#123;</span><br><span class="line">    <span class="comment">//没有声明异常</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">apply</span><span class="params">(<span class="keyword">int</span> i)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FunctionalInterfaceWithException</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//函数式接口没有声明异常，</span></span><br><span class="line">        <span class="comment">//而 Lambda中却抛出了异常，此时是无法通过编译的！！！</span></span><br><span class="line">        InterfaceWithException target = i -&gt; &#123;<span class="keyword">throw</span> <span class="keyword">new</span> Exception();&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="类型检查-类型推断以及限制"   >
+          <a href="#类型检查-类型推断以及限制" class="heading-link"><i class="fas fa-link"></i></a>类型检查、类型推断以及限制</h1>
+      
+<p>当我们第一次提到Lambda表达式时，说它可以为函数式接口生成一个实例。然而，Lambda 表达式本身并不包含它在实现哪个函数式接口的信息。为了全面了解Lambda表达式，你应该知 道Lambda的实际类型是什么。</p>
+
+        <h2 id="类型检查"   >
+          <a href="#类型检查" class="heading-link"><i class="fas fa-link"></i></a>类型检查</h2>
+      
+<p>Lambda的类型是从使用Lambda的上下文推断出来的。上下文（比如，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>接受它传递的方法的 参数，或接受它的值的局部变量</span>）中Lambda表达式需要的类型称为<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>目标类型</span>。让我们通过一个 例子，看看当你使用Lambda表达式时背后发生了什么。图3-4概述了下列代码的类型检查过程。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123105.png"  alt="" />
+      </p>
+<blockquote>
+<p>如果Lambda表达式抛出一个异常，那么抽象方法所声明的throws语句也必 须与之匹配。</p>
+</blockquote>
+
+        <h2 id="同样的lambda不同的函数式接口"   >
+          <a href="#同样的lambda不同的函数式接口" class="heading-link"><i class="fas fa-link"></i></a>同样的Lambda，不同的函数式接口</h2>
+      
+<p>有了目标类型的概念，同一个Lambda表达式就可以与不同的函数式接口联系起来，只要它 们的抽象方法签名能够兼容。比如，前面提到的Callable和PrivilegedAction，这两个接口 都代表着什么也不接受且返回一个泛型T的函数。</p>
+
+        <h3 id="菱形运算符"   >
+          <a href="#菱形运算符" class="heading-link"><i class="fas fa-link"></i></a>菱形运算符</h3>
+      
+<p>那些熟悉Java的演变的人会记得，Java 7中已经引入了菱形运算符（<code>&lt;&gt;</code>），利用泛型推断从上下文推断类型的思想（这一思想甚至可以追溯到更早的泛型方法）。一个类实例表达式可以出现在两个或更多不同的上下文中，并会像下面这样推断出适当的类型参数：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; listOfStrings = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">List&lt;Integer&gt; listOfIntegers = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="特殊的void兼容规则"   >
+          <a href="#特殊的void兼容规则" class="heading-link"><i class="fas fa-link"></i></a>特殊的void兼容规则</h3>
+      
+<p>如果一个Lambda的主体是一个<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>语句表达式</span>， 它就和一个返回void的函数描述符兼容（当然需要参数列表也兼容）。 例如， 以下两行都是合法的， 尽管 List 的 add 方法返回了一个boolean，而不是Consumer上下文（T -&gt; void）所要求的void：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Predicate返回了一个boolean</span></span><br><span class="line">Predicate&lt;String&gt; p = s -&gt; list.add(s);</span><br><span class="line"><span class="comment">// Consumer返回了一个void</span></span><br><span class="line">Consumer&lt;String&gt; b = s -&gt; list.add(s);</span><br></pre></td></tr></table></div></figure>
+<p>Lambda表达式可以从赋值的上下文、方法调用的上下文（参数和返回值），以及类型转换的上下文中获得目标类型。</p>
+
+        <h2 id="类型推断"   >
+          <a href="#类型推断" class="heading-link"><i class="fas fa-link"></i></a>类型推断</h2>
+      
+<p>Java编译器会从上下文（目标类型）推断出用什么函数式接 口来配合Lambda表达式，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>这意味着它也可以推断出适合Lambda的签名</span>，因为函数描述符可以通 过目标类型来得到。这样做的好处在于，编译器可以了解Lambda表达式的参数类型，这样就可 以在Lambda语法中省去标注参数类型。换句话说，Java编译器会像下面这样推断Lambda的参数 类型：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123744.png"  alt="" />
+      </p>
+<p>Lambda表达式有多个参数，代码可读性的好处就更为明显。例如，你可以这样来创建一个 Comparator对象：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123758.png"  alt="" />
+      </p>
+<blockquote>
+<p>当Lambda仅有一个类型需要推断的参数时，参数名称两边的括号也可以省略。</p>
+</blockquote>
+<p>请注意，有时候显式写出类型更易读，有时候去掉它们更易读。没有什么法则说哪种更好； 对于如何让代码更易读，程序员必须做出自己的选择。</p>
+
+        <h2 id="使用局部变量"   >
+          <a href="#使用局部变量" class="heading-link"><i class="fas fa-link"></i></a>使用局部变量</h2>
+      
+<p>我们迄今为止所介绍的所有Lambda表达式都只用到了其主体里面的参数。但Lambda表达式 也允许使用自由变量（不是参数，而是在外层作用域中定义的变量），就像匿名类一样。 它们被 称作捕获Lambda。例如，下面的Lambda捕获了portNumber变量：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> portNumber = <span class="number">1337</span>;</span><br><span class="line">Runnable r = () -&gt; System.out.println(portNumber);</span><br></pre></td></tr></table></div></figure>
+<p>尽管如此，还有一点点小麻烦：关于能对这些变量做什么有一些限制。Lambda可以没有限 制地捕获（也就是在其主体中引用）实例变量和静态变量。但局部变量必须显式声明为final， 或事实上是final。换句话说，Lambda表达式只能捕获指派给它们的局部变量一次。（注：捕获 实例变量可以被看作捕获最终局部变量this。） 例如，下面的代码无法编译，因为portNumber 变量被赋值两次：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807123947.png"  alt="" />
+      </p>
+
+        <h3 id="对局部变量的限制"   >
+          <a href="#对局部变量的限制" class="heading-link"><i class="fas fa-link"></i></a>对局部变量的限制</h3>
+      
+<p>你可能会问自己，为什么局部变量有这些限制。</p>
+<p>第一，实例变量和局部变量背后的实现有一 个关键不同。实例变量都存储在堆中，而局部变量则保存在栈上。如果Lambda可以直接访问局 部变量，而且Lambda是在一个线程中使用的，则使用Lambda的线程，可能会在分配该变量的线 程将这个变量收回之后，去访问该变量。因此，Java在访问自由局部变量时，实际上是在访问它 的副本，而不是访问原始变量。如果局部变量仅仅赋值一次那就没有什么区别了——因此就有了 这个限制。</p>
+<p>第二，这一限制不鼓励你使用改变外部变量的典型命令式编程模式（我们会在以后的各章中 解释，这种模式会阻碍很容易做到的并行处理）。</p>
+<blockquote>
+<p><strong>闭包</strong></p>
+<p>你可能已经听说过闭包（closure， 不要和Clojure编程语言混淆）这个词， 你可能会想Lambda是否满足闭包的定义。用科学的说法来说，闭包就是一个函数的实例，且<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>它可以无限制地访问那个函数的非本地变量</span>。例如，闭包可以作为参数传递给另一个函数。它也可以访问和修改其作用域之外的变量。现在，Java 8的Lambda和匿名类可以做类似于闭包的事情：它们可以作为参数传递给方法，并且可以访问其作用域之外的变量。但有一个限制：它们不能修改定义Lambda的方法的局部变量的内容。这些变量必须是隐式最终的。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>可以认为Lambda是对值封闭，而不是对变量封闭。</span>如前所述，这种限制存在的原因在于局部变量保存在栈上，并且隐式表示它们仅限于其所在线程。如果允许捕获可改变的局部变量，就会引发造成线程不安全的新的可能性，而这是我们不想看到的（实例变量可以，因为它们保存在堆中，而堆是在线程之间共享的）。</p>
+<p>如果想使用闭包，可以将局部变量改成引用变量。</p>
+<p>使用闭包的一个例子：打印给定数量的 斐波那契数列</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">fun</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyInter</span> </span>&#123;</span><br><span class="line">    Integer i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    print(<span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">print</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    MyInter last = <span class="keyword">new</span> MyInter(<span class="number">0</span>);</span><br><span class="line">    MyInter next = <span class="keyword">new</span> MyInter(<span class="number">1</span>);</span><br><span class="line">    fun fun = () -&gt; &#123;</span><br><span class="line">        <span class="keyword">int</span> r = next.getI();</span><br><span class="line">        <span class="keyword">int</span> i = last.getI() + next.getI();</span><br><span class="line">        last.setI(next.getI());</span><br><span class="line">        next.setI(i);</span><br><span class="line">        <span class="keyword">return</span> r;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        System.out.println(fun.f());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+
+        <h1 id="方法引用"   >
+          <a href="#方法引用" class="heading-link"><i class="fas fa-link"></i></a>方法引用</h1>
+      
+<p>方法引用让你可以重复使用现有的方法定义，并像Lambda一样传递它们。在一些情况下， 比起使用Lambda表达式，它们似乎更易读，感觉也更自然。</p>
+
+        <h2 id="管中窥豹"   >
+          <a href="#管中窥豹" class="heading-link"><i class="fas fa-link"></i></a>管中窥豹</h2>
+      
+<p>你为什么应该关心方法引用？<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>方法引用可以被看作仅仅调用特定方法的Lambda的一种快捷 写法</span>。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>它的基本思想是，如果一个Lambda代表的只是“直接调用这个方法”，那最好还是用名称 来调用它，而不是去描述如何调用它。事实上，方法引用就是让你根据已有的方法实现来创建 Lambda表达式。</span>显式地指明方法的名称，你的代码的可读性会更好。它是如何工作的呢？ <span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>当你需要使用方法引用时， 目标引用放在分隔符<code>::</code> 前， 方法的名称放在后面</span>。 <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>例如， Apple::getWeight就是引用了Apple类中定义的方法getWeight。请记住，不需要括号，因为 你没有实际调用这个方法。</span>方法引用就是Lambda表达式(Apple a) -&gt; a.getWeight()的快捷 写法。表3-4给出了Java 8中方法引用的其他一些例子。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807125859.png"  alt="" />
+      </p>
+<p>你可以把方法引用看作针对仅仅涉及单一方法的Lambda的语法糖，因为你表达同样的事情 时要写的代码更少了。</p>
+
+        <h2 id="如何构建方法引用"   >
+          <a href="#如何构建方法引用" class="heading-link"><i class="fas fa-link"></i></a>如何构建方法引用</h2>
+      
+<p>方法引用主要有三类。</p>
+<ol>
+<li>
+<p>指向静态方法的方法引用（例如Integer的parseInt方法，写作Integer::parseInt）。</p>
+</li>
+<li>
+<p>指向<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>任意类型实例</span>方法的方法引用（例如String 的 length方 法 ， 写 作 String::length）。</p>
+</li>
+<li>
+<p>指向现有对象的实例方法的方法引用（假设你有一个局部变量expensiveTransaction 用于存放Transaction类型的对象，它支持实例方法getValue，那么你就可以写expensive- Transaction::getValue）。</p>
+<blockquote>
+<p>第二种和第三种方法引用可能乍看起来有点儿晕。类似于String::length的第二种方法引 用的思想就是你在<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>引用一个对象的方法，而这个对象本身是Lambda的一个参数</span>。例如，Lambda 表达式(String s) -&gt; s.toUppeCase()可以写作String::toUpperCase。但第三种方法引用 指的是， 你在Lambda中<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>调用一个已经存在的外部对象中的方法</span>。 例如， Lambda表达式<code>()-&gt;expensiveTransaction.getValue()</code>可以写作expensiveTransaction::getValue。</p>
+</blockquote>
+</li>
+</ol>
+<p>依照一些简单的方子，我们就可以将Lambda表达式重构为等价的方法引用，如图3-5所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807130503.png"  alt="" />
+      </p>
+<p>请注意，还有针对构造函数、数组构造函数和父类调用（super-call）的一些特殊形式的方法 引用。</p>
+<p>让我们举一个方法引用的具体例子吧。比方说你想要对一个字符串的List排序，忽略大 小写。List的sort方法需要一个Comparator作为参数。你在前面看到了，Comparator描述了 一个具有(T, T) -&gt; int签名的函数描述符。你可以利用String类中的compareToIgnoreCase 方法来定义一个Lambda表达式（注意compareToIgnoreCase是String类中预先定义的）。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; str = Arrays.asList(<span class="string">"a"</span>,<span class="string">"b"</span>,<span class="string">"A"</span>,<span class="string">"B"</span>); </span><br><span class="line">str.sort((s1, s2) -&gt; s1.compareToIgnoreCase(s2));</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Lambda表达式的签名与Comparator的函数描述符兼容。</span>利用前面所述的方法，这个例子可 以用方法引用改写成下面的样子：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; str = Arrays.asList(<span class="string">"a"</span>,<span class="string">"b"</span>,<span class="string">"A"</span>,<span class="string">"B"</span>); </span><br><span class="line">str.sort(String::compareToIgnoreCase);</span><br></pre></td></tr></table></div></figure>
+<p>请注意，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>编译器会进行一种与Lambda表达式类似的类型检查过程，来确定对于给定的函数 式接口，这个方法引用是否有效</span>：<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>方法引用的签名必须和上下文类型匹配。</span></p>
+
+        <h2 id="构造函数引用"   >
+          <a href="#构造函数引用" class="heading-link"><i class="fas fa-link"></i></a>构造函数引用</h2>
+      
+<p>对于一个现有构造函数， 你可以利用它的名称和关键字 new 来创建它的一个引用： ClassName::new。它的功能与指向静态方法的引用类似。例如，假设有一个构造函数没有参数。 它适合Supplier的签名() -&gt; Apple。你可以这样做：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807130758.png"  alt="" />
+      </p>
+<p>如果你的构造函数的签名是Apple(Integer weight)，那么它就适合Function接口的签 名，于是你可以这样写：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807130815.png"  alt="" />
+      </p>
+
+        <h1 id="符合lambda表达式的有用方法"   >
+          <a href="#符合lambda表达式的有用方法" class="heading-link"><i class="fas fa-link"></i></a>符合Lambda表达式的有用方法</h1>
+      
+<p>Java 8的好几个函数式接口都有为方便而设计的方法。具体而言，许多函数式接口，比如用 于传递Lambda表达式的Comparator、Function和Predicate都提供了允许你进行复合的方法。 这是什么意思呢？在实践中，这<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>意味着你可以把多个简单的Lambda复合成复杂的表达式</span>。比如， 你可以让两个谓词之间做一个or操作，组合成一个更大的谓词。而且，你还可以让一个函数的结 果成为另一个函数的输入。你可能会想，函数式接口中怎么可能有更多的方法呢？（毕竟，这违背了函数式接口的定义啊！）窍门在于，我们即将介绍的方法都是<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>默认方法</span>，也就是说它们不是抽象方法。</p>
+
+        <h2 id="比较器复合"   >
+          <a href="#比较器复合" class="heading-link"><i class="fas fa-link"></i></a>比较器复合</h2>
+      
+<p>我们前面看到，你可以使用静态方法Comparator.comparing，根据提取用于比较的键值 的Function来返回一个Comparator，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Comparator&lt;Apple&gt; c = Comparator.comparing(Apple::getWeight);</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="逆序"   >
+          <a href="#逆序" class="heading-link"><i class="fas fa-link"></i></a>逆序</h3>
+      
+<p>如果你想要对苹果按重量递减排序怎么办？用不着去建立另一个Comparator的实例。接口 有一个默认方法reversed可以使给定的比较器逆序。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inventory.sort(comparing(Apple::getWeight).reversed());</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="比较器链"   >
+          <a href="#比较器链" class="heading-link"><i class="fas fa-link"></i></a>比较器链</h3>
+      
+<p>上面说得都很好，但如果发现有两个苹果一样重怎么办？哪个苹果应该排在前面呢？你可能 需要再提供一个Comparator来进一步定义这个比较。比如，在按重量比较两个苹果之后，你可 能想要按原产国排序。thenComparing方法就是做这个用的。它接受一个函数作为参数（就像 comparing方法一样），如果两个对象用第一个Comparator比较之后是一样的，就提供第二个 Comparator。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">inventory.sort(comparing(Apple::getWeight)</span><br><span class="line">	.reversed() </span><br><span class="line">	.thenComparing(Apple::getCountry));</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="谓词复合"   >
+          <a href="#谓词复合" class="heading-link"><i class="fas fa-link"></i></a>谓词复合</h2>
+      
+<p>谓词接口包括三个方法：negate、and和or，让你可以重用已有的Predicate来创建更复 杂的谓词。</p>
+
+        <h3 id="negate"   >
+          <a href="#negate" class="heading-link"><i class="fas fa-link"></i></a>negate</h3>
+      
+<p>比如，你可以使用negate方法来返回一个Predicate的非，比如苹果不是红的：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Predicate&lt;Apple&gt; notRedApple &#x3D; redApple.negate();</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="and"   >
+          <a href="#and" class="heading-link"><i class="fas fa-link"></i></a>and</h3>
+      
+<p>你可能想要把两个Lambda用and方法组合起来，比如一个苹果既是红色又比较重：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Predicate&lt;Apple&gt; redAndHeavyApple &#x3D; redApple.and(a -&gt; a.getWeight() &gt; 150);</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="or"   >
+          <a href="#or" class="heading-link"><i class="fas fa-link"></i></a>or</h3>
+      
+<p>你可以进一步组合谓词，表达要么是重（150克以上）的红苹果，要么是绿苹果：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Predicate&lt;Apple&gt; redAndHeavyAppleOrGreen &#x3D; redApple.and(a -&gt; a.getWeight() &gt; 150) .or(a -&gt; &quot;green&quot;.equals(a.getColor()));</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>请注意，and和or方法是按照在表达式链中的位置，从左向右确定优 先级的。因此，a.or(b).and©可以看作(a || b) &amp;&amp; c。</span></p>
+</blockquote>
+
+        <h2 id="函数复合"   >
+          <a href="#函数复合" class="heading-link"><i class="fas fa-link"></i></a>函数复合</h2>
+      
+<p>你还可以把Function接口所代表的Lambda表达式复合起来。Function接口为此配 了<strong>andThen</strong>和<strong>compose</strong>两个默认方法，它们都会返回Function的一个实例。</p>
+<p>andThen方法会返回一个函数，它先对输入应用一个给定函数，再对输出应用另一个函数。 比如，假设有一个函数f给数字加1 (x -&gt; x + 1)，另一个函数g给数字乘2，你可以将它们组 合成一个函数h，先给数字加1，再给结果乘2：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131738.png"  alt="" />
+      </p>
+<p>你也可以类似地使用compose方法，先把给定的函数用作compose的参数里面给的那个函 数，然后再把函数本身用于结果。比如在上一个例子里用compose的话，它将意味着f(g(x))， 而andThen则意味着g(f(x))：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131812.png"  alt="" />
+      </p>
+<p>图3-6说明了andThen和compose之间的区别。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131829.png"  alt="" />
+      </p>
+<p>比方说你有一系列工具方法，对用String表示的一封信做文本转换：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Letter</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">addHeader</span><span class="params">(String text)</span></span>&#123; <span class="keyword">return</span> <span class="string">"From Raoul, Mario and Alan: "</span> + text; &#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">addFooter</span><span class="params">(String text)</span></span>&#123; <span class="keyword">return</span> text + <span class="string">" Kind regards"</span>; &#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">checkSpelling</span><span class="params">(String text)</span></span>&#123; <span class="keyword">return</span> text.replaceAll(<span class="string">"labda"</span>, <span class="string">"lambda"</span>); &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>现在你可以通过复合这些工具方法来创建各种转型流水线了，比如创建一个流水线：先加上 抬头，然后进行拼写检查，最后加上一个落款，如图3-7所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807131952.png"  alt="" />
+      </p>
+
+        <h1 id="数学中的类似思想"   >
+          <a href="#数学中的类似思想" class="heading-link"><i class="fas fa-link"></i></a>数学中的类似思想</h1>
+      
+
+        <h2 id="积分"   >
+          <a href="#积分" class="heading-link"><i class="fas fa-link"></i></a>积分</h2>
+      
+<p>假设你有一个（数学，不是Java）函数f，比如说定义是</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>x</mi><mo>+</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">f (x) = x+10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">0</span></span></span></span></p>
+<p>那么，（工科学校里）经常问的一个问题就是，画在纸上之后函数下方的面积（把x轴作为基准）。比如对于图3-8所示的区域你会写</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807132107.png"  alt="" />
+      </p>
+<p>在这个例子里， 函数f是一条直线，因此你很容易通过梯形方法（画几个三角形）来算出 面积：</p>
+<p><code>1/2 × ((3 + 10) + (7 + 10)) × (7 – 3) = 60</code></p>
+<p>那么这在Java里面如何表达呢？你的第一个问题是把积分号或dy/dx之类的换成熟悉的编程 语言符号。</p>
+<p>确实，根据第一条原则你需要一个方法，比如说叫integrate，它接受三个参数：一个是f， 还有上下限（这里是3.0和7.0）。于是写在Java里就是下面这个样子，函数f是被传递进去的：</p>
+<p><code>integrate(f, 3, 7)</code></p>
+
+        <h2 id="与-java8-的-lambda-联系起来"   >
+          <a href="#与-java8-的-lambda-联系起来" class="heading-link"><i class="fas fa-link"></i></a>与 Java8 的 Lambda 联系起来</h2>
+      
+<p>我们前面说过，Java 8的表示法(double x) -&gt; x + 10（一个Lambda表达式）恰恰就是为此设计的，因此你可以写：</p>
+<p><code>integrate((double x) -&gt; x + 10, 3, 7)</code></p>
+<p>或者</p>
+<p><code>integrate((double x) -&gt; f(x), 3, 7)</code></p>
+<p>或者，用前面说的方法引用，只要写：</p>
+<p><code>integrate(C::f, 3, 7)</code></p>
+<p>这里C是包含静态方法f的一个类。理念就是把f背后的代码传给integrate方法。</p>
+<p>integrate本身:</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">integrate</span><span class="params">(DoubleFunction&lt;Double&gt; f, <span class="keyword">double</span> a, <span class="keyword">double</span> b)</span> </span>&#123; </span><br><span class="line">  	<span class="keyword">return</span> (f.apply(a) + f.apply(b)) * (b-a) / <span class="number">2.0</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>顺便提一句，有点儿可惜的是你必须写f.apply(a)，而不是像数学里面写f(a)，但Java无 法摆脱“一切都是对象”的思想——它不能让函数完全独立！</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>以下是你应从本章中学到的关键概念。</p>
+<ul>
+<li>Lambda表达式可以理解为一种匿名函数：它没有名称，但有参数列表、函数主体、返回类型，可能还有一个可以抛出的异常的列表。</li>
+<li>Lambda表达式让你可以简洁地传递代码。</li>
+<li>函数式接口就是仅仅声明了一个抽象方法的接口。</li>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>只有在接受函数式接口的地方才可以使用Lambda表达式。 </span></li>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Lambda表达式允许你直接内联，为函数式接口的抽象方法提供实现，并且将整个表达式作为函数式接口的一个实例。</span></li>
+<li>Java 8自带一些常用的函数式接口，放在java.util.function包里，包括<code>Predicate&lt;T&gt;</code>、<code>Function&lt;T,R&gt;</code>、<code>Supplier&lt;T&gt;</code>、<code>Consumer&lt;T&gt;</code>和<code>BinaryOperator&lt;T&gt;</code>，如表3-2所述。</li>
+<li>为了避免装箱操作，对<code>Predicate&lt;T&gt;</code>和<code>Function&lt;T, R&gt;</code>等通用函数式接口的<strong>原始类型特化</strong>：IntPredicate、IntToLongFunction等。</li>
+<li>环绕执行模式（即在方法所必需的代码中间，你需要执行点儿什么操作，比如资源分配 和清理）可以配合Lambda提高灵活性和可重用性。</li>
+<li>Lambda表达式所需要代表的类型称为目标类型。</li>
+<li>方法引用让你重复使用现有的方法实现并直接传递它们。</li>
+<li>Comparator、Predicate和Function等函数式接口都有几个可以用来结合Lambda表达式的默认方法。</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/3_Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/3_Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/java8/">java8</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/4_%E5%BC%95%E5%85%A5%E6%B5%81/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">引入流</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/2_%E9%80%9A%E8%BF%87%E8%A1%8C%E4%B8%BA%E5%8F%82%E6%95%B0%E5%8C%96%E4%BC%A0%E9%80%92%E4%BB%A3%E7%A0%81/"><span class="paginator-prev__text">通过行为参数化传递代码</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#lambda-管中窥豹"><span class="toc-number">1.</span> <span class="toc-text">
+          Lambda 管中窥豹</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#在哪里以及如何使用lambda"><span class="toc-number">2.</span> <span class="toc-text">
+          在哪里以及如何使用Lambda</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#函数式接口"><span class="toc-number">2.1.</span> <span class="toc-text">
+          函数式接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#函数描述符"><span class="toc-number">2.2.</span> <span class="toc-text">
+          函数描述符</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#把-lambda-付诸实践环绕执行模式"><span class="toc-number">3.</span> <span class="toc-text">
+          把 Lambda 付诸实践：环绕执行模式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#使用函数式接口"><span class="toc-number">4.</span> <span class="toc-text">
+          使用函数式接口</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#predicate"><span class="toc-number">4.1.</span> <span class="toc-text">
+          Predicate</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#consumer"><span class="toc-number">4.2.</span> <span class="toc-text">
+          Consumer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#function"><span class="toc-number">4.3.</span> <span class="toc-text">
+          Function</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原始类型特化"><span class="toc-number">4.4.</span> <span class="toc-text">
+          原始类型特化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异常-lambda还有函数式接口又是怎么回事呢"><span class="toc-number">4.5.</span> <span class="toc-text">
+          异常、Lambda，还有函数式接口又是怎么回事呢？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#非法抛出异常"><span class="toc-number">4.5.1.</span> <span class="toc-text">
+          非法抛出异常</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#类型检查-类型推断以及限制"><span class="toc-number">5.</span> <span class="toc-text">
+          类型检查、类型推断以及限制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#类型检查"><span class="toc-number">5.1.</span> <span class="toc-text">
+          类型检查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同样的lambda不同的函数式接口"><span class="toc-number">5.2.</span> <span class="toc-text">
+          同样的Lambda，不同的函数式接口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#菱形运算符"><span class="toc-number">5.2.1.</span> <span class="toc-text">
+          菱形运算符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#特殊的void兼容规则"><span class="toc-number">5.2.2.</span> <span class="toc-text">
+          特殊的void兼容规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#类型推断"><span class="toc-number">5.3.</span> <span class="toc-text">
+          类型推断</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用局部变量"><span class="toc-number">5.4.</span> <span class="toc-text">
+          使用局部变量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#对局部变量的限制"><span class="toc-number">5.4.1.</span> <span class="toc-text">
+          对局部变量的限制</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#方法引用"><span class="toc-number">6.</span> <span class="toc-text">
+          方法引用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#管中窥豹"><span class="toc-number">6.1.</span> <span class="toc-text">
+          管中窥豹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何构建方法引用"><span class="toc-number">6.2.</span> <span class="toc-text">
+          如何构建方法引用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#构造函数引用"><span class="toc-number">6.3.</span> <span class="toc-text">
+          构造函数引用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#符合lambda表达式的有用方法"><span class="toc-number">7.</span> <span class="toc-text">
+          符合Lambda表达式的有用方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#比较器复合"><span class="toc-number">7.1.</span> <span class="toc-text">
+          比较器复合</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#逆序"><span class="toc-number">7.1.1.</span> <span class="toc-text">
+          逆序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#比较器链"><span class="toc-number">7.1.2.</span> <span class="toc-text">
+          比较器链</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#谓词复合"><span class="toc-number">7.2.</span> <span class="toc-text">
+          谓词复合</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#negate"><span class="toc-number">7.2.1.</span> <span class="toc-text">
+          negate</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#and"><span class="toc-number">7.2.2.</span> <span class="toc-text">
+          and</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#or"><span class="toc-number">7.2.3.</span> <span class="toc-text">
+          or</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#函数复合"><span class="toc-number">7.3.</span> <span class="toc-text">
+          函数复合</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数学中的类似思想"><span class="toc-number">8.</span> <span class="toc-text">
+          数学中的类似思想</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#积分"><span class="toc-number">8.1.</span> <span class="toc-text">
+          积分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#与-java8-的-lambda-联系起来"><span class="toc-number">8.2.</span> <span class="toc-text">
+          与 Java8 的 Lambda 联系起来</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">9.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

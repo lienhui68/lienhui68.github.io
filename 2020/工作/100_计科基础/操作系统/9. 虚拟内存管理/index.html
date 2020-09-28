@@ -1,0 +1,680 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="虚拟内存的基本概念        虚拟内存是计算机系统内存管理的一种工作。它使得应用程序认为它拥有连续的可用的内存(一个连续完整的地址空间),而实际上,它通常是被分隔成多个物理内存碎片,还有部分暂时存储在外部磁盘存储器上,在需要时进行数据交换。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟内存管理">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/9.%20%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="虚拟内存的基本概念        虚拟内存是计算机系统内存管理的一种工作。它使得应用程序认为它拥有连续的可用的内存(一个连续完整的地址空间),而实际上,它通常是被分隔成多个物理内存碎片,还有部分暂时存储在外部磁盘存储器上,在需要时进行数据交换。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212213.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212303.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212330.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212507.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212536.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212759.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212913.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713214935.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713215307.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713215437.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713215540.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713220043.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713220129.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/WX20200713-2209381.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713221257.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713230229.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713230559.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713230938.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713231003.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713231249.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713231526.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713232042.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713232111.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713232349.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235602.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235616.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235810.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235929.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000016.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000043.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000104.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000144.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000235.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000314.png">
+<meta property="article:published_time" content="2020-09-16T16:21:54.786Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:54.831Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212213.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>虚拟内存管理 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/9.%20%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">虚拟内存管理</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">1.2k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">6分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="虚拟内存的基本概念"   >
+          <a href="#虚拟内存的基本概念" class="heading-link"><i class="fas fa-link"></i></a>虚拟内存的基本概念</h1>
+      
+<p>虚拟内存是计算机系统内存管理的一种工作。它使得应用程序认为它拥有连续的可用的内存(一个连续完整的地址空间),而实际上,它通常是被分隔成多个物理内存碎片,还有部分暂时存储在外部磁盘存储器上,在需要时进行数据交换。</p>
+<a id="more"></a>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212213.png"  alt="" />
+      </p>
+
+        <h2 id="传统存储管理方式的特征-缺点"   >
+          <a href="#传统存储管理方式的特征-缺点" class="heading-link"><i class="fas fa-link"></i></a>传统存储管理方式的特征、缺点</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212303.png"  alt="" />
+      </p>
+
+        <h2 id="局部性原理"   >
+          <a href="#局部性原理" class="heading-link"><i class="fas fa-link"></i></a>局部性原理</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212330.png"  alt="" />
+      </p>
+
+        <h2 id="虚拟内存的定义和特征"   >
+          <a href="#虚拟内存的定义和特征" class="heading-link"><i class="fas fa-link"></i></a>虚拟内存的定义和特征</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212507.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212536.png"  alt="" />
+      </p>
+
+        <h2 id="如何实现虚拟内存工作"   >
+          <a href="#如何实现虚拟内存工作" class="heading-link"><i class="fas fa-link"></i></a>如何实现虚拟内存工作</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212759.png"  alt="" />
+      </p>
+
+        <h2 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713212913.png"  alt="" />
+      </p>
+
+        <h1 id="请求分页管理方式"   >
+          <a href="#请求分页管理方式" class="heading-link"><i class="fas fa-link"></i></a>请求分页管理方式</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713214935.png"  alt="" />
+      </p>
+
+        <h2 id="页表机制"   >
+          <a href="#页表机制" class="heading-link"><i class="fas fa-link"></i></a>页表机制</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713215307.png"  alt="" />
+      </p>
+
+        <h2 id="缺页中断机构"   >
+          <a href="#缺页中断机构" class="heading-link"><i class="fas fa-link"></i></a>缺页中断机构</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713215437.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713215540.png"  alt="" />
+      </p>
+
+        <h2 id="地址变换机构"   >
+          <a href="#地址变换机构" class="heading-link"><i class="fas fa-link"></i></a>地址变换机构</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713220043.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713220129.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/WX20200713-2209381.png"  alt="" />
+      </p>
+<blockquote>
+<p>关于第5点</p>
+<p>在具有快表机构的请求分页系统中，访问一个逻辑地址时，若发生缺页，则地址变换步骤是： 查快表(未命中)——查慢表(发现未调入内存)——调页(调入的页面对应的表项会直接加入快表)——查快表(命中)——访问目标内存单元</p>
+</blockquote>
+
+        <h2 id="小结-2"   >
+          <a href="#小结-2" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713221257.png"  alt="" />
+      </p>
+
+        <h1 id="页面置换算法"   >
+          <a href="#页面置换算法" class="heading-link"><i class="fas fa-link"></i></a>页面置换算法</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713230229.png"  alt="" />
+      </p>
+
+        <h2 id="最佳置换算法opt"   >
+          <a href="#最佳置换算法opt" class="heading-link"><i class="fas fa-link"></i></a>最佳置换算法(OPT)</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713230559.png"  alt="" />
+      </p>
+<blockquote>
+<p>最佳置换算法可以保证最低的缺页率，但实际上，只有在进程执行的过程中才能知道接下来会访问到的是哪个页面。操作系统无法提前预判页面访问序列。因此，最佳置换算法是无法实现的。</p>
+</blockquote>
+
+        <h2 id="先进先出算法fifo"   >
+          <a href="#先进先出算法fifo" class="heading-link"><i class="fas fa-link"></i></a>先进先出算法(FIFO)</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713230938.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713231003.png"  alt="" />
+      </p>
+
+        <h2 id="最近最久未使用置换算法lru"   >
+          <a href="#最近最久未使用置换算法lru" class="heading-link"><i class="fas fa-link"></i></a>最近最久未使用置换算法(LRU)</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713231249.png"  alt="" />
+      </p>
+<blockquote>
+<p>LRU淘汰的是最早被使用的Cache，算法可以分为两种实现：</p>
+<p><strong>A.时间戳</strong></p>
+<p>硬件记录最近一次访问时间，每次淘汰遍历求最早访问的Cache。</p>
+<p><strong>B.链表</strong></p>
+<blockquote>
+<p>Algorithm 4th：著名的前移编码策略，假设最近访问过的元素很有可能再次访问,因此可以用于缓存、数据压缩等许多场景。</p>
+</blockquote>
+<p>这里将所有可能被淘汰的Cache用一张线性链表存储，当查询时，<strong>每次被查询到的Cache节点将会被移除出链表并且插入表头</strong>。如此一来，链表头将会是最新被访问的数据，而链表尾则会被淘汰。</p>
+<p>这样一来，淘汰最早访问的Cache则非常方便，代价则是需要<strong>链表的结构是可修改的</strong>。</p>
+<p>在硬件层，这两种实现都具有巨大的开销，因此难以用于实践。</p>
+</blockquote>
+
+        <h2 id="时钟置换算法clock"   >
+          <a href="#时钟置换算法clock" class="heading-link"><i class="fas fa-link"></i></a>时钟置换算法(CLOCK)</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713231526.png"  alt="" />
+      </p>
+<blockquote>
+<p>LRU-&gt;NRU: 对于Cache来说，能找到最早访问的固然好，但是宽容一点，不是最早，但是也很早被访问的被淘汰问题也不大，只要<strong>不淘汰最近被访问的破坏locality</strong>就好了。而这种近似，是必然存在的对现实的妥协，也是工业界必不可少的生存智慧。</p>
+</blockquote>
+
+        <h2 id="改进型的时钟置换算法"   >
+          <a href="#改进型的时钟置换算法" class="heading-link"><i class="fas fa-link"></i></a>改进型的时钟置换算法</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713232042.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713232111.png"  alt="" />
+      </p>
+<blockquote>
+<p>需要扫描4轮的只有一种情况， 都是(1, 1)</p>
+</blockquote>
+
+        <h2 id="小结-3"   >
+          <a href="#小结-3" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713232349.png"  alt="" />
+      </p>
+
+        <h1 id="页面分配策略"   >
+          <a href="#页面分配策略" class="heading-link"><i class="fas fa-link"></i></a>页面分配策略</h1>
+      
+
+        <h2 id="驻留集"   >
+          <a href="#驻留集" class="heading-link"><i class="fas fa-link"></i></a>驻留集</h2>
+      
+<p>指请求分页存储管理中给进程分配的<strong>物理块的集合</strong>。 在采用了虚拟存储工作的系统中，驻留集大小一般小于进程的总大小。</p>
+<p>若驻留集太小，会导致缺页频繁，系统要花大量的时间来处理缺页，实际用于进程推进的时间很少；</p>
+<p>驻留集太大，又会导致多道程序并发度下降，资源利用率降低。所以应该选择一个合适的驻留集大小。</p>
+
+        <h2 id="页面分配-置换策略"   >
+          <a href="#页面分配-置换策略" class="heading-link"><i class="fas fa-link"></i></a>页面分配、置换策略</h2>
+      
+<p><strong>固定分配</strong>：操作系统为每个进程分配一组固定数目的物理块，在进程运行期间不再改变。即，驻留集<strong>大小不变</strong></p>
+<p><strong>可变分配</strong>：先为每个进程分配一定数目的物理块，在进程运行期间，可根据情况做适当的增加或减少。 即，<strong>驻留集大小可变</strong></p>
+<p><strong>局部置换</strong>：发生缺页时只能选进程自己的物理块进行置换。</p>
+<p><strong>全局置换</strong>：可以将操作系统保留的空闲物理块分配给缺页进程，也可以将别的进程持有的物理块置换到外存，再分配给缺页进程。</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th></th>
+<th>局部置换</th>
+<th>全局置换</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>固定分配</td>
+<td>√</td>
+<td>-</td>
+</tr>
+<tr>
+<td>可变分配</td>
+<td>√</td>
+<td>√</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>全局置换意味着一个进程拥有的物理块数量必然会改变，因此不可能是固定分配</p>
+</blockquote>
+
+        <h3 id="固定分配局部置换"   >
+          <a href="#固定分配局部置换" class="heading-link"><i class="fas fa-link"></i></a>固定分配局部置换</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235602.png"  alt="" />
+      </p>
+
+        <h3 id="可变分配全局置换"   >
+          <a href="#可变分配全局置换" class="heading-link"><i class="fas fa-link"></i></a>可变分配全局置换</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235616.png"  alt="" />
+      </p>
+<blockquote>
+<p>系统会锁定一些页面，这些页面中的内容不能置换出外存（如：重要的内核数据可以设为“锁定”)</p>
+</blockquote>
+
+        <h3 id="可变分配局部置换"   >
+          <a href="#可变分配局部置换" class="heading-link"><i class="fas fa-link"></i></a>可变分配局部置换</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235810.png"  alt="" />
+      </p>
+
+        <h2 id="调入页面的时机"   >
+          <a href="#调入页面的时机" class="heading-link"><i class="fas fa-link"></i></a>调入页面的时机</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200713235929.png"  alt="" />
+      </p>
+
+        <h2 id="从何处调页"   >
+          <a href="#从何处调页" class="heading-link"><i class="fas fa-link"></i></a>从何处调页</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000016.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000043.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000104.png"  alt="" />
+      </p>
+
+        <h2 id="抖动颠簸现象"   >
+          <a href="#抖动颠簸现象" class="heading-link"><i class="fas fa-link"></i></a>抖动(颠簸)现象</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000144.png"  alt="" />
+      </p>
+
+        <h2 id="工作集"   >
+          <a href="#工作集" class="heading-link"><i class="fas fa-link"></i></a>工作集</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000235.png"  alt="" />
+      </p>
+
+        <h2 id="小结-4"   >
+          <a href="#小结-4" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200714000314.png"  alt="" />
+      </p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/9.%20%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/9.%20%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AEMESI/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">Cache一致性协议MESI</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/11.%20%E7%A3%81%E7%9B%98%E7%BB%84%E7%BB%87%E4%B8%8E%E7%AE%A1%E7%90%86/"><span class="paginator-prev__text">磁盘组织与管理</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#虚拟内存的基本概念"><span class="toc-number">1.</span> <span class="toc-text">
+          虚拟内存的基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传统存储管理方式的特征-缺点"><span class="toc-number">1.1.</span> <span class="toc-text">
+          传统存储管理方式的特征、缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#局部性原理"><span class="toc-number">1.2.</span> <span class="toc-text">
+          局部性原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚拟内存的定义和特征"><span class="toc-number">1.3.</span> <span class="toc-text">
+          虚拟内存的定义和特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何实现虚拟内存工作"><span class="toc-number">1.4.</span> <span class="toc-text">
+          如何实现虚拟内存工作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.5.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#请求分页管理方式"><span class="toc-number">2.</span> <span class="toc-text">
+          请求分页管理方式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#页表机制"><span class="toc-number">2.1.</span> <span class="toc-text">
+          页表机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缺页中断机构"><span class="toc-number">2.2.</span> <span class="toc-text">
+          缺页中断机构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#地址变换机构"><span class="toc-number">2.3.</span> <span class="toc-text">
+          地址变换机构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-2"><span class="toc-number">2.4.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#页面置换算法"><span class="toc-number">3.</span> <span class="toc-text">
+          页面置换算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#最佳置换算法opt"><span class="toc-number">3.1.</span> <span class="toc-text">
+          最佳置换算法(OPT)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#先进先出算法fifo"><span class="toc-number">3.2.</span> <span class="toc-text">
+          先进先出算法(FIFO)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最近最久未使用置换算法lru"><span class="toc-number">3.3.</span> <span class="toc-text">
+          最近最久未使用置换算法(LRU)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#时钟置换算法clock"><span class="toc-number">3.4.</span> <span class="toc-text">
+          时钟置换算法(CLOCK)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改进型的时钟置换算法"><span class="toc-number">3.5.</span> <span class="toc-text">
+          改进型的时钟置换算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-3"><span class="toc-number">3.6.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#页面分配策略"><span class="toc-number">4.</span> <span class="toc-text">
+          页面分配策略</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#驻留集"><span class="toc-number">4.1.</span> <span class="toc-text">
+          驻留集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#页面分配-置换策略"><span class="toc-number">4.2.</span> <span class="toc-text">
+          页面分配、置换策略</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#固定分配局部置换"><span class="toc-number">4.2.1.</span> <span class="toc-text">
+          固定分配局部置换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#可变分配全局置换"><span class="toc-number">4.2.2.</span> <span class="toc-text">
+          可变分配全局置换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#可变分配局部置换"><span class="toc-number">4.2.3.</span> <span class="toc-text">
+          可变分配局部置换</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#调入页面的时机"><span class="toc-number">4.3.</span> <span class="toc-text">
+          调入页面的时机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从何处调页"><span class="toc-number">4.4.</span> <span class="toc-text">
+          从何处调页</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#抖动颠簸现象"><span class="toc-number">4.5.</span> <span class="toc-text">
+          抖动(颠簸)现象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#工作集"><span class="toc-number">4.6.</span> <span class="toc-text">
+          工作集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-4"><span class="toc-number">4.7.</span> <span class="toc-text">
+          小结</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

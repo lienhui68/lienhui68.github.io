@@ -1,0 +1,574 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="转载：通信工具类 JDK中提供了一些工具类以供开发者使用。这样的话我们在遇到一些常见的应用场景时就可以使用这些工具类，而不用自己再重复造轮子了。 它们都在java.util.concurrent包下。先总体概括一下都有哪些工具类，它们有什么作用，然后再分别介绍它们的主要使用方法和原理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="通信工具类">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E9%80%9A%E4%BF%A1%E5%B7%A5%E5%85%B7%E7%B1%BB/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="转载：通信工具类 JDK中提供了一些工具类以供开发者使用。这样的话我们在遇到一些常见的应用场景时就可以使用这些工具类，而不用自己再重复造轮子了。 它们都在java.util.concurrent包下。先总体概括一下都有哪些工具类，它们有什么作用，然后再分别介绍它们的主要使用方法和原理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-16T16:22:28.406Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.410Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="并发编程">
+<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>通信工具类 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E9%80%9A%E4%BF%A1%E5%B7%A5%E5%85%B7%E7%B1%BB/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">通信工具类</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">32分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>转载：<span class="exturl"><a class="exturl__link"   href="http://concurrent.redspider.group/article/03/17.html"  target="_blank" rel="noopener">通信工具类</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>JDK中提供了一些工具类以供开发者使用。这样的话我们在遇到一些常见的应用场景时就可以使用这些工具类，而不用自己再重复造轮子了。</p>
+<p>它们都在java.util.concurrent包下。先总体概括一下都有哪些工具类，它们有什么作用，然后再分别介绍它们的主要使用方法和原理。</p>
+<a id="more"></a>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>类</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Semaphore</td>
+<td>限制线程的数量</td>
+</tr>
+<tr>
+<td>Exchanger</td>
+<td>两个线程交换数据</td>
+</tr>
+<tr>
+<td>CountDownLatch</td>
+<td>线程等待直到计数器减为0时开始工作</td>
+</tr>
+<tr>
+<td>CyclicBarrier</td>
+<td>作用跟CountDownLatch类似，但是可以重复使用</td>
+</tr>
+<tr>
+<td>Phaser</td>
+<td>增强的CyclicBarrier</td>
+</tr>
+</tbody>
+</table></div>
+<p>下面分别介绍这几个类。</p>
+
+        <h1 id="semaphore"   >
+          <a href="#semaphore" class="heading-link"><i class="fas fa-link"></i></a>Semaphore</h1>
+      
+
+        <h2 id="semaphore介绍"   >
+          <a href="#semaphore介绍" class="heading-link"><i class="fas fa-link"></i></a>Semaphore介绍</h2>
+      
+<p>Semaphore翻译过来是信号的意思。顾名思义，这个工具类提供的功能就是多个线程彼此“打信号”。而这个“信号”是一个<code>int</code>类型的数据，也可以看成是一种“资源”。</p>
+<p>可以在构造函数中传入初始资源总数，以及是否使用“公平”的同步器。默认情况下，是非公平的。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 默认情况下使用非公平</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Semaphore</span><span class="params">(<span class="keyword">int</span> permits)</span> </span>&#123;</span><br><span class="line">    sync = <span class="keyword">new</span> NonfairSync(permits);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Semaphore</span><span class="params">(<span class="keyword">int</span> permits, <span class="keyword">boolean</span> fair)</span> </span>&#123;</span><br><span class="line">    sync = fair ? <span class="keyword">new</span> FairSync(permits) : <span class="keyword">new</span> NonfairSync(permits);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>最主要的方法是acquire方法和release方法。acquire()方法会申请一个permit，而release方法会释放一个permit。当然，你也可以申请多个acquire(int permits)或者释放多个release(int permits)。</p>
+<p>每次acquire，permits就会减少一个或者多个。如果减少到了0，再有其他线程来acquire，那就要阻塞这个线程直到有其它线程release permit为止。</p>
+
+        <h2 id="semaphore案例"   >
+          <a href="#semaphore案例" class="heading-link"><i class="fas fa-link"></i></a>Semaphore案例</h2>
+      
+<p>Semaphore往往用于资源有限的场景中，去限制线程的数量。举个例子，我想限制同时只能有3个线程在工作：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SemaphoreDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> value;</span><br><span class="line">        <span class="keyword">private</span> Semaphore semaphore;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">MyThread</span><span class="params">(<span class="keyword">int</span> value, Semaphore semaphore)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.value = value;</span><br><span class="line">            <span class="keyword">this</span>.semaphore = semaphore;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                semaphore.acquire(); <span class="comment">// 获取permit</span></span><br><span class="line">                System.out.println(String.format(<span class="string">"当前线程是%d, 还剩%d个资源，还有%d个线程在等待"</span>,</span><br><span class="line">                        value, semaphore.availablePermits(), semaphore.getQueueLength()));</span><br><span class="line">                <span class="comment">// 睡眠随机时间，打乱释放顺序</span></span><br><span class="line">                Random random =<span class="keyword">new</span> Random();</span><br><span class="line">                Thread.sleep(random.nextInt(<span class="number">1000</span>));</span><br><span class="line">                System.out.println(String.format(<span class="string">"线程%d释放了资源"</span>, value));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125; <span class="keyword">finally</span>&#123;</span><br><span class="line">                semaphore.release(); <span class="comment">// 释放permit</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Semaphore semaphore = <span class="keyword">new</span> Semaphore(<span class="number">3</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyThread(i, semaphore)).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>输出：</p>
+<blockquote>
+<p>当前线程是1, 还剩2个资源，还有0个线程在等待<br />
+当前线程是0, 还剩1个资源，还有0个线程在等待<br />
+当前线程是6, 还剩0个资源，还有0个线程在等待<br />
+线程6释放了资源<br />
+当前线程是2, 还剩0个资源，还有6个线程在等待<br />
+线程2释放了资源<br />
+当前线程是4, 还剩0个资源，还有5个线程在等待<br />
+线程0释放了资源<br />
+当前线程是7, 还剩0个资源，还有4个线程在等待<br />
+线程1释放了资源<br />
+当前线程是8, 还剩0个资源，还有3个线程在等待<br />
+线程7释放了资源<br />
+当前线程是5, 还剩0个资源，还有2个线程在等待<br />
+线程4释放了资源<br />
+当前线程是3, 还剩0个资源，还有1个线程在等待<br />
+线程8释放了资源<br />
+当前线程是9, 还剩0个资源，还有0个线程在等待<br />
+线程9释放了资源<br />
+线程5释放了资源<br />
+线程3释放了资源</p>
+</blockquote>
+<p>可以看到，在这次运行中，最开始是1, 0, 6这三个线程获得了资源，而其它线程进入了等待队列。然后当某个线程释放资源后，就会有等待队列中的线程获得资源。</p>
+<p>当然，Semaphore默认的acquire方法是会让线程进入等待队列，且会抛出中断异常。但它还有一些方法可以忽略中断或不进入阻塞队列：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 忽略中断</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquireUninterruptibly</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acquireUninterruptibly</span><span class="params">(<span class="keyword">int</span> permits)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">// 不进入等待队列，底层使用CAS</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> tryAcquire</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> permits)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">int</span> permits, <span class="keyword">long</span> timeout, TimeUnit unit)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> InterruptedException</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span></span></span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="semaphore原理"   >
+          <a href="#semaphore原理" class="heading-link"><i class="fas fa-link"></i></a>Semaphore原理</h2>
+      
+<p>Semaphore内部有一个继承了AQS的同步器Sync，重写了<code>tryAcquireShared</code>方法。在这个方法里，会去尝试获取资源。</p>
+<p>如果获取失败（想要的资源数量小于目前已有的资源数量），就会返回一个负数（代表尝试获取资源失败）。然后当前线程就会进入AQS的等待队列。</p>
+
+        <h1 id="exchanger"   >
+          <a href="#exchanger" class="heading-link"><i class="fas fa-link"></i></a>Exchanger</h1>
+      
+<p>Exchanger类用于两个线程交换数据。它支持泛型，也就是说你可以在两个线程之间传送任何数据。先来一个案例看看如何使用，比如两个线程之间想要传送字符串：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExchangerDemo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Exchanger&lt;String&gt; exchanger = <span class="keyword">new</span> Exchanger&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"这是线程A，得到了另一个线程的数据："</span></span><br><span class="line">                        + exchanger.exchange(<span class="string">"这是来自线程A的数据"</span>));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"这个时候线程A是阻塞的，在等待线程B的数据"</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"这是线程B，得到了另一个线程的数据："</span></span><br><span class="line">                        + exchanger.exchange(<span class="string">"这是来自线程B的数据"</span>));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>输出：</p>
+<blockquote>
+<p>这个时候线程A是阻塞的，在等待线程B的数据<br />
+这是线程B，得到了另一个线程的数据：这是来自线程A的数据<br />
+这是线程A，得到了另一个线程的数据：这是来自线程B的数据</p>
+</blockquote>
+<p>可以看到，当一个线程调用exchange方法后，它是处于阻塞状态的，只有当另一个线程也调用了exchange方法，它才会继续向下执行。看源码可以发现它是使用park/unpark来实现等待状态的切换的，但是在使用park/unpark方法之前，使用了CAS检查，估计是为了提高性能。</p>
+<p>Exchanger一般用于两个线程之间更方便地在内存中交换数据，因为其支持泛型，所以我们可以传输任何的数据，比如IO流或者IO缓存。根据JDK里面的注释的说法，可以总结为一下特性：</p>
+<ul>
+<li>此类提供对外的操作是同步的；</li>
+<li>用于成对出现的线程之间交换数据；</li>
+<li>可以视作双向的同步队列；</li>
+<li>可应用于基因算法、流水线设计等场景。</li>
+</ul>
+<p>Exchanger类还有一个有超时参数的方法，如果在指定时间内没有另一个线程调用exchange，就会抛出一个超时异常。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">exchange</span><span class="params">(V x, <span class="keyword">long</span> timeout, TimeUnit unit)</span></span></span><br></pre></td></tr></table></div></figure>
+<p>那么问题来了，Exchanger只能是两个线程交换数据吗？那三个调用同一个实例的exchange方法会发生什么呢？答案是只有前两个线程会交换数据，第三个线程会进入阻塞状态。</p>
+<p>需要注意的是，exchange是可以重复使用的。也就是说。两个线程可以使用Exchanger在内存中不断地再交换数据。</p>
+
+        <h1 id="countdownlatch"   >
+          <a href="#countdownlatch" class="heading-link"><i class="fas fa-link"></i></a>CountDownLatch</h1>
+      
+
+        <h2 id="countdownlatch介绍"   >
+          <a href="#countdownlatch介绍" class="heading-link"><i class="fas fa-link"></i></a>CountDownLatch介绍</h2>
+      
+<p>先来解读一下CountDownLatch这个类名字的意义。CountDown代表计数递减，Latch是“门闩”的意思。也有人把它称为“屏障”。而CountDownLatch这个类的作用也很贴合这个名字的意义，假设某个线程在执行任务之前，需要等待其它线程完成一些前置任务，必须等所有的前置任务都完成，才能开始执行本线程的任务。</p>
+<p>CountDownLatch的方法也很简单，如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 构造方法：</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CountDownLatch</span><span class="params">(<span class="keyword">int</span> count)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="comment">// 等待</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="comment">// 超时等待</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">countDown</span><span class="params">()</span> <span class="comment">// count - 1</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getCount</span><span class="params">()</span> <span class="comment">// 获取当前还有多少count</span></span></span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="countdownlatch案例"   >
+          <a href="#countdownlatch案例" class="heading-link"><i class="fas fa-link"></i></a>CountDownLatch案例</h2>
+      
+<p>我们知道，玩游戏的时候，在游戏真正开始之前，一般会等待一些前置任务完成，比如“加载地图数据”，“加载人物模型”，“加载背景音乐”等等。只有当所有的东西都加载完成后，玩家才能真正进入游戏。下面我们就来模拟一下这个demo。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CountDownLatchDemo</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 定义前置任务线程</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">PreTaskThread</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> String task;</span><br><span class="line">        <span class="keyword">private</span> CountDownLatch countDownLatch;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">PreTaskThread</span><span class="params">(String task, CountDownLatch countDownLatch)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.task = task;</span><br><span class="line">            <span class="keyword">this</span>.countDownLatch = countDownLatch;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Random random = <span class="keyword">new</span> Random();</span><br><span class="line">                Thread.sleep(random.nextInt(<span class="number">1000</span>));</span><br><span class="line">                System.out.println(task + <span class="string">" - 任务完成"</span>);</span><br><span class="line">                countDownLatch.countDown();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 假设有三个模块需要加载</span></span><br><span class="line">        CountDownLatch countDownLatch = <span class="keyword">new</span> CountDownLatch(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 主任务</span></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"等待数据加载..."</span>);</span><br><span class="line">                System.out.println(String.format(<span class="string">"还有%d个前置任务"</span>, countDownLatch.getCount()));</span><br><span class="line">                countDownLatch.await();</span><br><span class="line">                System.out.println(<span class="string">"数据加载完成，正式开始游戏！"</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 前置任务</span></span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载地图数据"</span>, countDownLatch)).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载人物模型"</span>, countDownLatch)).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载背景音乐"</span>, countDownLatch)).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>输出：</p>
+<blockquote>
+<p>等待数据加载…<br />
+还有3个前置任务<br />
+加载人物模型 - 任务完成<br />
+加载背景音乐 - 任务完成<br />
+加载地图数据 - 任务完成<br />
+数据加载完成，正式开始游戏！</p>
+</blockquote>
+
+        <h2 id="countdownlatch原理"   >
+          <a href="#countdownlatch原理" class="heading-link"><i class="fas fa-link"></i></a>CountDownLatch原理</h2>
+      
+<p>其实CountDownLatch类的原理挺简单的，内部同样是一个基层了AQS的实现类Sync，且实现起来还很简单，可能是JDK里面AQS的子类中最简单的实现了，有兴趣的读者可以去看看这个内部类的源码。</p>
+<p>需要注意的是构造器中的<strong>计数值（count）实际上就是闭锁需要等待的线程数量</strong>。这个值只能被设置一次，而且CountDownLatch<strong>没有提供任何机制去重新设置这个计数值</strong>。</p>
+
+        <h1 id="cyclicbarrier"   >
+          <a href="#cyclicbarrier" class="heading-link"><i class="fas fa-link"></i></a>CyclicBarrier</h1>
+      
+
+        <h2 id="cyclicbarrier介绍"   >
+          <a href="#cyclicbarrier介绍" class="heading-link"><i class="fas fa-link"></i></a>CyclicBarrier介绍</h2>
+      
+<p>CyclicBarrirer从名字上来理解是“循环的屏障”的意思。前面提到了CountDownLatch一旦计数值<code>count</code>被降为0后，就不能再重新设置了，它只能起一次“屏障”的作用。而CyclicBarrier拥有CountDownLatch的所有功能，还可以使用<code>reset()</code>方法重置屏障。</p>
+
+        <h2 id="cyclicbarrier-barrier被破坏"   >
+          <a href="#cyclicbarrier-barrier被破坏" class="heading-link"><i class="fas fa-link"></i></a>CyclicBarrier Barrier被破坏</h2>
+      
+<p>如果在参与者（线程）在等待的过程中，Barrier被破坏，就会抛出BrokenBarrierException。可以用<code>isBroken()</code>方法检测Barrier是否被破坏。</p>
+<ol>
+<li>如果有线程已经处于等待状态，调用reset方法会导致已经在等待的线程出现BrokenBarrierException异常。并且由于出现了BrokenBarrierException，将会导致始终无法等待。</li>
+<li>如果在等待的过程中，线程被中断，也会抛出BrokenBarrierException异常，并且这个异常会传播到其他所有的线程。</li>
+<li>如果在执行屏障操作过程中发生异常，则该异常将传播到当前线程中，其他线程会抛出BrokenBarrierException，屏障被损坏。</li>
+<li>如果超出指定的等待时间，当前线程会抛出 TimeoutException 异常，其他线程会抛出BrokenBarrierException异常。</li>
+</ol>
+
+        <h2 id="cyclicbarrier案例"   >
+          <a href="#cyclicbarrier案例" class="heading-link"><i class="fas fa-link"></i></a>CyclicBarrier案例</h2>
+      
+<p>我们同样用玩游戏的例子。如果玩一个游戏有多个“关卡”，那使用CountDownLatch显然不太合适，那需要为每个关卡都创建一个实例。那我们可以使用CyclicBarrier来实现每个关卡的数据加载等待功能。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CyclicBarrierDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">PreTaskThread</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> String task;</span><br><span class="line">        <span class="keyword">private</span> CyclicBarrier cyclicBarrier;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">PreTaskThread</span><span class="params">(String task, CyclicBarrier cyclicBarrier)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.task = task;</span><br><span class="line">            <span class="keyword">this</span>.cyclicBarrier = cyclicBarrier;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="comment">// 假设总共三个关卡</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; <span class="number">4</span>; i++) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Random random = <span class="keyword">new</span> Random();</span><br><span class="line">                    Thread.sleep(random.nextInt(<span class="number">1000</span>));</span><br><span class="line">                    System.out.println(String.format(<span class="string">"关卡%d的任务%s完成"</span>, i, task));</span><br><span class="line">                    cyclicBarrier.await();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException | BrokenBarrierException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                cyclicBarrier.reset(); <span class="comment">// 重置屏障</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        CyclicBarrier cyclicBarrier = <span class="keyword">new</span> CyclicBarrier(<span class="number">3</span>, () -&gt; &#123;</span><br><span class="line">            System.out.println(<span class="string">"本关卡所有前置任务完成，开始游戏..."</span>);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载地图数据"</span>, cyclicBarrier)).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载人物模型"</span>, cyclicBarrier)).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载背景音乐"</span>, cyclicBarrier)).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>输出：</p>
+<blockquote>
+<p>关卡1的任务加载地图数据完成<br />
+关卡1的任务加载背景音乐完成<br />
+关卡1的任务加载人物模型完成<br />
+本关卡所有前置任务完成，开始游戏…<br />
+关卡2的任务加载地图数据完成<br />
+关卡2的任务加载背景音乐完成<br />
+关卡2的任务加载人物模型完成<br />
+本关卡所有前置任务完成，开始游戏…<br />
+关卡3的任务加载人物模型完成<br />
+关卡3的任务加载地图数据完成<br />
+关卡3的任务加载背景音乐完成<br />
+本关卡所有前置任务完成，开始游戏…</p>
+</blockquote>
+<p>注意这里跟CountDownLatch的代码有一些不同。CyclicBarrier没有分为<code>await()</code>和<code>countDown()</code>，而是只有单独的一个<code>await()</code>方法。</p>
+<p>一旦调用await()方法的线程数量等于构造方法中传入的任务总量（这里是3），就代表达到屏障了。CyclicBarrier允许我们在达到屏障的时候可以执行一个任务，可以在构造方法传入一个Runnable类型的对象。上述案例就是在达到屏障时，输出“本关卡所有前置任务完成，开始游戏…”。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 构造方法</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CyclicBarrier</span><span class="params">(<span class="keyword">int</span> parties)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(parties, <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CyclicBarrier</span><span class="params">(<span class="keyword">int</span> parties, Runnable barrierAction)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 具体实现</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="cyclicbarrier原理"   >
+          <a href="#cyclicbarrier原理" class="heading-link"><i class="fas fa-link"></i></a>CyclicBarrier原理</h2>
+      
+<p>CyclicBarrier虽说功能与CountDownLatch类似，但是实现原理却完全不同，CyclicBarrier内部使用的是Lock + Condition实现的等待/通知模式。详情可以查看这个方法的源码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">dowait</span><span class="params">(<span class="keyword">boolean</span> timed, <span class="keyword">long</span> nanos)</span></span></span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="phaser"   >
+          <a href="#phaser" class="heading-link"><i class="fas fa-link"></i></a>Phaser</h1>
+      
+
+        <h2 id="phaser介绍"   >
+          <a href="#phaser介绍" class="heading-link"><i class="fas fa-link"></i></a>Phaser介绍</h2>
+      
+<p>Phaser这个单词是“移相器，相位器”的意思（好吧，笔者并不懂这是什么玩意，下方资料来自百度百科）。这个类是从JDK 1.7 中出现的。</p>
+<blockquote>
+<p>移相器（Phaser）能够对波的相位进行调整的一种装置。任何传输介质对在其中传导的波动都会引入相移，这是早期模拟移相器的原理；现代电子工作发展后利用A/D、D/A转换实现了数字移相，顾名思义，它是一种不连续的移相工作，但特点是移相精度高。 移相器在雷达、导弹姿态控制、加速器、通信、仪器仪表甚至于音乐等领域都有着广泛的应用</p>
+</blockquote>
+<p>Phaser类有点复杂，这里只介绍一些基本的用法和知识点。详情可以查看JDK文档，文档里有这个类非常详尽的介绍。</p>
+<p>前面我们介绍了CyclicBarrier，可以发现它在构造方法里传入“任务总量”<code>parties</code>之后，就不能修改这个值了，并且每次调用<code>await()</code>方法也只能消耗一个<code>parties</code>计数。但Phaser可以动态地调整任务总量！</p>
+<p>名词解释：</p>
+<ul>
+<li>party：对应一个线程，数量可以通过register或者构造参数传入;</li>
+<li>arrive：对应一个party的状态，初始时是unarrived，当调用<code>arriveAndAwaitAdvance()</code>或者 <code>arriveAndDeregister()</code>进入arrive状态，可以通过<code>getUnarrivedParties()</code>获取当前未到达的数量;</li>
+<li>register：注册一个party，每一阶段必须所有注册的party都到达才能进入下一阶段;</li>
+<li>deRegister：减少一个party。</li>
+<li>phase：阶段，当所有注册的party都arrive之后，将会调用Phaser的<code>onAdvance()</code>方法来判断是否要进入下一阶段。</li>
+</ul>
+<p>Phaser终止的两种途径，Phaser维护的线程执行完毕或者<code>onAdvance()</code>返回<code>true</code> 此外Phaser还能维护一个树状的层级关系，构造的时候new Phaser(parentPhaser)，对于Task执行时间短的场景（竞争激烈），也就是说有大量的<strong>party</strong>, 那可以把每个Phaser的任务量设置较小，多个Phaser共同继承一个父Phaser。</p>
+<blockquote>
+<p>Phasers with large numbers of parties that would otherwise experience heavy synchronization contention costs may instead be set up so that groups of sub-phasers share a common parent. This may greatly increase throughput even though it incurs greater per-operation overhead.</p>
+<p>翻译：如果有大量的party，那许多线程可能同步的竞争成本比较高。所以可以拆分成多个子Phaser共享一个共同的父Phaser。这可能会大大增加吞吐量，即使它会带来更多的每次操作开销。</p>
+</blockquote>
+
+        <h2 id="phaser案例"   >
+          <a href="#phaser案例" class="heading-link"><i class="fas fa-link"></i></a>Phaser案例</h2>
+      
+<p>还是游戏的案例。假设我们游戏有三个关卡，但只有第一个关卡有新手教程，需要加载新手教程模块。但后面的第二个关卡和第三个关卡都不需要。我们可以用Phaser来做这个需求。</p>
+<p>代码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PhaserDemo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">PreTaskThread</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> String task;</span><br><span class="line">        <span class="keyword">private</span> Phaser phaser;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">PreTaskThread</span><span class="params">(String task, Phaser phaser)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.task = task;</span><br><span class="line">            <span class="keyword">this</span>.phaser = phaser;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; <span class="number">4</span>; i++) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 第二次关卡起不加载NPC，跳过</span></span><br><span class="line">                    <span class="keyword">if</span> (i &gt;= <span class="number">2</span> &amp;&amp; <span class="string">"加载新手教程"</span>.equals(task)) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    Random random = <span class="keyword">new</span> Random();</span><br><span class="line">                    Thread.sleep(random.nextInt(<span class="number">1000</span>));</span><br><span class="line">                    System.out.println(String.format(<span class="string">"关卡%d，需要加载%d个模块，当前模块【%s】"</span>,</span><br><span class="line">                            i, phaser.getRegisteredParties(), task));</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// 从第二个关卡起，不加载NPC</span></span><br><span class="line">                    <span class="keyword">if</span> (i == <span class="number">1</span> &amp;&amp; <span class="string">"加载新手教程"</span>.equals(task)) &#123;</span><br><span class="line">                        System.out.println(<span class="string">"下次关卡移除加载【新手教程】模块"</span>);</span><br><span class="line">                        phaser.arriveAndDeregister(); <span class="comment">// 移除一个模块</span></span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        phaser.arriveAndAwaitAdvance();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Phaser phaser = <span class="keyword">new</span> Phaser(<span class="number">4</span>) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">onAdvance</span><span class="params">(<span class="keyword">int</span> phase, <span class="keyword">int</span> registeredParties)</span> </span>&#123;</span><br><span class="line">                System.out.println(String.format(<span class="string">"第%d次关卡准备完成"</span>, phase + <span class="number">1</span>));</span><br><span class="line">                <span class="keyword">return</span> phase == <span class="number">3</span> || registeredParties == <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载地图数据"</span>, phaser)).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载人物模型"</span>, phaser)).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载背景音乐"</span>, phaser)).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> PreTaskThread(<span class="string">"加载新手教程"</span>, phaser)).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>输出：</p>
+<blockquote>
+<p>关卡1，需要加载4个模块，当前模块【加载背景音乐】<br />
+关卡1，需要加载4个模块，当前模块【加载新手教程】<br />
+下次关卡移除加载【新手教程】模块<br />
+关卡1，需要加载3个模块，当前模块【加载地图数据】<br />
+关卡1，需要加载3个模块，当前模块【加载人物模型】<br />
+第1次关卡准备完成<br />
+关卡2，需要加载3个模块，当前模块【加载地图数据】<br />
+关卡2，需要加载3个模块，当前模块【加载背景音乐】<br />
+关卡2，需要加载3个模块，当前模块【加载人物模型】<br />
+第2次关卡准备完成<br />
+关卡3，需要加载3个模块，当前模块【加载人物模型】<br />
+关卡3，需要加载3个模块，当前模块【加载地图数据】<br />
+关卡3，需要加载3个模块，当前模块【加载背景音乐】<br />
+第3次关卡准备完成</p>
+</blockquote>
+<p>这里要注意关卡1的输出，在“加载新手教程”线程中调用了<code>arriveAndDeregister()</code>减少一个party之后，后面的线程使用<code>getRegisteredParties()</code>得到的是已经被修改后的parties了。但是当前这个阶段(phase)，仍然是需要4个parties都arrive才触发屏障的。从下一个阶段开始，才需要3个parties都arrive就触发屏障。</p>
+<p>另外Phaser类用来控制某个阶段的线程数量很有用，但它并在意这个阶段具体有哪些线程arrive，只要达到它当前阶段的parties值，就触发屏障。所以我这里的案例虽然制定了特定的线程（加载新手教程）来更直观地表述Phaser的功能，但是其实Phaser是没有分辨具体是哪个线程的功能的，它在意的只是数量，这一点需要读者注意。</p>
+
+        <h2 id="phaser原理"   >
+          <a href="#phaser原理" class="heading-link"><i class="fas fa-link"></i></a>Phaser原理</h2>
+      
+<p>Phaser类的原理相比起来要复杂得多。它内部使用了两个基于Fork-Join框架的原子类辅助：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AtomicReference&lt;QNode&gt; evenQ;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AtomicReference&lt;QNode&gt; oddQ;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">QNode</span> <span class="keyword">implements</span> <span class="title">ForkJoinPool</span>.<span class="title">ManagedBlocker</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 实现代码</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>有兴趣的读者可以去看看JDK源代码，这里不做过多叙述。</p>
+<p>总的来说，CountDownLatch，CyclicBarrier，Phaser是一个比一个强大，但也一个比一个复杂。根据自己的业务需求合理选择即可。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E9%80%9A%E4%BF%A1%E5%B7%A5%E5%85%B7%E7%B1%BB/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E9%80%9A%E4%BF%A1%E5%B7%A5%E5%85%B7%E7%B1%BB/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/AQS/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">AQS</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1/"><span class="paginator-prev__text">计划任务</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#semaphore"><span class="toc-number">1.</span> <span class="toc-text">
+          Semaphore</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#semaphore介绍"><span class="toc-number">1.1.</span> <span class="toc-text">
+          Semaphore介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#semaphore案例"><span class="toc-number">1.2.</span> <span class="toc-text">
+          Semaphore案例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#semaphore原理"><span class="toc-number">1.3.</span> <span class="toc-text">
+          Semaphore原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#exchanger"><span class="toc-number">2.</span> <span class="toc-text">
+          Exchanger</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#countdownlatch"><span class="toc-number">3.</span> <span class="toc-text">
+          CountDownLatch</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#countdownlatch介绍"><span class="toc-number">3.1.</span> <span class="toc-text">
+          CountDownLatch介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#countdownlatch案例"><span class="toc-number">3.2.</span> <span class="toc-text">
+          CountDownLatch案例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#countdownlatch原理"><span class="toc-number">3.3.</span> <span class="toc-text">
+          CountDownLatch原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cyclicbarrier"><span class="toc-number">4.</span> <span class="toc-text">
+          CyclicBarrier</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#cyclicbarrier介绍"><span class="toc-number">4.1.</span> <span class="toc-text">
+          CyclicBarrier介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cyclicbarrier-barrier被破坏"><span class="toc-number">4.2.</span> <span class="toc-text">
+          CyclicBarrier Barrier被破坏</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cyclicbarrier案例"><span class="toc-number">4.3.</span> <span class="toc-text">
+          CyclicBarrier案例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cyclicbarrier原理"><span class="toc-number">4.4.</span> <span class="toc-text">
+          CyclicBarrier原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#phaser"><span class="toc-number">5.</span> <span class="toc-text">
+          Phaser</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#phaser介绍"><span class="toc-number">5.1.</span> <span class="toc-text">
+          Phaser介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#phaser案例"><span class="toc-number">5.2.</span> <span class="toc-text">
+          Phaser案例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#phaser原理"><span class="toc-number">5.3.</span> <span class="toc-text">
+          Phaser原理</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

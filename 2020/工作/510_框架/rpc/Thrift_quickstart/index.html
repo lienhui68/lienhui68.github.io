@@ -1,0 +1,525 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="概述                            什么是thrift        简单来说，是Facebook公布的一款开源跨语言的RPC510_框架。 rpc510_框架                  RPC全称为Remote Procedure Call，意为远程过程调用。 假设有两台服务器A，B。A服务器上部署着一个应用a，B服务器上部署着一个应用b，现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thrift_quickstart">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Thrift_quickstart/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="概述                            什么是thrift        简单来说，是Facebook公布的一款开源跨语言的RPC510_框架。 rpc510_框架                  RPC全称为Remote Procedure Call，意为远程过程调用。 假设有两台服务器A，B。A服务器上部署着一个应用a，B服务器上部署着一个应用b，现">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915192640.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915143030.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915193300.png">
+<meta property="article:published_time" content="2020-09-16T16:23:28.329Z">
+<meta property="article:modified_time" content="2020-09-16T16:23:28.347Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="510_框架">
+<meta property="article:tag" content="rpc">
+<meta property="article:tag" content="thrift">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915192640.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Thrift_quickstart | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Thrift_quickstart/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Thrift_quickstart</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.9k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">18分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="概述"   >
+          <a href="#概述" class="heading-link"><i class="fas fa-link"></i></a>概述</h1>
+      
+
+        <h2 id="什么是thrift"   >
+          <a href="#什么是thrift" class="heading-link"><i class="fas fa-link"></i></a>什么是thrift</h2>
+      
+<p>简单来说，是Facebook公布的一款开源跨语言的RPC510_框架。</p>
+<p><strong>rpc510_框架</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915192640.png"  alt="" />
+      </p>
+<p>RPC全称为Remote Procedure Call，意为远程过程调用。</p>
+<p>假设有两台服务器A，B。A服务器上部署着一个应用a，B服务器上部署着一个应用b，现在a希望能够调用b应用的某个函数(方法)，但是二者不在同一个进程内，不能直接调用，就需要通过网络传输，在AB服务器之间建一条网络传输通道，a把参数传过去，b接收到参数调用自己的方法，得到结果，再通过网络传回给a，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>简单讲就是A通过网络来调用B的过程</span>。这个过程要涉及的东西很多，比如多线程，Socket，序列化反序列化，网络I/O，很复杂，于是牛掰的程序员把这些封装起来做成一套510_框架，供大家使用，就是RPC510_框架。</p>
+<a id="more"></a>
+<p><strong>跨语言</strong></p>
+<p>thrift通过一个中间语言IDL(接口定义语言)来定义RPC的数据类型和接口，这些内容写在以 <code>.thrift</code> 结尾的文件中，然后通过特殊的编译器来生成不同语言的代码，以满足不同需要的开发者，比如java开发者，就可以生成java代码，c<ins>开发者可以生成c</ins>代码，生成的代码中不但包含目标语言的<strong>接口定义</strong>，方法，数据类型，还包含有<strong>RPC协议层和传输层的实现代码</strong>。</p>
+<p><strong>thrift协议栈结构</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915143030.png"  alt="" />
+      </p>
+<p>thrift是一种c/s的架构体系。在最上层是用户自行实现的业务逻辑代码。</p>
+<p>第二层是由thrift编译器自动生成的代码，主要用于结构化数据的解析，发送和接收。<strong>TServer</strong>主要任务是高效的接受客户端请求，并将请求转发给<strong>Processor</strong>处理。<strong>Processor</strong>负责对客户端的请求做出响应，包括RPC请求转发，调用参数解析和用户逻辑调用，返回值写回等处理。</p>
+<p>从<strong>TProtocol</strong>以下部分是thirft的传输协议和底层I/O通信。T<strong>Protocol</strong>是用于数据类型解析的，将结构化数据转化为字节流给<strong>TTransport</strong>进行传输。<strong>TTransport</strong>是与底层数据传输密切相关的传输层，负责以字节流方式接收和发送消息体，不关注是什么数据类型。底层IO负责实际的数据传输，包括socket、文件和压缩数据流等。</p>
+
+        <h1 id="下载与安装"   >
+          <a href="#下载与安装" class="heading-link"><i class="fas fa-link"></i></a>下载与安装</h1>
+      
+<p>官网：<span class="exturl"><a class="exturl__link"   href="http://thrift.apache.org/"  target="_blank" rel="noopener">http://thrift.apache.org/</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> brew install thrift</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> thrift -version</span></span><br><span class="line">Thrift version 0.13.0</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="helloworld"   >
+          <a href="#helloworld" class="heading-link"><i class="fas fa-link"></i></a>HelloWorld</h1>
+      
+<ol>
+<li>
+<p>创建一个服务Hello，创建文件<code>Hello.thrift</code>，代码如下:</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">namespace java com.eh.eden.thrift</span><br><span class="line"></span><br><span class="line">service Hello&#123;</span><br><span class="line">    <span class="function">string <span class="title">helloString</span><span class="params">(<span class="number">1</span>:string para)</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></div></figure>
+<p>这里定义了一个名为helloString的方法,入参和返回值都是一个string类型的参数.</p>
+</li>
+<li>
+<p>终端进入<code>Hello.thrift</code>所在目录，执行命令:</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash">thrift -r -gen java Hello.thrift</span></span><br></pre></td></tr></table></div></figure>
+<p>发现在当前目录下多了一个gen-java的目录，进入到包路径对应的文件夹下，里面有一个Hello.java文件。这个java文件包含Hello服务的接口定义<strong>Hello.Iface</strong>，以及服务调用的底层通信细节，包括客户端的调用逻辑<strong>Hello.Client</strong>以及服务端的处理逻辑<strong>Hello.Processor</strong>。</p>
+</li>
+<li>
+<p>创建一个Maven管理的Java项目，pom.xml中添加相关的依赖，并将Hello.java文件复制到项目中:</p>
+<figure class="highlight xml"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.thrift<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>libthrift<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.12.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.slf4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>slf4j-log4j12<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.7.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>创建HelloServiceImpl实现Hello.Iface接口:</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.thrift;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.TException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceImpl</span> <span class="keyword">implements</span> <span class="title">Hello</span>.<span class="title">Iface</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">helloString</span><span class="params">(String para)</span> <span class="keyword">throws</span> TException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> para + <span class="string">", world."</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>创建服务端实现代码HelloServer，把HelloServiceImpl作为一个具体的处理器传递给Thrift服务器:</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.thrift;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.TProcessor;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.protocol.TBinaryProtocol;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.server.TServer;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.server.TSimpleServer;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.transport.TServerSocket;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.transport.TTransportException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// transport</span></span><br><span class="line">            TServerSocket serverTransport = <span class="keyword">new</span> TServerSocket(<span class="number">9898</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// processor</span></span><br><span class="line">            TProcessor tprocessor = <span class="keyword">new</span> Hello.Processor&lt;Hello.Iface&gt;(<span class="keyword">new</span> HelloServiceImpl());</span><br><span class="line">          </span><br><span class="line">          	<span class="comment">// 组装参数</span></span><br><span class="line">            TServer.Args tArgs = <span class="keyword">new</span> TServer.Args(serverTransport);</span><br><span class="line">            tArgs.processor(tprocessor)</span><br><span class="line">                    .protocolFactory(<span class="keyword">new</span> TBinaryProtocol.Factory()); <span class="comment">// 协议要与客户端一致</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// Server</span></span><br><span class="line">            TServer server = <span class="keyword">new</span> TSimpleServer(tArgs);</span><br><span class="line">            System.out.println(<span class="string">"服务端开启...."</span>);</span><br><span class="line">            server.serve();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (TTransportException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p><strong>服务端编码基本流程</strong>：</p>
+<ol>
+<li>
+<p><strong>创建TProcessor</strong></p>
+<p>Processor封装了从输入数据流中读数据和向数据流中写数据的操作，与服务相关的Processor是由编译器编译IDL文件产生的。它的主要工作是：从连接中读取数据，把处理交给用户实现impl，最后把结果写到连接上。</p>
+</li>
+<li>
+<p><strong>创建serverTransport</strong></p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>TServerSocket是ServerTransport的阻塞式IO的实现。它实现了监听端口的作用，accept到的Socket类型都是客户端的TSocket类型(阻塞式Socket)。</span></p>
+</li>
+<li>
+<p><strong>创建TProtocol</strong></p>
+<p>TProtocol定义了基本的协议信息，包括传输什么数据，如何解析传输的数据。</p>
+</li>
+<li>
+<p><strong>创建server</strong></p>
+<p>根据需要选择使用不同的服务模式，代码中为了演示只是用了最简单TSimpleServer</p>
+</li>
+<li>
+<p><strong>启动服务</strong></p>
+</li>
+</ol>
+</li>
+<li>
+<p>创建客户端实现代码HelloServiceClient，调用Hello.client访问服务端的逻辑实现:</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.thrift;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.TException;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.protocol.TBinaryProtocol;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.protocol.TProtocol;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.transport.TSocket;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.transport.TTransport;</span><br><span class="line"><span class="keyword">import</span> org.apache.thrift.transport.TTransportException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloClient</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        TTransport transport = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 创建TTransport</span></span><br><span class="line">            transport = <span class="keyword">new</span> TSocket(<span class="string">"localhost"</span>, <span class="number">9898</span>, <span class="number">30000</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 创建TProtocol 协议要与服务端一致</span></span><br><span class="line">            TProtocol protocol = <span class="keyword">new</span> TBinaryProtocol(transport);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 创建client</span></span><br><span class="line">            Hello.Client client = <span class="keyword">new</span> Hello.Client(protocol);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 建立连接</span></span><br><span class="line">            transport.open();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// client调用server端方法</span></span><br><span class="line">            System.out.println(client.helloString(<span class="string">"hello"</span>));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (TTransportException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (TException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">null</span> != transport) &#123;</span><br><span class="line">                transport.close(); <span class="comment">// 请求结束，断开连接</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>全部工作完成后，下面来测试一下，先执行服务端main方法，在执行客户端main方法，会在客户端控制台打印出</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hello, world.</span><br></pre></td></tr></table></div></figure>
+</li>
+</ol>
+
+        <h1 id="基础知识"   >
+          <a href="#基础知识" class="heading-link"><i class="fas fa-link"></i></a>基础知识</h1>
+      
+<p>Thrift使用一种中间语言IDL，来进行接口的定义，下面来具体讲一下IDL可定义的几种常用数据类型和关键字。</p>
+
+        <h2 id="常用数据类型及关键字"   >
+          <a href="#常用数据类型及关键字" class="heading-link"><i class="fas fa-link"></i></a>常用数据类型及关键字</h2>
+      
+
+        <h3 id="基本类型"   >
+          <a href="#基本类型" class="heading-link"><i class="fas fa-link"></i></a>基本类型</h3>
+      
+<p>thrift不支持无符号的类型，像java的基本数据类型都是有符号的类型。</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">byte：有符号字节</span><br><span class="line">i32：32位有符号整数,此外还有i16,i64</span><br><span class="line">double：64位浮点数</span><br><span class="line">string：二进制字符串</span><br><span class="line">bool：布尔值 true或false</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="结构体类型"   >
+          <a href="#结构体类型" class="heading-link"><i class="fas fa-link"></i></a>结构体类型</h3>
+      
+<p>类似于c语言的结构体定义，在java中会被转化为javabean类</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">User</span> &#123;</span></span><br><span class="line">　　<span class="number">1</span>: i32 id;</span><br><span class="line">　　<span class="number">2</span>: <span class="built_in">string</span> name;</span><br><span class="line">　　<span class="number">3</span>: <span class="keyword">double</span> salary;</span><br><span class="line">　　<span class="number">4</span>: <span class="keyword">bool</span> hasCar;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="服务类型"   >
+          <a href="#服务类型" class="heading-link"><i class="fas fa-link"></i></a>服务类型</h3>
+      
+<p>service：对应服务的接口，内部可定义各种方法，相当于java中创建interface一样，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>创建的service经过代码生成命令会生成客户端和服务端的510_框架代码。</span></p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">service Hello&#123;</span><br><span class="line">　　<span class="function"><span class="built_in">string</span> <span class="title">helloString</span><span class="params">(<span class="number">1</span>:<span class="built_in">string</span> s)</span></span>;</span><br><span class="line">　　<span class="function">i32 <span class="title">helloInt</span><span class="params">(<span class="number">1</span>:i32 i)</span></span>;</span><br><span class="line">　　<span class="function"><span class="keyword">bool</span> <span class="title">helloBoolean</span><span class="params">(<span class="number">1</span>:<span class="keyword">bool</span> b)</span></span>;</span><br><span class="line">　　<span class="function"><span class="keyword">void</span> <span class="title">helloVoid</span><span class="params">()</span></span>;</span><br><span class="line">　　<span class="function"><span class="built_in">string</span> <span class="title">helloNull</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="异常类型"   >
+          <a href="#异常类型" class="heading-link"><i class="fas fa-link"></i></a>异常类型</h3>
+      
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">exception RequestException &#123;</span><br><span class="line">　　<span class="number">1</span>:i32 code;</span><br><span class="line">　　<span class="number">2</span>:<span class="built_in">string</span> detail;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="容器类型"   >
+          <a href="#容器类型" class="heading-link"><i class="fas fa-link"></i></a>容器类型</h3>
+      
+<p>集合中的元素可以是除了service之外的任意类型</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">list</span>&lt;T&gt;:有序列表,元素可重复</span><br><span class="line"><span class="built_in">set</span>&lt;T&gt;:无需集合,元素不可重复</span><br><span class="line"><span class="built_in">map</span>&lt;K,V&gt;:键值对集合</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="枚举类型"   >
+          <a href="#枚举类型" class="heading-link"><i class="fas fa-link"></i></a>枚举类型</h3>
+      
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> Color&#123;</span><br><span class="line">　　　　RED,</span><br><span class="line">　　　　BLUE</span><br><span class="line">　　&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="命名空间"   >
+          <a href="#命名空间" class="heading-link"><i class="fas fa-link"></i></a>命名空间</h3>
+      
+<p>可以理解成java中的packet,用于避免一些代码冲突,每种语言都有属于自己的命名空间的方式,比如java语言,就可以使用java语言的格式</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> java com.eh.eden.thrift</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>此外还有一些语言特性和关键字就不一一介绍了,比如可选参数和必选参数,required和optional,定义常量const,引入文件include等</span></p>
+</blockquote>
+
+        <h2 id="传输协议"   >
+          <a href="#传输协议" class="heading-link"><i class="fas fa-link"></i></a>传输协议</h2>
+      
+<p>Thrift支持多种传输协议，我们可以根据自己的需要来选择合适的类型,总体上来说，分为文本传输和二进制传输，由于<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>二进制传输在传输速率和节省带宽上有优势</span>，所以大部分情况下使用二进制传输是比较好的选择。</p>
+<ul>
+<li>TBinaryProtocol:使用二进制编码格式传输,是thrift的默认传输协议</li>
+<li>TCompactProtocol:使用压缩格式传输</li>
+<li>TJSONProtocol :使用JSON格式传输</li>
+<li>TDebugProtocol – 使用易懂可读的文本格式进行传输，以便于debug</li>
+<li>TSimpleJSONProtocol – 提供JSON只写的协议，适用于通过脚本语言解析</li>
+</ul>
+
+        <h2 id="传输模式"   >
+          <a href="#传输模式" class="heading-link"><i class="fas fa-link"></i></a>传输模式</h2>
+      
+<p>Thrift封装了一层传输层来支持底层的网络通信，在Thrift中称为Transport，不仅提供open，close，flush等方法，还有一些read/write方法。</p>
+<ul>
+<li>TSocket：阻塞式IO的Transport实现，用在客户端</li>
+<li>TServerSocket：阻塞式Socket，用于服务器端，用于监听TSocket</li>
+<li>TNonblockingSocket/TNonblockingServerSocket：非阻塞式IO的实现</li>
+<li>TMemoryInputTransport：封装了一个字节数组byte[]来做输入流的封装</li>
+<li>TFramedTransport：同样使用非阻塞方式，按块的大小进行传输，输入流封装了TMemoryInputTransport</li>
+</ul>
+
+        <h2 id="服务模型"   >
+          <a href="#服务模型" class="heading-link"><i class="fas fa-link"></i></a>服务模型</h2>
+      
+<ul>
+<li>
+<p><strong>TSimpleServer</strong></p>
+<p>这种工作模式只有一个线程，循环监听传过来的请求并对其进行处理，处理完才能接受下一个请求，是一种阻塞式IO的实现。因为效率比较低，实际线上环境一般用不到，一般用于开发时候演示工作流程时使用。</p>
+</li>
+<li>
+<p><strong>TNonblockingServer</strong></p>
+<p>这种模式与TsimpleServer最大的区别就是使用NIO，也就是非阻塞是IO的方式实现IO的多路复用，它可以同时监听多个socket的变化，但因为业务处理上还是单线程模式，所以在一些业务处理比较复杂耗时的时候效率还是不高，因为多个请求任务依然需要排队一个一个进行处理。</p>
+</li>
+<li>
+<p><strong>TThreadPoolServer</strong></p>
+<p>这种模式引入了线程池，主线程只负责accept，即监听Socket，当有新的请求(客户端Socket)来时，就会在线程池里起一个线程来处理业务逻辑，这样在并发量比较大的时候(但不超过线程池的数量)每个请求都能及时被处理，效率比较高，但一旦并发量很大的时候(超过线程池数量)，后面来的请求也只能排队等待。</p>
+<blockquote>
+<p>TThreadPoolServer这个服务器实现使用的是原始的OIO，在一个专门的线程上运行连接。这使得它在处理少量的连 接时表现不错；然而，使用 OIO，当你的服务器需要处理大量的并发连接时，你将很容易遇到 伸缩性问题。</p>
+</blockquote>
+</li>
+<li>
+<p><strong>TThreadedSelectorServer</strong></p>
+<p>这是一种多线程半同步半异步的服务模型，是Thrift提供的最复杂最高级的服务模型，内部有一个专门负责处理监听Socket的线程，有多个专门处理业务中网络IO的线程，有一个专门负责决定将新Socket连接分配给哪一个线程处理的起负载均衡作用的线程，还有一个工作线程池。这种模型既可以响应大量并发连接的请求又可以快速对wangluoIO进行读写，能适配很多场景，因此是一种使用比较高频的服务模型。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915193300.png"  alt="" />
+      </p>
+<blockquote>
+<p>图片来源：<span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/chikanzhu8527/article/details/100854924"  target="_blank" rel="noopener">https://blog.csdn.net/chikanzhu8527/article/details/100854924</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>参考：<span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/u013725455/article/details/62427963"  target="_blank" rel="noopener">https://blog.csdn.net/u013725455/article/details/62427963</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Thrift_quickstart/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Thrift_quickstart/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/510-%E6%A1%86%E6%9E%B6/">510_框架</a></span><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/rpc/">rpc</a></span><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/thrift/">thrift</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/uml%E4%B8%AD%E7%9A%84%E7%B1%BB%E5%9B%BE%E5%8F%8A%E7%B1%BB%E5%9B%BE%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">uml中的类图及类图之间的关系</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Finagle/"><span class="paginator-prev__text">Finagle：一个支持多协议的RPC系统</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">
+          概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是thrift"><span class="toc-number">1.1.</span> <span class="toc-text">
+          什么是thrift</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#下载与安装"><span class="toc-number">2.</span> <span class="toc-text">
+          下载与安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#helloworld"><span class="toc-number">3.</span> <span class="toc-text">
+          HelloWorld</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基础知识"><span class="toc-number">4.</span> <span class="toc-text">
+          基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#常用数据类型及关键字"><span class="toc-number">4.1.</span> <span class="toc-text">
+          常用数据类型及关键字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本类型"><span class="toc-number">4.1.1.</span> <span class="toc-text">
+          基本类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#结构体类型"><span class="toc-number">4.1.2.</span> <span class="toc-text">
+          结构体类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#服务类型"><span class="toc-number">4.1.3.</span> <span class="toc-text">
+          服务类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异常类型"><span class="toc-number">4.1.4.</span> <span class="toc-text">
+          异常类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#容器类型"><span class="toc-number">4.1.5.</span> <span class="toc-text">
+          容器类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#枚举类型"><span class="toc-number">4.1.6.</span> <span class="toc-text">
+          枚举类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#命名空间"><span class="toc-number">4.1.7.</span> <span class="toc-text">
+          命名空间</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#传输协议"><span class="toc-number">4.2.</span> <span class="toc-text">
+          传输协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#传输模式"><span class="toc-number">4.3.</span> <span class="toc-text">
+          传输模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务模型"><span class="toc-number">4.4.</span> <span class="toc-text">
+          服务模型</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;37353035&#x2F;answer&#x2F;175217812                      定义        全称:Content Delivery Network或Content Ddistribute Network，即内容分发网络                     基本思路        尽可能避开互联网上有可能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cdn">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cdn/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;37353035&#x2F;answer&#x2F;175217812                      定义        全称:Content Delivery Network或Content Ddistribute Network，即内容分发网络                     基本思路        尽可能避开互联网上有可能">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913155008.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913155032.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913161444.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913161708.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913161945.png">
+<meta property="article:published_time" content="2020-09-16T16:21:55.290Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:55.292Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络通信">
+<meta property="article:tag" content="cdn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913155008.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>cdn | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cdn/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">cdn</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">19分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/37353035/answer/175217812"  target="_blank" rel="noopener">https://www.zhihu.com/question/37353035/answer/175217812</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h1 id="定义"   >
+          <a href="#定义" class="heading-link"><i class="fas fa-link"></i></a>定义</h1>
+      
+<p><strong>全称</strong>:Content Delivery Network或Content Ddistribute Network，即内容分发网络</p>
+
+        <h1 id="基本思路"   >
+          <a href="#基本思路" class="heading-link"><i class="fas fa-link"></i></a>基本思路</h1>
+      
+<p>尽可能避开互联网上有可能影响数据传输速度和稳定性的瓶颈和环节，使内容传输的更快、更稳定。通过在网络各处放置节点服务器所构成的在现有的互联网基础之上的一层智能虚拟网络，CDN系统能够实时地根据网络流量和各节点的连接、负载状况以及到用户的距离和响应时间等综合信息将用户的请求<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>重新导向离用户最近的服务节点上</span>。</p>
+<a id="more"></a>
+
+        <h1 id="目的"   >
+          <a href="#目的" class="heading-link"><i class="fas fa-link"></i></a>目的</h1>
+      
+<p>解决因分布、带宽、服务器性能带来的访问延迟问题，适用于站点加速、点播、直播等场景。使用户可就近取得所需内容，解决 Internet网络拥挤的状况，提高用户访问网站的响应速度和成功率。</p>
+<p>控制时延无疑是现代信息科技的重要指标，CDN的意图就是尽可能的减少资源在转发、传输、链路抖动等情况下顺利保障信息的连贯性。</p>
+<p>CDN就是扮演者护航者和加速者的角色，更快准狠的触发信息和触达每一个用户，带来更为极致的使用体验。</p>
+
+        <h1 id="工作过程"   >
+          <a href="#工作过程" class="heading-link"><i class="fas fa-link"></i></a>工作过程</h1>
+      
+<p>使用CDN会极大地简化网站的系统维护工作量，网站维护人员只需将网站内容注入CDN的系统，通过CDN部署在各个物理位置的服务器进行全网分发，就可以实现跨运营商、跨地域的用户覆盖。由于CDN将内容推送到网络边缘，大量的用户访问被分散在网络边缘，不再构成网站出口、互联互通点的资源挤占，也不再需要跨越长距离IP路由了。</p>
+<p>CDN是如何工作的呢？让我们先看看没有CDN服务时，一个网站是如何向用户提供服务的。</p>
+<p>今天我们看到的网站系统基本上都是基于B/S架构的。B/S架构，即Browser-Server（浏览器 服务器）架构，是对传统C/S架构的一种变化或者改进架构。在这种架构下，用户只需使用通用浏览器，主要业务逻辑在服务器端实现。B/S架构，主要是利用了不断成熟的WWW浏览器工作，结合浏览器的多种Script语言（VBScript、JavaScript等）和ActiveX等工作，在通用浏览器上实现了C/S架构下需要复杂的软件才能实现的强大功能。</p>
+<p>用户通过浏览器等方式访问网站的过程如图1-2所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913155008.png"  alt="" />
+      </p>
+<ol>
+<li>用户在自己的浏览器中输入要访问的网站域名。</li>
+<li>浏览器向本地DNS服务器请求对该域名的解析。</li>
+<li>本地DNS服务器中如果缓存有这个域名的解析结果，则直接响应用户的解析请求。</li>
+<li>本地DNS服务器中如果没有关于这个域名的解析结果的缓存，则以递归方式向整个DNS系统请求解析，获得应答后将结果反馈给浏览器。</li>
+<li>浏览器得到域名解析结果，就是该域名相应的服务设备的IP地址。</li>
+<li>浏览器向服务器请求内容。</li>
+<li>服务器将用户请求内容传送给浏览器。</li>
+</ol>
+<p>在网站和用户之间加入CDN以后，用户不会有任何与原来不同的感觉。最简单的CDN网络有一个DNS服务器和几台缓存服务器就可以运行了。一个典型的CDN用户访问调度流程如图1-3所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913155032.png"  alt="" />
+      </p>
+<ol>
+<li>当用户点击网站页面上的内容URL，经过本地DNS系统解析，DNS系统会最终将域名的解析权交给CNAME指向的CDN专用DNS服务器。</li>
+<li>CDN的DNS服务器将CDN的全局负载均衡设备IP地址返回用户。</li>
+<li>用户向CDN的全局负载均衡设备发起内容URL访问请求。</li>
+<li>CDN全局负载均衡设备根据用户IP地址，以及用户请求的内容URL，选择一台用户所属区域的区域负载均衡设备，告诉用户向这台设备发起请求。</li>
+<li>区域负载均衡设备会为用户选择一台合适的缓存服务器提供服务，选择的依据包括：根据用户IP地址，判断哪一台服务器距用户最近；根据用户所请求的URL中携带的内容名称，判断哪一台服务器上有用户所需内容；查询各个服务器当前的负载情况，判断哪一台服务器尚有服务能力。基于以上这些条件的综合分析之后，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>区域负载均衡设备会向全局负载均衡设备返回一台缓存服务器的IP地址</span>。</li>
+<li>全局负载均衡设备把服务器的IP地址返回给用户。</li>
+<li>用户向缓存服务器发起请求，缓存服务器响应用户请求，将用户所需内容传送到用户终端。如果这台缓存服务器上并没有用户想要的内容，而区域均衡设备依然将它分配给了用户，那么这台服务器就要向它的上一级缓存服务器请求内容，直至追溯到网站的源服务器将内容拉到本地。</li>
+</ol>
+<p>DNS服务器根据用户IP地址，将域名解析成相应节点的缓存服务器IP地址，实现用户就近访问。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>使用CDN服务的网站，只需将其域名解析权交给CDN的GSLB（global server load balance）设备，将需要分发的内容注入CDN，就可以实现内容加速了。</span></p>
+
+        <h1 id="服务模式"   >
+          <a href="#服务模式" class="heading-link"><i class="fas fa-link"></i></a>服务模式</h1>
+      
+<p>简单地说，CDN是一个经营策略性部署的整体系统，包括分布式存储、负载均衡、网络请求的重定向和内容管理4个要件，而<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>内容管理和全局的网络流量管理(Traffic Management)是CDN的核心所在。</span></p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>通过用户就近性和服务器负载的判断，CDN确保内容以一种极为高效的方式为用户的请求提供服务。</span></p>
+
+        <h1 id="举例说明"   >
+          <a href="#举例说明" class="heading-link"><i class="fas fa-link"></i></a>举例说明</h1>
+      
+<p>国内访问量较高的网站、直播、视频平台，均使用CDN网络加速工作，虽然网站的访问巨大，但无论在什么地方访问都会感觉速度很快。而一般的网站如果服务器在网通，电信用户访问很慢，如果服务器在电信，网通用户访问又很慢。</p>
+<p>通过在现有的Internet中增加一层新的网络架构，将网站的内容发布到最接近用户的cache服务器内，通过DNS负载均衡的工作，判断用户来源就近访问cache服务器取得所需的内容，解决Internet网络拥塞状况，提高用户访问网站的响应速度，如同提供了多个分布在各地的加速器，以达到快速、可冗余的为多个网站加速的目的。</p>
+<p>CDN服务最初用于确保快速可靠地分发静态内容，这些内容可以缓存，最适合在网速庞大的网络中存储和分发，该网络在几十多个国家的十几个网络中的覆盖CDN网络服务器。由于动态内容必须通过互联网来传输，因此要提供快速的网络体验。如今的CDN可谓是大文件、小文件、点播、直播、动静皆宜！</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913161444.png"  alt="" />
+      </p>
+
+        <h1 id="主要特点"   >
+          <a href="#主要特点" class="heading-link"><i class="fas fa-link"></i></a>主要特点</h1>
+      
+<ol>
+<li>
+<p>本地Cache加速，提高了企业站点（尤其含有大量图片和静态页面站点）的访问速度，并大大提高以上性质站点的稳定性</p>
+</li>
+<li>
+<p>镜像服务消除了不同运营商之间互联的瓶颈造成的影响，实现了跨运营商的网络加速，保证不同网络中的用户都能得到良好的访问质量。</p>
+</li>
+<li>
+<p>远程加速 远程访问用户根据DNS负载均衡工作 智能自动选择Cache服务器，选择最快的Cache服务器，加快远程访问的速度</p>
+</li>
+<li>
+<p>带宽优化 自动生成服务器的远程Mirror（镜像）cache服务器，远程用户访问时从cache服务器上读取数据，减少远程访问的带宽、分担网络流量、减轻原站点WEB服务器负载等功能。</p>
+</li>
+<li>
+<p>集群抗攻击 广泛分布的CDN节点加上节点之间的智能冗余机制，可以有效地预防黑客入侵以及降低各种D.D.o.S攻击对网站的影响，同时保证较好的服务质量 。</p>
+</li>
+</ol>
+
+        <h1 id="关键工作"   >
+          <a href="#关键工作" class="heading-link"><i class="fas fa-link"></i></a>关键工作</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913161708.png"  alt="" />
+      </p>
+
+        <h2 id="内容发布"   >
+          <a href="#内容发布" class="heading-link"><i class="fas fa-link"></i></a>内容发布</h2>
+      
+<p>它借助于建立索引、缓存、流分裂、组播（Multicast）等工作</p>
+
+        <h2 id="内容路由"   >
+          <a href="#内容路由" class="heading-link"><i class="fas fa-link"></i></a>内容路由</h2>
+      
+<p>它是整体性的网络负载均衡工作，通过内容路由器中的重定向（DNS）机制，在多个远程POP上均衡用户的请求，以使用户请求得到最近内容源的响应；</p>
+
+        <h2 id="内容交换"   >
+          <a href="#内容交换" class="heading-link"><i class="fas fa-link"></i></a>内容交换</h2>
+      
+<p>它根据内容的可用性、服务器的可用性以及用户的背景，在POP的缓存服务器上，利用应用层交换、流分裂、重定向（ICP、WCCP）等工作，智能地平衡负载流量；</p>
+
+        <h2 id="性能管理"   >
+          <a href="#性能管理" class="heading-link"><i class="fas fa-link"></i></a>性能管理</h2>
+      
+<p>它通过内部和外部监控系统，获取网络部件的状况信息，测量内容发布的端到端性能（如包丢失、延时、平均带宽、启动时间、帧速率等），保证网络处于最佳的运行状态。</p>
+
+        <h1 id="适用范围"   >
+          <a href="#适用范围" class="heading-link"><i class="fas fa-link"></i></a>适用范围</h1>
+      
+<p><strong>一般来说以资讯、内容等为主的网站，具有一定访问体量的网站</strong></p>
+<p><strong>例如</strong></p>
+<ol>
+<li>
+<p>资讯网站、政府机构网站、行业平台网站、商城等以动态内容为主的网站</p>
+</li>
+<li>
+<p>论坛、博客、交友、SNS、网络游戏、搜索/查询、金融等提供http下载的网站</p>
+</li>
+<li>
+<p>软件开发商、内容服务提供商、网络游戏运行商、源码下载等有大量流媒体点播应用的网站</p>
+</li>
+<li>
+<p>拥有视频点播平台的电信运营商、内容服务提供商、体育频道、宽频频道、在线教育、视频博客等</p>
+</li>
+</ol>
+
+        <h1 id="国内主要的cdn服务提供商"   >
+          <a href="#国内主要的cdn服务提供商" class="heading-link"><i class="fas fa-link"></i></a>国内主要的CDN服务提供商</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.xjh.me/575.html/amp"  target="_blank" rel="noopener">https://www.xjh.me/575.html/amp</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h1 id="q-a"   >
+          <a href="#q-a" class="heading-link"><i class="fas fa-link"></i></a>Q &amp; A</h1>
+      
+<ul>
+<li>
+<p>CDN加速是对网站所在服务器加速，还是对其域名加速</p>
+<p>CDN是只对网站的某一个具体的域名加速。如果同一个网站有多个域名，则访客访问加入CDN的域名获得加速效果，访问未加入CDN的域名，或者直接访问IP地址，则无法获得CDN效果。</p>
+</li>
+<li>
+<p>CDN和镜像站点比较有何优势</p>
+<ul>
+<li>CDN对网站的访客完全透明，不需要访客手动选择要访问的镜像站点，保证了网站对访客的友好性。</li>
+<li>CDN对每个节点都有可用性检查，不合格的节点会第一时间剔出，从而保证了极高的可用率，而镜像站点无法实现这一点。</li>
+<li>CDN部署简单，对原站基本不做任何改动即可生效。</li>
+</ul>
+</li>
+<li>
+<p>CDN和双线机房相比有何优势</p>
+<p>常见的双线机房只能解决网通和电信互相访问慢的问题，其它ISP（internet service provider譬如教育网，移动网，铁通）互通的问题还是没得到解决。　　<br />
+而CDN是访问者就近取数据，而CDN的节点遍布各ISP，从而保证了网站到任意ISP的访问速度。另外CDN因为其流量分流到各节点的原理，天然获得抵抗网络攻击的能力。</p>
+<blockquote>
+<p><strong>抗攻击cdn之所以能有效防止ddos攻击，主要在于它的智能化</strong>。当有ddos攻击时，它会将整个系统被攻击的流量分散开来。一是节省了服务器的压力，二是增强了网站的工具难度。三是为服务器管理人员提供了补救的时间。所以使用这种工作可以有效的防止ddos攻击，增强网站的安全性能。</p>
+</blockquote>
+</li>
+<li>
+<p>CDN使用后，原来的网站是否需要做修改，做什么修改</p>
+<p>一般而言，网站无需任何修改即可使用CDN获得加速效果。只是对需要判断访客IP程序，才需要做少量修改。</p>
+</li>
+<li>
+<p>为什么我的网站更新后，通过CDN后看到网页还是旧网页，如何解决</p>
+<p>由于CDN采用各节点缓存的机制，网站的静态网页和图片修改后，如果CDN缓存没有做相应更新，则看到的还是旧的网页。</p>
+<p>为了解决这个问题，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>CDN管理面板中提供了URL推送服务，来通知CDN各节点刷新自己的缓存。</span></p>
+<p>在URL推送地址栏中，输入具体的网址或者图片地址，则各节点中的缓存内容即被统一删除，并且当即生效。</p>
+<p>如果需要推送的网址和图片太多，可以选择目录推送，输入 <span class="exturl"><a class="exturl__link"   href="http://www.kkk.com/news"  target="_blank" rel="noopener">http://www.kkk.com/news</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 即可以对网站下news目录下所有网页和图片进行了刷新。</p>
+</li>
+<li>
+<p>能不能让CDN不缓存某些即时性要求很高的网页和图片</p>
+<p>只需要使用动态页面，asp，php，jsp等动态工作做成的页面不被CDN缓存，无需每次都要刷新。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>或者采用一个网站两个域名，一个启用CDN，另外一个域名不用CDN，对即时性要求高的页面和图片放在不用CDN的域名下</span>。</p>
+</li>
+<li>
+<p>网站新增了不少网页和图片，这些需要使用URL推送吗</p>
+<p>后来增加的网页和图片，不需要使用URL推送，因为它们本来就不存在缓存中。</p>
+</li>
+<li>
+<p>网站用CDN后，有些地区反映无法访问了，怎么办</p>
+<p>CDN启用后，访客不能访问网站有很多种可能，可能是CDN的问题，也可能是源站点出现故障或者源站点被关闭，还可能是访客自己所在的网络出现问题，甚至我们实际故障排除中，还出现过客户自己计算机中毒，导致无法访问网站。　　<br />
+客户报告故障时，可随时联系我们24小时工作部进行处理。</p>
+</li>
+<li>
+<p>哪些情况不适用于CDN</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913161945.png"  alt="" />
+      </p>
+<blockquote>
+<p>备注：此类极端状况不建议您使用CDN服务</p>
+</blockquote>
+</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cdn/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cdn/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">网络通信</a></span><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/cdn/">cdn</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">网络编程基础</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/%E6%8F%92%E5%80%BC%E6%9F%A5%E6%89%BE/"><span class="paginator-prev__text">插值查找</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#定义"><span class="toc-number">1.</span> <span class="toc-text">
+          定义</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基本思路"><span class="toc-number">2.</span> <span class="toc-text">
+          基本思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#目的"><span class="toc-number">3.</span> <span class="toc-text">
+          目的</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#工作过程"><span class="toc-number">4.</span> <span class="toc-text">
+          工作过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#服务模式"><span class="toc-number">5.</span> <span class="toc-text">
+          服务模式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#举例说明"><span class="toc-number">6.</span> <span class="toc-text">
+          举例说明</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#主要特点"><span class="toc-number">7.</span> <span class="toc-text">
+          主要特点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#关键工作"><span class="toc-number">8.</span> <span class="toc-text">
+          关键工作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#内容发布"><span class="toc-number">8.1.</span> <span class="toc-text">
+          内容发布</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内容路由"><span class="toc-number">8.2.</span> <span class="toc-text">
+          内容路由</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内容交换"><span class="toc-number">8.3.</span> <span class="toc-text">
+          内容交换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#性能管理"><span class="toc-number">8.4.</span> <span class="toc-text">
+          性能管理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#适用范围"><span class="toc-number">9.</span> <span class="toc-text">
+          适用范围</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#国内主要的cdn服务提供商"><span class="toc-number">10.</span> <span class="toc-text">
+          国内主要的CDN服务提供商</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#q-a"><span class="toc-number">11.</span> <span class="toc-text">
+          Q &amp; A</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

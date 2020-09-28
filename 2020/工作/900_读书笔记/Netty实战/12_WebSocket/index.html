@@ -1,0 +1,531 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章主要内容  实时 Web 的概念 WebSocket 协议 使用 Netty 构建一个基于 WebSocket 的聊天室服务器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WebSocket">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/12_WebSocket/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章主要内容  实时 Web 的概念 WebSocket 协议 使用 Netty 构建一个基于 WebSocket 的聊天室服务器">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913075644.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913080750.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913081152.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913081700.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082311.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082604.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082713.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082813.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082910.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083042.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083155.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083215.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083327.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083404.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083423.png">
+<meta property="article:published_time" content="2020-08-01T01:04:12.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.597Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913075644.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>WebSocket | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/12_WebSocket/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">WebSocket</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-08-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.9k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">21分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章主要内容</strong></p>
+<ul>
+<li>实时 Web 的概念</li>
+<li>WebSocket 协议</li>
+<li>使用 Netty 构建一个基于 WebSocket 的聊天室服务器</li>
+</ul>
+<a id="more"></a>
+<p>如果你有跟进 Web 工作的最新进展，你很可能就遇到过“实时 Web”这个短语，而如果你 在工程领域中有实时应用程序的实战经验，那么你可能有点怀疑这个术语到底意味着什么。</p>
+<p>因此， 让我们首先澄清， 这里并不是指所谓的硬实时服务质量（QoS）， 硬实时服务质 量是保证计算结果将在指定的时间间隔内被递交。 仅 HTTP 的请求/响应模式设计就使得其 很难被支持，从过去所设计的各种方案中都没有提供一种能够提供令人满意的解决方案的事 实中便可见一斑。</p>
+<p>虽然已经有了一些关于正式定义实时Web服务 语义的学术讨论，但是被普遍接受的定义似 乎还未出现。因此现在我们将采纳下面来自维基百科的非权威性描述：</p>
+<blockquote>
+<p>实时 Web 利用工作和实践，使用户在信息的作者发布信息之后就能够立即收到信 息，而不需要他们或者他们的软件周期性地检查信息源以获取更新。</p>
+<p>服务端发送消息给客户端，客户端能立即受到而不需要去轮询</p>
+</blockquote>
+<p>简而言之，虽然全面的实时Web可能并不会马上到来， 但是它背后的想法却助长了对于几乎瞬时获得信息的期望。我们将在本章中讨论的WebSocket 协议便是在这个方向上迈出的坚实 的一步。</p>
+
+        <h1 id="websocket简介"   >
+          <a href="#websocket简介" class="heading-link"><i class="fas fa-link"></i></a>WebSocket简介</h1>
+      
+<p>WebSocket 协议是完全重新设计的协议， <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>旨在为 Web 上的双向数据传输问题提供一个切实可行的解决方案， 使得客户端和服务器之间可以在任意时刻传输消息， 因此， 这也就要求 它们异步地处理消息回执</span>。（作为 HTML5 客户端 API 的一部分，大部分最新的浏览器都已经 支持了 WebSocket。）</p>
+<p>Netty 对于 WebSocket 的支持包含了所有正在使用中的主要实现，因此在你的下一个应 用程序中采用它将是简单直接的。和往常使用 Netty 一样，你可以完全使用该协议，而无需 关心它内部的实现细节。 我们将通过创建一个基于 WebSocket 的实时聊天应用程序来演示 这一点。</p>
+
+        <h2 id="http中长连接和websocket的长连接的区别"   >
+          <a href="#http中长连接和websocket的长连接的区别" class="heading-link"><i class="fas fa-link"></i></a>http中长连接和websocket的长连接的区别</h2>
+      
+<p><strong>什么是http协议</strong></p>
+<p>HTTP是一个应用层协议，无状态的,端口号为80。主要的版本有1.0/1.1/2.0.</p>
+<ul>
+<li>HTTP/1.* 一次请求-响应，建立一个连接，用完关闭；</li>
+<li>HTTP/1.1 串行化单线程处理，可以同时在同一个tcp链接上发送多个请求，但是只有响应是有顺序的，只有上一个请求完成后，下一个才能响应。一旦有任务处理超时等，后续任务只能被阻塞(线头阻塞)；</li>
+<li>HTTP/2 并行执行。某任务耗时严重，不会影响到任务正常执行</li>
+</ul>
+<p><strong>什么是websocket</strong></p>
+<p>Websocket是html5提出的一个协议规范，是为解决客户端与服务端实时通信。本质上是一个基于tcp，先通过HTTP/HTTPS协议发起一条特殊的http请求进行握手后创建一个用于交换数据的TCP连接。</p>
+<p>WebSocket优势： 浏览器和服务器只需要要做一个握手的动作，在建立连接之后，双方可以在任意时刻，相互推送信息。同时，服务器与客户端之间交换的头信息很小。</p>
+<p><strong>什么是长连接、短连接</strong></p>
+<ul>
+<li>短连接：</li>
+</ul>
+<p>连接-&gt;传输数据-&gt;关闭连接</p>
+<p>HTTP是无状态的，浏览器和服务器每进行一次HTTP操作，就建立一次连接，但任务结束就中断连接。</p>
+<p>也可以这样说：短连接是指SOCKET连接后发送后接收完数据后马上断开连接。</p>
+<ul>
+<li>长连接、</li>
+</ul>
+<p>连接-&gt;传输数据-&gt;保持连接 -&gt; 传输数据-&gt; 。。。 -&gt;关闭连接。</p>
+<p>长连接指建立SOCKET连接后不管是否使用都保持连接，但安全性较差。</p>
+<p><strong>http和websocket的长连接区别</strong></p>
+<p>HTTP1.1通过使用Connection:keep-alive进行长连接，HTTP 1.1默认进行持久连接。在一次 TCP 连接中可以完成多个 HTTP 请求，但是对每个请求仍然要单独发 header，Keep-Alive不会永久保持连接，它有一个保持时间，可以在不同的服务器软件（如Apache）中设定这个时间。这种长连接是一种“伪链接”</p>
+<p>websocket的长连接，是一个真的全双工。长连接第一次tcp链路建立之后，后续数据可以双方都进行发送，不需要发送请求头。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>keep-alive双方并没有建立正真的连接会话，服务端可以在任何一次请求完成后关闭。WebSocket 它本身就规定了是正真的、双工的长连接，两边都必须要维持住连接的状态。</span></p>
+
+        <h1 id="我们的websocket示例应用程序"   >
+          <a href="#我们的websocket示例应用程序" class="heading-link"><i class="fas fa-link"></i></a>我们的WebSocket示例应用程序</h1>
+      
+<p>为了让示例应用程序展示它的实时功能，我们 将通过使用 WebSocket 协议来实现一个基于浏 览器的聊天应用程序，就像你可能在 Facebook 的文本消息功能中见到过的那样。我们将通过使 得多个用户之间可以同时进行相互通信，从而更进一步。</p>
+<p>图 12-1 说明了该应用程序的逻辑：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913075644.png"  alt="" />
+      </p>
+<ul>
+<li>客户端发送一个消息；</li>
+<li>该消息将被广播到所有其他连接的客户端。</li>
+</ul>
+<p>这正如你可能会预期的一个聊天室应当的工作方式：所有的人都可以和其他的人聊天。在示 例中，我们将只实现服务器端，而客户端则是通过 Web 页面访问该聊天室的浏览器。正如同你 将在接下来的几页中所看到的，WebSocket 简化了编写这样的服务器的过程。</p>
+
+        <h1 id="添加websocket支持"   >
+          <a href="#添加websocket支持" class="heading-link"><i class="fas fa-link"></i></a>添加WebSocket支持</h1>
+      
+<p>在从标准的HTTP或者HTTPS协议切换到WebSocket时，将会使用一种称为升级握手 的机 制。因此，使用WebSocket的应用程序将始终以HTTP/S作为开始，然后再执行升级。这个<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>升级动作发生的确切时刻特定于应用程序；它可能会发生在启动时，也可能会发生在请求了某个特定的 URL之后。</span></p>
+<p>我们的应用程序将采用下面的约定：如果被请求的 URL 以 /ws 结尾，那么我们将会把该协 议升级为 WebSocket；否则，服务器将使用基本的 HTTP/S。在连接已经升级完成之后，所有数 据都将会使用 WebSocket 进行传输。图 12-2 说明了该服务器逻辑，一如在 Netty 中一样，它由一 组 ChannelHandler 实现。我们将会在下一节中，解释用于处理 HTTP 以及 WebSocket 协议的 工作时，描述它们。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913080750.png"  alt="" />
+      </p>
+
+        <h2 id="处理http请求"   >
+          <a href="#处理http请求" class="heading-link"><i class="fas fa-link"></i></a>处理Http请求</h2>
+      
+<p>首先，我们将实现该处理 HTTP 请求的组件。这个组件将提供用于访问聊天室并显示由连接 的客户端发送的消息的网页。代码清单 12-1 给出了这个 HttpRequestHandler 对应的代码， 其扩展了 SimpleChannelInboundHandler 以处理 FullHttpRequest 消息。需要注意的是， channelRead0() 方法的实现是如何转发任何目标 URI 为 /ws 的请求的。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913081152.png"  alt="" />
+      </p>
+<p>如果该 HTTP 请求指向了地址为 /ws 的 URI，那么 HttpRequestHandler 将调用 FullHttpRequest 对象上的 retain() 方法，并通过调用 fireChannelRead(msg) 方法将它转发给下一 个 ChannelInboundHandler 。之所以需要调用 retain() 方法，是因为调用 channelRead() 方法完成之后，它将调用 FullHttpRequest 对象上的 release() 方法以释放它的资源，fireChannelRead(msg) 是异步的，可能出现read方法执行完fireChannelRead还没有执行的情况，所以需要引用计数加1。（参见 我们在第 6 章中对于 SimpleChannelInboundHandler 的讨论。）</p>
+<p>如果客户端发送了 HTTP 1.1 的 HTTP 头信息 Expect: 100-continue ，那么 Http- RequestHandler 将会发送一个 100 Continue 响应。在该 HTTP 头信息被设置之后， Http- RequestHandler 将会写回一个 HttpResponse 给客户端。 这不是一个 FullHttpResponse ，因为它只是响应的第一个部分。此外，这里也不会调用 writeAndFlush() 方法， 在结束的时候才会调用。</p>
+<p>如果不需要加密和压缩，那么可以通过将 index.html 的内容存储到 DefaultFile- Region 中来达到最佳效率。 这将会利用零拷贝特性来进行内容的传输。为此，你可以检查一下， 是否有 SslHandler 存在于在 ChannelPipeline 中，如果有的话需要拷贝到用户空间执行，此时可以使用 ChunkedNioFile 。</p>
+<p>HttpRequestHandler 将写一个 LastHttpContent 来标记响应的结束。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果没有请 求 keep-alive ，那么 HttpRequestHandler 将会添加一个 ChannelFutureListener 到最后一次写出动作的 ChannelFuture ，并关闭该连接。</span>在这里，你将调用 writeAndFlush() 方法以冲刷所有之前写入的消息。</p>
+<p>这部分代码代表了聊天服务器的第一个部分，它管理纯粹的 HTTP 请求和响应。接下来，我 们将处理传输实际聊天消息的 WebSocket 帧。</p>
+<blockquote>
+<p><strong>WEBSOCKET 帧</strong></p>
+<p>WebSocket 以帧的方式传输数据，每一帧代表消息的一部分。一个完整的消息可能会包含许多帧。</p>
+</blockquote>
+
+        <h2 id="处理websocket帧"   >
+          <a href="#处理websocket帧" class="heading-link"><i class="fas fa-link"></i></a>处理WebSocket帧</h2>
+      
+<p>由 IETF 发布的 WebSocket RFC，定义了 6 种帧，Netty 为它们每种都提供了一个 POJO 实现。 表 12-1 列出了这些帧类型，并描述了它们的用法。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913081700.png"  alt="" />
+      </p>
+<p>我们的聊天应用程序将使用下面几种帧类型：</p>
+<ul>
+<li>CloseWebSocketFrame；</li>
+<li>PingWebSocketFrame；</li>
+<li>PongWebSocketFrame；</li>
+<li>TextWebSocketFrame</li>
+</ul>
+<p>TextWebSocketFrame 是我们唯一真正需要处理的帧类型。为了符合 WebSocket RFC， Netty 提供了 WebSocketServerProtocolHandler 来处理其他类型的帧。</p>
+<p>代码清单 12-2 展示了我们用于处理 TextWebSocketFrame 的 ChannelInboundHandler ， 其还将在它的 ChannelGroup 中跟踪所有活动的 WebSocket 连接。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082311.png"  alt="" />
+      </p>
+<p>TextWebSocketFrameHandler 只有一组非常少量的责任。当和新客户端的 WebSocket 握手成功完成之后 ，它将通过把通知消息写到 ChannelGroup 中的所有 Channel 来通知所 有已经连接的客户端，然后它将把这个新 Channel 加入到该 ChannelGroup 中 。</p>
+<p>如果接收到了 TextWebSocketFrame 消息 ， TextWebSocketFrameHandler 将调用 TextWebSocketFrame 消息上的 retain() 方法，并使用 writeAndFlush() 方法来将它传 输给 ChannelGroup ，以便所有已经连接的 WebSocket Channel 都将接收到它。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>和之前一样，对于 retain() 方法的调用是必需的，因为当 channelRead0() 方法返回时， TextWebSocketFrame 的引用计数将会被减少。由于所有的操作都是异步的，因此， writeAndFlush() 方法可能会在 channelRead0() 方法返回之后完成，而且它绝对不能访问一个已经失 效的引用。</span></p>
+<p>因为 Netty 在内部处理了大部分剩下的功能，所以现在剩下唯一需要做的事情就是为每个新创建 的 Channel 初始化其 ChannelPipeline 。为此，我们将需要一个 ChannelInitializer 。</p>
+
+        <h2 id="初始化channelpipeline"   >
+          <a href="#初始化channelpipeline" class="heading-link"><i class="fas fa-link"></i></a>初始化ChannelPipeline</h2>
+      
+<p>正如你已经学习到的，为了将 ChannelHandler 安装到 ChannelPipeline 中，你扩展了 ChannelInitializer ，并实现了 initChannel() 方法。代码清单 12-3 展示了由此生成的 ChatServerInitializer 的代码。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082604.png"  alt="" />
+      </p>
+<p>对于 initChannel() 方法的调用，通过安装所有必需的 ChannelHandler 来设置该新注 册的 Channel 的 ChannelPipeline 。这些 ChannelHandler 以及它们各自的职责都被总结 在了表 12-2 中。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082713.png"  alt="" />
+      </p>
+<p>Netty的 WebSocketServerProtocolHandler处理了所有委托管理的 WebSocket 帧类型以 及升级握手本身。如果握手成功，那么所需的 ChannelHandler 将会被添加到 ChannelPipeline 中，而那些不再需要的 ChannelHandler 则将会被移除。</p>
+<p>WebSocket 协议升级之前的 ChannelPipeline 的状态如图 12-3 所示。这代表了刚刚被 ChatServerInitializer 初始化之后的 ChannelPipeline 。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082813.png"  alt="" />
+      </p>
+<p>当 WebSocket 协议升级完成之后， WebSocketServerProtocolHandler 将会把 Http- RequestDecoder 替换为 WebSocketFrameDecoder ，把 HttpResponseEncoder 替换为 WebSocketFrameEncoder 。为了性能最大化，它将移除任何不再被 WebSocket 连接所需要的 ChannelHandler 。这也包括了图 12-3 所示的 HttpObjectAggregator 和 HttpRequest- Handler 。</p>
+<p>图 12-4 展示了这些操作完成之后的 ChannelPipeline 。需要注意的是，Netty目前支持 4 个版本的WebSocket协议， 它们每个都具有自己的实现类。Netty将会根据客户端（这里指浏览 器）所支持的版本 ， 自动地选择正确版本的 WebSocketFrameDecoder 和 WebSocketFrameEncoder 。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913082910.png"  alt="" />
+      </p>
+
+        <h2 id="引导"   >
+          <a href="#引导" class="heading-link"><i class="fas fa-link"></i></a>引导</h2>
+      
+<p>这幅拼图最后的一部分是引导该服务器，并安装 ChatServerInitializer的代码。这将由 ChatServer 类处理，如代码清单 12-4 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083042.png"  alt="" />
+      </p>
+<p>这也就完成了该应用程序本身。现在让我们来测试它吧。</p>
+
+        <h1 id="测试应用程序"   >
+          <a href="#测试应用程序" class="heading-link"><i class="fas fa-link"></i></a>测试应用程序</h1>
+      
+<p>目录 chapter12 中的示例代码包含了你需要用来构建并运行该服务器的所有资源。（如果 你还没有设置好你的包括 Apache Maven 在内的开发环境，参见第 2 章中的操作说明。）</p>
+<p>我们将使用下面的 Maven 命令来构建和启动服务器：</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn -PChatServer clean package exec:exec</span><br></pre></td></tr></table></div></figure>
+<p>项目文件 pom.xml 被配置为在端口 9999 上启动服务器。如果要使用不同的端口，可以通 过编辑文件中对应的值，或者使用一个 System 属性来对它进行重写：</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn -PChatServer -Dport=1111 clean package exec:exec</span><br></pre></td></tr></table></div></figure>
+<p>代码清单 12-5 展示了该命令主要的输出（无关紧要的行已经被删除了）。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083155.png"  alt="" />
+      </p>
+<p>你通过将自己的浏览器指向 <span class="exturl"><a class="exturl__link"   href="http://localhost:9999"  target="_blank" rel="noopener">http://localhost:9999</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 来访问该应用程序。图 12-5 展示了其在 Chrome 浏览器中的 UI。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083215.png"  alt="" />
+      </p>
+<p>图中展示了两个已经连接的客户端。第一个客户端是使用上面的界面连接的，第二个客户端 则是通过底部的 Chrome 浏览器的命令行工具连接的。你会注意到，两个客户端都发送了消息， 并且每个消息都显示在两个客户端中。</p>
+<p>这是一个非常简单的演示，演示了 WebSocket 如何在浏览器中实现实时通信。</p>
+
+        <h2 id="如何进行加密"   >
+          <a href="#如何进行加密" class="heading-link"><i class="fas fa-link"></i></a>如何进行加密</h2>
+      
+<p>在真实世界的场景中，你将很快就会被要求向该服务器添加加密。使用 Netty，这不过是将一 个 SslHandler 添加到 ChannelPipeline 中，并配置它的问题。代码清单 12-6 展示了如何通 过扩展我们的 ChatServerInitializer 来创建一个 SecureChatServerInitializer 以完 成这个需求。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083327.png"  alt="" />
+      </p>
+<p>最后一步是调整 ChatServer 以使用 SecureChatServerInitializer ，以便在 Channel- Pipeline 中安装 SslHandler 。这给了我们代码清单 12-7 中所展示的 SecureChatServer 。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083404.png"  alt="" />
+      </p>
+<p>这就是为所有的通信启用 SSL/TLS 加密需要做的全部。和之前一样，可以使用 Apache Maven 来运行该应用程序，如代码清单 12-8 所示。它还将检索任何所需的依赖。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913083423.png"  alt="" />
+      </p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>在本章中，你学习了如何使用 Netty 的 WebSocket 实现来管理 Web 应用程序中的实时数据。 我们覆盖了其所支持的数据类型，并讨论了你可能会遇到的一些限制。尽管不可能在所有的情况 下都使用 WebSocket，但是仍然需要清晰地认识到，它代表了 Web 工作的一个重要进展。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/12_WebSocket/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/12_WebSocket/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/netty/">netty</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/13_%E4%BD%BF%E7%94%A8UDP%E5%B9%BF%E6%92%AD%E4%BA%8B%E4%BB%B6/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">使用UDP广播事件</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/11_%E9%A2%84%E7%BD%AE%E7%9A%84ChannelHandler%E5%92%8C%E7%BC%96%E8%A7%A3%E7%A0%81%E5%99%A8/"><span class="paginator-prev__text">预置的ChannelHandler和编解码器</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#websocket简介"><span class="toc-number">1.</span> <span class="toc-text">
+          WebSocket简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#http中长连接和websocket的长连接的区别"><span class="toc-number">1.1.</span> <span class="toc-text">
+          http中长连接和websocket的长连接的区别</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#我们的websocket示例应用程序"><span class="toc-number">2.</span> <span class="toc-text">
+          我们的WebSocket示例应用程序</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#添加websocket支持"><span class="toc-number">3.</span> <span class="toc-text">
+          添加WebSocket支持</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#处理http请求"><span class="toc-number">3.1.</span> <span class="toc-text">
+          处理Http请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#处理websocket帧"><span class="toc-number">3.2.</span> <span class="toc-text">
+          处理WebSocket帧</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#初始化channelpipeline"><span class="toc-number">3.3.</span> <span class="toc-text">
+          初始化ChannelPipeline</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引导"><span class="toc-number">3.4.</span> <span class="toc-text">
+          引导</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#测试应用程序"><span class="toc-number">4.</span> <span class="toc-text">
+          测试应用程序</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#如何进行加密"><span class="toc-number">4.1.</span> <span class="toc-text">
+          如何进行加密</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

@@ -1,0 +1,841 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章主要内容  Droplr Firebase Urban Airship">
+<meta property="og:type" content="article">
+<meta property="og:title" content="案例研究，第一部分">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/14_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章主要内容  Droplr Firebase Urban Airship">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913102547.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913103706.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913103746.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913105928.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913110255.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200914084242.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200914090001.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200914090336.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200914091143.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915083835.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915085008.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915085240.png">
+<meta property="article:published_time" content="2020-08-01T01:04:14.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.520Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913102547.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>案例研究，第一部分 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/14_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">案例研究，第一部分</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-08-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">14.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">77分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章主要内容</strong></p>
+<ul>
+<li>Droplr</li>
+<li>Firebase</li>
+<li>Urban Airship</li>
+</ul>
+<a id="more"></a>
+<p>在本章中，我们将介绍两部分案例研究中的第一部分，它们是由已经在内部基础设施中广泛 使用了 Netty 的公司贡献的。我们希望这些其他人如何利用 Netty 框架来解决现实世界问题的例 子，能够拓展你对于 Netty 能够做到什么事情的理解。</p>
+<blockquote>
+<p>注意：每个案例分析的作者都直接参与了他们所讨论的项目。</p>
+</blockquote>
+
+        <h1 id="droplr构建移动服务"   >
+          <a href="#droplr构建移动服务" class="heading-link"><i class="fas fa-link"></i></a>Droplr——构建移动服务</h1>
+      
+<blockquote>
+<p><strong>Droplr介绍</strong></p>
+<p>Droplr ： 一拖乐，最简单的分享工具，类似于国内的网盘类服务</p>
+<p>Droplr 是大名鼎鼎的在线分享工具，操作极简：只需要把文件往 通知窗口(Windows) / menubar(Mac OSX) 一拖，稍等片刻文件便会上传到共享空间，自动生成链接存入剪贴板。<strong>Droplr</strong> 在 Mac/Windows/iPhone 上都有客户端软件，Windows 平台软件名称是 <strong>windroplr</strong>，安装后系统栏和会出现小图标，直接向里面拖文件共享即可。<strong><span class="exturl"><a class="exturl__link"   href="http://Drop.lr"  target="_blank" rel="noopener">Drop.lr</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></strong> 网站首页也可以直接上传共享，登录后还能管理账户上传的文件。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913102547.png"  alt="" />
+      </p>
+<p>Droplr 软件附加功能，可以直接截屏上传，还能上传剪贴板文本。免费账户的空间总大小默认 2G，单个文件大小限制 25MB</p>
+</blockquote>
+<blockquote>
+<p><strong>Bruno de Carvalho， 首席架构师</strong></p>
+</blockquote>
+<p>在 Droplr，我们在我们的基础设施的核心部分、从我们的 API 服务器到辅助服务的各个部分 都使用了 Netty。</p>
+<blockquote>
+<p><strong>LAMP</strong>：一个典型的应用程序工作栈的首字母缩写；由 Linux、Apache Web Server、MySQL 以及 PHP 的首字母组成。</p>
+</blockquote>
+<p>这是一个关于我们是如何从一个单片的、运行缓慢的LAMP 应用程序迁移到基于Netty实现的现代的、高性能的以及水平扩展的分布式架构的案例研究。</p>
+
+        <h2 id="这一切的起因"   >
+          <a href="#这一切的起因" class="heading-link"><i class="fas fa-link"></i></a>这一切的起因</h2>
+      
+<p>当我加入这个团队时，我们运行的是一个 LAMP 应用程序，其作为前端页面服务于用户， 同时还作为 API 服务于客户端应用程序，其中，也包括我的逆向工程的、第三方的 Windows 客 户端 windroplr。</p>
+<p>后来 Windroplr 变成了 Droplr for Windows，而我则开始主要负责基础设施的建设，并且最终 得到了一个新的挑战：完全重新考虑 Droplr 的基础设施。</p>
+<p>在那时，Droplr 本身已经确立成为了一种工作的理念，因此 2.0 版本的目标也是相当的标准：</p>
+<ul>
+<li>将单片的工作栈拆分为多个可横向扩展的组件；</li>
+<li>添加冗余，以避免宕机；</li>
+<li>为客户端创建一个简洁的 API；</li>
+<li>使其全部运行在 HTTPS 上。</li>
+</ul>
+<p>创始人 Josh 和 Levi 对我说：“要不惜一切代价，让它飞起来。”</p>
+<p>我知道这句话意味的可不只是变快一点或者变快很多。“要不惜一切代价”意味着一个完全 数量级上的更快。而且我也知道，Netty 最终将会在这样的努力中发挥重要作用。</p>
+
+        <h2 id="droplr是怎样工作的"   >
+          <a href="#droplr是怎样工作的" class="heading-link"><i class="fas fa-link"></i></a>Droplr是怎样工作的</h2>
+      
+<p>Droplr 拥有一个非常简单的工作流：将一个文件拖动到应用程序的菜单栏图标，然后 Droplr 将会上传该文件。当上传完成之后，Droplr 将复制一个短 URL——也就是所谓的拖乐（drop） —到剪贴板。</p>
+<p>就是这样。欢畅地、实时地分享。</p>
+<p>而在幕后，拖乐元数据将会被存储到数据库中（包括创建日期、名称以及下载次数等信息）， 而文件本身则被存储在 Amazon S3 上。</p>
+<blockquote>
+<p>Amazon S3：Amazon Simple Storage Service (简称 Amazon S3) 是一个公开的云存储服务，Web 应用程序开发人员可以使用它存储数字资产，包括图片、视频、音乐和文档。S3 提供一个 RESTful API 以编程方式实现与该服务的交互。，目前市面上主流的存储厂商都支持S3协议接口，比如华为、华三、戴尔、元核云等。</p>
+</blockquote>
+
+        <h2 id="创建一个更加快速的上传体验"   >
+          <a href="#创建一个更加快速的上传体验" class="heading-link"><i class="fas fa-link"></i></a>创建一个更加快速的上传体验</h2>
+      
+<p>Droplr 的第一个版本的上传流程是相当地天真可爱：</p>
+<ol>
+<li>接收上传；</li>
+<li>上传到 S3；</li>
+<li>如果是图片，则创建略缩图；</li>
+<li>应答客户端应用程序。</li>
+</ol>
+<p>更加仔细地看看这个流程，你很快便会发现在第 2 步和第 3 步上有两个瓶颈。不管从客户端 上传到我们的服务器有多快，在实际的上传完成之后，直到成功地接收到响应之间，对于拖乐的 创建总是会有恼人的间隔—因为对应的文件仍然需要被上传到 S3 中，并为其生成略缩图。</p>
+<p>文件越大，间隔的时间也越长。对于非常大的文件来说，连接（客户端和服务器之间的连接） 最终将会在等待来自服务器 的响应时超时。由于这个严重的问题，当时Droplr只可以提供单个文件最大 32MB的上传能力。</p>
+<p>有两种截然不同的方案来减少上传时间。</p>
+<ul>
+<li>
+<p>方案 A，乐观且看似更加简单（见图 14-1）：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913103706.png"  alt="" />
+      </p>
+<ul>
+<li>完整地接收文件；</li>
+<li>将文件保存到本地的文件系统，并立即返回成功到客户端；</li>
+<li>计划在将来的某个时间点将其上传到 S3。</li>
+</ul>
+</li>
+<li>
+<p>方案 B，安全但复杂（见图 14-2）：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913103746.png"  alt="" />
+      </p>
+<ul>
+<li>实时地（流式地）将从客户端上传的数据直接管道给 S3。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>
+<p><strong>乐观且看似更加简单的方案</strong></p>
+<p>在收到文件之后便返回一个短 URL 创造了一个空想（也可以将其称为隐式的契约），即该文 件立即在该 URL 地址上可用。但是并不能够保证，上传的第二阶段（实际将文件推送到 S3）也 将最终会成功，那么用户可能会得到一个坏掉的链接，其可能已经被张贴到了 Twitter 或者发送 给了一个重要的客户。这是不可接受的，即使是每十万次上传也只会发生一次。</p>
+<p>我们当前的数据显示，我们的上传失败率略低于 0.01%（万分之一），绝大多数都是在上传 实际完成之前，客户端和服务器之间的连接就超时了。</p>
+<p>我们也可以尝试通过在文件被最终推送到 S3 之前，从接收它的机器提供该文件的服务来绕 开它，然而这种做法本身就是一堆麻烦：</p>
+<ul>
+<li>如果在一批文件被完整地上传到 S3 之前，机器出现了故障，那么这些文件将会永久丢失；</li>
+<li>也将会有跨集群的同步问题（“这个拖乐所对应的文件在哪里呢？”）；</li>
+<li>将会需要额外的复杂的逻辑来处理各种边界情况，继而不断产生更多的边界情况；</li>
+</ul>
+<p>在思考过每种变通方案和其陷阱之后，我很快认识到，这是一个经典的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>九头蛇问题——对于 每个砍下的头，它的位置上都会再长出两个头。</span></p>
+</li>
+<li>
+<p><strong>安全但复杂的方案</strong></p>
+<p>另一个选项需要对整体过程进行底层的控制。从本质上说，我们必须要能够做到以下几点。</p>
+<ul>
+<li>在接收客户端上传文件的同时，打开一个到 S3 的连接。</li>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>将从客户端连接上收到的数据管道给到 S3 的连接。</span></li>
+<li>缓冲并节流这两个连接:
+<ul>
+<li>需要进行缓冲，以在客户端到服务器，以及服务器到 S3 这两个分支之间保持一条的 稳定的流；</li>
+<li>需要进行节流，以防止当服务器到 S3 的分支上的速度变得慢于客户端到服务器的分 支时，内存被消耗殆尽。</li>
+</ul>
+</li>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>当出现错误时，需要能够在两端进行彻底的回滚。</span></li>
+</ul>
+<p>看起来概念上很简单，但是它并不是你的通常的 Web 服务器能够提供的能力。尤其是当你 考虑节流一个 TCP 连接时，你需要对它的套接字进行底层的访问。</p>
+<p>它同时也引入了一个新的挑战，其将最终塑造我们的终极架构：推迟略缩图的创建。</p>
+<p>这也意味着， 无论该平台最终构建于哪种工作栈之上， 它都必须要不仅能够提供一些基 本的特性， 如难以置信的性能和稳定性， 而且在必要时还要能够提供操作底层（即字节级别 的控制）的灵活性。</p>
+</li>
+</ol>
+
+        <h2 id="工作栈"   >
+          <a href="#工作栈" class="heading-link"><i class="fas fa-link"></i></a>工作栈</h2>
+      
+<p>当开始一个新的 Web 服务器项目时，最终你将会问自己：“好吧，这些酷小子们这段时间都在用什么框架呢？”我也是这样的。</p>
+<p>选择 Netty 并不是一件无需动脑的事；我研究了大量的框架，并谨记我认为的 3 个至关重要的要素。</p>
+<ol>
+<li>
+<p>它必须是快速的</p>
+<p>我可不打算用一个低性能的工作栈替换另一个低性能的工作栈。</p>
+</li>
+<li>
+<p>它必须能够伸缩</p>
+<p>不管它是有 1 个连接还是 10 000 个连接，每个服务器实例都必须要 能够保持吞吐量，并且随着时间推移不能出现崩溃或者内存泄露。</p>
+</li>
+<li>
+<p>它必须提供对底层数据的控制</p>
+<p>字节级别的读取、TCP 拥塞控制等，这些都是难点。</p>
+</li>
+</ol>
+<p>要素 1 和要素 2 基本上排除了任何非编译型的语言。我是 Ruby 语言的拥趸，并且热爱 Sinatra和 Padrino 这样的轻量级框架，但是我知道我所追寻的性能是不可能通过这些构件块实现的。</p>
+<p>要素 2 本身就意味着：无论是什么样的解决方案，它都不能依赖于阻塞 I/O。看到了本书这 里，你肯定已经明白为什么非阻塞 I/O 是唯一的选择了。</p>
+<p>要素 3 比较绕弯儿。它意味着必须要在一个框架中找到完美的平衡，它必须在提供了对于它 所接收到的数据的底层控制的同时，也支持快速的开发，并且值得信赖。这便是语言、文档、社区以及其他的成功案例开始起作用的时候了。</p>
+<p>在那时我有一种强烈的感觉：Netty 便是我的首选武器。</p>
+
+        <h3 id="基本要素服务器和流水线"   >
+          <a href="#基本要素服务器和流水线" class="heading-link"><i class="fas fa-link"></i></a>基本要素：服务器和流水线</h3>
+      
+<p>服务器基本上只是一个 ServerBootstrap ，其内置了 NioServerSocketChannelFactory ， 配置了几个常见的 ChannelHandler <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>以及在末尾的 HTTP RequestController</span> ，如代码清单 14-1 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913105928.png"  alt="" />
+      </p>
+<p>RequestController 是 ChannelPipeline 中唯一自定义的 Droplr 代码，同时也可能是整个 Web 服务器中最复杂的部分。它的作用是处理初始请求的验证，并且如果一切都没问题，那么将 会把请求路由到适当的请求处理器。对于每个已经建立的客户端连接，都会创建一个新的实例， 并且只要连接保持活动就一直存在。</p>
+<p>请求控制器负责：</p>
+<ul>
+<li>处理负载洪峰</li>
+<li>HTTP ChannelPipeline 的管理；</li>
+<li>设置请求处理的上下文；</li>
+<li>派生新的请求处理器；</li>
+<li>向请求处理器供给数据；</li>
+<li>处理内部和外部的错误。</li>
+</ul>
+<p>代码清单 14-2 给出的是 RequestController 相关部分的一个纲要。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913110255.png"  alt="" />
+      </p>
+<p>如同本书之前所解释过的一样，你应该永远不要在 Netty 的 I/O 线程上执行任何非 CPU 限定 的代码——你将会从 Netty 偷取宝贵的资源，并因此影响到服务器的吞吐量。</p>
+<p>因此，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'> HttpRequest 和 HttpChunk 都可以通过切换到另一个不同的线程，来将执行流程 移交给请求处理器</span>。当请求处理器不是 CPU 限定时，就会发生这样的情况，不管是因为它们访 问了数据库，还是执行了不适合于本地内存或者 CPU 的逻辑。</p>
+<p>当发生线程切换时，所有的代码块都必须要以串行的方式执行；否则，我们就会冒风险，对于一 次上传来说，在处理完了序列号为 n 的 HttpChunk 之后，再处理序列号为 n -1 的 HttpChunk 必然 会导致文件内容的损坏。（我们可能会交错所上传的文件的字节布局。）为了处理这种情况，我<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>创建了 一个自定义的线程池执行器，其确保了所有共享了同一个通用标识符的任务都将以串行的方式被执行</span>。</p>
+<p>从这里开始，这些数据（请求和HttpChunk）便开始了在 Netty 和 Droplr 王国之外的冒险。</p>
+<p>我将简短地解释请求处理器是如何被构建的，以在 <span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>RequestController （其存在于 Netty 的领地）</span>和<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>这些处理器（存在于 Droplr 的领地）</span>之间的桥梁上亮起一些光芒。谁知道呢，这也许 将会帮助你架构你自己的服务器应用程序呢！</p>
+
+        <h3 id="请求处理器"   >
+          <a href="#请求处理器" class="heading-link"><i class="fas fa-link"></i></a>请求处理器</h3>
+      
+<p>请求处理器提供了 Droplr 的功能。它们是类似地址为 /account 或者 /drops 这样的 URI背后的端点。它们是逻辑核心——服务器对于客户端请求的解释器。</p>
+<p>请求处理器的实现也是（Netty）框架实际上成为了 Droplr 的 API 服务器的地方。</p>
+
+        <h3 id="父接口"   >
+          <a href="#父接口" class="heading-link"><i class="fas fa-link"></i></a>父接口</h3>
+      
+<p>每个请求处理器，不管是直接的还是通过子类继承，都是 RequestHandler 接口的实现。</p>
+<p>其本质上， RequestHandler 接口表示了一个对于请求（ HttpRequest 的实例）和分块 （ HttpChunk 的实例）的无状态处理器。它是一个非常简单的接口，包含了一组方法以帮助请求 控制器来执行以及/或者决定如何执行它的职责，例如：</p>
+<ul>
+<li>请求处理器是有状态的还是无状态的呢？它需要从某个原型克隆，还是原型本身就可以 用来处理请求呢？</li>
+<li>请求处理器是 CPU 限定的还是非 CPU 限定的呢？它可以在 Netty 的工作线程上执行，还 是需要在一个单独的线程池中执行呢？</li>
+<li>回滚当前的变更；</li>
+<li>清理任何使用过的资源。</li>
+</ul>
+<p>这个RequestHandler接口 就是 RequestController 对于相关动作的所有理解。通过它非常清晰和简洁的 接口，该控制器可以和<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>有状态的和无状态的、CPU限定的和非CPU限定的</span>（或者这些性质的组合） 处理器以一种独立的并且实现无关的方式进行交互。</p>
+
+        <h3 id="处理器的实现"   >
+          <a href="#处理器的实现" class="heading-link"><i class="fas fa-link"></i></a>处理器的实现</h3>
+      
+<p>最简单的 RequestHandler 实现是 AbstractRequestHandler ，它代表一个子类型的 层次结构的根，在到达提供了所有 Droplr 的功能的实际处理器之前，它将变得愈发具体。最终， 它会到达有状态的实现 SimpleHandler ，它在一个非 I/O 工作线程中执行，因此也不是 CPU 限定的。 SimpleHandler 是快速实现那些执行读取 JSON 格式的数据、访问数据库，然后写出 一些 JSON 的典型任务的端点的理想选择。</p>
+
+        <h3 id="上传请求处理器"   >
+          <a href="#上传请求处理器" class="heading-link"><i class="fas fa-link"></i></a>上传请求处理器</h3>
+      
+<p>上传请求处理器是整个 Droplr API 服务器的关键。它是对于重塑 webserver 模块——服务 器的框架化部分的设计的响应，也是到目前为止整个工作栈中最复杂、最优化的代码部分。</p>
+<p>在上传的过程中，服务器具有双重行为：</p>
+<ul>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在一边，它充当了正在上传文件的 API 客户端的服务器；</span></li>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在另一边，它充当了 S3 的客户端，以推送它从 API 客户端接收的数据。</span></li>
+</ul>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>为了充当客户端，服务器使用了一个同样使用Netty构建的HTTP客户端库 </span>。这个异步的 HTTP客户端库暴露了一组完美匹配该服务器的需求的接口。它将开始执行一个HTTP请求，并允许在数据变得可用时再供给给它，而这大大地降低了上传请求处理器的<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>客户门面</span>的复杂性。</p>
+<blockquote>
+<p>你可以在 <span class="exturl"><a class="exturl__link"   href="https://github.com/brunodecarvalho/http-client"  target="_blank" rel="noopener">https://github.com/brunodecarvalho/http-client</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 找到这个 HTTP 客户端库。</p>
+<p>上一个脚注中提到的这个 HTTP 客户端库已经废弃，推荐 AsyncHttpClient（<span class="exturl"><a class="exturl__link"   href="https://github.com/AsyncHttpClient/"  target="_blank" rel="noopener">https://github.com/AsyncHttpClient/</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> async-http-client）和 Akka-HTTP（<span class="exturl"><a class="exturl__link"   href="https://github.com/akka/akka-http%EF%BC%89%EF%BC%8C%E5%AE%83%E4%BB%AC%E9%83%BD%E5%AE%9E%E7%8E%B0%E4%BA%86%E7%9B%B8%E5%90%8C%E7%9A%84%E5%8A%9F%E8%83%BD%E3%80%82"  target="_blank" rel="noopener">https://github.com/akka/akka-http），它们都实现了相同的功能。</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h2 id="性能"   >
+          <a href="#性能" class="heading-link"><i class="fas fa-link"></i></a>性能</h2>
+      
+<p>在服务器的初始版本完成之后，我运行了一批性能测试。结果简直就是让人兴奋不已。在不 断地增加了难以置信的负载之后，我看到新的服务器的上传在峰值时相比于旧版本的 LAMP 技 术栈的快了 10～12 倍（完全数量级的更快），而且它能够支撑超过 1000 倍的并发上传，总共将 近 10k 的并发上传（而这一切都只是运行在一个单一的 EC2 大型实例之上）。</p>
+<p>下面的这些因素促成了这一点。</p>
+<ul>
+<li>它运行在一个调优的 JVM 中。</li>
+<li>它运行在一个<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>高度调优的自定义工作栈</span>中，是专为解决这个问题而创建的，而不是一个 通用的 Web 框架。</li>
+<li>该自定义的工作栈通过 Netty 使用了 NIO（基于选择器的模型）构建，这意味着不同于 每个客户端一个进程的 LAMP 工作栈，它可以扩展到上万甚至是几十万的并发连接。</li>
+<li>再也没有以两个单独的，先接收一个完整的文件，然后再将其上传到 S3，的步骤所带来 的开销了。现在文件将直接流向 S3。</li>
+<li>因为服务器现在对文件进行了流式处理，所以：
+<ul>
+<li>它再也不会花时间在 I/O 操作上了，即将数据写入临时文件，并在稍后的第二阶段上 传中读取它们；</li>
+<li>对于每个上传也将消耗更少的内存，这意味着可以进行更多的并行上传。</li>
+</ul>
+</li>
+<li>略缩图生成变成了一个异步的后处理。</li>
+</ul>
+
+        <h2 id="小结站在巨人的肩膀上"   >
+          <a href="#小结站在巨人的肩膀上" class="heading-link"><i class="fas fa-link"></i></a>小结——站在巨人的肩膀上</h2>
+      
+<p>所有的这一切能够成为可能，都得益于 Netty 的难以置信的精心设计的 API，以及高性能的非阻塞的 I/O 架构。</p>
+<p>自 2011 年 12 月推出 Droplr 2.0 以来，我们在 API 级别的宕机时间几乎为零。在几个月前，由于 一次既定的全栈升级（数据库、操作系统、主要的服务器和守护进程的代码库升级），我们中断了已 经连续一年半安静运行的基础设施的 100%正常运行时间，这次升级只耗费了不到 1 小时的时间。</p>
+<p>这些服务器日复一日地坚挺着，每秒钟处理几百个（有时甚至是几千个）并发请求，而同时 还保持了如此低的内存和 CPU 使有率，以至于我们都难以相信它们实际上正在真实地做着如此 大量的工作：</p>
+<ul>
+<li>CPU 使用率很少超过 5%；</li>
+<li>无法准确地描述内存使用率，因为进程启动时预分配了 1 GB 的内存，同时配置的 JVM 可以在必要时增长到 2 GB，而在过去的两年内这一次也没有发生过。</li>
+</ul>
+<p>任何人都可以通过增加机器来解决某个特定的问题，然而 Netty 帮助了 Droplr <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>智能地伸缩</span>， 并且保持了相当低的服务器账单。</p>
+
+        <h1 id="firebase实时的数据同步服务"   >
+          <a href="#firebase实时的数据同步服务" class="heading-link"><i class="fas fa-link"></i></a>Firebase——实时的数据同步服务</h1>
+      
+<p><strong>Sara Robinson，Developer Happiness 副总裁</strong><br />
+<strong>Greg Soltis，Cloud Architecture 副总裁</strong></p>
+<p>实时更新是现代应用程序中用户体验的一个组成部分。随着用户期望这样的行为，越来越多 的应用程序都正在实时地向用户推送数据的变化。通过传统的 3 层架构很难实现实时的数据同 步，其需要开发者管理他们自己的运维、服务器以及伸缩。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>通过维护到客户端的实时的、双向的通信，Firebase 提供了一种即时的直观体验，允许开发人员在几分钟之内跨越不同的客户端进行应用程序数据的同步</span>——这一切都不需要任何的后端工作、服务器、运维或者伸缩。</p>
+<blockquote>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在基于Web的即时通信、股票行情这样的系统中，需要客户端能够及时更新内容</span>。由于B/S架构的特性（Http连接是无状态连接, 即服务器处理完客户的请求,并收到客户的应答后即断开连接），最简单的方式是通过客户端轮询的方式实现客户端刷新。</p>
+<p>较早是将一个隐藏的iframe嵌在网页中，通过该iframe不断刷新来获取最新内容，现在通过Ajax来实现，通过每隔一段时间发起Http请求实现数据更新，并可以实现异步更新。轮询方式显而易见的缺点就是会造成服务器较大负载。</p>
+</blockquote>
+<p>实现这种能力提出了一项艰难的工作挑战，而 Netty 则是用于在 Firebase 内构建用于所有网 络通信的底层框架的最佳解决方案。这个案例研究概述了 Firebase 的架构，然后审查了 Firebase 使用 Netty 以支撑它的实时数据同步服务的 3 种方式：</p>
+<ul>
+<li>长轮询；</li>
+<li>HTTP 1.1 keep-alive 和流水线化；</li>
+<li>控制 SSL 处理器</li>
+</ul>
+
+        <h2 id="firebase的架构"   >
+          <a href="#firebase的架构" class="heading-link"><i class="fas fa-link"></i></a>Firebase的架构</h2>
+      
+<p>Firebase 允许开发者使用两层体系结构来上线运行应用程序。开发者只需要简单地导入 Firebase 库，并编写客户端代码。数据将以 JSON 格式暴露给开发者的代码，并且在本地进行缓存。该库处理 了本地高速缓存和存储在 Firebase 服务器上的主副本（master copy）之间的同步。对于任何数据进行 的更改都将会被实时地同步到与 Firebase 相连接的潜在的数十万个客户端上。跨多个平台的多个客户 端之间的以及设备和 Firebase 之间的交互如图 14-3 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200914084242.png"  alt="" />
+      </p>
+<p>Firebase 的服务器接收传入的数据更新，并将它们立即 同步给所有注册了对于更改的数据感兴趣的已经连接的客 户端。为了启用状态更改的实时通知，客户端将会始终保持一个到 Firebase 的活动连接。该连接的范围是：<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>从基于单个 Netty Channel 的抽象到基于多个 Channel 的抽象， 甚至是在客户端正在切换传输类型时的多个并存的抽象。</span></p>
+<p>因为客户端可以通过多种方式连接到Firebase，所以保 持连接代码的模块化很重要。Netty的 Channel 抽象对于Firebase集成新的传输来说简直是梦幻般的 构建块。此外，流水线和处理器模式（指 ChannelPipeline 和 ChannelHandler）使得可以简单地把传输相关的细节隔离开来，并为应用程序 代码提供一个公共的消息流抽象。同样，这也极大地简化了添加新的协议支持所需要的工作。 Firebase只通过简单地添加几个新的 ChannelHandler 到 ChannelPipeline 中，便添加了对一 种二进制传输的支持。对于实现客户端和服务器之间的实时连接而言，Netty的速度、抽象的级别以及细粒度的控制都使得它成为了一个的卓绝的框架。</p>
+
+        <h2 id="长轮询"   >
+          <a href="#长轮询" class="heading-link"><i class="fas fa-link"></i></a>长轮询</h2>
+      
+<p>Firebase 同时使用了长轮询和 WebSocket 传输。长轮询传输是高度可靠的，覆盖了所有的浏 览器、网络以及运营商；而基于 WebSocket 的传输，速度更快，但是由于浏览器/客户端的局限 性，并不总是可用的。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>开始时，Firebase 将会使用长轮询进行连接，然后在 WebSocket 可用时再升级到 WebSocket。</span>对于少数不支持 WebSocket 的 Firebase 流量，Firebase 使用 Netty 实现了一个 自定义的库来进行长轮询，并且经过调优具有非常高的性能和响应性。</p>
+<p>Firebase 的客户端库逻辑处理双向消息流，并且会在任意一端关闭流时进行通知。虽然这在 TCP 或者 WebSocket 协议上实现起来相对简单，但是在处理长轮询传输时它仍然是一项挑战。对 于长轮询的场景来说，下面两个属性必须被严格地保证：</p>
+<ul>
+<li>保证消息的按顺序投递</li>
+<li>关闭通知。</li>
+</ul>
+
+        <h3 id="保证消息的按顺序投递"   >
+          <a href="#保证消息的按顺序投递" class="heading-link"><i class="fas fa-link"></i></a>保证消息的按顺序投递</h3>
+      
+<p>可以通过使得在某个指定的时刻有且只有一个未完成的请求，来实现长轮询的按顺序投递。 因为客户端不会在它收到它的上一个请求的响应之前发出另一个请求，所以这就保证了它之前所 发出的所有消息都被接收，并且可以安全地发送更多的请求了。同样，在服务器端，直到客户端 收到之前的响应之前，将不会发出新的请求。因此，总是可以安全地发送缓存在两个请求之间的 任何东西。然而，这将导致一个严重的缺陷。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>使用单一请求工作，客户端和服务器端都将花费大量的时间来对消息进行缓冲</span>。例如，如果客户端有新的数据需要发送，但是这时已经有了一个未完成的请求，那么它在发出新请求之前，就必须得等待服务器的响应。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果这时在服务器上没有可用的数据，则可能需要很长的时间。</span></p>
+<p>一个更加高性能的解决方案则是容忍更多的正在并发进行的请求。在实践中，这可以通过<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>将 单一请求的模式切换为最多两个请求的模式</span>。这个算法包含了两个部分：</p>
+<ul>
+<li>每当客户端有新的数据需要发送时，它都会发送一个新的请求，除非已经有了两个请求 正在被处理；</li>
+<li>每当服务器接收到来自客户端的请求时，如果它已经有了一个来自客户端的未完成的请 求，那么即使没有数据，它也将<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>立即回应第一个请求</span>。</li>
+</ul>
+<p>相对于单一请求的模式，这种方式提供了一个重要的改进：<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>客户端和服务器的缓冲时间都被限定在了最多一次的网络往返时间里</span>。</p>
+<p>当然，这种性能的增加并不是没有代价的；它导致了代码复杂性的相应增加。该长轮询算法 也不再保证消息的按顺序投递，但是一些来自 TCP 协议的理念可以保证这些消息的按顺序投递。 由客户端发送的每个请求都包含一个序列号，每次请求时都将会递增。此外，每个请求都包含了 关于有效负载中的消息数量的元数据。如果一个消息跨越了多个请求，那么在有效负载中所包含 的消息的序号也会被包含在元数据中。</p>
+<p>服务器维护了一个传入消息分段的环形缓冲区，在它们完成之后，如果它们之前没有不完整 的消息，那么会立即对它们进行处理。下行要简单点，因为长轮询传输响应的是 HTTP GET 请求， 而且对于有效载荷的大小没有相同的限制。在这种情况下，将包含一个对于每个响应都将会递增 的序列号。只要客户端接收到了达到指定序列号的所有响应，它就可以开始处理列表中的所有消 息；如果它还没有收到，那么它将缓冲该列表，直到它接收到了这些未完成的响应。</p>
+
+        <h3 id="关闭通知"   >
+          <a href="#关闭通知" class="heading-link"><i class="fas fa-link"></i></a>关闭通知</h3>
+      
+<p>在长轮询传输中第二个需要保证的属性是关闭通知。在这种情况下，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>使得服务器意识到传输已经关闭，明显要重要于使得客户端识别到传输的关闭</span>。客户端所使用的 Firebase 库将会在连接断开 时将操作放入队列以便稍后执行，而且这些被放入队列的操作可能也会对其他仍然连接着的客户端 造成影响。因此，知道客户端什么时候实际上已经断开了是非常重要的。实现由服务器发起的关闭 操作是相对简单的，其可以通过使用一个特殊的协议级别的关闭消息响应下一个请求来实现。</p>
+<p>实现客户端的关闭通知是比较棘手的。虽然可以使用相同的关闭通知，但是有两种情况可能 会导致这种方式失效：用户可以关闭浏览器标签页，或者网络连接也可能会消失。标签页关闭的这种情况可以通过 iframe 来处理， iframe 会在页面卸载时发送一个包含关闭消息的请求。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>第二种情况则可以通过服务器端超时来处理。小心谨慎地选择超时值大小很重要，因为服务器无法区分慢速的网络和断开的客户端</span>。也就是说，对于服务器来说，无法知道一个请求是被实际推迟 了一分钟，还是该客户端丢失了它的网络连接。相对于应用程序需要多快地意识到断开的客户端 来说，选取一个平衡了误报所带来的成本（关闭慢速网络上的客户端的传输）的合适的超时大小 是很重要的。</p>
+<p>图 14-4 演示了 Firebase 的长轮询传输是如何处理不同类型的请求的。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200914090001.png"  alt="" />
+      </p>
+<p>在这个图中，每个长轮询请求都代表了不同类型的场景。最初，客户端向服务器发送了一个 轮询（轮询 0）。一段时间之后，服务器从系统内的其他地方接收到了发送给该客户端的数据， 所以它使用该数据响应了轮询 0。在该轮询返回之后，因为客户端目前没有任何未完成的请求， 所以客户端又立即发送了一个新的轮询（轮询 1）。过了一小会儿，客户端需要发送数据给服务 器。因为它只有一个未完成的轮询，所以它又发送了一个新的轮询（轮询 2），其中包含了需要被递交的数据。根据协议，一旦在服务器同时存在两个来自相同的客户端的轮询时，它将响应第 一个轮询。在这种情况下，服务器没有任何已经就绪的数据可以用于该客户端，因此它发送回了 一个空响应。客户端也维护了一个超时，并将在超时被触发时发送第二次轮询，即使它没有任何 额外的数据需要发送。这将系统从由于浏览器超时缓慢的请求所导致的故障中隔离开来。</p>
+
+        <h2 id="http-11-keep-alive和流水线化"   >
+          <a href="#http-11-keep-alive和流水线化" class="heading-link"><i class="fas fa-link"></i></a>HTTP 1.1 keep-alive和流水线化</h2>
+      
+<p>通过 HTTP 1.1 keep-alive 特性，可以在同一个连接上发送多个请求到服务器。这使得 HTTP 流水线化——可以发送新的请求而不必等待来自服务器的响应，成为了可能。实现对于 HTTP 流 水线化以及 keep-alive 特性的支持通常是直截了当的，但是当混入了长轮询之后，它就明显变得 更加复杂起来。</p>
+<p>如果一个长轮询请求紧跟着一个 REST（表征状态转移） 请求，那么将有一些注意事项需要被考虑在内，以确保浏览 器能够正确工作。一个 Channel 可能会混和异步消息（长 轮询请求）和同步消息（REST 请求）。当一个 Channel 上 出现了一个同步请求时， Firebase 必须按顺序同步响应该 Channel 中所有之前的请求。例如，如果有一个未完成的 长轮询请求，那么在处理该 REST 请求之前，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>需要使用一个 空操作对该长轮询传输进行响应。</span></p>
+<p>图 14-5 说明了 Netty 是如何让 Firebase 在一个套接字上 响应多个请求的。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200914090336.png"  alt="" />
+      </p>
+<p>如果浏览器有多个打开的连接，并且正在使用长轮询， 那么它将重用这些连接来处理来自这两个打开的标签页的 消息。对于长轮询请求来说，这是很困难的，并且还需要妥 善地管理一个 HTTP 请求队列。长轮询请求可以被中断，但是被代理的请求却不能。Netty 使服 务于多种类型的请求很轻松。</p>
+<ul>
+<li>静态的 HTML 页面——缓存的内容，可以直接返回而不需要进行处理；例子包括一个单 页面的 HTTP 应用程序、robots.txt 和 crossdomain.xml。</li>
+<li>REST 请求——Firebase 支持传统的GET、 POST、 PUT、 DELETE、 PATCH以及OPTIONS请求。</li>
+<li>WebSocket——浏览器和 Firebase 服务器之间的双向连接，拥有它自己的分帧协议。</li>
+<li>长轮询——这些类似于 HTTP 的GET请求，但是应用程序的处理方式有所不同。</li>
+<li>被代理的请求——某些请求不能由接收它们的服务器处理。在这种情况下，Firebase 将会 把这些请求代理到集群中正确的服务器。以便最终用户不必担心数据存储的具体位置。 这些类似于 REST 请求，但是代理服务器处理它们的方式有所不同。</li>
+<li>通过 SSL 的原始字节——一个简单的 TCP 套接字，运行 Firebase 自己的分帧协议，并且优化了握手过程。</li>
+</ul>
+<p>Firebase<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'> 使用 Netty 来设置好它的 ChannelPipeline 以解析传入的请求，并随后适当地重新配置 ChannelPipeline 剩余的其他部分。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在某些情况下，如 WebSocket 和原始字节，一旦某个特定类型的请求被分配给某个 Channel 之后，它就会在它的整个生命周期内保持一致。在 其他情况下，如各种 HTTP 请求，该分配则必须以每个消息为基础进行赋值。同一个 Channel 可以处理 REST 请求、长轮询请求以及被代理的请求。</span></p>
+
+        <h2 id="控制sslhandler"   >
+          <a href="#控制sslhandler" class="heading-link"><i class="fas fa-link"></i></a>控制SslHandler</h2>
+      
+<p>Netty 的 SslHandler 类是 Firebase 如何使用 Netty 来对它的网络通信进行细粒度控制的一 个例子。当传统的 Web 工作栈使用 Apache 或者 Nginx 之类的 HTTP 服务器来将请求传递给应用 程序时，传入的 SSL 请求在被应用程序的代码接收到的时候就已经被解码了。在多租户的架构 体系中，很难将部分的加密流量分配给使用了某个特定服务的应用程序的租户。这很复杂，因为 事实上多个应用程序可能使用了相同的加密 Channel 来和 Firebase 通信（例如，用户可能在不 同的标签页中打开了两个 Firebase 应用程序）。为了解决这个问题，Firebase 需要在 SSL 请求被 解码之前对它们拥有足够的控制来处理它们。</p>
+<blockquote>
+<p><strong>用户和租户</strong></p>
+<p>用户：强调的是“用”，比如你是某宝的用户，你使用了它的服务。</p>
+<p>租户：强调的是“租”，一定是有什么资源租给你了。比如你使用阿里云的存储服务，阿里是“租”给你它的存储设备，你是它的租户，别人不会看见你存储的数据，就像你租的房子别人不能翻查一样。当然同时你也是阿里云网站的用户。</p>
+<blockquote>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>多用户共享的是OS资源，多租户共享的是云上的IaaS资源</span></p>
+</blockquote>
+</blockquote>
+<p>Firebase 基于带宽向客户进行收费。然而，对于某个消息来说，在 SSL 解密被执行之前，要 收取费用的账户通常是不知道的，因为它被包含在加密了的有效负载中。Netty 使得 Firebase 可 以在 ChannelPipeline 中的多个位置对流量进行拦截，因此对于<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>字节数的统计</span>可以从字节刚被从套接字读取出来时便立即开始。在消息被解密并且被 Firebase 的服务器端逻辑处理之后，字 节计数便可以被分配给对应的账户。在构建这项功能时，Netty 在协议栈的每一层上，都提供了 对于处理网络通信的控制，并且也使得非常精确的计费、限流以及速率限制成为了可能，所有的 这一切都对业务具有显著的影响。</p>
+<p>Netty 使得通过少量的 Scala 代码便可以拦截所有的入站消息和出站消息并且统计字节数成为了可能，如代码清单 14-3 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200914091143.png"  alt="" />
+      </p>
+<h2 id=""><a class="markdownIt-Anchor" href="#"></a> </h2>
+
+        <h2 id="firebase小结"   >
+          <a href="#firebase小结" class="heading-link"><i class="fas fa-link"></i></a>Firebase小结</h2>
+      
+<p>在 Firebase 的实时数据同步服务的服务器端架构中，Netty 扮演了不可或缺的角色。它使得 可以支持一个异构的客户端生态系统，其中包括了各种各样的浏览器，以及完全由 Firebase 控制 的客户端。使用 Netty，Firebase 可以在每个服务器上每秒钟处理数以万计的消息。Netty 之所以 非常了不起，有以下几个原因。</p>
+<ul>
+<li>它很快。开发原型只需要几天时间，并且从来不是生产瓶颈。</li>
+<li>它的抽象层次具有良好的定位。Netty 提供了必要的细粒度控制，并且允许在控制流的每一步进行自定义。</li>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>它支持在同一个端口上支撑多种协议。HTTP、WebSocket、长轮询以及独立的 TCP 协议。</span></li>
+<li>它的 GitHub 库是一流的。精心编写的 Javadoc 使得可以无障碍地利用它进行开发。</li>
+<li>它拥有一个非常活跃的社区。社区非常积极地修复问题，并且认真地考虑所有的反馈以及 合并请求。此外，Netty 团队还提供了优秀的最新的示例代码。Netty 是一个优秀的、维护良 好的框架，而且它已经成为了构建和伸缩 Firebase 的基础设施的基础要素。如果没有 Netty 的速度、控制、抽象以及了不起的团队，那么 Firebase 中的实时数据同步将无从谈起。</li>
+</ul>
+
+        <h1 id="urban-airship构建移动服务"   >
+          <a href="#urban-airship构建移动服务" class="heading-link"><i class="fas fa-link"></i></a>Urban Airship——构建移动服务</h1>
+      
+<p><strong>Erik Onnen， 架构副总裁</strong></p>
+<p>随着智能手机的使用以前所未有的速度在全球范围内不断增长，涌现了大量的服务提供商， 以协助开发者和市场人员提供令人惊叹不已的终端用户体验。不同于它们的功能手机前辈，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>智能 手机渴求 IP 连接，并通过多个渠道（3G、4G、WiFi、WiMAX 以及蓝牙）来寻求连接。随着越 来越多的这些设备通过基于 IP 的协议连接到公共网络，对于后端服务提供商来说，伸缩性、延 迟以及吞吐量方面的挑战变得越来越艰巨了。</span></p>
+<p>值得庆幸的是，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Netty 非常适用于处理由随时在线的移动设备的<strong>惊群效应</strong>所带来的许多问题</span>。本节将详细地介绍 Netty 在伸缩移动开发人员和市场人员平台——Urban Airship 时的几个实际应用。</p>
+
+        <h2 id="移动消息的基础知识"   >
+          <a href="#移动消息的基础知识" class="heading-link"><i class="fas fa-link"></i></a>移动消息的基础知识</h2>
+      
+<p>虽然市场人员长期以来都使用 SMS 来作为一种触达移动设备的通道，但是最近一种被称为推送通知的功能正在迅速地成为向智能手机发送消息的首选机制。推送通知通常使用较为便宜的数据通道，每条消息的价格只是 SMS 费用的一小部分。推送通知的吞吐量通常都比 SMS 高 2～3 个数 量级，所以它成为了突发新闻的理想通道。最重要的是，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>推送通知为用户提供了设备驱动的对推送通道的控制。如果一个用户不喜欢某个应用程序的通知消息，那么用户可以禁用该应用程序的通知， 或者干脆删除该应用程序。</span></p>
+<p>在一个非常高的级别上，设备和推送通知行为之间的交互类似于图 14-6 中所描述的那样。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915083835.png"  alt="" />
+      </p>
+<p>在高级别上，当应用程序开发人员想要发送推送通知给某台设备时，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>开发人员必须要考虑存储有关设备及其应用程序安装的信息</span> 。通常，应用程序的安装都将会执行代码以<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>检索一个平台相关的标识符，并且将该标识符上报给一个持久化该标识符的中心化服务</span>。稍后，应用程序安装 之外的逻辑将会发起一个请求以向该设备投递一条消息。</p>
+<p>一旦一个应用程序的安装已经将它的标识符注册到了后端服务，那么推送消息的递交就可以反过来采取两种方式。在第一种方式中，使用应用程序维护一条到后端服务的直接连接，消息可 以被直接递交给应用程序本身。第二种方式更加常见，在这种方式中，应用程序将依赖第三方代 表该后端服务来将消息递交给应用程序。在 Urban Airship，这两种递交推送通知的方式都有使用， 而且也都大量地使用了 Netty。</p>
+
+        <h2 id="第三方递交"   >
+          <a href="#第三方递交" class="heading-link"><i class="fas fa-link"></i></a>第三方递交</h2>
+      
+<p>在第三方推送递交的情况下，每个推送通知平台都为开发者提供了一个不同的 API，来将消 息递交给应用程序安装。这些 API 有着不同的协议（基于二进制的或者基于文本的）、身份验证 （OAuth、X.509 等）以及能力。对于集成它们并且达到最佳的吞吐量，每种方式都有着其各自不 同的挑战。</p>
+<p>尽管事实上每个这些提供商的根本目的都是向应用程序递交通知消息，但是它们各自又都采 取了不同的方式，这对系统集成商造成了重大的影响。例如，苹果公司的 Apple 推送通知服务 （APNS）定义了一个严格的<strong>二进制协议</strong>；而其他的提供商则将它们的服务构建在了某种形式的 <strong>HTTP</strong> 之上，所有的这些微妙变化都影响了如何以最佳的方式达到最大的吞吐量。值得庆幸的是， Netty 是一个灵活得令人惊奇的工具，它为消除不同协议之间的差异提供了极大的帮助。</p>
+<p>接下来的几节将提供 Urban Airship 是如何使用 Netty 来集成两个上面所列出的服务提供商的例子。</p>
+
+        <h2 id="使用二进制协议的例子"   >
+          <a href="#使用二进制协议的例子" class="heading-link"><i class="fas fa-link"></i></a>使用二进制协议的例子</h2>
+      
+<p>苹果公司的 APNS 是一个具有特定的网络字节序的有效载荷的二进制协议。发送一个 APNS 通知将涉及下面的事件序列：</p>
+<ol>
+<li>通过 SSLv3 连接将 TCP 套接字连接到 APNS 服务器，并用 X.509 证书进行身份认证；</li>
+<li>根据Apple定义的格式 ，构造推送消息的二进制表示形式；</li>
+<li>将消息写出到套接字；</li>
+<li>如果你已经准备好了确定任何和已经发送的消息相关的错误代码，则从套接字中读取；</li>
+<li>如果有错误发生，则重新连接该套接字，并从步骤 2 继续。</li>
+</ol>
+<p>作为格式化二进制消息的一部分，消息的生产者需要生成一个对于 APNS 系统透明的标识 符。一旦消息无效（如不正确的格式、大小或者设备信息），那么该标识符将会在步骤 4 的错误 响应消息中返回给客户端。</p>
+<p>虽然从表面上看，该协议似乎简单明了，但是想要成功地解决所有上述问题，还是有一些微妙的细节，尤其是在 JVM 上。</p>
+<ul>
+<li>APNS 规范规定，特定的有效载荷值需要以大端字节序进行发送（如令牌长度）。</li>
+<li>在前面的操作序列中的第 3 步要求两个解决方案二选一。因为 JVM 不允许从一个已经关闭的套接字中读取数据，即使在输出缓冲区中有数据存在，所以你有两个选项。
+<ul>
+<li>在一次写出操作之后，在该套接字上执行带有超时的阻塞读取动作。这种方式有多个缺点，具体如下。
+<ul>
+<li>阻塞等待错误消息的时间长短是不确定的。 错误可能会发生在数毫秒或者数秒 之内。</li>
+<li>由于套接字对象无法在多个线程之间共享，所以在等待错误消息时，对套接字的 写操作必须立即阻塞。这将对吞吐量造成巨大的影响。如果在一次套接字写操作 中递交单个消息，那么在直到读取超时发生之前，该套接字上都不会发出更多的 消息。当你要递交数千万的消息时，每个消息之间都有 3 秒的延迟是无法接受的。</li>
+<li>依赖套接字超时是一项昂贵的操作。它将导致一个异常被抛出，以及几个不必要的 系统调用。</li>
+</ul>
+</li>
+<li>使用异步 I/O。在这个模型中，读操作和写操作都不会阻塞。这使得写入者可以持续地给 APNS 发送消息，同时也允许操作系统在数据可供读取时通知用户代码。</li>
+</ul>
+</li>
+</ul>
+<p>Netty 使得可以轻松地解决所有的这些问题，同时提供了令人惊叹的吞吐量。</p>
+<p>首先，让我们看看 Netty 是如何简化使用正确的字节序打包二进制 APNS 消息的，如代码清单 14-4 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915085008.png"  alt="" />
+      </p>
+<p>关于该实现的一些重要说明如下。</p>
+<ul>
+<li>Java 数组的长度属性值始终是一个整数。但是，APNS 协议需要一个 2- byte 值。在这种 情况下，有效负载的长度已经在其他的地方验证过了，所以在这里将其强制转换为 short 是安全的。注意，如果没有显式地将 ByteBuf 构造为大端字节序，那么在处理 short 和 int 类型的值时则可能会出现各种微妙的错误。</li>
+<li>不同于标准的 java.nio.ByteBuffer ，没有必要翻转缓冲区（即调用 ByteBuffer 的 flip()方法），也没必要关心它的位 置——Netty的 ByteBuf 将会自动管理用于读取和写入的位置。</li>
+</ul>
+<p>使用少量的代码，Netty 已经使得创建一个格式正确的 APNS 消息的过程变成小事一桩了。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'> 因为这个消息现在已经被打包进了一个 ByteBuf ，所以当消息准备好发送时，便可以很容易地 被直接写入连接了 APNS 的 Channel </span>。</p>
+<p>可以通过多重机制连接 APNS，但是最基本的，是需要一个使用 SslHandler 和解码器来 填充 ChannelPipeline 的 ChannelInitializer ， 如代码清单 14-5 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915085240.png"  alt="" />
+      </p>
+<p>值得注意的是，Netty 使得协商结合了异步 I/O 的 X.509 认证的连接变得多么的容易。在 Urban Airship 早期的没有使用 Netty 的原型 APNS 的代码中， 协商一个异步的 X.509 认证的 连接需要 80 多行代码和一个线程池， 而这只仅仅是为了建立连接。 Netty 隐藏了所有的复杂 性，包括 SSL 握手、身份验证、最重要的将明文的字节加密为密文，以及使用 SSL 所带来的 密钥的重新协商。这些 JDK 中异常无聊的、容易出错的并且缺乏文档的 API 都被隐藏在了 3 行 Netty 代码之后。</p>
+<p>在 Urban Airship，在所有和众多的包括 APNS 以及 Google 的 GCM 的第三方推送通知服务 的连接中，Netty 都扮演了重要的角色。在每种情况下，Netty 都足够灵活，允许显式地控制从更 高级别的 HTTP 的连接行为到基本的套接字级别的配置（如 TCP keep-alive 以及套接字缓冲区大 小）的集成如何生效。</p>
+
+        <h2 id="直接面向设备的递交"   >
+          <a href="#直接面向设备的递交" class="heading-link"><i class="fas fa-link"></i></a>直接面向设备的递交</h2>
+      
+<p>上一节提供了 Urban Airship 如何与第三方集成以进行消息递交的内部细节。在谈及图 14-6 时， 需要注意的是，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>将消息递交到设备有两种方式。除了通过第三方来递交消息之外，Urban Airship 还有直接作为消息递交通道的经验</span>。在作为这种角色时，单个设备将直接连接 Urban Airship 的基础设施，绕过第三方提供商。这种方式也带来了一组截然不同的挑战。</p>
+<ul>
+<li><strong>由移动设备发出的套接字连接往往是短暂的</strong>。根据不同的条件，移动设备将频繁地在不 同类型的网络之间进行切换。对于移动服务的后端提供商来说，设备将不断地重新连接， 并将感受到短暂而又频繁的连接周期。</li>
+<li><strong>跨平台的连接性是不规则的</strong>。从网络的角度来看，平板设备的连接性往往表现得和移动 电话不一样，而对比于台式计算机，移动电话的连接性的表现又不一样。</li>
+<li><strong>移动电话向后端服务提供商更新的频率一定会增加</strong>。移动电话越来越多地被应用于日常 任务中，不仅产生了大量常规的网络流量，而且也为后端服务提供商提供了大量的分 析数据。</li>
+<li><strong>电池和带宽不能被忽略</strong>。不同于传统的桌面环境，移动电话通常使用有限的数据流量包。 服务提供商必须要尊重最终用户只有有限的电池使用时间，而且他们使用昂贵的、速率 有限的（蜂窝移动数据网络）带宽这一事实。滥用两者之一都通常会导致应用被卸载， 这对于移动开发人员来说可能是最坏的结果了。</li>
+<li><strong>基础设施的所有方面都需要大规模的伸缩</strong>。随着移动设备普及程度的不断增加，更多的 应用程序安装量将会导致更多的到移动服务的基础设施的连接。由于移动设备的庞大规 模和增长，这个列表中的每一个前面提到的元素都将变得愈加复杂。</li>
+</ul>
+<p>随着时间的推移，Urban Airship 从移动设备的不断增长中学到了几点关键的经验教训：</p>
+<ul>
+<li>移动运营商的多样性可以对移动设备的连接性造成巨大的影响；</li>
+<li>许多运营商都不允许 TCP 的 keep-alive 特性，因此许多运营商都会积极地剔除空闲的 TCP 会话；</li>
+<li>UDP 不是一个可行的向移动设备发送消息的通道，因为许多的运营商都禁止它；</li>
+<li>SSLv3 所带来的开销对于短暂的连接来说是巨大的痛苦。</li>
+</ul>
+<p>鉴于移动增长的挑战，以及 Urban Airship 的经验教训，Netty 对于实现一个移动消息平台来 说简直就是天作之合，原因将在以下各节强调。</p>
+
+        <h2 id="netty擅长处理大量的并发连接"   >
+          <a href="#netty擅长处理大量的并发连接" class="heading-link"><i class="fas fa-link"></i></a>Netty擅长处理大量的并发连接</h2>
+      
+<p>如上一节中所提到的， Netty使得可以轻松地在JVM平台上支持异步I/O。 因为Netty运行在 JVM之上，并且因为JVM在Linux上将<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>最终使用Linux的epoll方面的设施来管理套接字文件描述符 中所感兴趣的事件（interest），所 以Netty使得开发者能够轻松地接受大量打开的套接字</span>——每一 个Linux进程将近一百万的TCP连接，从而适应快速增长的移动设备的规模。有了这样的伸缩能 力，服务提供商便可以在保持低成本的同时，允许大量的设备连接到物理服务器上的一个单独的 进程 。</p>
+<blockquote>
+<p>注意，在这种情况下云服务器和物理服务器的区别。尽管虚拟化提供了许多的好处，但是领先的云计算提供商仍然未能支持到单个虚拟主机超过 200 000～300 000 的并发 TCP 连接。当连接达到或者超过这种规模时，建议使用裸机（bare metal）服务器，并且密切关注网络接口卡（Network Interface Card，NIC） 提供商。</p>
+</blockquote>
+<p>在受控的测试以及优化了配置选项以使用少量的内存的条件下， 一个基于 Netty 的服务 得以容纳略少于 100 万（约为 998 000）的连接。在这种情况下，这个限制从根本上来说是由于 Linux 内核强制硬编码了每个进程限制 100 万个文件句柄。如果 JVM 本身没有持有大量的 套接字以及用于 JAR 文件的文件描述符，那么该服务器可能本能够处理更多的连接，而所有 的这一切都在一个 4GB 大小的堆上。 利用这种效能， Urban Airship 成功地维持了超过 2000 万的到它的基础设施的持久化的 TCP 套接字连接以进行消息递交，所有的这一切都只使用了 少量的服务器。</p>
+<p>值得注意的是，虽然在实践中，一个单一的基于 Netty 的服务便能够处理将近 1 百万的入站 TCP 套接字连接，但是这样做并不一定就是务实的或者明智的。如同分布式计算中的所有陷阱一 样，主机将会失败、进程将需要重新启动并且将会发生不可预期的行为。由于这些现实的问题， 适当的容量规划意味着需要考虑到单个进程失败的后果。</p>
+
+        <h2 id="urban-airship小结跨越防火墙边界"   >
+          <a href="#urban-airship小结跨越防火墙边界" class="heading-link"><i class="fas fa-link"></i></a>Urban Airship小结——跨越防火墙边界</h2>
+      
+<p>我们已经演示了两个在 Urban Airship 内部网络中每天都会使用 Netty 的场景。Netty 适合这 些用途，并且工作得非常出色，但在 Urban Airship 内部的许多其他的组件中也有它作为脚手架存在的身影。</p>
+<ol>
+<li>
+<p>内部的 RPC 框架</p>
+<p>Netty 一直都是 Urban Airship 内部的 RPC 框架的核心， 其一直都在不断进化。 今天， 这 个框架每秒钟可以处理数以十万计的请求， 并且拥有相当低的延迟以及杰出的吞吐量。 几乎 每个由 Urban Airship 发出的 API 请求都经由了多个后端服务处理， 而 Netty 正是所有这些服务的核心。</p>
+</li>
+<li>
+<p>负载和性能测试</p>
+<p>Netty 在 Urban Airship 已经被用于几个不同的负载测试框架和性能测试框架。例如，在测试 前面所描述的设备消息服务时， 为了模拟数百万的设备连接， Netty 和一个 Redis 实例 （<span class="exturl"><a class="exturl__link"   href="http://redis.io/%EF%BC%89%E7%9B%B8%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8%EF%BC%8C%E4%BB%A5%E6%9C%80%E5%B0%8F%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B6%B3%E8%BF%B9%EF%BC%88%E8%B4%9F%E8%BD%BD%EF%BC%89%E6%B5%8B%E8%AF%95%E4%BA%86%E7%AB%AF%E5%88%B0%E7%AB%AF%E7%9A%84%E6%B6%88%E6%81%AF%E5%90%9E%E5%90%90%E9%87%8F%E3%80%82"  target="_blank" rel="noopener">http://redis.io/）相结合使用，以最小的客户端足迹（负载）测试了端到端的消息吞吐量。</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</li>
+<li>
+<p>同步协议的异步客户端</p>
+<p>对于一些内部的使用场景，Urban Airship 一直都在尝试使用 Netty 来为典型的同步协议创建异 步的客户端，包括如 Apache Kafka（<span class="exturl"><a class="exturl__link"   href="http://kafka.apache.org/%EF%BC%89%E4%BB%A5%E5%8F%8A"  target="_blank" rel="noopener">http://kafka.apache.org/）以及</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> Memcached（<span class="exturl"><a class="exturl__link"   href="http://memcached.org/%EF%BC%89"  target="_blank" rel="noopener">http://memcached.org/）</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 这样的服务。Netty 的灵活性使得我们能够很容易地打造天然异步的客户端，并且能够在真正的异 步或同步的实现之间来回地切换，而不需要更改任何的上游代码。</p>
+</li>
+</ol>
+<p>总而言之，Netty 一直都是 Urban Airship 服务的基石。其作者和社区都是极其出色的，并为 任何需要在 JVM 上进行网络通信的应用程序，创造了一个真正意义上的一流框架。</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>本章旨在揭示真实世界中的 Netty 的使用场景，以及它是如何帮助这些公司解决了重大的网 络通信问题的。值得注意的是，在所有的场景下，Netty 都不仅是被作为一个代码框架而使用， 而且还是开发和架构最佳实践的重要组成部分。</p>
+<p>在下一章中，我们将介绍由 Facebook 和 Twitter 所贡献的案例研究，描述两个开源项目，这 两个项目是从基于 Netty 的最初被开发用来满足内部需求的项目演化而来的。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/14_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/14_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/netty/">netty</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/15_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">案例研究，第二部分</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/13_%E4%BD%BF%E7%94%A8UDP%E5%B9%BF%E6%92%AD%E4%BA%8B%E4%BB%B6/"><span class="paginator-prev__text">使用UDP广播事件</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#droplr构建移动服务"><span class="toc-number">1.</span> <span class="toc-text">
+          Droplr——构建移动服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#这一切的起因"><span class="toc-number">1.1.</span> <span class="toc-text">
+          这一切的起因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#droplr是怎样工作的"><span class="toc-number">1.2.</span> <span class="toc-text">
+          Droplr是怎样工作的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建一个更加快速的上传体验"><span class="toc-number">1.3.</span> <span class="toc-text">
+          创建一个更加快速的上传体验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#工作栈"><span class="toc-number">1.4.</span> <span class="toc-text">
+          工作栈</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本要素服务器和流水线"><span class="toc-number">1.4.1.</span> <span class="toc-text">
+          基本要素：服务器和流水线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请求处理器"><span class="toc-number">1.4.2.</span> <span class="toc-text">
+          请求处理器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#父接口"><span class="toc-number">1.4.3.</span> <span class="toc-text">
+          父接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#处理器的实现"><span class="toc-number">1.4.4.</span> <span class="toc-text">
+          处理器的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#上传请求处理器"><span class="toc-number">1.4.5.</span> <span class="toc-text">
+          上传请求处理器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#性能"><span class="toc-number">1.5.</span> <span class="toc-text">
+          性能</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结站在巨人的肩膀上"><span class="toc-number">1.6.</span> <span class="toc-text">
+          小结——站在巨人的肩膀上</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#firebase实时的数据同步服务"><span class="toc-number">2.</span> <span class="toc-text">
+          Firebase——实时的数据同步服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#firebase的架构"><span class="toc-number">2.1.</span> <span class="toc-text">
+          Firebase的架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#长轮询"><span class="toc-number">2.2.</span> <span class="toc-text">
+          长轮询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#保证消息的按顺序投递"><span class="toc-number">2.2.1.</span> <span class="toc-text">
+          保证消息的按顺序投递</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#关闭通知"><span class="toc-number">2.2.2.</span> <span class="toc-text">
+          关闭通知</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#http-11-keep-alive和流水线化"><span class="toc-number">2.3.</span> <span class="toc-text">
+          HTTP 1.1 keep-alive和流水线化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#控制sslhandler"><span class="toc-number">2.4.</span> <span class="toc-text">
+          控制SslHandler</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#"><span class="toc-number">2.5.</span> <span class="toc-text"> </span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#firebase小结"><span class="toc-number">2.6.</span> <span class="toc-text">
+          Firebase小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#urban-airship构建移动服务"><span class="toc-number">3.</span> <span class="toc-text">
+          Urban Airship——构建移动服务</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#移动消息的基础知识"><span class="toc-number">3.1.</span> <span class="toc-text">
+          移动消息的基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#第三方递交"><span class="toc-number">3.2.</span> <span class="toc-text">
+          第三方递交</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用二进制协议的例子"><span class="toc-number">3.3.</span> <span class="toc-text">
+          使用二进制协议的例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#直接面向设备的递交"><span class="toc-number">3.4.</span> <span class="toc-text">
+          直接面向设备的递交</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#netty擅长处理大量的并发连接"><span class="toc-number">3.5.</span> <span class="toc-text">
+          Netty擅长处理大量的并发连接</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#urban-airship小结跨越防火墙边界"><span class="toc-number">3.6.</span> <span class="toc-text">
+          Urban Airship小结——跨越防火墙边界</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

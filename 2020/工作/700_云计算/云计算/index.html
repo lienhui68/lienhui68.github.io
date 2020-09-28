@@ -1,0 +1,433 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;20449565                      云计算产生的背景        传统的应用正在变得越来越复杂：需要支持更多的用户、需要更强的计算能力、需要更加稳定安全等等 而为了支撑这些不断增长的需求，企业不得不去购买各类硬件设备（服务器，存储，带宽等等）和软件（数据库，中间件等等），另外还需要组建一个完整的运维团队">
+<meta property="og:type" content="article">
+<meta property="og:title" content="云计算">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/%E4%BA%91%E8%AE%A1%E7%AE%97/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;www.zhihu.com&#x2F;question&#x2F;20449565                      云计算产生的背景        传统的应用正在变得越来越复杂：需要支持更多的用户、需要更强的计算能力、需要更加稳定安全等等 而为了支撑这些不断增长的需求，企业不得不去购买各类硬件设备（服务器，存储，带宽等等）和软件（数据库，中间件等等），另外还需要组建一个完整的运维团队">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913170838.png">
+<meta property="article:published_time" content="2020-09-16T16:25:27.043Z">
+<meta property="article:modified_time" content="2020-09-16T16:25:27.052Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="云计算">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913170838.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>云计算 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/%E4%BA%91%E8%AE%A1%E7%AE%97/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">云计算</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">14分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/20449565"  target="_blank" rel="noopener">https://www.zhihu.com/question/20449565</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h1 id="云计算产生的背景"   >
+          <a href="#云计算产生的背景" class="heading-link"><i class="fas fa-link"></i></a>云计算产生的背景</h1>
+      
+<p>传统的应用正在变得越来越复杂：需要支持更多的用户、需要更强的计算能力、需要更加稳定安全等等</p>
+<p>而为了支撑这些不断增长的需求，企业不得不去购买各类硬件设备（服务器，存储，带宽等等）和软件（数据库，中间件等等），另外还需要组建一个完整的运维团队来支持这些设备或软件的正常运作，这些维护工作就包括安装、配置、测试、运行、升级以及保证系统的安全等。</p>
+<a id="more"></a>
+<p>便会发现支持这些应用的开销变得非常巨大，而且它们的费用会随着你应用的数量或规模的增加而不断提高。</p>
+<p>这也是为什么即使是在那些拥有很出色IT部门的大企业中，那些用户仍在不断抱怨他们所使用的系统难以满足他们的需求。</p>
+<p>而对于那些中小规模的企业，甚至个人创业者来说，创造软件产品的运维成本就更加难以承受了</p>
+<p><strong>基于此，云计算应运而生：更大量、更快速、更强大</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913170838.png"  alt="" />
+      </p>
+
+        <h1 id="概念"   >
+          <a href="#概念" class="heading-link"><i class="fas fa-link"></i></a>概念</h1>
+      
+<p>将应用部署到云端后，可以不必再关注那些令人头疼的硬件和软件问题，它们会由云服务提供商的专业团队去解决。使用的是共享的硬件，这意味着像使用一个工具一样去利用云服务（就像插上插座，你就能使用电一样简单）。</p>
+<p>只需要按照你的需要来支付相应的费用，而关于软件的更新，资源的按需扩展都能自动完成。</p>
+<p>云计算是将我们传统的IT工作(面向服务端)转为以网络为依托的云平台(面向云端)运行，NIST（美国国家标准与工作研究院）在2011年下半年公布了云计算定义的最终稿，给出了云计算模式所具备的</p>
+<p><strong>5个基本特征</strong></p>
+<ul>
+<li>按需自助服务</li>
+<li>广泛的网络访问</li>
+<li>资源共享</li>
+<li>快速的可伸缩性</li>
+<li>可度量的服务</li>
+</ul>
+<p><strong>3种服务模式</strong></p>
+<ul>
+<li>SaaS（软件即服务）</li>
+<li>PaaS（平台即服务）</li>
+<li>IaaS（基础设施即服务）</li>
+</ul>
+<p><strong>4种部署方式</strong></p>
+<ul>
+<li>私有云</li>
+<li>社区云</li>
+<li>公有云</li>
+<li>混合云</li>
+</ul>
+<p><strong>云计算发展较早，经过10年发展，国内已经拥有超百亿规模，云计算也早已不再只是充当存储与计算的工具而已！</strong></p>
+<p><strong>下面分享几种关于云计算的通俗观点</strong></p>
+<ul>
+<li>
+<p>水龙头观点</p>
+<p><strong>当需要的时候，扭开水龙头，水就来了，我只需要操心交水费就是了</strong>！</p>
+<p>当你需要用一个软件时，你不用跑去电脑城，打开应用商店，它就下载下来了，你只需要交钱就是了；当你想看报纸的时候，你不用跑去报刊亭，只要打开头条新闻，新闻唾手可得；当你想看书的时候，你不用跑去书城，只需要打开阅读软件，找到这样的一本书，在手机上阅读；当你想听音乐的时候，你不用再跑去音像店苦苦找寻CD光碟，打开音乐软件，就能聆听音乐；</p>
+<blockquote>
+<p><strong>云计算</strong>，像在每个不同地区开设不同的自来水公司，没有地域限制，优秀的云软件服务商，向世界每个角落提供软件服务——就像天空上的云一样，不论你身处何方，只要你抬头，就能看见！</p>
+</blockquote>
+</li>
+<li>
+<p>荤段子观点</p>
+<p>网上很流行的一种比喻：男人找个女友或老婆是自建私有云，单身约炮或者到娱乐场所消费是公有云服务，按需使用并可弹性扩容，已婚男人找二奶小蜜则属于混合云。</p>
+<p>这种解释方式对男人比较适用，通常稍微一解释就心领神会！</p>
+</li>
+<li>
+<p>共享经济观点</p>
+<p>出行需要用车，云计算或者云服务好比乘坐出租车或专车快车共享单车，随时需要随时用，按用量（路程）付费即可。</p>
+<p>自己买车开车是混合云，车是自己的，出去付费停车或加油相当于部分使用公有云，而亚马逊或微软云在国内跟黑车差不多被政策限制</p>
+</li>
+<li>
+<p>少不了的一日三餐</p>
+<p>饿了要吃饭，在家里自己做饭属于自建私有云，需要建造厨房购买锅碗瓢盆柴米油盐等，吃完饭还需要自己刷锅洗碗等运维工作，费时费力；</p>
+<p>外面餐馆提供的就相当于公有云服务，按需胡吃海塞吃完结账抹嘴走人，餐馆后厨如何安排做菜顺序并加快出菜速度就是负载均衡和虚拟化概念；</p>
+<p>请厨师到家里上门做饭则属于典型的混合云，在资产安全的情况下有限使用公有云。</p>
+</li>
+</ul>
+
+        <h1 id="私有云和公有云的区别"   >
+          <a href="#私有云和公有云的区别" class="heading-link"><i class="fas fa-link"></i></a>私有云和公有云的区别</h1>
+      
+<p><strong>公有云</strong></p>
+<p>“公有”反映了这类云服务并非用户所拥有，公有云是面向大众提供计算资源的服务。是由第三方提供资源，如应用和存储，这些资源是在服务商的场所内部署。用户通过互联网来获取这些资源的使用。</p>
+<p>公有云的优势是成本低，扩展性非常好。缺点是对于云端的资源缺乏控制、保密数据的安全性、网络性能和匹配性问题。</p>
+<p><strong>私有云</strong></p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>私有云是企业传统数据中心的延伸和优化，能够针对各种功能提供存储容量和处理能力。</span>“私有”更多是指此类平台属于非共享资源，而非指其安全优势。私有云是为了一个客户单独使用而构建的，所以这些数据、安全和服务质量都较公有云有着更好地保障。而私有云由于是客户独享，则用户拥有着构建云的基础设置，并可以控制在此工作设置上部署应有程序的方式。</p>
+<p>在私有云模式中，云平台的资源为包含多个用户的单一组织专用。私有云可由该组织、第三方或两者联合拥有、管理和运营。私有云的部署场所可以是在机构内部，也可以在外部。</p>
+<p><strong>区别</strong></p>
+<p>私有云和公有云的显著差别在于对数据的掌控。采用公有云服务的企业必须将数据托版管于云服务商权的数据中心，企业对数据的掌控力度自然减弱，一旦数据中心因自然灾害、人为因素或法律规范等各方面因素导致数据丢失，将对企业形成致命伤害。此前已有美国企业因公有云数据中心受飓风影响丢失数据和因数据中心数据被政府没收而无法找回的案例。<br />
+因此，企业若想对数据拥有较大掌控力度，在防火墙内构建私有云是最佳选择。<br />
+除此之外，私有云在数据安全、数据备份等方面也有更多的可选择空间。公有云当然也具备数据安全服务和数据备份能力，但企业对此的控制力度较差，不能处于主导地位，换句话说，公有云服务商的数据安全服务和数据备份措施是为保证整个数据中心的数据安全而进行的，并没有特别针对某个企业或某些数据的举措。而私有云在这方面则拥有更多灵活性，企业可以选择更安全、灵活的数据安全策略和数据备份计划。<br />
+当然，可利用现有IT资源也是私有云的优势之一，而如天锐绿盘提供数据加密、私密文件保险柜等功能的私有云产品更是基于私有云基础上的个性服务。私有云有了更多的个性化属性，企业才能根据自身情况进行服务定制，使私有云和企业现有IT资源无缝对接。</p>
+
+        <h1 id="五大特点"   >
+          <a href="#五大特点" class="heading-link"><i class="fas fa-link"></i></a>五大特点</h1>
+      
+
+        <h2 id="大规模-分布式"   >
+          <a href="#大规模-分布式" class="heading-link"><i class="fas fa-link"></i></a>大规模、分布式</h2>
+      
+<p>“云”一般具有相当的规模，一些知名的云供应商如Google云计算、Amazon、IBM、微软、阿里等也都拥能拥有上百万级的服务器规模。而依靠这些分布式的服务器所构建起来的“云”能够为使用者提供前所未有的计算能力。</p>
+
+        <h2 id="虚拟化"   >
+          <a href="#虚拟化" class="heading-link"><i class="fas fa-link"></i></a>虚拟化</h2>
+      
+<p>云计算都会采用虚拟化工作，用户并不需要关注具体的硬件实体，只需要选择一家云服务提供商，注册一个账号，登陆到它们的云控制台，去购买和配置你需要的服务（比如 云服务器，云存储，CDN等等），再为你的应用做一些简单的配置之后，你就可以让你的应用对外服务了，这比传统的在企业的数据中心去部署一套应用要简单方便得多。而且你可以随时随地通过你的PC或移动设备来控制你的资源，这就好像是云服务商为每一个用户都提供了一个IDC(Internet Data Center)一样。</p>
+
+        <h2 id="高可用性和扩展性"   >
+          <a href="#高可用性和扩展性" class="heading-link"><i class="fas fa-link"></i></a>高可用性和扩展性</h2>
+      
+<p>那些知名的云计算供应商一般都会采用数据多副本容错、计算节点同构可互换等措施来保障服务的高可靠性。基于云服务的应用可以持续对外提供服务（7*24小时），另外“云”的规模可以动态伸缩，来满足应用和用户规模增长的需要。</p>
+
+        <h2 id="按需服务更加经济"   >
+          <a href="#按需服务更加经济" class="heading-link"><i class="fas fa-link"></i></a>按需服务，更加经济</h2>
+      
+<p>用户可以根据自己的需要来购买服务，甚至可以按使用量来进行精确计费。这能大大节省IT成本，而资源的整体利用率也将得到明显的改善。</p>
+
+        <h2 id="安全"   >
+          <a href="#安全" class="heading-link"><i class="fas fa-link"></i></a>安全</h2>
+      
+<p>网络安全已经成为所有企业或个人创业者必须面对的问题，企业的IT团队或个人很难应对那些来自网络的恶意攻击，而使用云服务则可以借助更专业的安全团队来有效降低安全风险。</p>
+<p>“云计算”已经深深植入到我们生活中的点点滴滴，平时常用的那些APP或网站，基本都离不开“云计算”作为背后的强大服务和工作支持，如剁手党爱恨交加的淘宝、京东，社交痴迷党的微信、微博等等。于此同时，越来越多的企业机构乃至政务部门，开始使用基于云的平台服务，生活因“云计算”正在发生着革命性的变革和改变！</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/%E4%BA%91%E8%AE%A1%E7%AE%97/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/%E4%BA%91%E8%AE%A1%E7%AE%97/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/">云计算</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/%E5%A4%A7%E6%95%B0%E6%8D%AE%E3%80%81%E4%BA%91%E8%AE%A1%E7%AE%97%E5%92%8C%E6%95%B0%E6%8D%AE%E4%B8%AD%E5%BF%83%E4%B8%89%E8%80%85%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">大数据、云计算和数据中心三者的区别与联系</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/Firebase/"><span class="paginator-prev__text">Firebase</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#云计算产生的背景"><span class="toc-number">1.</span> <span class="toc-text">
+          云计算产生的背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#概念"><span class="toc-number">2.</span> <span class="toc-text">
+          概念</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#私有云和公有云的区别"><span class="toc-number">3.</span> <span class="toc-text">
+          私有云和公有云的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#五大特点"><span class="toc-number">4.</span> <span class="toc-text">
+          五大特点</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#大规模-分布式"><span class="toc-number">4.1.</span> <span class="toc-text">
+          大规模、分布式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚拟化"><span class="toc-number">4.2.</span> <span class="toc-text">
+          虚拟化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高可用性和扩展性"><span class="toc-number">4.3.</span> <span class="toc-text">
+          高可用性和扩展性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#按需服务更加经济"><span class="toc-number">4.4.</span> <span class="toc-text">
+          按需服务，更加经济</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安全"><span class="toc-number">4.5.</span> <span class="toc-text">
+          安全</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

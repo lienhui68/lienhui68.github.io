@@ -1,0 +1,619 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章内容  什么是Scala语言 Java 8与Scala是如何相生相承的 Scala中的函数与Java 8中的函数有哪些区别 类和trait">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面向对象和函数式编程的混合_Java8和Scala的比较">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/15_%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%B7%B7%E5%90%88_Java8%E5%92%8CScala%E7%9A%84%E6%AF%94%E8%BE%83/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章内容  什么是Scala语言 Java 8与Scala是如何相生相承的 Scala中的函数与Java 8中的函数有哪些区别 类和trait">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818010901.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818011412.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818012205.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818012626.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818013238.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818013309.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818015630.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818020302.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021409.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021558.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021625.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021705.png">
+<meta property="article:published_time" content="2020-07-01T01:04:15.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:17.033Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="java8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200818010901.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>面向对象和函数式编程的混合_Java8和Scala的比较 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/15_%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%B7%B7%E5%90%88_Java8%E5%92%8CScala%E7%9A%84%E6%AF%94%E8%BE%83/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">面向对象和函数式编程的混合_Java8和Scala的比较</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">8.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">51分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章内容</strong></p>
+<ul>
+<li>什么是Scala语言</li>
+<li>Java 8与Scala是如何相生相承的</li>
+<li>Scala中的函数与Java 8中的函数有哪些区别</li>
+<li>类和trait</li>
+</ul>
+<a id="more"></a>
+<p>Scala是一种混合了面向对象和函数式编程的语言。它常常被看作Java的一种替代语言，程序 员们希望在运行于JVM上的静态类型语言中使用函数式特性，同时又期望保持Java体验的一致 性。和Java比较起来，Scala提供了更多的特性，包括<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>更复杂的类型系统、类型推断、模式匹配（我 们在14.4节提到过）、定义域语言的结构等</span>。除此之外，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>你可以在Scala代码中直接使用任何一个 Java类库。</span></p>
+<p>你可能会有这样的疑惑，我们为什么要在一本介绍Java 8的书里特别设计一章讨论Scala。本 书的绝大部分内容都在介绍如何在Java中应用函数式编程。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Scala和Java 8极其类似，它们都支持 对集合的函数式处理（类似于对Stream的操作）、一等函数、默认方法。不过Scala将这些思想向 前又推进了一大步：它为实现这些思想提供了大量的特性，这方面它领先了Java 8一大截。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>我们 相信你会发现，对比Scala和Java 8在实现方式上的不同以及了解Java 8目前的局限是非常有趣的。</span> 通过这一章，我们希望能针对这些问题为你提供一些线索，解答一些疑惑。</p>
+<p>请记住，本章的目的并非让你掌握如何编写纯粹的Scala代码，或者了解Scala的方方面面。 不少的特性，比如模式匹配，在Scala中是天然支持的，也非常容易理解，不过这些特性在Java 8 中却并未提供，这部分内容我们在这里不会涉及。本章着重对比Java 8中新引入的特性和该特性 在Scala中的实现，帮助你更全面地理解该特性。比如，你会发现，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>用Scala重新实现原先用Java 完成的代码更简单，可读性也更好。</span></p>
+<p>本章从对Scala的介绍入手：让你了解如何使用Scala编写简单的程序，以及如何处理集合。 紧接着我们会讨论Scala中的函数式，包括一等函数、闭包以及科里化。最后，我们会一起看看 Scala中的类，以及一种名为trait的特性，它是Scala中带默认方法的接口。</p>
+
+        <h1 id="scala简介"   >
+          <a href="#scala简介" class="heading-link"><i class="fas fa-link"></i></a>Scala简介</h1>
+      
+<p>本节会简要地介绍Scala的一些基本特性，让你有一个比较直观的感受：到底简单的Scala程序 怎么编写。我们从一个略微改动的Hello World示例入手，该程序会以两种方式编写，一种以命令 式的风格编写，另一种以函数式的风格编写。接着，我们会看看Scala支持哪些数据结构——List、 Set、Map、Stream、Tuple以及Option——并将它们与Java 8中对应的数据结构一一进行比较。 最后，我们会介绍trait，它是Scala中接口的替代品，支持在对象实例化时对方法进行继承。</p>
+
+        <h2 id="你好啤酒"   >
+          <a href="#你好啤酒" class="heading-link"><i class="fas fa-link"></i></a>你好，啤酒</h2>
+      
+<p>让我们看一个简单的例子，这样你能对Scala的语法、语言特性，以及它与Java的差异有一个 比较直观的认识。我们对经典的Hello World示例进行了微调，让我们来点儿啤酒。你希望在屏幕 上打印输出下面这些内容：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Hello 2 bottles of beer </span><br><span class="line">Hello 3 bottles of beer </span><br><span class="line">Hello 4 bottles of beer </span><br><span class="line">Hello 5 bottles of beer </span><br><span class="line">Hello 6 bottles of beer</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="命令式scala"   >
+          <a href="#命令式scala" class="heading-link"><i class="fas fa-link"></i></a>命令式Scala</h3>
+      
+<p>下面这段代码中，Scala以命令式的风格打印输出这段内容：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818010901.png"  alt="" />
+      </p>
+<p>如何运行这段代码的指导信息可以在 <span class="exturl"><a class="exturl__link"   href="http://www.scala-lang.org/documentation/getting-started.html"  target="_blank" rel="noopener">Scala的官方网站</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 找到。这段代码看起来和你用Java编 写的程序相当类似。它的结构和Java程序几乎一样：它包含了一个名为main的方法，该方法接受 一个由参数构成的数组（类型注释遵循这样的语法s : String，不像Java那样用String s）。 由于main方法不返回值，所以使用Scala不需要像Java那样声明一个类型为void的返回值。</p>
+<blockquote>
+<p>通常而言，在Scala中声明非递归的方法时，不需要显式地返回类型，因为Scala会自动地 替你推断生成一个。</p>
+</blockquote>
+<p>转入main的方法体之前，我们想先讨论下对象的声明。不管怎样，Java中的main方法都需要在某个类中声明。对象的声明产生了一个单例的对象：它声明了一个对象，比如Bear，与此 同时又对其进行了实例化。整个过程中只有一个实例被创建。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>这是第一个以经典的设计模式（即 单例模式）实现语言特性的例子</span>——尽量不拘一格地使用它！此外，你可以将对象声明中的方法 看成静态的，这也是main方法的方法签名中并未显式地声明为静态的原因。</p>
+<p>现在让我们看看main的方法体。它看起来和Java非常类似，但是语句不需要再以分号结尾了 （它成了一种可选项）。方法体中包含了一个while循环，它会递增一个可修改变量n。通过预定 义的方法println，你可以打印输出n的每一个新值。println这一行还展示了Scala的另一个特 性：<strong>字符串插值</strong>。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>字符串插值在字符串的字面量中内嵌变量和表达式。</span>前面的这段代码中，你在 字符串字面量s&quot;Hello ${n} bottles of beer&quot;中直接使用了变量n。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>字符串前附加的插值操作符s</span>，神奇地完成了这一转变。而在Java中，你通常需要使用显式的连接操作，比如&quot;Hello &quot; + n + &quot; bottles of beer&quot;，才能达到同样的效果。</p>
+
+        <h3 id="函数式scala"   >
+          <a href="#函数式scala" class="heading-link"><i class="fas fa-link"></i></a>函数式Scala</h3>
+      
+<p>那么，Scala到底能带来哪些好处呢？毕竟我们在本书里主要讨论的还是函数式。前面的这段 代码利用Java 8的新特性能以更加函数式的方式实现，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Foo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        IntStream.rangeClosed(<span class="number">2</span>, <span class="number">6</span>).forEach(n -&gt; System.out.println(<span class="string">"Hello "</span> + n + <span class="string">" bottles of beer"</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>如果以Scala来实现，它是下面这样的：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818011412.png"  alt="" />
+      </p>
+<p>这种实现看起来和基于Java的版本有几分相似，不过Scala的实现更加简洁。首先，你使用表 达式2 to 6创建了一个区间。这看起来相当特别： 2在这里并非原始数据类型，在Scala中它是 一个类型为Int的对象。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Scala语言里，任何事物都是对象；不像Java那样，Scala没有原始数据类 型一说了。通过这种方式，Scala被转变成为了纯粹的面向对象语言。</span>Scala语言中Int对象支持名 为to的方法，它接受另一个Int对象，返回一个区间。所以，你还可以通过另一种方式实现这一 语句，即<code>2.to(6)</code>。由于<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>接受一个参数的方法可以采用中缀式表达</span>，所以你可以用开头的方式实现这一语句。紧接着，我们看到了foreach（这里的e采用的是小写），它和Java 8中的forEach （使用了大写的E）也很类似。它是对一个区间进行操作的函数（这里你可以再次使用中缀表达式）， 它可以接受Lambda表达式做参数，对区间的每一个元素顺次执行操作。这里Lambda表达式的语 法和Java 8也非常类似，区别是箭头的表示用=&gt;替换了-&gt; ① 。前面的这段代码是函数式的：因为就像我们早期使用while循环时示例的那样，你并未修改任何变量。</p>
+<blockquote>
+<p>① 注意，在Scala语言中，我们使用“匿名函数”或者“闭包”（可以互相替换）来指代Java 8中的Lambda表达式。</p>
+</blockquote>
+
+        <h2 id="基础数据结构list-set-map-tuple-stream以及option"   >
+          <a href="#基础数据结构list-set-map-tuple-stream以及option" class="heading-link"><i class="fas fa-link"></i></a>基础数据结构：List、Set、Map、Tuple、Stream以及Option</h2>
+      
+<p>几杯啤酒之后，你一定已经止住口渴，精神一振了吧？大多数的程序都需要操纵和存储数据， 那么，就让我们一起看看如何在Scala中操作集合，以及它与Java 8中操作的不同。</p>
+
+        <h3 id="创建集合"   >
+          <a href="#创建集合" class="heading-link"><i class="fas fa-link"></i></a>创建集合</h3>
+      
+<p>在Scala中创建集合是非常简单的，这<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>主要归功于它对简洁性的一贯坚持</span>。比如，创建一个 Map，你可以用下面的方式：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> authorsToAge = <span class="type">Map</span>(<span class="string">"Raoul"</span> -&gt; <span class="number">23</span>, <span class="string">"Mario"</span> -&gt; <span class="number">40</span>, <span class="string">"Alan"</span> -&gt; <span class="number">53</span>)</span><br></pre></td></tr></table></div></figure>
+<p>这行代码中，有几件事情是我们首次碰到的。首先，你使用-&gt;语法轻而易举地创建了一个 Map，并完成了键到值的映射，整个过程令人吃惊地简单。你不再需要像Java中那样手工添加每 一个元素：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Integer&gt; authorsToAge = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">authorsToAge.put(<span class="string">"Raoul"</span>, <span class="number">23</span>);</span><br><span class="line">authorsToAge.put(<span class="string">"Mario"</span>, <span class="number">40</span>);</span><br><span class="line">authorsToAge.put(<span class="string">"Alan"</span>, <span class="number">53</span>);</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>关于这一点，也有一些讨论，希望在未来的Java版本中添加类似的语法糖，不过在Java 8中 暂时还没有这样的特性。</span>第二件让人耳目一新的事是你可以选择不对变量authorsToAge的类型进行注解。实际上，你可以编写<code>val authorsToAge : Map[String, Int]</code>这样的代码，显式地声明变量类型，不过<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Scala可以替你推断变量的类型（请注意，即便如此，代码依旧是静态检查 的！所有的变量在编译时都具有确定的类型）。</span>我们会在本章后续部分继续讨论这一特性。第三， 你可以使用val关键字替换var。这二者之间存在什么差别吗？关键字<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>val表明变量是只读的，并 由此不能被赋值（就像Java中声明为final的变量一样）。而关键字var表明变量是可以读写的。</span></p>
+<p>听起来不错，那么其他的集合类型呢？你可以用同样的方式轻松地创建List（一种单向链 表）或者Set（不带冗余数据的集合），如下所示：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> authors = <span class="type">List</span>(<span class="string">"Raoul"</span>, <span class="string">"Mario"</span>, <span class="string">"Alan"</span>) </span><br><span class="line"><span class="keyword">val</span> numbers = <span class="type">Set</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">8</span>)</span><br></pre></td></tr></table></div></figure>
+<p>这里的变量authors包含3个元素，而变量numbers包含5个元素。</p>
+
+        <h3 id="不可变与可变的比较"   >
+          <a href="#不可变与可变的比较" class="heading-link"><i class="fas fa-link"></i></a>不可变与可变的比较</h3>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Scala的集合有一个重要的特质我们应该牢记在心，那就是我们之前创建的集合在默认情况下 都是只读的。</span><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这意味着它们从创建开始就不能修改。这是一种非常有用的特性，因为有了它，你 知道任何时候访问程序中的集合都会返回包含相同元素的集合。</span></p>
+<p>那么，你怎样才能更新Scala语言中不可变的集合呢？回到前面章节介绍的术语，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Scala中的 这些集合都是持久化的：更新一个Scala集合会生成一个新的集合，这个新的集合和之前版本的集合共享大部分的内容，最终的结果是数据尽可能地实现了持久化，避免了图14-3和图14-4中那样 由于改变所引起的问题。由于具备这一属性，你代码的隐式数据依赖更少： 对你代码中集合变 更的困惑（比如在何处更新了集合，什么时候做的更新）也会更少。</span></p>
+<p>让我们看一个实际的例子，具体分析下这一思想是如何影响你的程序设计的。下面这段代码 中，我们会为Set添加一个元素：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818012205.png"  alt="" />
+      </p>
+<p>这个例子中，原始Set对象中的数字没有发生变更。实际的效果是该操作创建了一个新的 Set，并向其中加入了一个新的元素。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>注意，Scala语言并未强制你必须使用不可变集合，它只是让你能更轻松地在你的代码中应用 不可变原则。scala.collection.mutable包中也包含了集合的可变版本。</span></p>
+<blockquote>
+<p><strong>不可修改与不可变的比较</strong></p>
+<p>Java中提供了多种方法创建不可修改的（unmodifiable）集合。 下面的代码中， 变量newNumbers是集合Set对象numbers的一个只读视图：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Set&lt;Integer&gt; numbers = <span class="keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line"></span><br><span class="line">Set&lt;Integer&gt; newNumbers = Collections.unmodifiableSet(numbers);</span><br></pre></td></tr></table></div></figure>
+<p>这意味着你无法通过操作变量newNumbers向其中加入新的元素。不过，不可修改集合仅仅是对可变集合进行了一层封装。通过直接访问numbers变量，你还是能向其中加入元素。</p>
+<p>与此相反，不可变（immutable）集合确保了该集合在任何时候都不会发生变化，无论有多少个变量同时指向它。</p>
+<p>我们在第14章介绍过如何创建一个持久化的数据结构：<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>要操作不可变数据结构时，你需要重新创建一个不可变数据结构，该数据结构会保存它自身修改之前的版本。任何的修改都会创建一个更新的数据结构。</span></p>
+</blockquote>
+
+        <h3 id="使用集合"   >
+          <a href="#使用集合" class="heading-link"><i class="fas fa-link"></i></a>使用集合</h3>
+      
+<p>现在你已经了解了如何创建结合，你还需要了解如何使用这些集合开展工作。我们很快会看 到Scala支持的集合操作和Stream API提供的操作极其类似。比如，在下面的代码片段中，你会发 现熟悉的filter和map，图15-1对这段代码逻辑进行了阐释。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> fileLines = <span class="type">Source</span>.fromFile(<span class="string">"data.txt"</span>).getLines.toList() </span><br><span class="line"><span class="keyword">val</span> linesLongUpper = fileLines.filter(l =&gt; l.length() &gt; <span class="number">10</span>).map(l =&gt; l.toUpperCase())</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818012626.png"  alt="" />
+      </p>
+<p>不用担心第一行的内容，它实现的基本功能是将文件中的所有行转换为一个字符串列表（类 似Java 8提供的Files.readAllLines）。第二行创建了一个由两个操作构成的流水线：</p>
+<ul>
+<li>filter操作会过滤出所有长度超过10的行</li>
+<li>map操作会将这些长的字符串统一转换为大写字符</li>
+</ul>
+<p>这段代码也可以用下面的方式实现：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> linesLongUpper = fileLines filter (_.length() &gt; <span class="number">10</span>) map(_.toUpperCase())</span><br></pre></td></tr></table></div></figure>
+<p>这段代码使用了中缀表达式和下划线<code>_</code>，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>下划线是一种占位符，它按照位置匹配对应的参数。</span>这个例子中，你可以将<code>_.length()</code>解读为<code>l =&gt;l.length()</code>。在传递给filter和map的函 数中，下划线会被绑定到待处理的line参数。</p>
+<p>Scala的集合API提供了很多非常有用的操作。我们强烈建议你抽空浏览一下Scala的文档， 对这些API有一个大致的了解。注意，Scala的集合类提供的功能比Stream API提供的功能还丰 富很多，比如，Scala的集合类支持压缩操作，你可以将两个列表中的元素整合到一个列表中。 通过学习，一定能大大增强你的功力。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这些编程技巧在将来的Java版本中也可能会被Stream API 所引入。</span></p>
+<p>最后，还记得吗？Java 8中你可以对Stream调用parallel方法，将流水线转化为并行执行。 Scala提供了类似的技巧；你只需要使用方法par就能实现同样的效果：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> linesLongUpper = fileLines.par filter (_.length() &gt; <span class="number">10</span>) map(_.toUpperCase())</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="元祖"   >
+          <a href="#元祖" class="heading-link"><i class="fas fa-link"></i></a>元祖</h3>
+      
+<p>现在，让我们看看另一个特性，该特性使用起来通常异常繁琐，它就是元组。你可能希望 使用元组将人的名字和电话号码组合起来，同时又不希望额外声明新的类，并对其进行实例化。 你希望元组的结构就像：<code>(“Raoul”，“+ 44 007007007”)、 (“Alan”，“+44 003133700”)</code>，诸 如此类。 非常不幸，Java目前还不支持元组，所以你只能创建自己的数据结构。下面是一个简单的Pair 类定义：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Pair</span>&lt;<span class="title">X</span>, <span class="title">Y</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> X x;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> Y y;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Pair</span><span class="params">(X x, Y y)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.x = x;</span><br><span class="line">        <span class="keyword">this</span>.y = y;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>当然，你还需要显式地实例化Pair对象：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Pair&lt;String, String&gt; raoul = <span class="keyword">new</span> Pair&lt;&gt;(<span class="string">"Raoul"</span>, <span class="string">"+ 44 007007007"</span>);</span><br><span class="line">Pair&lt;String, String&gt; alan = <span class="keyword">new</span> Pair&lt;&gt;(<span class="string">"Alan"</span>, <span class="string">"+44 003133700"</span>);</span><br></pre></td></tr></table></div></figure>
+<p>好了，看起来一切顺利，不过如果是三元组呢？如果是自定义大小的元组呢？这个问题就变 得相当繁琐，最终会影响你代码的可读性和可维护性。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Scala提供了名为元组字面量的特性来解决这一问题，这意味着你可以通过简单的语法糖创建 元组，就像普通的数学符号那样：</span></p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> raoul = (<span class="string">"Raoul"</span>, <span class="string">"+ 44 887007007"</span>) </span><br><span class="line"><span class="keyword">val</span> alan = (<span class="string">"Alan"</span>, <span class="string">"+44 883133700"</span>)</span><br></pre></td></tr></table></div></figure>
+<p>Scala支持任意大小的元组(元组中元素的最大上限为23)，所以下面的这些声明都是合法的：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818013238.png"  alt="" />
+      </p>
+<p>你可以依据它们的位置，通过存取器<code>（accessor） _1、_2（从1开始的一个序列）</code>访问元组 中的元素，比如：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818013309.png"  alt="" />
+      </p>
+<p>是不是比Java语言中现有的实现方法简单很多？<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>好消息是关于将元组字面量引入到未来Java 版本的讨论正在进行中</span>（我们会在第16章围绕这一主题进行更深入的讨论）。</p>
+
+        <h3 id="stream"   >
+          <a href="#stream" class="heading-link"><i class="fas fa-link"></i></a>Stream</h3>
+      
+<p>到目前为止，我们讨论的集合，包括List、Set、Map和Tuple都是即时计算的（即在第一 时间立刻进行计算）。当然，你也已经了解Java 8中的Stream是按需计算的（即延迟计算）。通过 第5章，你知道由于这一特性，Stream可以表示无限的序列，同时又不消耗太多的内存。</p>
+<p>Scala也提供了对应的数据结构，它采用延迟方式计算数据结构，名称也叫Stream！<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>不过Scala 中的Stream提供了更加丰富的功能，让Java中的Stream有些黯然失色。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Scala中的Stream可以记 录它曾经计算出的值，所以之前的元素可以随时进行访问。除此之外，Stream还进行了索引， 所以Stream中的元素可以像List那样通过索引访问。注意，这种抉择也附带着开销，由于需要 存储这些额外的属性，和Java 8中的Stream比起来，Scala版本的Stream内存的使用效率变低了， 因为Scala中的Stream需要能够回溯之前的元素，这意味着之前访问过的元素都需要在内存“记 录下来”（即进行缓存）。</span></p>
+
+        <h3 id="option"   >
+          <a href="#option" class="heading-link"><i class="fas fa-link"></i></a>Option</h3>
+      
+<p>另一个你熟悉的数据结构是Option。我们在第10章中讨论过Java的Optional，Option是 Java 8中Optional类型的Scala版本。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>我们建议你在设计API时尽可能地使用Optional，这种方式下，接口用户只需要阅读方法签名就能了解他们是否应该传递一个optional值。我们应该尽 量地用它替代null，避免发生空指针异常。</span></p>
+<p>第10章中，你了解了我们可以使用Optional返回客户的保险公司名称——如果客户的年龄 超过设置的最低值，就返回该客户对应的保险公司名称，具体代码如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getCarInsuranceName</span><span class="params">(Optional&lt;Person&gt; person, <span class="keyword">int</span> minAge)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> person.filter(p -&gt; p.getAge() &gt;= minAge)</span><br><span class="line">            .flatMap(Person::getCar)</span><br><span class="line">            .flatMap(Car::getInsurance)</span><br><span class="line">            .map(Insurance::getName)</span><br><span class="line">            .orElse(<span class="string">"Unknown"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>在Scala语言中，你可以使用Option使用Optional类似的方法实现该函数：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getCarInsuranceName</span></span>(person: <span class="type">Option</span>[<span class="type">Person</span>], minAge: <span class="type">Int</span>) = </span><br><span class="line">	person.filter(_.getAge() &gt;= minAge) </span><br><span class="line">	.flatMap(_.getCar) </span><br><span class="line">	.flatMap(_.getInsurance) </span><br><span class="line">	.map(_.getName)</span><br><span class="line">	.getOrElse(<span class="string">"Unknown"</span>)</span><br></pre></td></tr></table></div></figure>
+<p>这段代码中除了getOrElse方法，其他的结构和方法你一定都非常熟悉，getOrElse是与Java 8中orElse等价的方法。你看到了吗？在本书中学习的新概念能直接应用于其他语言！然而，不 幸的是，为了保持同Java的兼容性，在Scala中依旧保持了null，不过我们极度不推荐你使用它。</p>
+<blockquote>
+<p>在前面的代码中，你使用的是<code>_.getCar</code> （并未使用圆括号），而不是<code>_.getCar() （带 圆括号）</code>。 <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Scala语言中， 执行方法调用时，如果不需要传递参数，那么函数的圆括号是可以省略的。</span></p>
+</blockquote>
+
+        <h1 id="函数"   >
+          <a href="#函数" class="heading-link"><i class="fas fa-link"></i></a>函数</h1>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Scala中的函数可以看成为了完成某个任务而组合在一起的指令序列。它们对于抽象行为非常 有帮助，是函数式编程的基石。</span></p>
+<p>对于Java语言中的方法，你已经非常熟悉了：它们是与类相关的函数。你也已经了解了Lambda 表达式，它可以看成一种匿名函数。跟Java比较起来，Scala为函数提供的特性要丰富得多，我们 在这一节中会逐一讲解。Scala提供了下面这些特性。</p>
+<ul>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>函数类型，它是一种语法糖，体现了Java语言中函数描述符的思想，即，它是一种符号， 表示了在函数接口中声明的抽象方法的签名。这些内容我们在第3章中都介绍过。</span></li>
+<li>能够读写非本地变量的匿名函数， 而Java中的Lambda表达式无法对非本地变量进行写能够读写非本地变量的匿名函数， 而Java中的Lambda表达式无法对非本地变量进行写</li>
+<li>对科里化的支持，这意味着你可以<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>将一个接受多个参数的函数拆分成一系列接受部分参数的函数。</span></li>
+</ul>
+
+        <h2 id="scala中的一等函数"   >
+          <a href="#scala中的一等函数" class="heading-link"><i class="fas fa-link"></i></a>Scala中的一等函数</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>函数在Scala语言中是一等值。这意味着它们可以像其他的值，比如Integer或者String那 样，作为参数传递，可以作为结果值返回。正如我们在前面章节所介绍的那样，Java 8中的方法 引用和Lambda表达式也可以看成一等函数。</span></p>
+<p>让我们看一个例子，看看Scala中的一等函数是如何工作的。我们假设你现在有一个字符串列 表，列表中的值是朋友们发送给你的消息（tweet）。你希望依据不同的筛选条件对该列表进行过 滤，比如，你可能想要找出所有提及Java这个词或者短于某个长度的消息。你可以使用谓词（返 回一个布尔型结果的函数）定义这两个筛选条件，代码如下：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">isJavaMentioned</span></span>(tweet: <span class="type">String</span>) : <span class="type">Boolean</span> = tweet.contains(<span class="string">"Java"</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">isShortTweet</span></span>(tweet: <span class="type">String</span>) : <span class="type">Boolean</span> = tweet.length() &lt; <span class="number">20</span></span><br></pre></td></tr></table></div></figure>
+<p>Scala语言中，你可以直接传递这两个方法给内嵌的filter，如下所示（这和你<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在Java中使用方法引用将它们传递给某个函数大同小异</span>）：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> tweets = <span class="type">List</span>( </span><br><span class="line">	<span class="string">"I love the new features in Java 8"</span>, </span><br><span class="line">	<span class="string">"How's it going?"</span>, </span><br><span class="line">	<span class="string">"An SQL query walks into a bar, sees two tables and says 'Can I join you?'"</span> </span><br><span class="line">)</span><br><span class="line">tweets.filter(isJavaMentioned).foreach(println) </span><br><span class="line">tweets.filter(isShortTweet).foreach(println)</span><br></pre></td></tr></table></div></figure>
+<p>现在，让我们一起审视下内嵌方法filter的函数签名：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">filter</span></span>[<span class="type">T</span>](p: (<span class="type">T</span>) =&gt; <span class="type">Boolean</span>): <span class="type">List</span>[<span class="type">T</span>]</span><br></pre></td></tr></table></div></figure>
+<p>你可能会疑惑参数p到底代表的是什么类型（即<code>(T) =&gt; Boolean</code>），因为在Java语言里你期 望看到的是一个函数接口！<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这其实是一种新的语法，Java中暂时还不支持。它描述的是一个函数类型。这里它表示的是这样一个函数，它接受类型为T的对象，返回一个布尔类型的值。Java语 言 中 ， 它 被 编 码 为 <code>Predicate&lt;T&gt;</code> 或 者 <code>Function&lt;T, Boolean&gt;</code>。</span> 所 以 它 实 际 上 和 isJavaMentioned和isShortTweet具有类似的函数签名，所以你可以将它们作为参数传递给 filter方法。Java 8语言的设计者们为了保持语言与之前版本的一致性，决定不引入类似的语法。 对于一门语言的新版本，引入太多的新语法会增加它的学习成本，带来额外学习负担。</p>
+
+        <h2 id="匿名函数和闭包"   >
+          <a href="#匿名函数和闭包" class="heading-link"><i class="fas fa-link"></i></a>匿名函数和闭包</h2>
+      
+
+        <h3 id="匿名函数"   >
+          <a href="#匿名函数" class="heading-link"><i class="fas fa-link"></i></a>匿名函数</h3>
+      
+<p>Scala也支持匿名函数。匿名函数和Lambda表达式的语法非常类似。下面的这个例子中，你将一个匿名函数赋值给了名为isLongTweet的变量，该匿名函数的功能是检查给定的消息长度， 判断它是否超长：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818015630.png"  alt="" />
+      </p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在新版的Java中，你可以使用Lambda表达式创建函数式接口的实例。Scala也提供了类似的机制。</span>前面的这段代码是Scala中声明匿名类的语法糖。Function1（只带一个参数的函数）提供了apply方法的实现：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> isLongTweet : <span class="type">String</span> =&gt; <span class="type">Boolean</span></span><br><span class="line">= <span class="keyword">new</span> <span class="type">Function1</span>[<span class="type">String</span>, <span class="type">Boolean</span>] &#123; </span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">apply</span></span>(tweet: <span class="type">String</span>): <span class="type">Boolean</span> = tweet.length() &gt; <span class="number">60</span> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>由于变量isLongTweet中保存了类型为Function1的对象，你可以调用它的apply方法， 这看起来就像下面的方法调用：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">isLongTweet.apply(<span class="string">"A very short tweet"</span>)</span><br></pre></td></tr></table></div></figure>
+<p>如果用Java，你可以采用下面的方式：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Function&lt;String, Boolean&gt; isLongTweet = (String s) -&gt; s.length() &gt; <span class="number">60</span>; </span><br><span class="line"><span class="keyword">boolean</span> <span class="keyword">long</span> = isLongTweet.apply(<span class="string">"A very short tweet"</span>);</span><br></pre></td></tr></table></div></figure>
+<p>为了使用Lambda表达式，Java提供了几种内置的函数式接口，比如Predicate、Function、 Consumer。Scala提供了trait（你可以暂时将trait想象成接口，我们会在接下来的一节介绍它们） 来实现同样的功能：<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>从Function0（一个函数不接受任何参数，并返回一个结果）到Function22 （一个函数接受22个参数），它们都定义了apply方法。</span></p>
+<p>Scala还提供了另一个非常酷炫的特性，你可以使用语法糖调用apply方法，效果就像一次函 数调用：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">isLongTweet(<span class="string">"A very short tweet"</span>) <span class="comment">// 返回false</span></span><br></pre></td></tr></table></div></figure>
+<p>编译器会自动地将方法调用f(a)转换为f.apply(a)。更一般地说，如果f是一个支持apply 方法的对象（注，apply可以有任意数目的参数），对方法<code>f(a1, ..., an)</code>的调用会被转换为<code>f.apply(a1, ..., an)</code>。</p>
+
+        <h3 id="闭包"   >
+          <a href="#闭包" class="heading-link"><i class="fas fa-link"></i></a>闭包</h3>
+      
+<p>第3章中我们曾经抛给大家一个问题：Java中的Lambda表达式是否是借由闭包组成的。温习 一下，那么什么是闭包呢？<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>闭包是一个函数实例，它可以不受限制地访问该函数的非本地变量。</span> 不过<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Java 8中的Lambda表达式自身带有一定的限制：它们不能修改定义Lambda表达式的函数中的 本地变量值。这些变量必须隐式地声明为final。这些背景知识有助于我们理解“Lambda避免了 对变量值的修改，而不是对变量的访问”。</span></p>
+<p>与此相反，Scala中的匿名函数可以取得本地变量，但并非变量当前指向的变量值。比如， 下面这段代码在Scala中是可能的：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818020302.png"  alt="" />
+      </p>
+<p>我们在第7、13以及14章多次提到你<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>应该尽量避免修改，这样你的代码更加易于维护和并发 运行，所以请在绝对必要时才使用这一特性。</span></p>
+
+        <h2 id="科里化"   >
+          <a href="#科里化" class="heading-link"><i class="fas fa-link"></i></a>科里化</h2>
+      
+<p>第14章中，我们描述了一种名为科里化的工作：带有两个参数（比如x和y）的函数f可以看 成一个仅接受一个参数的函数g，函数g的返回值也是一个仅带一个参数的函数。这一定义可以归 纳为接受多个参数的函数可以转换为多个接受一个参数的函数。换句话说，你<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>可以将一个接受多个参数的函数切分为一系列接受该参数列表子集的函数。</span>Scala为此特别提供了一个构造器，帮助 你更加轻松地科里化一个现存的方法。</p>
+<p>为了理解Scala到底带来了哪些变化，让我们先回顾一个Java的示例。你定义了一个简单的函 数对两个正整数做乘法运算：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123; <span class="keyword">return</span> x * y; &#125; </span><br><span class="line"><span class="keyword">int</span> r = multiply(<span class="number">2</span>, <span class="number">10</span>);</span><br></pre></td></tr></table></div></figure>
+<p>不过这种定义方式要求向其传递所有的参数才能开始工作。你可以人工地对multiple方法 进行切分，让其返回另一个函数：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> Function&lt;Integer, Integer&gt; <span class="title">multiplyCurry</span><span class="params">(<span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (Integer y) -&gt; x * y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>由multiplyCurry返回的函数会捕获x的值，并将其与它的参数y相乘，然后返回一个整型 结果。这意味着你可以像下面这样在一个map中使用multiplyCurry，对每一个元素值乘以2：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream.of(<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>).map(multiplyCurry(<span class="number">2</span>)).forEach(System.out::println);</span><br></pre></td></tr></table></div></figure>
+<p>这样就能得到计算的结果2、6、10、14。这种方式工作的原因是<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>map期望的参数为一个函数， 而multiplyCurry的返回结果就是一个函数</span>。</p>
+<p>现在的Java语言中，为了构造科里化的形式需要你手工地切分函数（尤其是函数有非常多的 参数时），这是极其枯燥的事情。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Scala提供了一种特殊的语法可以自动完成这部分工作。</span>比如， 正常情况下，你定义的multiply方法如下所示：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">multiply</span></span>(x : <span class="type">Int</span>, y: <span class="type">Int</span>) = x * y</span><br><span class="line"><span class="keyword">val</span> r = multiply(<span class="number">2</span>, <span class="number">10</span>);</span><br></pre></td></tr></table></div></figure>
+<p>该函数的科里化版本如下：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">multiplyCurry</span></span>(x :<span class="type">Int</span>)(y : <span class="type">Int</span>) = x * y <span class="comment">// 定义一个科里化函数</span></span><br><span class="line"><span class="keyword">val</span> r = multiplyCurry(<span class="number">2</span>)(<span class="number">10</span>) <span class="comment">// 调用该科里化函数</span></span><br></pre></td></tr></table></div></figure>
+<p>使用语法<code>(x: Int)(y: Int)</code>，方法multiplyCurry接受两个由一个Int参数构成的参数 列表。与此相反，multiply接受一个由两个Int参数构成的参数列表。当你调用multiplyCurry 时 会 发 生 什 么 呢 ？ multiplyCurry 的第一次调用使用了单一整型参数（ 参数 x）， 即 <code>multiplyCurry(2)</code>，返回另一个函数，该函数接受参数y，并将其与它捕获的变量x（这里的 值为2）相乘。正如我们在14.1.2节介绍的，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>我们称这个函数是<strong>部分应用</strong>的，因为它并未提供所有的参数。</span>第二次调用对x和y进行了乘法运算。这意味着你可以将对multiplyCurry的第一次调 用保存到一个变量中，进行复用：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> multiplyByTwo : <span class="type">Int</span> =&gt; <span class="type">Int</span> = multiplyCurry(<span class="number">2</span>) </span><br><span class="line"><span class="keyword">val</span> r = multiplyByTwo(<span class="number">10</span>)</span><br></pre></td></tr></table></div></figure>
+<p>和Java比较起来，在Scala中你不再需要像这里这样手工地提供函数的科里化形式。Scala提供了一种方便的函数定义语法，能轻松地表示函数使用了多个科里化的参数列表。</p>
+
+        <h1 id="类和trait"   >
+          <a href="#类和trait" class="heading-link"><i class="fas fa-link"></i></a>类和trait</h1>
+      
+<p>现在我们看看类与接口在Java和Scala中的不同。这两种结构在我们设计应用时都很常用。你 会看到相对于Java的类和接口，Scala的类和接口提供了更多的灵活性。</p>
+
+        <h2 id="更加简洁的scala类"   >
+          <a href="#更加简洁的scala类" class="heading-link"><i class="fas fa-link"></i></a>更加简洁的Scala类</h2>
+      
+<p>由于Scala也是一门完全的面向对象语言，你可以创建类，并将其实例化生成对象。最基础的 形态上，声明和实例化类的语法与Java非常类似。比如，下面是一个声明Hello类的例子：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span> </span>&#123; </span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">sayThankYou</span></span>()&#123; </span><br><span class="line">    println(<span class="string">"Thanks for reading our book"</span>)                  </span><br><span class="line">  &#125; </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">val</span> h = <span class="keyword">new</span> <span class="type">Hello</span>() </span><br><span class="line">h.sayThankYou()</span><br></pre></td></tr></table></div></figure>
+<p><strong>getter方法和setter方法</strong></p>
+<p>一旦你定义的类具有了字段，这件事情就变得有意思了。你碰到过单纯只定义字段列表的 Java类吗？很明显，你还需要声明一长串的getter方法、setter方法，以及恰当的构造器。多麻烦 啊！除此之外，你还需要为每一个方法编写测试。在企业Java应用中，大量的代码都消耗在了这 样的类中。比如下面这个简单的Student类：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> id;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Student</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(<span class="keyword">int</span> id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>你需要手工定义构造器对所有的字段进行初始化，还要实现2个getter方法、2个setter方法。 一个非常简单的类现在需要超过20行的代码才能实现！有的集成开发环境或者工具能帮你自动生 成这些代码，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>不过你的代码库中还是需要增加大量额外的代码</span>，而这些代码与你实际的业务逻辑并没有太大的关系。</p>
+<p>Scala语言中构造器、getter方法以及setter方法都能隐式地生成，从而大大降低你代码中的冗余：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021409.png"  alt="" />
+      </p>
+
+        <h2 id="scala的trait与java8的接口对比"   >
+          <a href="#scala的trait与java8的接口对比" class="heading-link"><i class="fas fa-link"></i></a>Scala的trait与Java8的接口对比</h2>
+      
+<p>Scala还提供了另一个非常有助于抽象对象的特性，名称叫trait。它是Scala为实现Java中的接 口而设计的替代品。trait中既可以定义抽象方法，也可以定义带有默认实现的方法。trait同时还支持Java中接口那样的多继承，所以你可以将它们看成与Java 8中接口类似的特性，它们都支持 默认方法。。trait中还可以包含像抽象类这样的字段，而Java 8的接口不支持这样的特性。那么，trait 就类似于抽象类吗？显然不是，因为trait支持多继承，而抽象类不支持多继承。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>Java支持类型的 多继承，因为一个类可以实现多个接口。现在，Java 8通过默认方法又引入了对行为的多继承， 不过它依旧不支持对状态的多继承，而这恰恰是trait支持的。</span></p>
+<p>为了展示Scala中的trait到底是什么样，让我们看一个例子。我们定义了一个名为 Sized 的 trait，它包含一个名为size的可变字段，以及一个带有默认实现的isEmpty方法：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021558.png"  alt="" />
+      </p>
+<p>你现在可以使用一个类在声明时继承它，下面这个例子中Empty类的size恒定为0：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021625.png"  alt="" />
+      </p>
+<p>有一件事非常有趣，trait和Java的接口类似，也是在对象实例化时被创建（不过这依旧是一 个编译时的操作）。比如，你可以创建一个Box类，动态地决定到底选择哪一个实例支持由trait Sized定义的操作：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200818021705.png"  alt="" />
+      </p>
+<p>如果一个类继承了多个trait，各trait中声明的方法又使用了相同的签名或者相同的字段，这 时会发生什么情况？<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>为了解决这些问题，Scala中定义了一系列限制，这些限制和我们之前在第9 章介绍默认方法时的限制极其类似。</span></p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>下面是这一章中介绍的关键概念和你应该掌握的要点。</p>
+<ul>
+<li>Java 8和Scala都是整合了面向对象编程和函数式编程特性的编程语言，它们都运行于JVM 之上，在很多时候可以相互操作。</li>
+<li>Scala支持对集合的抽象，支持处理的对象包括List、Set、Map、Stream、Option，这些和Java 8非常类似。不过，除此之外Scala还支持元组。</li>
+<li>Scala为函数提供了更加丰富的特性，这方面比Java 8做得好，Scala支持：<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>函数类型、可以不受限制地访问本地变量的闭包，以及内置的科里化表单。 </span></li>
+<li>Scala中的类可以提供隐式的构造器、getter方法以及setter方法。</li>
+<li>Scala还支持trait，它是一种同时包含了字段和默认方法的接口。</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/15_%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%B7%B7%E5%90%88_Java8%E5%92%8CScala%E7%9A%84%E6%AF%94%E8%BE%83/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/15_%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%B7%B7%E5%90%88_Java8%E5%92%8CScala%E7%9A%84%E6%AF%94%E8%BE%83/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/java8/">java8</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/16_%E7%BB%93%E8%AE%BA%E4%BB%A5%E5%8F%8AJava%E7%9A%84%E6%9C%AA%E6%9D%A5/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">结论以及Java的未来</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/14_%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%8A%80%E5%B7%A7/"><span class="paginator-prev__text">函数式编程的技巧</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#scala简介"><span class="toc-number">1.</span> <span class="toc-text">
+          Scala简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#你好啤酒"><span class="toc-number">1.1.</span> <span class="toc-text">
+          你好，啤酒</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#命令式scala"><span class="toc-number">1.1.1.</span> <span class="toc-text">
+          命令式Scala</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#函数式scala"><span class="toc-number">1.1.2.</span> <span class="toc-text">
+          函数式Scala</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基础数据结构list-set-map-tuple-stream以及option"><span class="toc-number">1.2.</span> <span class="toc-text">
+          基础数据结构：List、Set、Map、Tuple、Stream以及Option</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建集合"><span class="toc-number">1.2.1.</span> <span class="toc-text">
+          创建集合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不可变与可变的比较"><span class="toc-number">1.2.2.</span> <span class="toc-text">
+          不可变与可变的比较</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用集合"><span class="toc-number">1.2.3.</span> <span class="toc-text">
+          使用集合</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#元祖"><span class="toc-number">1.2.4.</span> <span class="toc-text">
+          元祖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#stream"><span class="toc-number">1.2.5.</span> <span class="toc-text">
+          Stream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#option"><span class="toc-number">1.2.6.</span> <span class="toc-text">
+          Option</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#函数"><span class="toc-number">2.</span> <span class="toc-text">
+          函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#scala中的一等函数"><span class="toc-number">2.1.</span> <span class="toc-text">
+          Scala中的一等函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#匿名函数和闭包"><span class="toc-number">2.2.</span> <span class="toc-text">
+          匿名函数和闭包</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#匿名函数"><span class="toc-number">2.2.1.</span> <span class="toc-text">
+          匿名函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#闭包"><span class="toc-number">2.2.2.</span> <span class="toc-text">
+          闭包</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#科里化"><span class="toc-number">2.3.</span> <span class="toc-text">
+          科里化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#类和trait"><span class="toc-number">3.</span> <span class="toc-text">
+          类和trait</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#更加简洁的scala类"><span class="toc-number">3.1.</span> <span class="toc-text">
+          更加简洁的Scala类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#scala的trait与java8的接口对比"><span class="toc-number">3.2.</span> <span class="toc-text">
+          Scala的trait与Java8的接口对比</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

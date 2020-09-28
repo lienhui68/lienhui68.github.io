@@ -1,0 +1,387 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：从Urban Airship 到个推国内外推送经验总结分享  导语 APP开发商们总是在不断尝试新的东西，有些行得通，有些却不行。 删除一封垃圾邮件或者随手把一张无关紧要的广告纸丢进垃圾桶是件微不足道的事情，但是消息推送却完全不是如此轻松之事。 推送，是用户为你开启的绿色通道，给予开发商运营者无比的信任，允许消息去“打扰”他们的生活，进入他们的生活。如果你滥用职权，注定要失去他们。你甚至来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从Urban Airship到个推国内外推送经验总结分享">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/810_%E8%BF%90%E8%90%A5/%E4%BB%8EUrban%20Airship%E5%88%B0%E4%B8%AA%E6%8E%A8%E5%9B%BD%E5%86%85%E5%A4%96%E6%8E%A8%E9%80%81%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93%E5%88%86%E4%BA%AB/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：从Urban Airship 到个推国内外推送经验总结分享  导语 APP开发商们总是在不断尝试新的东西，有些行得通，有些却不行。 删除一封垃圾邮件或者随手把一张无关紧要的广告纸丢进垃圾桶是件微不足道的事情，但是消息推送却完全不是如此轻松之事。 推送，是用户为你开启的绿色通道，给予开发商运营者无比的信任，允许消息去“打扰”他们的生活，进入他们的生活。如果你滥用职权，注定要失去他们。你甚至来">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-16T16:26:05.428Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:05.460Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="运营">
+<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>从Urban Airship到个推国内外推送经验总结分享 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/810_%E8%BF%90%E8%90%A5/%E4%BB%8EUrban%20Airship%E5%88%B0%E4%B8%AA%E6%8E%A8%E5%9B%BD%E5%86%85%E5%A4%96%E6%8E%A8%E9%80%81%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93%E5%88%86%E4%BA%AB/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">从Urban Airship到个推国内外推送经验总结分享</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">18分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://www.chinaz.com/news/2015/0817/434826.shtml"  target="_blank" rel="noopener">从Urban Airship 到个推国内外推送经验总结分享</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p><strong>导语</strong></p>
+<p>APP开发商们总是在不断尝试新的东西，有些行得通，有些却不行。</p>
+<p>删除一封垃圾邮件或者随手把一张无关紧要的广告纸丢进垃圾桶是件微不足道的事情，但是消息推送却完全不是如此轻松之事。</p>
+<p><span style='color:red;background:yellow;font-size:文字大小;font-weight:'>推送，是用户为你开启的绿色通道，给予开发商运营者无比的信任，允许消息去“打扰”他们的生活，进入他们的生活。如果你滥用职权，注定要失去他们。你甚至来不及说声抱歉，在你准备调整策略之前用户早已将应用卸载。</span>在中国，陆续崛起几家专做推送工作的服务商，如<span class="exturl"><a class="exturl__link"   href="https://www.chinaz.com/tags/getui.shtml"  target="_blank" rel="noopener">个推</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>、小米、信鸽、百度等，他们在为开发者服务的过程中都有了各自的体验与总结。</p>
+<a id="more"></a>
+<p>曾有推送工作服务商在Twitter、Facebook以及国内常用的各大应用做过调查，让我们来看看他们是如何看待推送消息的。要学习如何做好的推送，首先要从根本上认识什么是错误的不可取的推送。</p>
+<ol>
+<li>
+<p><strong>认为手机消息和媒介传播一样</strong></p>
+<p>没有人比你更懂你自己的用户。在过去很长一段时间里，人们靠成功的电视广告、纸质传媒或者互联网资讯铺盖来吸引眼球抓住人心。如今，在移动端盛行的年代，很多商家还是延续以前的方式将原有的宣传方式与内容搬上手机小屏幕，并认为他们手机上的消息只是另一种广告渠道。事实上，这大错特错。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>手机是完全不同的，它更注重个性化和语境意识。</span>一款应用越想从用户那里获得更多，客户就越期待应用能带给他们什么。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>这些愿意接受消息推送的用户群体自然希望所获得的内容是经过开发商深思熟虑并有选择针对性地送达到他们的手中</span>。但用户和客户的兴趣并不是千篇一律，这就是为什么用传统老方法是行不通的。</p>
+</li>
+<li>
+<p><strong>永远将你的商业目标放在第一</strong></p>
+<p>任何一位从大品牌公司出来的市场运营老将在第一次接触消息推送之时都会容易犯错。曾经Facebook的运营者推送消息强调用户参与度而不是传递用户感兴趣的内容，结果却并没有得到用户的关注。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>用操控性的手段来强调交易，而不是用来做个性化的实战经验，是非常容易导致失败的。</span>每次推送消息的时候，运营者们都应该思考：“应该如何服务客户？”</p>
+</li>
+<li>
+<p><strong>不关心用户所在意的事情</strong></p>
+<p>想要避免被卸载，就要找出用户真正的需求，要问他们。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>如果你不能使自己的用户设置自己的偏好,他们会很反感甚至生气,会产生被推送消息强制侵入的心理。</span>但如果你推送了的内容恰好是用户所需的（正如他们告诉你的一样），他们便会以热情忠诚回馈与你，甚至不吝惜赞美告诉全世界你的产品有多好，因为这满足了他们最最想要的东西。</p>
+</li>
+<li>
+<p><strong>无时无刻不唤起用户的注意</strong></p>
+<p>广告，无处不在且频率超凡，这是众所周知的。不过手机消息不是广告，也最忌讳无时无刻地去打扰用户。我们要注重的是某种关联与实质内容，而不是频率。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>推送，不等于让用户知道每一条有关或无关他们的消息。</span></p>
+<p>调查显示Facebook上的用户<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>对抒发强烈自我情感的帖子或者发布太过于频繁的消息日渐敏感，大多数用户会渐渐选择屏蔽他们</span>。试问，你愿意在凌晨三点收到一条别人在夜店嗨到不行的消息吗？又或者一个素食主义者总是收到鲜肉美食的推荐通知。长此以往的不对称消息和无针对性推送，不仅会让用户被逼疯，推送的价值也会荡然无存。许多APP运营者们也该好好考虑，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>自己精心编辑的消息通知是否打扰了别人浪漫的晚餐、温馨的聚会又或者是专注的工作。</span></p>
+<p>除非，你能很好地把握在合适的时间把他们感兴趣的内容推送到他们手中，这样才会有更高的消息打开率以及提高与用户之间的互动。</p>
+</li>
+<li>
+<p><strong>无视细微的线索</strong></p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>用户在手机端进行偏好设置，其实是在告诉你他们想要什么。而且用户的手机行为和消费历史可以为你的消息文案提供很好的内容与方向。千万别忽略这些重要的线索。我们要善于利用这些信息来解析你的用户是如何与你的应用程序或你的产品相处的。</span>正如有个美剧迷一直在追剧，每天都会不断查看是否有新剧集出现或搜索相似的电视剧，那么专属于这批追剧迷们的推送消息在第一时间给予聚集更新的提醒就再贴心不过了！</p>
+<p>PPTV，作为国内的一款颇受欢迎的视频类应用，在接入个推推送之后表示大大提高了用户活跃度。保守数据表明，PPTV与个推合作一年多以来，累计覆盖的用户就超过1亿之多，单次推送可覆盖2500万-3000万的用户，并将日活提升至少15%！ 好的推送效果与高效稳定的推送工作及选择精准目标用户都分不开。</p>
+</li>
+<li>
+<p><strong>卖！卖！卖！</strong></p>
+<p>一家公司的确是需要达到一定的数据指标，通过市场和销售的手段去达成这些目标。而APP里面的用户其实是最容易帮助完成更多点击和销售的对象。但一定要避免诱惑！手机用户是你最忠诚的客户，然而<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>过多的垃圾消息与销售广告只会扼杀他们对你的信任。</span></p>
+<p>我们要考虑的是什么对你的客户来说最重要？当然不是广告和营销，而是，“价值”。帮助客户其实就是在帮助自己。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>接受打开消息推送开关并愿意与之互动的客户活跃度比那些没有接受推送的活跃度高出388%，所以最好的推送一定要为用户带去足够的价值，否则就是在消费信任。</span></p>
+</li>
+<li>
+<p><strong>对用户死缠烂打</strong></p>
+<p>在你想去唤起沉默用户之前，不妨先想一想，为什么一开始的时候他们就没有成为活跃的那一批呢？是不是他们对我们的销售和客户服务不满意？他们打开你的APP是每天一次还是每周一次还是每月一次？</p>
+<p>你不断想让你的用户回到你的程序并对他们纠缠不清的时候，用户往往会无比厌烦，甚至发个帖发个文对你破口大骂也是常有的事！<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>网络传播的力量是巨大的，千万不要轻易惹怒用户造成无可挽回的后果。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>要记住不能只是告诉他们“我们很想你”，重要的是给他们一个回来的理由，一个新的特质或者一个不容错过的机会。</span>比如你们有了一次<strong>无比惊艳的改版</strong>，提升了用户体验，又或者推出<strong>超值福利</strong>，吸引用户点击。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>让自己进步才是挽留用户最好的理由。</span></p>
+</li>
+<li>
+<p><strong>用户不在意广告</strong></p>
+<p>对于传统的媒介来说，广告活动会尽可能地通过更多的渠道让人们看到、听到和记住，让越多的人知道，传播得越广泛效果可能是越好。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>但手机用户往往不希望他们的设备成为另一个广告交付系统，其实移动的生活在他们的口袋中更偏向是个人的</span>。而且<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>没有什么广告是值得利用并“牺牲”你最好的客户来达成目的</span>。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>从某种程度上说，无休止推送广告意味着他们离被卸载不远了</span>。除非客户对销售信息有着特定的需求，否则千万别肆无忌惮地推送广告给用户。</p>
+</li>
+<li>
+<p><strong>忽视时间契机</strong></p>
+<p>手机端的消息讲究时间和契机，我们要在用户最可能采取行动的时候与他们“对话”，这样才能得到良好的反馈与互动。不然就是拿着产品的声誉开玩笑。用户们希望他们所有的渠道都是同步的，如果他们回复了一条社交网络的消息或者点击了一个弹框，说明此时他们有这个时间、兴趣或者需求来做出回应的动作，同时用户也期待着商家或者运营者们有进一步的回应。好的时间能增加推送消息的价值，可以帮助你的产品在你用户的手机里占有一席之地。给18岁的少女和新婚燕尔的少妇推送备孕的相关信息，谁的互动会更多？早上7点和下午3-4点推送晚市代金券，哪个接受度会更高？</p>
+</li>
+<li>
+<p><strong>认为推送和邮件一样慢速</strong></p>
+<p>如果你把时间看做是推送至关重要的策略之一，那么你的APP就打败绝大多数的产品了！不像邮件，人们可能过几个小时甚至几天才会看到打开，然而推送消息则更注重<strong>实时性和实效性</strong>，起到了及时提醒用户的作用。对航空公司来说，实时更新航班动态并将消息及时推送到用户手中可大大减少乘客误机的几率。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>消息推送是能得到用户立即响应的唯一渠道</span>，事实上，推送还能大大提高你打败竞争对手的可能，因为你的消息推送能得到快速回应。</p>
+</li>
+<li>
+<p><strong>推送对服务与支持来说不重要</strong></p>
+<p>用消息通知给你的用户惊喜可以让他们更加熟悉你的产品和服务。比如花一些小心思祝贺他们通过某个里程碑，奖励他们意想不到的“额外”生日，又或者为他们提供经验技巧来更好地使用你的产品。推送的内容越被用户认可，他们就越需要这些消息。</p>
+</li>
+<li>
+<p><strong>隐藏消息推送开关</strong></p>
+<p>不管你如何费尽心思，如何创造价值消息给用户，总有那么一小部分的用户是不愿意接受通知的。如果你越是想隐藏push开关，他们就更容易卸载你的APP。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>与其被卸载，还不如只是让用户关闭推送通知的开关</span>。因为只要用户没有离开你的APP，你还是可以通过应用内的消息推送触达用户。这样的举措也显得产品尊重用户，体现设计人性化的一面。</p>
+</li>
+<li>
+<p><strong>对推送的小错误漠不关心</strong></p>
+<p>在移动终端，失败的代价是很高的：就意味着失去了你与用户之间的联系。</p>
+<p>有些推送消息确实是触到了用户无法忍受的点，比如：“请下载我们的APP吧”（我不是正在用的APP吗？？？），“亲爱的用户，再过两天就是的生日啦！”（谁需要你来提醒我自己的生日啊！！），又或者是“test”、“test”、“test”（你把我当成机器在调试吗？一条还不够，还发这么多测试信息！）。</p>
+<p>是人都会犯错，发现有这些错误，运营者们千万不可置之不理，而要把错误当做与用户沟通的宝贵机会，给予真诚道歉并重新赢得用户的信任。</p>
+</li>
+<li>
+<p><strong>品牌经验并不重要</strong></p>
+<p>为消息推送制定专属铃声赢得很多用户的心。对用户行为做深度挖掘，可以基本判断他们的喜好，比如给一帮杰伦迷推送消息时用一曲周董的铃声，那还不让粉丝们欣喜若狂吗？又或者喜欢看新闻时政的人群推送消息时抓住他们简洁干练的习惯，设置清晰明快的消息声，也能让他们感受到运营者的用心。</p>
+<p>但值得注意的是，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>对于许多用户避免用太过可爱的声音，不然很容易引起反感</span>。除非已经抓准某一特定人群的特征。</p>
+</li>
+</ol>
+<p><strong>结语</strong></p>
+<p>国内的推送工作服务商如今已经呈现了非常猛烈的发展势头，不仅在推送能力上飞速提升，在各方面的功能的优化上也更显丰富。早年先有个推、智游推送、极光推送等创业公司的出现，近两年更有BAT公司加入推送的行列，如腾讯信鸽推送、百度云推送等。</p>
+<p>以发展较为突出的个推推送为例，经过4年的磨练，个推已成为目前国内最大最专业的第三方推送服务商，并于2014年于业内首次提出“智能精准推送“概念，将A/B Test和智能标签功能融入推送， 摒弃盲目推送，以大数据驱动精细化运营。一年后，个推又率先发布名为”应景推送“的新产品，以智能场景指引精准投放，结合大数据人群属性分析和LBS地理围栏工作，实时触发消息。在原本智能标签的工作上，个推深挖用户场景的这一成功探索，又给推送带来了重大转型，也给用户带来更有价值的消息。</p>
+<p>不难看出，推送工作服务商们在注重精准推送对用户减少打扰方渐渐达成了共识。在此，我们更希望，开发者和运营者们要避免以上的错误推送，真正了解用户需求，让推送成为喜闻乐见的事！</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/810_%E8%BF%90%E8%90%A5/%E4%BB%8EUrban%20Airship%E5%88%B0%E4%B8%AA%E6%8E%A8%E5%9B%BD%E5%86%85%E5%A4%96%E6%8E%A8%E9%80%81%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93%E5%88%86%E4%BA%AB/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/810_%E8%BF%90%E8%90%A5/%E4%BB%8EUrban%20Airship%E5%88%B0%E4%B8%AA%E6%8E%A8%E5%9B%BD%E5%86%85%E5%A4%96%E6%8E%A8%E9%80%81%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93%E5%88%86%E4%BA%AB/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E8%BF%90%E8%90%A5/">运营</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/999_%E5%85%B6%E4%BB%96/ISO%208601%E8%A7%84%E5%88%99/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">ISO 8601规则</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/800_%E4%BA%A7%E5%93%81/%E5%8D%A0%E5%9D%91/"><span class="paginator-prev__text">占坑</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

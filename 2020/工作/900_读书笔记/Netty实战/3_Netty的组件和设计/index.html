@@ -1,0 +1,527 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章主要内容  Netty 的工作和体系结构方面的内容 Channel、EventLoop 和 ChannelFuture ChannelHandler 和 ChannelPipeline 引导">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty的组件和设计">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/3_Netty%E7%9A%84%E7%BB%84%E4%BB%B6%E5%92%8C%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章主要内容  Netty 的工作和体系结构方面的内容 Channel、EventLoop 和 ChannelFuture ChannelHandler 和 ChannelPipeline 引导">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904013924.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904021734.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904022045.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904031357.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904031806.png">
+<meta property="article:published_time" content="2020-08-01T01:04:03.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.592Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904013924.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Netty的组件和设计 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/3_Netty%E7%9A%84%E7%BB%84%E4%BB%B6%E5%92%8C%E8%AE%BE%E8%AE%A1/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Netty的组件和设计</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-08-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">5.1k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">27分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章主要内容</strong></p>
+<ul>
+<li>Netty 的工作和体系结构方面的内容</li>
+<li>Channel、EventLoop 和 ChannelFuture</li>
+<li>ChannelHandler 和 ChannelPipeline</li>
+<li>引导</li>
+</ul>
+<a id="more"></a>
+<p>在第 1 章中，我们给出了 Java 高性能网络编程的历史以及工作基础的小结。这为 Netty 的核 心概念和构件块的概述提供了背景。</p>
+<p>在第 2章中，我们把我们的讨论范围扩大到了应用程序的开发。通过构建一个简单的客户端 和服务器，你学习了引导，并且获得了最重要的 ChannelHandler API 的实战经验。与此同时， 你也验证了自己的开发工具都能正常运行。</p>
+<p>由于本书剩下的部分都建立在这份材料的基础之上，所以我们将从两个不同的但却又密切相 关的视角来探讨 Netty：类库的视角以及框架的视角。对于使用 Netty 编写高效的、可重用的和 可维护的代码来说，两者缺一不可。</p>
+<blockquote>
+<p>框架的英文为Framework意思是框架、机制、准则。最早是源于建筑行业，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>是一个框子——指其约束性，也是一个架子——指其支撑性。</span>是一个基本概念上的结构，用于去解决或者处理复杂的问题。</p>
+<p>现在，框架这个广泛的定义使用的十分流行，尤其在软件行业。在软件工程中，框架被定义为<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>整个或部分系统的可重用设计，表现为一组抽象构件及构件实例间交互的方法;另一种定义认为，框架是可被应用开发者定制的应用骨架。</span></p>
+<blockquote>
+<p>Netty框架的抽象构件：Channel、EventLoop、ChannelFuture</p>
+</blockquote>
+<p>通俗的说，框架是实现某种功能的半成品，提供了一些常用的工具类和一些基础通用化的组件，可以供开发人员在此基础上，更高效的满足各自的业务需求。</p>
+<p>btw 提一下中间件</p>
+<ul>
+<li>中间件是一类软件，它为上层的应用软件提供运行与开发的环境，帮助用户开发和集成应用软件。它不仅仅要实现互连，还要实现应用之间的互操作；最突出的特点是其网络通信功能。最流行的交易中间件为Tuxedo。有两个关键特征，为上层的应用层服务；必须连接到操作系统的层面，并确保持运行工作状态。</li>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>中间件是一种应用于分布式系统的基础软件，位于应用与操作系统、数据库之间</span>，主要用于解决分布式环境下数据传输、数据访问、应用调度、系统构建和系统集成、流程管理等问题，是分布式环境下支撑应用开发、运行和集成的平台。</li>
+<li>中间件产品开发的核心思想是抽取分布式系统对于数据传输、信息系统构建与集成等问题的共性要求，封装共性问题的解决方法，对外提供简单统一的接口，从而减少开发人员面对上述共性问题时的难度和重复性工作量，提高系统的开发效率。</li>
+</ul>
+</blockquote>
+<p>从高层次的角度来看，Netty 解决了两个相应的关注领域，我们可将其大致标记为<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>工作的和 体系结构</span>的。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>首先，它的基于 Java NIO 的异步的和事件驱动的实现，保证了高负载下应用程序 性能的最大化和可伸缩性。其次，Netty 也包含了一组设计模式，将应用程序逻辑从网络层解耦， 简化了开发过程，同时也最大限度地提高了可测试性、模块化以及代码的可重用性。</span></p>
+<p>在我们更加详细地研究 Netty 的各个组件时，我们将密切关注它们是如何通过协作来支撑这 些体系结构上的最佳实践的。通过遵循同样的原则，我们便可获得 Netty 所提供的所有益处。牢 记这个目标，在本章中，我们将回顾到目前为止我们介绍过的主要概念和组件。</p>
+<blockquote>
+<p>所谓架构，不仅要掌握体系结构，还要掌握各个组件的工作实现细节</p>
+<p>就如同一个建筑工程师，不仅要掌握设计一栋建筑的结构，还要对各种建筑材料有一定的了解。</p>
+</blockquote>
+
+        <h1 id="channel-eventloop和channelfuture"   >
+          <a href="#channel-eventloop和channelfuture" class="heading-link"><i class="fas fa-link"></i></a>Channel、EventLoop和ChannelFuture</h1>
+      
+<p>接下来的各节将会为我们对于 Channel 、 EventLoop 和 ChannelFuture 增添更多的细节，这些类合在一起，可以被认为是 Netty <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>网络抽象的代表</span>：</p>
+<ul>
+<li>Channel — Socket ；</li>
+<li>EventLoop —控制流、多线程处理、并发；</li>
+<li>ChannelFuture 异步通知</li>
+</ul>
+
+        <h2 id="channel接口"   >
+          <a href="#channel接口" class="heading-link"><i class="fas fa-link"></i></a>Channel接口</h2>
+      
+<p>基本的 I/O 操作（ bind() 、 connect() 、 read() 和 write() ）依赖于底层网络传输所提 供的原语。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在基于 Java 的网络编程中，其基本的构造是 class Socket 。Netty 的 Channel 接 口所提供的 API，大大地降低了直接使用 Socket 类的复杂性。</span>此外， Channel 也是拥有许多 预定义的、专门化实现的广泛类层次结构的根，下面是一个简短的部分清单：</p>
+<ul>
+<li>EmbeddedChannel;</li>
+<li>LocalServerChannel；</li>
+<li>NioDatagramChannel；</li>
+<li>NioSctpChannel；</li>
+<li>NioSocketChannel</li>
+</ul>
+
+        <h2 id="eventloop接口"   >
+          <a href="#eventloop接口" class="heading-link"><i class="fas fa-link"></i></a>EventLoop接口</h2>
+      
+<p>EventLoop 定义了 Netty 的核心抽象，用于处理连接的生命周期中所发生的事件。我们将 在第 7 章中结合 Netty 的线程处理模型的上下文对 EventLoop 进行详细的讨论。目前，图 3-1 在高层次上说明了 Channel 、 EventLoop 、 Thread 以及 EventLoopGroup 之间的关系。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904013924.png"  alt="" />
+      </p>
+<p>这些关系是：</p>
+<ul>
+<li>一个 EventLoopGroup 包含一个或者多个 EventLoop ；</li>
+<li>一个EventLoop在它的生命周期内只和一个Thread绑定；</li>
+<li>所有由 EventLoop 处理的 I/O 事件都将在它专有的 Thread 上被处理；</li>
+<li>一个 Channel 在它的生命周期内只注册于一个 EventLoop；</li>
+<li>一个 EventLoop 可能会被分配给一个或多个 Channel 。</li>
+</ul>
+<p>注意，在这种设计中，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>一个给定 Channel 的 I/O 操作都是由相同的 Thread执行的，实际上消除了对于同步的需要</span>。</p>
+
+        <h2 id="channelfuture接口"   >
+          <a href="#channelfuture接口" class="heading-link"><i class="fas fa-link"></i></a>ChannelFuture接口</h2>
+      
+<p>正如我们已经解释过的那样，Netty 中所有的 I/O 操作都是异步的。因为一个操作可能不会 立即返回，所以我们需要一种用于在之后的某个时间点确定其结果的方法。为此，Netty 提供了 ChannelFuture 接口，其 addListener() 方法注册了一个 ChannelFutureListener ，以 便<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在某个操作完成时（无论是否成功）得到通知</span>。</p>
+<blockquote>
+<p><strong>关于 ChannelFuture 的更多讨论</strong></p>
+<p>可以将 ChannelFuture 看作是将来要执行的操作的结果的 占位符。它究竟什么时候被执行则可能取决于若干的因素，因此不可能准确地预测，但是可以肯 定的是它将会被执行。此外，所有属于同一个 Channel 的操作都被保证其将以它们被调用的顺序 被执行。</p>
+<p>我们将在第 7 章中深入地讨论EventLoop和EventLoopGroup。</p>
+</blockquote>
+
+        <h1 id="channelhandler和channelpipeline"   >
+          <a href="#channelhandler和channelpipeline" class="heading-link"><i class="fas fa-link"></i></a>ChannelHandler和ChannelPipeline</h1>
+      
+<p>现在，我们将更加细致地看一看那些管理数据流以及执行应用程序处理逻辑的组件。</p>
+
+        <h2 id="channelhandler接口"   >
+          <a href="#channelhandler接口" class="heading-link"><i class="fas fa-link"></i></a>ChannelHandler接口</h2>
+      
+<p>从应用程序开发人员的角度来看，Netty 的主要组件是 ChannelHandler ，它充当了所有 处理入站和出站数据的应用程序逻辑的容器。这是可行的，因为 ChannelHandler 的方法是 由网络事件（其中术语“事件”的使用非常广泛）触发的。事实上， ChannelHandler 可专 门用于几乎任何类型的动作，例如将数据从一种格式转换为另外一种格式，或者处理转换过程 中所抛出的异常。</p>
+<p>举例来说， ChannelInboundHandler 是一个你将会经常实现的子接口。 这种类型的 ChannelHandler 接收入站事件和数据，这些数据随后将会被你的应用程序的业务逻辑所处 理。当你要给连接的客户端发送响应时，也可以从 ChannelInboundHandler 冲刷数据。你 的应用程序的业务逻辑通常驻留在一个或者多个 ChannelInboundHandler 中。</p>
+
+        <h2 id="channelpipeline接口"   >
+          <a href="#channelpipeline接口" class="heading-link"><i class="fas fa-link"></i></a>ChannelPipeline接口</h2>
+      
+<p>ChannelPipeline 提供了 ChannelHandler 链的容器，并定义了用于在该链上传播入站 和出站事件流的 API。当 Channel 被创建时，它会被自动地分配到它专属的 ChannelPipeline 。</p>
+<p>ChannelHandler 安装到 ChannelPipeline 中的过程如下所示：</p>
+<ul>
+<li>
+<p>一个 ChannelInitializer 的实现被注册到了 ServerBootstrap 或者用于客户端的 Bootstrap中</p>
+</li>
+<li>
+<p>当 ChannelInitializer.initChannel() 方法被调用时， ChannelInitializer 将在 ChannelPipeline 中安装一组自定义的 ChannelHandler ；</p>
+<blockquote>
+<p>ChannelInitializer 本身也是一个ChannelHandler，负责在channel被创建时执行初始化工作——安装一组自定义的ChannelHandler并将自己移除。</p>
+</blockquote>
+</li>
+<li>
+<p>ChannelInitializer 将它自己从 ChannelPipeline 中移除。</p>
+</li>
+</ul>
+<p>为了审查发送或者接收数据时将会发生什么，让我们来更加深入地研究 ChannelPipeline 和 ChannelHandler 之间的共生关系吧。</p>
+<p>ChannelHandler 是专为支持广泛的用途而设计的，可以将它看作是处理往来 ChannelPipeline 事件（包括数据）的任何代码的通用容器。图 3-2 说明了这一点，其展示了从 ChannelHandler 派生的 ChannelInboundHandler 和 ChannelOutboundHandler 接口。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904021734.png"  alt="" />
+      </p>
+<p>使得事件流经 ChannelPipeline 是 ChannelHandler 的工作，它们是在应用程序的初 始化或者引导阶段被安装的。这些对象接收事件、执行它们所实现的处理逻辑，并将数据传递给 链中的下一个 ChannelHandler 。它们的执行顺序是由它们被添加的顺序所决定的。实际上， 被我们称为 ChannelPipeline 的是这些 ChannelHandler 的编排顺序。</p>
+<p>图 3-3 说明了一个 Netty 应用程序中入站和出站数据流之间的区别。从一个客户端应用程序 的角度来看，如果事件的运动方向是从客户端到服务器端，那么我们称这些事件为出站的，反之 则称为入站的。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904022045.png"  alt="" />
+      </p>
+<p>图 3-3 也显示了入站和出站 ChannelHandler 可以被安装到同一个 ChannelPipeline 中。如果一个消息或者任何其他的入站事件被读取，那么它会从 ChannelPipeline 的头部 开始流动，并被传递给第一个 ChannelInboundHandler 。这个 ChannelHandler 不一定 会实际地修改数据， 具体取决于它的具体功能， 在这之后， 数据将会被传递给链中的下一个 ChannelInboundHandler 。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>最终，数据将会到达 ChannelPipeline 的尾端，届时，所有 处理就都结束了。</span></p>
+<p>数据的出站运动（即正在被写的数据）在概念上也是一样的。 在这种情况下， 数据将从 ChannelOutboundHandler 链的尾端开始流动，直到它到达链的头部为止。在这之后，出站 数据将会到达网络传输层，这里显示为 Socket 。通常情况下，这将触发一个写操作。</p>
+<blockquote>
+<p><strong>关于入站和出站 ChannelHandler 的更多讨论</strong></p>
+<p>通过使用作为参数传递到每个方法的 ChannelHandlerContext ， 事件可以被传递给当前 ChannelHandler 链中的下一个 ChannelHandler 。因为你有时会忽略那些不感兴趣的事件，所以 Netty 提供了抽象基类 ChannelInboundHandlerAdapter 和 ChannelOutboundHandlerAdapter 。通过调 用 ChannelHandlerContext 上的对应方法，每个都提供了简单地将事件传递给下一个 ChannelHandler 的方法的实现。随后，你可以通过重写你所感兴趣的那些方法来扩展这些类。</p>
+<p>说白了，就是适配器模式和责任链设计模式</p>
+</blockquote>
+<p>鉴于出站操作和入站操作是不同的，你可能会想知道如果将两个类别的 ChannelHandler 都混合添加到同一个 ChannelPipeline 中会发生什么。虽然 ChannelInboundHandle 和 ChannelOutboundHandle 都扩展自 ChannelHandler ，但是 <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Netty 能区分 ChannelInboundHandler 实现和 ChannelOutboundHandler 实现， 并确保数据只会在具有相同定向类型的两个 ChannelHandler 之间传递。</span></p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>当 ChannelHandler 被添加到 ChannelPipeline 时，它将会被分配一个 ChannelHandlerContext ，其代表了 ChannelHandler 和 ChannelPipeline 之间的绑定。虽然这个对象可 以被用于获取底层的 Channel ，但是它主要还是被用于写出站数据。</span></p>
+<p>在 Netty 中，有两种发送消息的方式。你可以直接写到 Channel 中，也可以 写到和 ChannelHandler 相关联的 ChannelHandlerContext 对象中。前一种方式将会导致消息<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>从 ChannelPipeline 的尾端</span>开始流动，而后者将导致消息从 ChannelPipeline 中的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>下一个 ChannelHandler</span> 开始流动。</p>
+
+        <h2 id="更加深入地了解channelhandler接口"   >
+          <a href="#更加深入地了解channelhandler接口" class="heading-link"><i class="fas fa-link"></i></a>更加深入地了解ChannelHandler接口</h2>
+      
+<p>正如我们之前所说的，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>有许多不同类型的 ChannelHandler ，它们各自的功能主要取决于它们的超类</span>。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Netty 以适配器类的形式提供了大量默认的 ChannelHandler 实现，其旨在简化应用程序处理逻辑的开发过程。</span>你已经看到了， ChannelPipeline 中的每个 ChannelHandler 将负责把事件转发到链中的下一个 ChannelHandler 。这些适配器类（及它们的子类）将自动执行这个操作，所以你可以只重写那些你想要特殊处理的方法和事件。</p>
+<blockquote>
+<p><strong>为什么需要适配器类</strong></p>
+<p>有一些适配器类可以将编写自定义的 ChannelHandler 所需要的努力降到最低限度，因为它们提供了定义在对应接口中的所有方法的默认实现。</p>
+<p>下面这些是编写自定义 ChannelHandler 时经常会用到的适配器类：</p>
+<ul>
+<li>ChannelHandlerAdapter</li>
+<li>ChannelInboundHandlerAdapter</li>
+<li>ChannelOutboundHandlerAdapter</li>
+<li>ChannelDuplexHandler</li>
+</ul>
+</blockquote>
+<p>接下来我们将研究 3 个 ChannelHandler 的子类型：编码器、解码器和 <code>SimpleChannelInboundHandler&lt;T&gt;</code>—— ChannelInboundHandlerAdapter 的一个子类。</p>
+
+        <h2 id="编码器和解码器"   >
+          <a href="#编码器和解码器" class="heading-link"><i class="fas fa-link"></i></a>编码器和解码器</h2>
+      
+<p>当你通过 Netty 发送或者接收一个消息的时候，就将会发生一次数据转换。入站消息会被解 码；也就是说，从字节转换为另一种格式，通常是一个 Java 对象。如果是出站消息，则会发生 相反方向的转换：它将从它的当前格式被编码为字节。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>这两种方向的转换的原因很简单：网络数 据总是一系列的字节。</span></p>
+<p>对应于特定的需要，Netty 为编码器和解码器提供了不同类型的抽象类。例如，你的应用程 序可能使用了一种中间格式，而不需要立即将消息转换成字节。你将仍然需要一个编码器，但是 它将派生自一个不同的超类。为了确定合适的编码器类型，你可以应用一个简单的命名约定。</p>
+<p>通常来说， 这些基类的名称将类似于 ByteToMessageDecoder 或 MessageToByte- Encoder 。对于特殊的类型，你可能会发现类似于 ProtobufEncoder 和 ProtobufDecoder 这样的名称——预置的用来支持 Google 的 Protocol Buffers。</p>
+<p>严格地说， 其他的处理器也可以完成编码器和解码器的功能。 但是， 正如有用来简化 ChannelHandler 的创建的适配器类一样，所有由 Netty 提供的编码器/解码器适配器类都实现 了 ChannelOutboundHandler 或者 ChannelInboundHandler 接口。</p>
+<p>你将会发现对于入站数据来说， channelRead 方法/事件已经被重写了。对于每个从入站 Channel 读取的消息，这个方法都将会被调用。随后，它将调用由预置解码器所提供的 decode() 方法，并将已解码的字节转发给 ChannelPipeline 中的下一个 ChannelInboundHandler 。</p>
+<p>出站消息的模式是相反方向的：编码器将消息转换为字节， 并将它们转发给下一个 ChannelOutboundHandler。</p>
+
+        <h2 id="抽象类simplechannelinboundhandler"   >
+          <a href="#抽象类simplechannelinboundhandler" class="heading-link"><i class="fas fa-link"></i></a>抽象类SimpleChannelInboundHandler</h2>
+      
+<p>最常见的情况是，你的应用程序会利用一个 ChannelHandler 来接收解码消息，并对该数据应用业务逻辑。要创建一个这样的 ChannelHandler ，你只需要扩展基类 <code>SimpleChannelInboundHandler&lt;T&gt;</code> ，其中 T 是你要处理的消息的 Java 类型 。在这个 ChannelHandler 中， 你将需要重写基类的一个或者多个方法，并且获取一个到 ChannelHandlerContext 的引用， 这个引用将作为输入参数传递给 ChannelHandler 的所有方法。</p>
+<p>在这种类型的 ChannelHandler 中， 最重要的方法是 channelRead0(Channel- HandlerContext,T) 。除了要求不要阻塞当前的 I/O 线程之外，其具体实现完全取决于你。我 们稍后将对这一主题进行更多的说明。</p>
+<blockquote>
+<p><strong>ChannelInboundHandler 和 SimpleChannelInboundHandler的区别</strong></p>
+<p>最主要的区别就是SimpleChannelInboundHandler在接收到数据后会自动release掉数据占用的Bytebuffer资源(自动调用Bytebuffer.release())。而为何服务器端不能用呢，因为我们想让服务器把客户端请求的数据发送回去，而服务器端有可能在channelRead方法返回前还没有写完数据，因此不能让它自动release。</p>
+</blockquote>
+
+        <h1 id="引导"   >
+          <a href="#引导" class="heading-link"><i class="fas fa-link"></i></a>引导</h1>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Netty 的引导类为应用程序的网络层配置提供了容器，这涉及将一个进程绑定到某个指定的 端口，或者将一个进程连接到另一个运行在某个指定主机的指定端口上的进程。</span></p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>通常来说，我们把前面的用例称作引导一个服务器，后面的用例称作引导一个客户端。虽然 这个术语简单方便，但是它略微掩盖了一个重要的事实，即“服务器”和“客户端”实际上表示 了不同的网络行为；换句话说，是监听传入的连接还是建立到一个或者多个进程的连接</span>。</p>
+<blockquote>
+<p><strong>面向连接的协议</strong></p>
+<p>请记住，严格来说，“连接”这个术语仅适用于面向连接的协议，如 TCP， 其 保证了两个连接端点之间消息的有序传递。</p>
+</blockquote>
+<p>因此， 有两种类型的引导：一种用于客户端（简单地称为 Bootstrap ）， 而另一种 （ ServerBootstrap ）用于服务器。无论你的应用程序使用哪种协议或者处理哪种类型的数据， 唯一决定它使用哪种引导类的是它是作为一个客户端还是作为一个服务器。表 3-1 比较了这两种 类型的引导类。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904031357.png"  alt="" />
+      </p>
+<blockquote>
+<p>实际上，ServerBootstrap 类也可以只使用一个 EventLoopGroup，此时其将在两个场景下共用 同一个 EventLoopGroup。</p>
+<p>前面写的Echo服务端b.group(group)就是这样，其内部实现是b.group(group,group)，使用的同一个group。</p>
+</blockquote>
+<p>这两种类型的引导类之间的第一个区别已经讨论过了： ServerBootstrap 将绑定到一个 端口，因为服务器必须要监听连接，而 Bootstrap 则是由想要连接到远程节点的客户端应用程 序所使用的。</p>
+<p>第二个区别可能更加明显。 引导一个客户端只需要一个 EventLoopGroup ， 但是一个 ServerBootstrap 则需要两个（也可以是同一个实例）。为什么呢？</p>
+<p>因为服务器需要两组不同的 Channel 。第一组将只包含一个 ServerChannel ，代表服务 器自身的已绑定到某个本地端口的正在监听的套接字。而第二组将包含所有已创建的用来处理传 入客户端连接（对于每个服务器已经接受的连接都有一个）的 Channel 。图 3-4 说明了这个模 型，并且展示了为何需要两个不同的 EventLoopGroup 。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904031806.png"  alt="" />
+      </p>
+<p>与 ServerChannel 相关联的 EventLoopGroup 将分配一个负责为传入连接请求创建 Channel 的 EventLoop 。一旦连接被接受，第二个 EventLoopGroup 就会给它的 Channel 分配一个 EventLoop 。</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>在本章中，我们从工作和体系结构这两个角度探讨了理解 Netty 的重要性。我们也更加详 ChannelPipeline 细地重新审视了之前引入的一些概念和组件，特别是 ChannelHandler 、 ChannelPipeline和引导。</p>
+<p>特别地，我们讨论了 ChannelHandler 类的层次结构，并介绍了编码器和解码器，描述了 它们在数据和网络字节格式之间来回转换的互补功能。</p>
+<p>下面的许多章节都将致力于深入研究这些组件，而这里所呈现的概览应该有助于你对整体 的把控。</p>
+<p>下一章将探索 Netty 所提供的不同类型的传输，以及如何选择一个最适合于你的应用程序的传输。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/3_Netty%E7%9A%84%E7%BB%84%E4%BB%B6%E5%92%8C%E8%AE%BE%E8%AE%A1/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/3_Netty%E7%9A%84%E7%BB%84%E4%BB%B6%E5%92%8C%E8%AE%BE%E8%AE%A1/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/netty/">netty</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/4_%E4%BC%A0%E8%BE%93/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">传输</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/2_%E7%AC%AC%E4%B8%80%E6%AC%BENetty%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/"><span class="paginator-prev__text">第一款Netty应用程序</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#channel-eventloop和channelfuture"><span class="toc-number">1.</span> <span class="toc-text">
+          Channel、EventLoop和ChannelFuture</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#channel接口"><span class="toc-number">1.1.</span> <span class="toc-text">
+          Channel接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#eventloop接口"><span class="toc-number">1.2.</span> <span class="toc-text">
+          EventLoop接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#channelfuture接口"><span class="toc-number">1.3.</span> <span class="toc-text">
+          ChannelFuture接口</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#channelhandler和channelpipeline"><span class="toc-number">2.</span> <span class="toc-text">
+          ChannelHandler和ChannelPipeline</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#channelhandler接口"><span class="toc-number">2.1.</span> <span class="toc-text">
+          ChannelHandler接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#channelpipeline接口"><span class="toc-number">2.2.</span> <span class="toc-text">
+          ChannelPipeline接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#更加深入地了解channelhandler接口"><span class="toc-number">2.3.</span> <span class="toc-text">
+          更加深入地了解ChannelHandler接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编码器和解码器"><span class="toc-number">2.4.</span> <span class="toc-text">
+          编码器和解码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#抽象类simplechannelinboundhandler"><span class="toc-number">2.5.</span> <span class="toc-text">
+          抽象类SimpleChannelInboundHandler</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#引导"><span class="toc-number">3.</span> <span class="toc-text">
+          引导</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

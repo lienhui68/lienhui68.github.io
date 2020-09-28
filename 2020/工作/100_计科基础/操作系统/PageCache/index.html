@@ -1,0 +1,535 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="概述        Page cache是通过将磁盘中的数据缓存到内存中，从而减少磁盘I&#x2F;O操作，从而提高性能。此外，还要确保在page cache中的数据更改时能够被同步到磁盘上，后者被称为page回写（page writeback）。一个inode对应一个page cache对象，一个page cache对象包含多个物理page。 对磁盘的数据进行缓存从而提高性能主要是基">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PageCache">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PageCache/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="概述        Page cache是通过将磁盘中的数据缓存到内存中，从而减少磁盘I&#x2F;O操作，从而提高性能。此外，还要确保在page cache中的数据更改时能够被同步到磁盘上，后者被称为page回写（page writeback）。一个inode对应一个page cache对象，一个page cache对象包含多个物理page。 对磁盘的数据进行缓存从而提高性能主要是基">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928170314454.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928170613094.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200715061403.png">
+<meta property="article:published_time" content="2020-09-28T00:04:35.000Z">
+<meta property="article:modified_time" content="2020-09-28T09:47:09.990Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928170314454.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>PageCache | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PageCache/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">PageCache</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-28</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-28</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">28分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="概述"   >
+          <a href="#概述" class="heading-link"><i class="fas fa-link"></i></a>概述</h1>
+      
+<p>Page cache是通过将磁盘中的数据缓存到内存中，从而减少磁盘I/O操作，从而提高性能。此外，还要确保在page cache中的数据更改时能够被同步到磁盘上，后者被称为page回写（page writeback）。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>一个inode对应一个page cache对象，一个page cache对象包含多个物理page。</span></p>
+<p>对磁盘的数据进行缓存从而提高性能主要是基于两个因素：第一，磁盘访问的速度比内存慢好几个数量级（毫秒和纳秒的差距）。第二是被访问过的数据，有很大概率会被再次访问。</p>
+<a id="more"></a>
+
+        <h1 id="page-cache"   >
+          <a href="#page-cache" class="heading-link"><i class="fas fa-link"></i></a>Page Cache</h1>
+      
+<p>Page cache由内存中的物理page组成，其内容对应磁盘上的block。page cache的大小是动态变化的，可以扩大，也可以在内存不足时缩小。cache缓存的存储设备被称为后备存储（backing store），注意我们在<span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/damontive/article/details/80112628"  target="_blank" rel="noopener">block I/O一文</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>中提到的：一个page通常包含多个block，这些block不一定是连续的。</p>
+<blockquote>
+<p>块设备是一种以块（block）为单位可以进行随机存取的硬件设备。常见的块设备有硬盘，软盘，闪存等。</p>
+<p>块设备的最小寻址单元是扇区（sector），一个扇区是<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.664392em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span></span></span></span>个字节，512Bytes是最常见的扇区大小。内核的文件系统使用块（block）作为最小寻址单元。block的大小是sector的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">2^n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.664392em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span></span></span></span></span></span></span>次方倍（n可以为0），但是不大于page size. 常见的block大小为512Bytes，1KB，4KB。</p>
+<p>层级关系 page cache -&gt; page -&gt; block -&gt; sector</p>
+</blockquote>
+
+        <h2 id="读cache"   >
+          <a href="#读cache" class="heading-link"><i class="fas fa-link"></i></a>读Cache</h2>
+      
+<p>当内核发起一个读请求时（例如进程发起read()请求），首先会检查请求的数据是否缓存到了page cache中，如果有，那么直接从内存中读取，不需要访问磁盘，这被称为cache命中（cache hit）。如果cache中没有请求的数据，即cache未命中（cache miss），就必须从磁盘中读取数据。然后内核将读取的数据缓存到cache中，这样后续的读请求就可以命中cache了。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>page可以只缓存一个文件部分的内容，不需要把整个文件都缓存进来。</span></p>
+
+        <h2 id="写cache"   >
+          <a href="#写cache" class="heading-link"><i class="fas fa-link"></i></a>写Cache</h2>
+      
+<p>当内核发起一个写请求时（例如进程发起write()请求），同样是直接往cache中写入，后备存储中的内容不会直接更新。内核会将被写入的page标记为dirty，并将其加入dirty list中。内核会周期性地将dirty list中的page写回到磁盘上，从而使磁盘上的数据和内存中缓存的数据一致。</p>
+
+        <h2 id="cache回收"   >
+          <a href="#cache回收" class="heading-link"><i class="fas fa-link"></i></a>Cache回收</h2>
+      
+<p>Page cache的另一个重要工作是释放page，从而释放内存空间。cache回收的任务是选择合适的page释放，并且如果page是dirty的，需要将page写回到磁盘中再释放。理想的做法是释放距离下次访问时间最久的page，但是很明显，这是不现实的。下面先介绍LRU算法，然后介绍基于LRU改进的Two-List策略，后者是Linux使用的策略。</p>
+
+        <h3 id="lru算法"   >
+          <a href="#lru算法" class="heading-link"><i class="fas fa-link"></i></a>LRU算法</h3>
+      
+<p>LRU（least rencently used)算法是选择最近一次访问时间最靠前的page，即干掉最近没被光顾过的page。原始LRU算法存在的问题是，有些文件只会被访问一次，但是按照LRU的算法，即使这些文件以后再也不会被访问了，但是如果它们是刚刚被访问的，就不会被选中。</p>
+
+        <h3 id="two-list策略"   >
+          <a href="#two-list策略" class="heading-link"><i class="fas fa-link"></i></a>Two-List策略</h3>
+      
+<p>Two-List策略维护了两个list，active list 和 inactive list。在active list上的page被认为是hot的，不能释放。只有inactive list上的page可以被释放的。首次缓存的数据的page会被加入到inactive list中，已经在inactive list中的page如果再次被访问，就会移入active list中。两个链表都使用了伪LRU算法维护，新的page从尾部加入，移除时从头部移除，就像队列一样。如果active list中page的数量远大于inactive list，那么active list头部的页面会被移入inactive list中，从而位置两个表的平衡。</p>
+
+        <h1 id="page-cache在linux中的具体实现"   >
+          <a href="#page-cache在linux中的具体实现" class="heading-link"><i class="fas fa-link"></i></a>Page Cache在Linux中的具体实现</h1>
+      
+
+        <h2 id="address_space结构"   >
+          <a href="#address_space结构" class="heading-link"><i class="fas fa-link"></i></a>address_space结构</h2>
+      
+<p>内核使用address_space结构来表示一个page cache，address_space这个名字起得很糟糕，叫page_ache_entity可能更合适。下面是address_space的定义</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">address_space</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">inode</span>            *<span class="title">host</span>;</span>              <span class="comment">/* owning inode */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">radix_tree_root</span>  <span class="title">page_tree</span>;</span>          <span class="comment">/* radix tree of all pages */</span></span><br><span class="line">    <span class="keyword">spinlock_t</span>              tree_lock;          <span class="comment">/* page_tree lock */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span>            i_mmap_writable;    <span class="comment">/* VM_SHARED ma count */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">prio_tree_root</span>   <span class="title">i_mmap</span>;</span>             <span class="comment">/* list of all mappings */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span>        <span class="title">i_mmap_nonlinear</span>;</span>   <span class="comment">/* VM_NONLINEAR ma list */</span></span><br><span class="line">    <span class="keyword">spinlock_t</span>              i_mmap_lock;        <span class="comment">/* i_mmap lock */</span></span><br><span class="line">    <span class="keyword">atomic_t</span>                truncate_count;     <span class="comment">/* truncate re count */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span>           nrpages;            <span class="comment">/* total number of pages */</span></span><br><span class="line">    <span class="keyword">pgoff_t</span>                 writeback_index;    <span class="comment">/* writeback start offset */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">address_space_operations</span> *<span class="title">a_ops</span>;</span>     <span class="comment">/* operations table */</span></span><br><span class="line">    <span class="keyword">unsigned</span>                <span class="keyword">long</span> flags;         <span class="comment">/* gfp_mask and error flags */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">backing_dev_info</span> *<span class="title">backing_dev_info</span>;</span>  <span class="comment">/* read-ahead information */</span></span><br><span class="line">    <span class="keyword">spinlock_t</span>              private_lock;       <span class="comment">/* private lock */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span>        <span class="title">private_list</span>;</span>       <span class="comment">/* private list */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">address_space</span>    *<span class="title">assoc_mapping</span>;</span>     <span class="comment">/* associated buffers */</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="number">123456789101112131415161718</span></span><br></pre></td></tr></table></div></figure>
+<p>其中 host域指向对应的inode对象，host有可能为NULL，这意味着这个address_space不是和一个文件关联，而是和swap area相关，swap是Linux中将匿名内存（比如进程的堆、栈等，没有一个文件作为back store）置换到swap area（比如swap分区）从而释放物理内存的一种机制。page_tree保存了该page cache中所有的page，使用基数树(radix Tree)来存储。i_mmap是保存了所有映射到当前page cache（物理的）的虚拟内存区域（VMA）。nrpages是当前address_space中page的数量。</p>
+
+        <h2 id="address_space操作函数"   >
+          <a href="#address_space操作函数" class="heading-link"><i class="fas fa-link"></i></a>address_space操作函数</h2>
+      
+<p>address_space中的a_ops域指向操作函数表（struct address_space_operations），每个后备存储都要实现这个函数表，比如ext3文件系统在fs/ext3/inode.c中实现了这个函数表。</p>
+<p>内核使用函数表中的函数管理page cache，其中最重要的两个函数是readpage() 和writepage()</p>
+
+        <h3 id="readpage函数"   >
+          <a href="#readpage函数" class="heading-link"><i class="fas fa-link"></i></a>readpage()函数</h3>
+      
+<p>readpage()首先会调用find_get_page(mapping, index)在page cache中寻找请求的数据，mapping是要寻找的page cache对象，即address_space对象，index是要读取的数据在文件中的偏移量。如果请求的数据不在该page cache中，那么内核就会创建一个新的page加入page cache中，并将要请求的磁盘数据缓存到该page中，同时将page返回给调用者。</p>
+
+        <h3 id="writepage-函数"   >
+          <a href="#writepage-函数" class="heading-link"><i class="fas fa-link"></i></a>writepage() 函数</h3>
+      
+<p>对于文件映射（host指向一个inode对象），page每次修改后都会调用SetPageDirty（page）将page标识为dirty。（个人理解swap映射的page不需要dirty，是因为不需要考虑断电丢失数据的问题，因为内存的数据断电时默认就是会失去的）内核首先在指定的address_space寻找目标page，如果没有，就分配一个page并加入到page cache中，然后内核发起一个写请求将数据从用户空间拷入内核空间，最后将数据写入磁盘中。（对从用户空间拷贝到内核空间不是很理解，后期会重点学习Linux读、写文件的详细过程然后写一篇详细的blog介绍）</p>
+
+        <h1 id="buffer-cache"   >
+          <a href="#buffer-cache" class="heading-link"><i class="fas fa-link"></i></a>Buffer Cache</h1>
+      
+<p>在Block I/O的文章中提到用于表示内存到磁盘映射的buffer_head结构，每个buffer-block映射都有一个buffer_head结构，buffer_head中的b_assoc_map指向了address_space。在Linux2.4中，buffer cache和 page cache之间是独立的，前者使用老版本的buffer_head进行存储，这导致了一个磁盘block可能在两个cache中同时存在，造成了内存的浪费。2.6内核中将两者合并到了一起，使buffer_head只存储buffer-block的映射信息，不再存储block的内容。这样保证一个磁盘block在内存中只会有一个副本，减少了内存浪费。</p>
+
+        <h1 id="flusher线程群flusher-threads"   >
+          <a href="#flusher线程群flusher-threads" class="heading-link"><i class="fas fa-link"></i></a>Flusher线程群（Flusher Threads）</h1>
+      
+<p>Page cache推迟了文件写入后备存储的时间，但是dirty page最终还是要被写回磁盘的。</p>
+<p>内核在下面三种情况下会进行会将dirty page写回磁盘：</p>
+<ul>
+<li>用户进程调用sync() 和 fsync()系统调用</li>
+<li>空闲内存低于特定的阈值（threshold）</li>
+<li>Dirty数据在内存中驻留的时间超过一个特定的阈值</li>
+</ul>
+<p>线程群的特点是让一个线程负责一个存储设备（比如一个磁盘驱动器），多少个存储设备就用多少个线程。这样可以避免阻塞或者竞争的情况，提高效率。当空闲内存低于阈值时，内核就会调用wakeup_flusher_threads()来唤醒一个或者多个flusher线程，将数据写回磁盘。为了避免dirty数据在内存中驻留过长时间（避免在系统崩溃时丢失过多数据），内核会定期唤醒一个flusher线程，将驻留时间过长的dirty数据写回磁盘。</p>
+
+        <h1 id="pagecache与内存占用"   >
+          <a href="#pagecache与内存占用" class="heading-link"><i class="fas fa-link"></i></a>pagecache与内存占用</h1>
+      
+
+        <h2 id="概念介绍"   >
+          <a href="#概念介绍" class="heading-link"><i class="fas fa-link"></i></a>概念介绍</h2>
+      
+<p>linux系统中通常使用free命令来查看内存使用情况，free命令主要是从/proc/meminfo文件中读取的内存数据然后进行简单处理进行展示，根据查看free命令的手册了解到各个字段的含义。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928170314454.png"  alt="image-20200928170314454" />
+      </p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">total：系统总内存大小（分物理内存mem、交换分区swap）</span><br><span class="line">used：已使用的内存（total - <span class="built_in">free</span> - buffers - cache）</span><br><span class="line"><span class="built_in">free</span>：未使用的内存</span><br><span class="line">shared：通常情况下是tmpfs（内存文件系统）使用的内存</span><br><span class="line">buffers：内核缓冲区使用的内存</span><br><span class="line">cache：page cache和slab所占用的内存之和</span><br><span class="line">buff/cache：buffers + cache</span><br><span class="line"><span class="built_in">available</span>：在不进行swap的前提下还有多少内存可用于创建新的进程。这个跟<span class="built_in">free</span>、buff/cache字段中的数字有所不同，这里的剩余内存是<span class="built_in">free</span>加上可以被回收（有些slab、cache正在使用，不能回收）的page cache、mem slab的值的总和。</span><br></pre></td></tr></table></div></figure>
+<p>上述的page cache是系统读写磁盘文件时为了提高性能而将一部分文件缓存到内存中。这种做法虽然提高了磁盘I/O性能，但是也极大的占用了物理内存，特别当系统内存紧张时更容易出现问题。</p>
+
+        <h2 id="实际用途"   >
+          <a href="#实际用途" class="heading-link"><i class="fas fa-link"></i></a>实际用途</h2>
+      
+<p>linux系统会经常执行一些写日志、生成备份文件的工作，当这些文件比较大时相应的cache就会占用大量的系统内存，而且这些类型的cache并不会被经常访问，所以系统会定期将这些cache flush到磁盘中。但是如果系统未及时的将这些cache flush到磁盘中的话，就会占用大量的内存导致出现swap的情况，这样会很影响系统的整体性能。</p>
+<p><code>/proc</code>是一个虚拟文件系统，我们可以通过对它的读写操作做为与kernel实体间进行通信的一种手段。也就是说可以通过修改/proc中的文件，来对当前kernel的行为做出调整。有一个内核配置接口 <code>/proc/sys/vm/drop_caches</code> 可以允许用户手动清理cache来达到释放内存的作用，这个文件有三个值：1、2、3。具体介绍如下</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Writing to this will cause the kernel to drop clean caches, dentries and inodes from memory, causing that memory to become free.</span><br><span class="line">- To free pagecache:</span><br><span class="line">- * echo 1 &gt; &#x2F;proc&#x2F;sys&#x2F;vm&#x2F;drop_caches</span><br><span class="line"> </span><br><span class="line">- To free dentries and inodes:</span><br><span class="line">- * echo 2 &gt; &#x2F;proc&#x2F;sys&#x2F;vm&#x2F;drop_caches</span><br><span class="line"> </span><br><span class="line">- To free pagecache, dentries and inodes:</span><br><span class="line">- * echo 3 &gt; &#x2F;proc&#x2F;sys&#x2F;vm&#x2F;drop_caches</span><br><span class="line"> </span><br><span class="line">- As this is a non-destructive operation, and dirty objects are notfreeable, the user should run &quot;sync&quot; first in order to make sure allcached objects are freed.</span><br><span class="line">- This tunable was added in 2.6.16.</span><br></pre></td></tr></table></div></figure>
+<p>根据上面介绍，在执行上述命令需要先执行sync命令将page cache刷新到磁盘中，然后在通过该drop_caches接口进行缓存清理。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928170613094.png"  alt="image-20200928170613094" />
+      </p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>另外，在编写处理大文件的代码时，避免整个文件全部读取到内存中，这样会导致占用大量的内存，极端情况下会出现linux 系统的OOM导致的正常进程被终止。尽量将文件分割成小文件再进行处理，文件使用完毕后尽早close。</span></p>
+
+        <h1 id="page-cache和buffer-cache"   >
+          <a href="#page-cache和buffer-cache" class="heading-link"><i class="fas fa-link"></i></a>page cache和buffer cache</h1>
+      
+
+        <h2 id="buffer-cache块缓存"   >
+          <a href="#buffer-cache块缓存" class="heading-link"><i class="fas fa-link"></i></a>buffer cache(块缓存)</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200715061403.png"  alt="" />
+      </p>
+<p><strong>块缓冲，通常1K，对应于一个磁盘块，用于减少磁盘IO</strong></p>
+<p>由物理内存分配，通常空闲内存全是bufferCache</p>
+<p>应用层面，不直接与BufferCache交互，而是与PageCache交互</p>
+<ul>
+<li>
+<p>读文件：</p>
+<p>直接从bufferCache中读取</p>
+</li>
+<li>
+<p>写文件：</p>
+<ul>
+<li>方法一，写bufferCache，后写磁盘</li>
+<li>方法二，写bufferCache，后台程序合并写磁盘</li>
+</ul>
+</li>
+</ul>
+<p>Buffer cache 也叫块缓冲，<strong>是对物理磁盘上的一个磁盘块进行的缓冲</strong>，其大小为通常为1k，磁盘块也是磁盘的组织单位。<strong>设立buffer cache的目的是为在程序多次访问同一磁盘块时，减少访问时间</strong>。系统将磁盘块首先读入buffer cache 如果cache空间不够时，会通过一定的策略将一些过时或多次未被访问的buffer cache清空。程序在下一次访问磁盘时首先查看是否在buffer cache找到所需块，命中可减少访问磁盘时间。不命中时需重新读入buffer cache。对buffer cache 的写分为两种，一是直接写，这是程序在写buffer cache后也写磁盘，要读时从buffer cache 上读，二是后台写，程序在写完buffer cache 后并不立即写磁盘，因为有可能程序在很短时间内又需要写文件，如果直接写，就需多次写磁盘了。这样效率很低，而是过一段时间后由后台写，减少了多次访磁盘 的时间。</p>
+<p>Buffer cache 是由物理内存分配，linux系统为提高内存使用率，会将空闲内存全分给buffer cache ，当其他程序需要更多内存时，系统会减少cahce大小。</p>
+
+        <h2 id="page-cache页缓存"   >
+          <a href="#page-cache页缓存" class="heading-link"><i class="fas fa-link"></i></a>page cache(页缓存)</h2>
+      
+<p>页缓冲/文件缓冲，通常4K，<strong>由若干个磁盘块组成（物理上不一定连续），也即由若干个bufferCache组成</strong></p>
+<ul>
+<li>
+<p>读文件：</p>
+<p>可能不连续的几个磁盘块—&gt;bufferCache—&gt;pageCache—&gt;应用程序进程空间</p>
+</li>
+<li>
+<p>写文件：</p>
+<p>pageCache—&gt;bufferCache—&gt;磁盘</p>
+</li>
+</ul>
+<p>Page cache 也叫页缓冲或文件缓冲，是由好几个磁盘块构成，大小通常为4k，在64位系统上为8k，构成的几个磁盘块在物理磁盘上不一定连续，文件的组织单位为一页， 也就是一个page cache大小，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>文件读取是由外存上不连续的几个磁盘块，到buffer cache，然后组成page cache，然后供给应用程序。</span></p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>Page cache在linux读写文件时，它用于缓存文件的逻辑内容，从而加快对磁盘上映像和数据的访问。具体说是加速对文件内容的访问，buffer cache缓存文件的具体内容——物理磁盘上的磁盘块，这是加速对磁盘的访问。</span></p>
+<p><strong>影响脏数据在cache缓存flush操作阈值的参数</strong><br />
+<strong>按空间大小调整</strong></p>
+<ol>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>m.dirty_background_ratio = 10 # 内存可以填充脏数据的百分比，例如内存32G，该参数设为10，即脏数据最大为3.2G，超过3.2G就启动flush落盘清理脏数据，此时脏数据依然可以写入内存。</span></li>
+<li>vm.dirty_background_bytes = 0 # 与1相同的作用，1中设置不为0时，该参数设置失效</li>
+<li>vm.dirty_ratio = 30 # 是可以用脏数据填充的绝对最大系统内存量，当系统到达此点时，必须将所有脏数据提交到磁盘，同时所有新的<code>I/O</code>块都会被阻塞，不允许写到内存中，直到脏数据被写入磁盘。这通常是长<code>I/O</code>卡顿的原因，但这也是保证内存中不会存在过量脏数据的保护机制</li>
+<li>vm.dirty_bytes = 0 # 与3相同的作用，3中设置不为0时，该参数设置失效</li>
+</ol>
+<p>代码源码 （其中，thresh/bg_thresh的单位均为page）</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">domain_dirty_limits</span><span class="params">(struct dirty_throttle_control *dtc)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        …</span><br><span class="line">        <span class="keyword">unsigned</span> <span class="keyword">long</span> bytes = vm_dirty_bytes;</span><br><span class="line">        <span class="keyword">unsigned</span> <span class="keyword">long</span> bg_bytes = dirty_background_bytes;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (bytes)</span><br><span class="line">            thresh = DIV_ROUND_UP(bytes, PAGE_SIZE);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            thresh = (ratio * available_memory) / PAGE_SIZE;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (bg_bytes)</span><br><span class="line">            bg_thresh = DIV_ROUND_UP(bg_bytes, PAGE_SIZE);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            bg_thresh = (bg_ratio * available_memory) / PAGE_SIZE;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (bg_thresh &gt;= thresh)</span><br><span class="line">            bg_thresh = thresh / <span class="number">2</span>;</span><br><span class="line">        tsk = current;</span><br><span class="line">        <span class="keyword">if</span> (tsk-&gt;flags &amp; PF_LESS_THROTTLE || rt_task(tsk)) &#123;</span><br><span class="line">            bg_thresh += bg_thresh / <span class="number">4</span> + global_wb_domain.dirty_limit / <span class="number">32</span>;</span><br><span class="line">            thresh += thresh / <span class="number">4</span> + global_wb_domain.dirty_limit / <span class="number">32</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        …</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p><strong>按时间使用调整</strong></p>
+<ol>
+<li>vm.dirty_expire_centisecs = 3000 # 默认值30 * 100，即3000毫秒，是脏数据可持续的最长时间，超过该时间脏数据必须完成同步</li>
+<li>vm.dirty_writeback_centisecs = 500 # 默认500ms，如果inode被标记为dirty，就会确保500ms后唤醒wb进行后台回写，减小该值可加快元数据的同步</li>
+</ol>
+
+        <h2 id="区别"   >
+          <a href="#区别" class="heading-link"><i class="fas fa-link"></i></a>区别</h2>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>磁盘的操作有逻辑级（文件系统）和物理级（磁盘块），这两种Cache就是分别缓存逻辑和物理级数据的。</span></p>
+<p>假设我们通过文件系统操作文件，那么文件将被缓存到Page Cache，如果需要刷新文件的时候，Page Cache将交给Buffer Cache去完成，因为Buffer Cache就是缓存磁盘块的。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>也就是说，直接去操作文件，那就是Page Cache区缓存，用dd等命令直接操作磁盘块，就是Buffer Cache缓存的东西。</span></p>
+<p><strong>Page cache实际上是针对文件系统的，是文件的缓存</strong>，在文件层面上的数据会缓存到page cache。文件的逻辑层需要映射到实际的物理磁盘，这种映射关系由文件系统来完成。当page cache的数据需要刷新时，page cache中的数据交给buffer cache，但是这种处理在2.6版本的内核之后就变的很简单了，没有真正意义上的cache操作。</p>
+<p><strong>Buffer cache是针对磁盘块的缓存</strong>，也就是在没有文件系统的情况下，直接对磁盘进行操作的数据会缓存到buffer cache中，例如，文件系统的元数据都会缓存到buffer cache中。</p>
+<p>简单说来，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>page cache用来缓存文件数据，buffer cache用来缓存磁盘数据。在有文件系统的情况下，对文件操作，那么数据会缓存到page cache，如果直接采用dd等工具对磁盘进行读写，那么数据会缓存到buffer cache。</span></p>
+<p>Buffer(Buffer Cache)以块形式缓冲了块设备的操作，定时或手动的同步到硬盘，它是为了缓冲写操作然后一次性将很多改动写入硬盘，避免频繁写硬盘，提高写入效率。</p>
+<p>Cache(Page Cache)以页面形式缓存了文件系统的文件，给需要使用的程序读取，它是为了给读操作提供缓冲，避免频繁读硬盘，提高读取效率。</p>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<ul>
+<li>page cache是针对文件系统的，是文件的缓存，注意区分快表，快表示操作系统根据时空局部性设置的页表项缓存。</li>
+<li>page cache是一个逻辑上的缓存，由多个buffer cache组成</li>
+<li>buffer cache是针对磁盘块的缓存，在没有文件系统的情况下，直接对磁盘进行操作的数据会缓存到buffer cache。</li>
+</ul>
+
+        <h1 id="参考资料"   >
+          <a href="#参考资料" class="heading-link"><i class="fas fa-link"></i></a>参考资料</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/damontive/article/details/80552566"  target="_blank" rel="noopener">Linux内核学习笔记（八）Page Cache与Page回写</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/sxhlinux/p/6376480.html"  target="_blank" rel="noopener">linux pagecache与内存占用</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.51cto.com/ultrasql/1627647"  target="_blank" rel="noopener">Linux系统中的Page cache和Buffer cache</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/syw-home/p/13073350.html"  target="_blank" rel="noopener">io性能调优之page cache</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PageCache/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PageCache/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">redis使用场景</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/%E5%8D%A0%E5%9D%91/"><span class="paginator-prev__text">占坑</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">
+          概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#page-cache"><span class="toc-number">2.</span> <span class="toc-text">
+          Page Cache</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#读cache"><span class="toc-number">2.1.</span> <span class="toc-text">
+          读Cache</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写cache"><span class="toc-number">2.2.</span> <span class="toc-text">
+          写Cache</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cache回收"><span class="toc-number">2.3.</span> <span class="toc-text">
+          Cache回收</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#lru算法"><span class="toc-number">2.3.1.</span> <span class="toc-text">
+          LRU算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#two-list策略"><span class="toc-number">2.3.2.</span> <span class="toc-text">
+          Two-List策略</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#page-cache在linux中的具体实现"><span class="toc-number">3.</span> <span class="toc-text">
+          Page Cache在Linux中的具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#address_space结构"><span class="toc-number">3.1.</span> <span class="toc-text">
+          address_space结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#address_space操作函数"><span class="toc-number">3.2.</span> <span class="toc-text">
+          address_space操作函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#readpage函数"><span class="toc-number">3.2.1.</span> <span class="toc-text">
+          readpage()函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#writepage-函数"><span class="toc-number">3.2.2.</span> <span class="toc-text">
+          writepage() 函数</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#buffer-cache"><span class="toc-number">4.</span> <span class="toc-text">
+          Buffer Cache</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#flusher线程群flusher-threads"><span class="toc-number">5.</span> <span class="toc-text">
+          Flusher线程群（Flusher Threads）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pagecache与内存占用"><span class="toc-number">6.</span> <span class="toc-text">
+          pagecache与内存占用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#概念介绍"><span class="toc-number">6.1.</span> <span class="toc-text">
+          概念介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实际用途"><span class="toc-number">6.2.</span> <span class="toc-text">
+          实际用途</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#page-cache和buffer-cache"><span class="toc-number">7.</span> <span class="toc-text">
+          page cache和buffer cache</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#buffer-cache块缓存"><span class="toc-number">7.1.</span> <span class="toc-text">
+          buffer cache(块缓存)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#page-cache页缓存"><span class="toc-number">7.2.</span> <span class="toc-text">
+          page cache(页缓存)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#区别"><span class="toc-number">7.3.</span> <span class="toc-text">
+          区别</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">
+          总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">9.</span> <span class="toc-text">
+          参考资料</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

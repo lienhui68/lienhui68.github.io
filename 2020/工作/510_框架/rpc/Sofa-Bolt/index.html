@@ -1,0 +1,437 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;blog.csdn.net&#x2F;codehole_&#x2F;article&#x2F;details&#x2F;100892364  蚂蚁金服近期开源了研发多年的SOFA一篮子框架，其中就有一个非常核心的RPC框架，它叫SOFA-BOLT。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sofa-Bolt框架结构分析">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Sofa-Bolt/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;blog.csdn.net&#x2F;codehole_&#x2F;article&#x2F;details&#x2F;100892364  蚂蚁金服近期开源了研发多年的SOFA一篮子框架，其中就有一个非常核心的RPC框架，它叫SOFA-BOLT。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061239.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061306.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061522.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061654.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904064107.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904064458.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904064746.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.057Z">
+<meta property="article:modified_time" content="2020-09-17T12:58:25.475Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061239.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Sofa-Bolt框架结构分析 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Sofa-Bolt/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Sofa-Bolt框架结构分析</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.3k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">13分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/codehole_/article/details/100892364"  target="_blank" rel="noopener">https://blog.csdn.net/codehole_/article/details/100892364</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>蚂蚁金服近期开源了研发多年的SOFA一篮子框架，其中就有一个非常核心的RPC框架，它叫SOFA-BOLT。</p>
+<a id="more"></a>
+<p>SOFA-BOLT基于开源的Netty框架，同时提供了服务器和客户端的实现。它的源码非常值得一读，结构简单，考虑周全，绝不是一个普通的玩具。它没有滥用设计模式，源码阅读起来比较直接，没有太多绕来绕去的复杂结构。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061239.png"  alt="" />
+      </p>
+<p>一个节点既可以同时既是RPC服务器又是客户端，作为客户端该节点需要其它节点提供服务，作为服务器它可以为其它节点提供服务。不过上面这张图并不是合理的结构，因为两个服务相互耦合了，我需要你，你也需要我，就成了鸡蛋问题。比较合理的结构一般如下图所示，它们之间不构成环。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061306.png"  alt="" />
+      </p>
+
+        <h1 id="通讯协议"   >
+          <a href="#通讯协议" class="heading-link"><i class="fas fa-link"></i></a>通讯协议</h1>
+      
+<p>通讯协议是客户端和服务器之间交流的语言，SOFA定义了自己的一套通讯协议，它的编码解码分为二层，第一层是消息体对象的二进制序列化，这部分默认由开源的Hession协议库序列化完成，第二层是负责给序列化的消息体增加一系列包装字段，形成一个完整的消息。包括请求ID、消息体的长度、协议版本号和CRC32校验位等等</p>
+<p>如果希望进一步优化网络性能，SOFA还提供了Snappy压缩协议，可以在现有的两层协议基础上增加第三层，能显著降低网络传输负担。压缩是时间换空间，提升网络性能的同时，它也会加重CPU计算，所以在使用时需要适当进行权衡。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061522.png"  alt="" />
+      </p>
+
+        <h1 id="连接池"   >
+          <a href="#连接池" class="heading-link"><i class="fas fa-link"></i></a>连接池</h1>
+      
+<p>客户端和服务器之间一般需要建立多个连接，但是也不能每个请求都建立一个连接。一般是通过维护一个连接池，限定最大连接数。客户端通过有限的连接来和服务器进行通信。</p>
+<p>我们在使用Jedis客户端和Redis服务器进行通信时，也是通过连接池来获取连接的。Jedis的连接必须是线程独占的，因为它不是线程安全的。从连接池中获取连接时，其它线程就暂时拿不到这个连接了，待当前线程处理完毕后，要将连接归还给线程池，这样其它线程才可以继续使用这个连接。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904061654.png"  alt="" />
+      </p>
+<p>Redis的客户端请求和应答是顺序性的，一问一答，所以请求和应答不需要唯一ID就可以建立起关联。</p>
+<p>Bolt不一样，它的问答是乱序的，问和答之间是必须通过请求的唯一ID来建立起关联。Bolt的客户端是线程安全的，它可以同时传递多个请求，连接对象会维护一个正在处理的RPC请求对象字典。当客户端想要发起RPC请求时，它不是从连接池中摘出一个独占连接，而是随意选择一个连接来传递自己的请求，这个连接也可以被其它线程同时使用。</p>
+
+        <h1 id="负载均衡"   >
+          <a href="#负载均衡" class="heading-link"><i class="fas fa-link"></i></a>负载均衡</h1>
+      
+<p>客户端提供了多种负载均衡的实现，阿里默认使用带权重的随机算法(RandomLoadBalancer)，此外还有</p>
+<ol>
+<li>
+<p>ConsistentHashLoaderBalancer 一致性hash，客户端和服务器之间的连接关系(谁跟谁连)比较稳定</p>
+</li>
+<li>
+<p>LocalPreferenceLoadBalancer 本地环回地址优先，提升本机调用性能</p>
+</li>
+<li>
+<p>RoundRobinLoadBalancer 循环依次来</p>
+</li>
+<li>
+<p>WeightedRoundRobinLoadBalancer 带权重的循环依次来</p>
+</li>
+<li>
+<p>RandomLoadBalancer 这个是带权重的随机，阿里的默认使用</p>
+<blockquote>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RandomLoadBalance</span> <span class="keyword">extends</span> <span class="title">AbstractLoadBalance</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String NAME = <span class="string">"random"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Random random = <span class="keyword">new</span> Random();</span><br><span class="line">    <span class="keyword">protected</span> &lt;T&gt; <span class="function">Invoker&lt;T&gt; <span class="title">doSelect</span><span class="params">(List&lt;Invoker&lt;T&gt;&gt; invokers, URL url, Invocation invocation)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> length = invokers.size(); <span class="comment">// 总个数</span></span><br><span class="line">        <span class="keyword">int</span> totalWeight = <span class="number">0</span>; <span class="comment">// 总权重</span></span><br><span class="line">        <span class="keyword">boolean</span> sameWeight = <span class="keyword">true</span>; <span class="comment">// 权重是否都一样</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> weight = getWeight(invokers.get(i), invocation);</span><br><span class="line">            totalWeight += weight; <span class="comment">// 累计总权重</span></span><br><span class="line">            <span class="keyword">if</span> (sameWeight &amp;&amp; i &gt; <span class="number">0</span></span><br><span class="line">                    &amp;&amp; weight != getWeight(invokers.get(i - <span class="number">1</span>), invocation)) &#123;</span><br><span class="line">                sameWeight = <span class="keyword">false</span>; <span class="comment">// 计算所有权重是否一样</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (totalWeight &gt; <span class="number">0</span> &amp;&amp; ! sameWeight) &#123;</span><br><span class="line">            <span class="comment">// 如果权重不相同且权重大于0则按总权重数随机</span></span><br><span class="line">            <span class="keyword">int</span> offset = random.nextInt(totalWeight);</span><br><span class="line">            <span class="comment">// 并确定随机值落在哪个片断上</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">                offset -= getWeight(invokers.get(i), invocation);</span><br><span class="line">                <span class="keyword">if</span> (offset &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> invokers.get(i);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果权重相同或权重为0则均等随机</span></span><br><span class="line">        <span class="keyword">return</span> invokers.get(random.nextInt(length));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+</li>
+</ol>
+
+        <h1 id="服务器线程模型"   >
+          <a href="#服务器线程模型" class="heading-link"><i class="fas fa-link"></i></a>服务器线程模型</h1>
+      
+<p>服务器采用传统netty多线程模型，一个acceptor线程专门用来接收连接，然后扔给io线程处理读消息并解码成请求对象，最后扔给业务线程池进行处理。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904064107.png"  alt="" />
+      </p>
+
+        <h1 id="心跳"   >
+          <a href="#心跳" class="heading-link"><i class="fas fa-link"></i></a>心跳</h1>
+      
+<p>客户端和服务器之间会有定时心跳检测连接的存活，默认30s来一次。tcp的关闭是通过FIN包来通知对方的，如果因为网络问题，对方连FIN包都收不到，那么即使一边关闭了套接字，另一边可能还以为连接正常。所以心跳检测存活机制在长连接应用里非常普遍。如果客户端连续发了三次心跳都没有收到服务器的回复，那么就认为连接已经关闭。服务器也会有连接存活检测，如果一个客户端连接90s内没有任何消息进来，那么也认为该连接已经断开。服务器不会主动发送心跳消息。</p>
+
+        <h1 id="双工通信"   >
+          <a href="#双工通信" class="heading-link"><i class="fas fa-link"></i></a>双工通信</h1>
+      
+<p>RPC一般是由客户端向服务器发起一个请求，然后收到服务器的应答。Bolt的RPC是双工通信，服务器也可以向客户端主动发起请求，它们共享一个TCP连接。TCP连接本身就是双工的，所以这也不算什么奇迹。只是服务器在什么业务场景需要向客户端主动发起请求，这个蚂蚁并没有进行详细说明。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904064458.png"  alt="" />
+      </p>
+
+        <h1 id="重连"   >
+          <a href="#重连" class="heading-link"><i class="fas fa-link"></i></a>重连</h1>
+      
+<p>客户端作为主动连接方，它要负责重连和发起心跳消息。服务器作为被动方，它不需要处理重连，如果连接断开，它就直接将连接从集合中移除就行，不需要做特殊的处理，但是它会检测心跳消息，如果在一定时间内连接通道没有任何消息到来，它就会主动关闭。</p>
+<blockquote>
+<p>客户端发起心跳和负责重连，服务端不需要处理重连，只需要检测心跳，如果在一定时间内连接通道没有任何消息到来，它就会主动关闭。</p>
+</blockquote>
+<p>客户端的重连策略是一个单独的模块，有两个地方会成为重连的入口。一个是正常连接断开触发channelInActive回调，另一个就是重连连接不能建立成功时需要进行重试。Bolt有一个单独的重连线程，所有需要重连的连接会被包装成一个任务塞进这个线程的任务队列，该线程不断地从队列里拿任务进行重连处理，如果重连失败会尝试再将任务重新包装进队列延后继续处理。默认是1s钟处理一个重连任务。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200904064746.png"  alt="" />
+      </p>
+<p>RPC连接是延迟建立的，它在第一次客户端发送RPC请求时尝试进行连接，如果连接失败，它会立即继续重连最多默认两次。如果三次尝试连接后还是没有建立成功，就向上层爆出异常。它不需要包装一个重连任务塞进ReconnectManager，因为后续客户端请求会继续触发连接。</p>
+
+        <h1 id="单向消息"   >
+          <a href="#单向消息" class="heading-link"><i class="fas fa-link"></i></a>单向消息</h1>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>RPC通常是一应一答，客户端可以同步等待响应，也可以提供回调接口等待结果通知。</span>Bolt除了提供应答模式之外，还提供了oneway单向消息，这种消息服务器收到后不用回复，客户端发送请求之后就立即返回了也不需要等待结果。</p>
+<p>oneway消息一般用于不那么重要的日志类消息，它不能保证服务器一定能收到，所以此种业务消息应该是那种允许丢失的消息，形式上类似于UDP，它在牺牲可靠性的前提下能大幅提升消息的吞吐量。</p>
+
+        <h1 id="消息追踪"   >
+          <a href="#消息追踪" class="heading-link"><i class="fas fa-link"></i></a>消息追踪</h1>
+      
+<p>Bolt提供了回调接口，方便监控系统可以对请求的调用状况进行分析。监控的客户端可以通过实现该接口，注册进RPC的客户端和服务器进行打点收集日志，然后发送到日志分析系统。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Tracer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">startRpc</span><span class="params">(SofaRequest request)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">serverReceived</span><span class="params">(SofaRequest request)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">serverSend</span><span class="params">(SofaRequest request, SofaResponse response, Throwable throwable)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">clientReceived</span><span class="params">(SofaRequest request, SofaResponse response, Throwable throwable)</span></span>;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<p>Bolt是一个成熟的比较复杂的RPC系统，内部还有大量的实现细节有待去挖掘。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Sofa-Bolt/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Sofa-Bolt/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">网络编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8BEventLoop/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">Netty源码分析之EventLoop</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%9F%BA%E7%A1%80/"><span class="paginator-prev__text">NIO简述</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#通讯协议"><span class="toc-number">1.</span> <span class="toc-text">
+          通讯协议</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#连接池"><span class="toc-number">2.</span> <span class="toc-text">
+          连接池</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#负载均衡"><span class="toc-number">3.</span> <span class="toc-text">
+          负载均衡</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#服务器线程模型"><span class="toc-number">4.</span> <span class="toc-text">
+          服务器线程模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#心跳"><span class="toc-number">5.</span> <span class="toc-text">
+          心跳</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#双工通信"><span class="toc-number">6.</span> <span class="toc-text">
+          双工通信</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#重连"><span class="toc-number">7.</span> <span class="toc-text">
+          重连</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#单向消息"><span class="toc-number">8.</span> <span class="toc-text">
+          单向消息</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#消息追踪"><span class="toc-number">9.</span> <span class="toc-text">
+          消息追踪</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">10.</span> <span class="toc-text">
+          总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

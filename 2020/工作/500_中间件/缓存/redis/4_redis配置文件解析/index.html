@@ -1,0 +1,711 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="注意事项        12345678910111213141516# Note that in order to read the configuration file, Redis must be# started with the file path as first argument:## .&#x2F;redis-server &#x2F;path&#x2F;to&#x2F;redis.conf# No">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis配置文件解析">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/4_redis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="注意事项        12345678910111213141516# Note that in order to read the configuration file, Redis must be# started with the file path as first argument:## .&#x2F;redis-server &#x2F;path&#x2F;to&#x2F;redis.conf# No">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-25T07:04:04.000Z">
+<meta property="article:modified_time" content="2020-09-27T08:15:59.879Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>redis配置文件解析 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/4_redis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">redis配置文件解析</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-25</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">65分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="注意事项"   >
+          <a href="#注意事项" class="heading-link"><i class="fas fa-link"></i></a>注意事项</h1>
+      
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Note that <span class="keyword">in</span> order to <span class="built_in">read</span> the configuration file, Redis must be</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> started with the file path as first argument:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ./redis-server /path/to/redis.conf</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note on units: when memory size is needed, it is possible to specify</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> it <span class="keyword">in</span> the usual form of 1k 5GB 4M and so forth:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1k =&gt; 1000 bytes</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1kb =&gt; 1024 bytes</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1m =&gt; 1000000 bytes</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1mb =&gt; 1024*1024 bytes</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1g =&gt; 1000000000 bytes</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1gb =&gt; 1024*1024*1024 bytes</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> units are <span class="keyword">case</span> insensitive so 1GB 1Gb 1gB are all the same.</span></span><br></pre></td></tr></table></div></figure>
+<ol>
+<li>只支持byte不支持bit</li>
+<li>对大小写不敏感</li>
+</ol>
+<a id="more"></a>
+
+        <h1 id="includes包含"   >
+          <a href="#includes包含" class="heading-link"><i class="fas fa-link"></i></a>INCLUDES包含</h1>
+      
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">################################# INCLUDES ###################################</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Include one or more other config files here.  This is useful <span class="keyword">if</span> you</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> have a standard template that goes to all Redis servers but also need</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> to customize a few per-server settings.  Include files can include</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> other files, so use this wisely.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Notice option <span class="string">"include"</span> won<span class="string">'t be rewritten by command "CONFIG REWRITE"</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> from admin or Redis Sentinel. Since Redis always uses the last processed</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> line as value of a configuration directive, you<span class="string">'d better put includes</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> at the beginning of this file to avoid overwriting config change at runtime.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If instead you are interested <span class="keyword">in</span> using includes to override configuration</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> options, it is better to use include as the last line.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> include /path/to/local.conf</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> include /path/to/other.conf</span></span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>和spring配置文件类似，可以通过includes包含，redis.conf作为总闸包含其他。</li>
+</ul>
+
+        <h1 id="network网络"   >
+          <a href="#network网络" class="heading-link"><i class="fas fa-link"></i></a>NETWORK网络</h1>
+      
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> By default, <span class="keyword">if</span> no <span class="string">"bind"</span> configuration directive is specified, Redis listens</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="keyword">for</span> connections from all the network interfaces available on the server.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> It is possible to listen to just one or multiple selected interfaces using</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the <span class="string">"bind"</span> configuration directive, followed by one or more IP addresses.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Examples:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">bind</span> 192.168.1.100 10.0.0.1</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">bind</span> 127.0.0.1 ::1</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ~~~ WARNING ~~~ If the computer running Redis is directly exposed to the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> internet, binding to all the interfaces is dangerous and will expose the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> instance to everybody on the internet. So by default we uncomment the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> following <span class="built_in">bind</span> directive, that will force Redis to listen only into</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the IPv4 loopback interface address (this means Redis will be able to</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> accept connections only from clients running into the same computer it</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> is running).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> IF YOU ARE SURE YOU WANT YOUR INSTANCE TO LISTEN TO ALL THE INTERFACES</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> JUST COMMENT THE FOLLOWING LINE.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span></span><br><span class="line">bind 127.0.0.1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Protected mode is a layer of security protection, <span class="keyword">in</span> order to avoid that</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis instances left open on the internet are accessed and exploited.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> When protected mode is on and <span class="keyword">if</span>:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1) The server is not binding explicitly to a <span class="built_in">set</span> of addresses using the</span></span><br><span class="line"><span class="meta">#</span><span class="bash">    <span class="string">"bind"</span> directive.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 2) No password is configured.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> The server only accepts connections from clients connecting from the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> IPv4 and IPv6 loopback addresses 127.0.0.1 and ::1, and from Unix domain</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> sockets.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> By default protected mode is enabled. You should <span class="built_in">disable</span> it only <span class="keyword">if</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> you are sure you want clients from other hosts to connect to Redis</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> even <span class="keyword">if</span> no authentication is configured, nor a specific <span class="built_in">set</span> of interfaces</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> are explicitly listed using the <span class="string">"bind"</span> directive.</span></span><br><span class="line">protected-mode yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Accept connections on the specified port, default is 6379 (IANA <span class="comment">#815344).</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If port 0 is specified Redis will not listen on a TCP socket.</span></span><br><span class="line">port 6379</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> TCP listen() backlog.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> In high requests-per-second environments you need an high backlog <span class="keyword">in</span> order</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> to avoid slow clients connections issues. Note that the Linux kernel</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> will silently truncate it to the value of /proc/sys/net/core/somaxconn so</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> make sure to raise both the value of somaxconn and tcp_max_syn_backlog</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="keyword">in</span> order to get the desired effect.</span></span><br><span class="line">tcp-backlog 511</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Unix socket.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Specify the path <span class="keyword">for</span> the Unix socket that will be used to listen <span class="keyword">for</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> incoming connections. There is no default, so Redis will not listen</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> on a unix socket when not specified.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> unixsocket /tmp/redis.sock</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> unixsocketperm 700</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Close the connection after a client is idle <span class="keyword">for</span> N seconds (0 to <span class="built_in">disable</span>)</span></span><br><span class="line">timeout 0</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> TCP keepalive.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If non-zero, use SO_KEEPALIVE to send TCP ACKs to clients <span class="keyword">in</span> absence</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> of communication. This is useful <span class="keyword">for</span> two reasons:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 1) Detect dead peers.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 2) Take the connection alive from the point of view of network</span></span><br><span class="line"><span class="meta">#</span><span class="bash">    equipment <span class="keyword">in</span> the middle.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> On Linux, the specified value (<span class="keyword">in</span> seconds) is the period used to send ACKs.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note that to close the connection the double of the time is needed.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> On other kernels the period depends on the kernel configuration.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> A reasonable value <span class="keyword">for</span> this option is 300 seconds, <span class="built_in">which</span> is the new</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis default starting with Redis 3.2.1.</span></span><br><span class="line">tcp-keepalive 300</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>
+<p>bind</p>
+<p>如果想要监听所有网卡使用默认配置就好。</p>
+</li>
+<li>
+<p>protected-mode</p>
+<p>redis3.2版本后新增protected-mode配置，默认是yes，即开启。设置外部网络连接redis服务，设置方式如下：</p>
+<ol>
+<li>
+<p>关闭protected-mode模式，此时外部网络可以直接访问</p>
+</li>
+<li>
+<p>开启protected-mode保护模式，需配置bind ip或者设置访问密码</p>
+</li>
+</ol>
+</li>
+<li>
+<p>port端口</p>
+</li>
+<li>
+<p>tcp-backlog</p>
+<p>设置tcp的backlog，backlog其实是一个连接队列，backlog队列总和=未完成三次握手队列+已经完成三次握手队列。</p>
+<p>在高并发环境下你需要一个高backlog值来避免慢客户端连接问题。注意Linux内核会将这个值减小到/proc/sys/net/core/somaxconn的值，所以需要确认增大somaxconn和tcp_max_syn_backlog两个值来达到想要的效果。</p>
+</li>
+<li>
+<p>timeout</p>
+<p>空闲多长时间关闭连接，单位秒</p>
+</li>
+<li>
+<p>tcp-keepalive</p>
+<p>两个作用</p>
+<ul>
+<li>探测 定时向client发送tcp_ack包来探测client是否存活的。默认不探测，官方建议值为300秒</li>
+<li>保活 保持连接</li>
+</ul>
+</li>
+</ul>
+
+        <h1 id="general通用"   >
+          <a href="#general通用" class="heading-link"><i class="fas fa-link"></i></a>GENERAL通用</h1>
+      
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> By default Redis does not run as a daemon. Use <span class="string">'yes'</span> <span class="keyword">if</span> you need it.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note that Redis will write a pid file <span class="keyword">in</span> /var/run/redis.pid when daemonized.</span></span><br><span class="line">daemonize no</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> If you run Redis from upstart or systemd, Redis can interact with your</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> supervision tree. Options:</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   supervised no      - no supervision interaction</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   supervised upstart - signal upstart by putting Redis into SIGSTOP mode</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   supervised systemd - signal systemd by writing READY=1 to <span class="variable">$NOTIFY_SOCKET</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash">   supervised auto    - detect upstart or systemd method based on</span></span><br><span class="line"><span class="meta">#</span><span class="bash">                        UPSTART_JOB or NOTIFY_SOCKET environment variables</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note: these supervision methods only signal <span class="string">"process is ready."</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash">       They <span class="keyword">do</span> not <span class="built_in">enable</span> continuous liveness pings back to your supervisor.</span></span><br><span class="line">supervised no</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> If a pid file is specified, Redis writes it <span class="built_in">where</span> specified at startup</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> and removes it at <span class="built_in">exit</span>.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> When the server runs non daemonized, no pid file is created <span class="keyword">if</span> none is</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> specified <span class="keyword">in</span> the configuration. When the server is daemonized, the pid file</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> is used even <span class="keyword">if</span> not specified, defaulting to <span class="string">"/var/run/redis.pid"</span>.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Creating a pid file is best effort: <span class="keyword">if</span> Redis is not able to create it</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> nothing bad happens, the server will start and run normally.</span></span><br><span class="line">pidfile /var/run/redis_6379.pid</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Specify the server verbosity level.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This can be one of:</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> debug (a lot of information, useful <span class="keyword">for</span> development/testing)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> verbose (many rarely useful info, but not a mess like the debug level)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> notice (moderately verbose, what you want <span class="keyword">in</span> production probably)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> warning (only very important / critical messages are logged)</span></span><br><span class="line">loglevel notice</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Specify the <span class="built_in">log</span> file name. Also the empty string can be used to force</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis to <span class="built_in">log</span> on the standard output. Note that <span class="keyword">if</span> you use standard</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> output <span class="keyword">for</span> logging but daemonize, logs will be sent to /dev/null</span></span><br><span class="line">logfile ""</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> To <span class="built_in">enable</span> logging to the system logger, just <span class="built_in">set</span> <span class="string">'syslog-enabled'</span> to yes,</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> and optionally update the other syslog parameters to suit your needs.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> syslog-enabled no</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Specify the syslog identity.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> syslog-ident redis</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Specify the syslog facility. Must be USER or between LOCAL0-LOCAL7.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> syslog-facility local0</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Set the number of databases. The default database is DB 0, you can select</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> a different one on a per-connection basis using SELECT &lt;dbid&gt; <span class="built_in">where</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> dbid is a number between 0 and <span class="string">'databases'</span>-1</span></span><br><span class="line">databases 16</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> By default Redis shows an ASCII art logo only when started to <span class="built_in">log</span> to the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> standard output and <span class="keyword">if</span> the standard output is a TTY. Basically this means</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> that normally a logo is displayed only <span class="keyword">in</span> interactive sessions.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> However it is possible to force the pre-4.0 behavior and always show a</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ASCII art logo <span class="keyword">in</span> startup logs by setting the following option to yes.</span></span><br><span class="line">always-show-logo yes</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>daemonzize 后台启动</li>
+<li>pidfile pidfile位置，主要只有设置后台启动的时候才会有</li>
+<li>loglevel 日志级别</li>
+<li>logfile</li>
+<li>syslog-enabled 是否把日志输出到syslog中</li>
+<li>syslog-ident 指定syslog里的日志标志</li>
+<li>syslog-facility 指定syslog设备，值可以是USER或LOCAL0-LOCAL7</li>
+<li>databases 库的个数</li>
+</ul>
+
+        <h1 id="snapshotting快照"   >
+          <a href="#snapshotting快照" class="heading-link"><i class="fas fa-link"></i></a>SNAPSHOTTING快照</h1>
+      
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">############################### SNAPSHOTTING  ################################</span></span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Save the DB on disk:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   save &lt;seconds&gt; &lt;changes&gt;</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   Will save the DB <span class="keyword">if</span> both the given number of seconds and the given</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   number of write operations against the DB occurred.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   In the example below the behaviour will be to save:</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   after 900 sec (15 min) <span class="keyword">if</span> at least 1 key changed</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   after 300 sec (5 min) <span class="keyword">if</span> at least 10 keys changed</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   after 60 sec <span class="keyword">if</span> at least 10000 keys changed</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   Note: you can <span class="built_in">disable</span> saving completely by commenting out all <span class="string">"save"</span> lines.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   It is also possible to remove all the previously configured save</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   points by adding a save directive with a single empty string argument</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   like <span class="keyword">in</span> the following example:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   save <span class="string">""</span></span></span><br><span class="line"></span><br><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> By default Redis will stop accepting writes <span class="keyword">if</span> RDB snapshots are enabled</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> (at least one save point) and the latest background save failed.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This will make the user aware (<span class="keyword">in</span> a hard way) that data is not persisting</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> on disk properly, otherwise chances are that no one will notice and some</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> disaster will happen.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If the background saving process will start working again Redis will</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> automatically allow writes again.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> However <span class="keyword">if</span> you have setup your proper monitoring of the Redis server</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> and persistence, you may want to <span class="built_in">disable</span> this feature so that Redis will</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">continue</span> to work as usual even <span class="keyword">if</span> there are problems with disk,</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> permissions, and so forth.</span></span><br><span class="line">stop-writes-on-bgsave-error yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Compress string objects using LZF when dump .rdb databases?</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> For default that<span class="string">'s set to '</span>yes<span class="string">' as it'</span>s almost always a win.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If you want to save some CPU <span class="keyword">in</span> the saving child <span class="built_in">set</span> it to <span class="string">'no'</span> but</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the dataset will likely be bigger <span class="keyword">if</span> you have compressible values or keys.</span></span><br><span class="line">rdbcompression yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Since version 5 of RDB a CRC64 checksum is placed at the end of the file.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This makes the format more resistant to corruption but there is a performance</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> hit to pay (around 10%) when saving and loading RDB files, so you can <span class="built_in">disable</span> it</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="keyword">for</span> maximum performances.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> RDB files created with checksum disabled have a checksum of zero that will</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> tell the loading code to skip the check.</span></span><br><span class="line">rdbchecksum yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> The filename <span class="built_in">where</span> to dump the DB</span></span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> The working directory.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> The DB will be written inside this directory, with the filename specified</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> above using the <span class="string">'dbfilename'</span> configuration directive.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> The Append Only File will also be created inside this directory.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note that you must specify a directory here, not a file name.</span></span><br><span class="line">dir ./</span><br></pre></td></tr></table></div></figure>
+<p>持久化时会使用到以上几个配置</p>
+<ul>
+<li>
+<p>save 快照策略</p>
+<ul>
+<li>
+<p>当前时间点往后数多少秒之内有几次更改则保存到快照</p>
+</li>
+<li>
+<p>也可以手动执行save指令 立即保存快照文件。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>stop-writes-on-bgsave-error yes</p>
+<p>异步保存出错是否还继续写</p>
+</li>
+<li>
+<p>rdbcompression</p>
+<p>对于存储到磁盘中的快照，可以设置是否进行压缩存储。如果是的话，redis会采用LZF算法进行压缩。如果你不想消耗CPU来进行压缩的话，可以设置为关闭此功能</p>
+</li>
+<li>
+<p>rdbchecksum</p>
+<p>在存储快照后，还可以让redis使用CRC64算法来进行数据校验，但是这样做会增加大约10%的性能消耗，如果希望获取到最大的性能提升，可以关闭此功能。</p>
+</li>
+<li>
+<p>dbfilename</p>
+</li>
+<li>
+<p>dir</p>
+</li>
+</ul>
+
+        <h1 id="replication复制"   >
+          <a href="#replication复制" class="heading-link"><i class="fas fa-link"></i></a>REPLICATION复制</h1>
+      
+
+        <h1 id="security安全"   >
+          <a href="#security安全" class="heading-link"><i class="fas fa-link"></i></a>SECURITY安全</h1>
+      
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">################################# SECURITY ###################################</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Require clients to issue AUTH &lt;PASSWORD&gt; before processing any other</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> commands.  This might be useful <span class="keyword">in</span> environments <span class="keyword">in</span> <span class="built_in">which</span> you <span class="keyword">do</span> not trust</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> others with access to the host running redis-server.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This should stay commented out <span class="keyword">for</span> backward compatibility and because most</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> people <span class="keyword">do</span> not need auth (e.g. they run their own servers).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Warning: since Redis is pretty fast an outside user can try up to</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 150k passwords per second against a good box. This means that you should</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> use a very strong password otherwise it will be very easy to <span class="built_in">break</span>.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> requirepass foobared</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Command renaming.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> It is possible to change the name of dangerous commands <span class="keyword">in</span> a shared</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> environment. For instance the CONFIG <span class="built_in">command</span> may be renamed into something</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> hard to guess so that it will still be available <span class="keyword">for</span> internal-use tools</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> but not available <span class="keyword">for</span> general clients.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Example:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> rename-command CONFIG b840fc02d524045429941cc15f59e41cb7be6c52</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> It is also possible to completely <span class="built_in">kill</span> a <span class="built_in">command</span> by renaming it into</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> an empty string:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> rename-command CONFIG <span class="string">""</span></span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Please note that changing the name of commands that are logged into the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> AOF file or transmitted to replicas may cause problems.</span></span><br></pre></td></tr></table></div></figure>
+<p>一般不用设置密码，redis作为缓存服务器运行在linux上，能连接linux表示已经得到许可了，也就是redis主要做缓存，安全交给上层去做。</p>
+<p>如果设置密码的话可以编辑该文件，也可以通过命令方式</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看密码</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> config get requirepass</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置密码，之后每次执行命令都会做安全检查</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> config <span class="built_in">set</span> requirepass <span class="string">"123456"</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 还原</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> config <span class="built_in">set</span> requirepass <span class="string">""</span></span></span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="clients"   >
+          <a href="#clients" class="heading-link"><i class="fas fa-link"></i></a>CLIENTS</h1>
+      
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">################################### CLIENTS ####################################</span><br><span class="line"></span><br><span class="line"># Set the max number of connected clients at the same time. By default</span><br><span class="line"># this limit is set to 10000 clients, however if the Redis server is not</span><br><span class="line"># able to configure the process file limit to allow for the specified limit</span><br><span class="line"># the max number of allowed clients is set to the current file limit</span><br><span class="line"># minus 32 (as Redis reserves a few file descriptors for internal uses).</span><br><span class="line">#</span><br><span class="line"># Once the limit is reached Redis will close all the new connections sending</span><br><span class="line"># an error &#39;max number of clients reached&#39;.</span><br><span class="line">#</span><br><span class="line"># maxclients 10000</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>maxclients 最大连接数</li>
+</ul>
+
+        <h1 id="memory-management-内存管理"   >
+          <a href="#memory-management-内存管理" class="heading-link"><i class="fas fa-link"></i></a>MEMORY MANAGEMENT 内存管理</h1>
+      
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">############################# MEMORY MANAGEMENT ################################</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Set a memory usage <span class="built_in">limit</span> to the specified amount of bytes.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> When the memory <span class="built_in">limit</span> is reached Redis will try to remove keys</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> according to the eviction policy selected (see maxmemory-policy).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If Redis can<span class="string">'t remove keys according to the policy, or if the policy is</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">set</span> to <span class="string">'noeviction'</span>, Redis will start to reply with errors to commands</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> that would use more memory, like SET, LPUSH, and so on, and will <span class="built_in">continue</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> to reply to <span class="built_in">read</span>-only commands like GET.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This option is usually useful when using Redis as an LRU or LFU cache, or to</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">set</span> a hard memory <span class="built_in">limit</span> <span class="keyword">for</span> an instance (using the <span class="string">'noeviction'</span> policy).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> WARNING: If you have replicas attached to an instance with maxmemory on,</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the size of the output buffers needed to feed the replicas are subtracted</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> from the used memory count, so that network problems / resyncs will</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> not trigger a loop <span class="built_in">where</span> keys are evicted, and <span class="keyword">in</span> turn the output</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> buffer of replicas is full with DELs of keys evicted triggering the deletion</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> of more keys, and so forth until the database is completely emptied.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> In short... <span class="keyword">if</span> you have replicas attached it is suggested that you <span class="built_in">set</span> a lower</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">limit</span> <span class="keyword">for</span> maxmemory so that there is some free RAM on the system <span class="keyword">for</span> replica</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> output buffers (but this is not needed <span class="keyword">if</span> the policy is <span class="string">'noeviction'</span>).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> maxmemory &lt;bytes&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> MAXMEMORY POLICY: how Redis will select what to remove when maxmemory</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> is reached. You can select among five behaviors:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> volatile-lru -&gt; Evict using approximated LRU among the keys with an expire <span class="built_in">set</span>.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> allkeys-lru -&gt; Evict any key using approximated LRU.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> volatile-lfu -&gt; Evict using approximated LFU among the keys with an expire <span class="built_in">set</span>.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> allkeys-lfu -&gt; Evict any key using approximated LFU.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> volatile-random -&gt; Remove a random key among the ones with an expire <span class="built_in">set</span>.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> allkeys-random -&gt; Remove a random key, any key.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> volatile-ttl -&gt; Remove the key with the nearest expire time (minor TTL)</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> noeviction -&gt; Don<span class="string">'t evict anything, just return an error on write operations.</span></span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> LRU means Least Recently Used</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> LFU means Least Frequently Used</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Both LRU, LFU and volatile-ttl are implemented using approximated</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> randomized algorithms.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note: with any of the above policies, Redis will <span class="built_in">return</span> an error on write</span></span><br><span class="line"><span class="meta">#</span><span class="bash">       operations, when there are no suitable keys <span class="keyword">for</span> eviction.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">       At the date of writing these commands are: <span class="built_in">set</span> setnx setex append</span></span><br><span class="line"><span class="meta">#</span><span class="bash">       incr decr rpush lpush rpushx lpushx linsert lset rpoplpush sadd</span></span><br><span class="line"><span class="meta">#</span><span class="bash">       sinter sinterstore sunion sunionstore sdiff sdiffstore zadd zincrby</span></span><br><span class="line"><span class="meta">#</span><span class="bash">       zunionstore zinterstore hset hsetnx hmset hincrby incrby decrby</span></span><br><span class="line"><span class="meta">#</span><span class="bash">       getset mset msetnx <span class="built_in">exec</span> sort</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> The default is:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> maxmemory-policy noeviction</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> LRU, LFU and minimal TTL algorithms are not precise algorithms but approximated</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> algorithms (<span class="keyword">in</span> order to save memory), so you can tune it <span class="keyword">for</span> speed or</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> accuracy. For default Redis will check five keys and pick the one that was</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> used less recently, you can change the sample size using the following</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> configuration directive.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> The default of 5 produces good enough results. 10 Approximates very closely</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="literal">true</span> LRU but costs more CPU. 3 is faster but not very accurate.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> maxmemory-samples 5</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Starting from Redis 5, by default a replica will ignore its maxmemory setting</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> (unless it is promoted to master after a failover or manually). It means</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> that the eviction of keys will be just handled by the master, sending the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> DEL commands to the replica as keys evict <span class="keyword">in</span> the master side.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This behavior ensures that masters and replicas stay consistent, and is usually</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> what you want, however <span class="keyword">if</span> your replica is writable, or you want the replica to have</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> a different memory setting, and you are sure all the writes performed to the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> replica are idempotent, <span class="keyword">then</span> you may change this default (but be sure to understand</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> what you are doing).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note that since the replica by default does not evict, it may end using more</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> memory than the one <span class="built_in">set</span> via maxmemory (there are certain buffers that may</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> be larger on the replica, or data structures may sometimes take more memory and so</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> forth). So make sure you monitor your replicas and make sure they have enough</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> memory to never hit a real out-of-memory condition before the master hits</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the configured maxmemory setting.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> replica-ignore-maxmemory yes</span></span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>
+<p>maxmemory 最大内存</p>
+</li>
+<li>
+<p>maxmemory-policy 达到最大内存时 缓存移除算法</p>
+<p>默认noeviction</p>
+<ul>
+<li>
+<p>lru</p>
+<blockquote>
+<p>LRU（The Least Recently Used，最近最久未使用算法）是一种常见的缓存算法，在很多分布式缓存系统（如Redis, Memcached）中都有广泛使用。</p>
+<p>LRU算法的思想是：<strong>如果一个数据在最近一段时间没有被访问到，那么可以认为在将来它被访问的可能性也很小。因此，当空间满时，最久没有访问的数据最先被置换（淘汰）</strong>。</p>
+<p>LRU算法的描述： 设计一种缓存结构，该结构在构造时确定大小，假设大小为 K，并有两个功能：</p>
+<ol>
+<li>set(key,value)：将记录(key,value)插入该结构。当缓存满时，将最久未使用的数据置换掉。</li>
+<li>get(key)：返回key对应的value值。</li>
+</ol>
+<p>实现：最朴素的思想就是用数组+时间戳的方式，不过这样做效率较低。因此，我们可以用双向链表（LinkedList）+哈希表（HashMap）实现（链表用来表示位置，哈希表用来存储和查找），在Java里有对应的数据结构<strong>LinkedHashMap</strong>。</p>
+</blockquote>
+</li>
+<li>
+<p>lfu</p>
+<blockquote>
+<p>LFU（Least Frequently Used ，最近最少使用算法）也是一种常见的缓存算法。</p>
+<p>顾名思义，LFU算法的思想是：<strong>如果一个数据在最近一段时间很少被访问到，那么可以认为在将来它被访问的可能性也很小。因此，当空间满时，最小频率访问的数据最先被淘汰</strong>。</p>
+<p>LFU 算法的描述：</p>
+<p>设计一种缓存结构，该结构在构造时确定大小，假设大小为 K，并有两个功能：</p>
+<ol>
+<li>set(key,value)：将记录(key,value)插入该结构。当缓存满时，将访问频率最低的数据置换掉。</li>
+<li>get(key)：返回key对应的value值。</li>
+</ol>
+<p>算法实现策略：考虑到 LFU 会淘汰访问频率最小的数据，我们需要一种合适的方法按大小顺序维护数据访问的频率。LFU 算法本质上可以看做是一个 top K 问题(K = 1)，即选出频率最小的元素，因此我们很容易想到可以用二项堆来选择频率最小的元素，这样的实现比较高效。最终实现策略为小顶堆+哈希表。</p>
+</blockquote>
+</li>
+<li>
+<p>random 随机</p>
+</li>
+<li>
+<p>ttl 选择最近的快要过期的key</p>
+</li>
+<li>
+<p>noevicition 不移除，仅仅是在写操作时返回一个错误</p>
+<p>个人使用，生产上不会使用这个</p>
+</li>
+</ul>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>volatile</span>：保护策略，只对设置了过期时间的键运用指定算法。</p>
+<p>allkeys: 所有键</p>
+</li>
+<li>
+<p>maxmemory-samples</p>
+<p>设置样本数量，LRU算法、LFU和最小TTL算法都并非是精确的算法，而是估算值，所以你可以设置样本的大小，redis默认会检查这么多个key并选择其中LRU的那个。</p>
+</li>
+</ul>
+
+        <h1 id="append-only-mode追加"   >
+          <a href="#append-only-mode追加" class="heading-link"><i class="fas fa-link"></i></a>APPEND ONLY MODE追加</h1>
+      
+<p>配置数据持久化</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">############################# APPEND ONLY MODE ###############################</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> By default Redis asynchronously dumps the dataset on disk. This mode is</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> good enough <span class="keyword">in</span> many applications, but an issue with the Redis process or</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> a power outage may result into a few minutes of writes lost (depending on</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the configured save points).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> The Append Only File is an alternative persistence mode that provides</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> much better durability. For instance using the default data fsync policy</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> (see later <span class="keyword">in</span> the config file) Redis can lose just one second of writes <span class="keyword">in</span> a</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> dramatic event like a server power outage, or a single write <span class="keyword">if</span> something</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> wrong with the Redis process itself happens, but the operating system is</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> still running correctly.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> AOF and RDB persistence can be enabled at the same time without problems.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If the AOF is enabled on startup Redis will load the AOF, that is the file</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> with the better durability guarantees.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Please check http://redis.io/topics/persistence <span class="keyword">for</span> more information.</span></span><br><span class="line"></span><br><span class="line">appendonly no</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> The name of the append only file (default: <span class="string">"appendonly.aof"</span>)</span></span><br><span class="line"></span><br><span class="line">appendfilename "appendonly.aof"</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> The fsync() call tells the Operating System to actually write data on disk</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> instead of waiting <span class="keyword">for</span> more data <span class="keyword">in</span> the output buffer. Some OS will really flush</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> data on disk, some other OS will just try to <span class="keyword">do</span> it ASAP.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis supports three different modes:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> no: don<span class="string">'t fsync, just let the OS flush the data when it wants. Faster.</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> always: fsync after every write to the append only <span class="built_in">log</span>. Slow, Safest.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> everysec: fsync only one time every second. Compromise.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> The default is <span class="string">"everysec"</span>, as that<span class="string">'s usually the right compromise between</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> speed and data safety. It<span class="string">'s up to you to understand if you can relax this to</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="string">"no"</span> that will <span class="built_in">let</span> the operating system flush the output buffer when</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> it wants, <span class="keyword">for</span> better performances (but <span class="keyword">if</span> you can live with the idea of</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> some data loss consider the default persistence mode that<span class="string">'s snapshotting),</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> or on the contrary, use <span class="string">"always"</span> that<span class="string">'s very slow but a bit safer than</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> everysec.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> More details please check the following article:</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> http://antirez.com/post/redis-persistence-demystified.html</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If unsure, use <span class="string">"everysec"</span>.</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> appendfsync always</span></span><br><span class="line">appendfsync everysec</span><br><span class="line"><span class="meta">#</span><span class="bash"> appendfsync no</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> When the AOF fsync policy is <span class="built_in">set</span> to always or everysec, and a background</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> saving process (a background save or AOF <span class="built_in">log</span> background rewriting) is</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> performing a lot of I/O against the disk, <span class="keyword">in</span> some Linux configurations</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis may block too long on the fsync() call. Note that there is no fix <span class="keyword">for</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> this currently, as even performing fsync <span class="keyword">in</span> a different thread will block</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> our synchronous write(2) call.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> In order to mitigate this problem it<span class="string">'s possible to use the following option</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> that will prevent fsync() from being called <span class="keyword">in</span> the main process <span class="keyword">while</span> a</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> BGSAVE or BGREWRITEAOF is <span class="keyword">in</span> progress.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This means that <span class="keyword">while</span> another child is saving, the durability of Redis is</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the same as <span class="string">"appendfsync none"</span>. In practical terms, this means that it is</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> possible to lose up to 30 seconds of <span class="built_in">log</span> <span class="keyword">in</span> the worst scenario (with the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> default Linux settings).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If you have latency problems turn this to <span class="string">"yes"</span>. Otherwise leave it as</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="string">"no"</span> that is the safest pick from the point of view of durability.</span></span><br><span class="line"></span><br><span class="line">no-appendfsync-on-rewrite no</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Automatic rewrite of the append only file.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis is able to automatically rewrite the <span class="built_in">log</span> file implicitly calling</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> BGREWRITEAOF when the AOF <span class="built_in">log</span> size grows by the specified percentage.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This is how it works: Redis remembers the size of the AOF file after the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> latest rewrite (<span class="keyword">if</span> no rewrite has happened since the restart, the size of</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the AOF at startup is used).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This base size is compared to the current size. If the current size is</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> bigger than the specified percentage, the rewrite is triggered. Also</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> you need to specify a minimal size <span class="keyword">for</span> the AOF file to be rewritten, this</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> is useful to avoid rewriting the AOF file even <span class="keyword">if</span> the percentage increase</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> is reached but it is still pretty small.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Specify a percentage of zero <span class="keyword">in</span> order to <span class="built_in">disable</span> the automatic AOF</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> rewrite feature.</span></span><br><span class="line"></span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> An AOF file may be found to be truncated at the end during the Redis</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> startup process, when the AOF data gets loaded back into memory.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> This may happen when the system <span class="built_in">where</span> Redis is running</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> crashes, especially when an ext4 filesystem is mounted without the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> data=ordered option (however this can<span class="string">'t happen when Redis itself</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> crashes or aborts but the operating system still works correctly).</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis can either <span class="built_in">exit</span> with an error when this happens, or load as much</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> data as possible (the default now) and start <span class="keyword">if</span> the AOF file is found</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> to be truncated at the end. The following option controls this behavior.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> If aof-load-truncated is <span class="built_in">set</span> to yes, a truncated AOF file is loaded and</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the Redis server starts emitting a <span class="built_in">log</span> to inform the user of the event.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Otherwise <span class="keyword">if</span> the option is <span class="built_in">set</span> to no, the server aborts with an error</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> and refuses to start. When the option is <span class="built_in">set</span> to no, the user requires</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> to fix the AOF file using the <span class="string">"redis-check-aof"</span> utility before to restart</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the server.</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Note that <span class="keyword">if</span> the AOF file will be found to be corrupted <span class="keyword">in</span> the middle</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> the server will still <span class="built_in">exit</span> with an error. This option only applies when</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Redis will try to <span class="built_in">read</span> more data from the AOF file but not enough bytes</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> will be found.</span></span><br><span class="line">aof-load-truncated yes</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> When rewriting the AOF file, Redis is able to use an RDB preamble <span class="keyword">in</span> the</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> AOF file <span class="keyword">for</span> faster rewrites and recoveries. When this option is turned</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> on the rewritten AOF file is composed of two different stanzas:</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash">   [RDB file][AOF tail]</span></span><br><span class="line"><span class="meta">#</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> When loading Redis recognizes that the AOF file starts with the <span class="string">"REDIS"</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> string and loads the prefixed RDB file, and continues loading the AOF</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> tail.</span></span><br><span class="line">aof-use-rdb-preamble yes</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>
+<p>appendonly</p>
+<p>yes: 开启aof持久化模式</p>
+<blockquote>
+<p>AOF and RDB persistence can be enabled at the same time without problems.If the AOF is enabled on startup Redis will load the AOF, that is the file with the better durability guarantees.</p>
+<p>aof和rdb可以同时存在，如果同时存在恢复时优先选择使用aof，因为它有更好的持久化保证(everysec)。</p>
+<p>如果aof文件毁坏（io突然断开等），可以使用<code>redis-check-aof --fix appendonly.aof</code>进行修复，将不符合语法的字符串删除。dump同理。</p>
+</blockquote>
+</li>
+<li>
+<p>appendfilename</p>
+</li>
+<li>
+<p>appendfsync</p>
+<ul>
+<li>always 同步持久化 每次发生数据变更会被立即记录到磁盘 性能较差但数据完整性比较好</li>
+<li>everysec 异步操作，每秒记录如果一秒内宕机，有数据丢失</li>
+<li>no 从不同步</li>
+</ul>
+</li>
+<li>
+<p>no-appendfsync-on-rewrite</p>
+<p>重写时是否可以运用appendfsync，用默认no即可，保证数据安全性</p>
+</li>
+<li>
+<p>auto-aof-rewrite-percentage</p>
+<p>增长多少时重写</p>
+</li>
+<li>
+<p>auto-aof-rewrite-min-size</p>
+<p>达到最小日志大小时才有可能触发重写，生产上起步3G以上</p>
+</li>
+</ul>
+
+        <h1 id="常见配置redisconf介绍"   >
+          <a href="#常见配置redisconf介绍" class="heading-link"><i class="fas fa-link"></i></a>常见配置redis.conf介绍</h1>
+      
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>配置项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>daemonize no</code></td>
+<td>Redis 默认不是以守护进程的方式运行，可以通过该配置项修改，使用 yes 启用守护进程（Windows 不支持守护线程的配置为 no ）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>pidfile /var/run/redis.pid</code></td>
+<td>当 Redis 以守护进程方式运行时，Redis 默认会把 pid 写入 /var/run/redis.pid 文件，可以通过 pidfile 指定</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>port 6379</code></td>
+<td>指定 Redis 监听端口，默认端口为 6379，作者在自己的一篇博文中解释了为什么选用 6379 作为默认端口，因为 6379 在手机按键上 MERZ 对应的号码，而 MERZ 取自意大利歌女 Alessia Merz 的名字</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>bind 127.0.0.1</code></td>
+<td>绑定的主机地址</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>timeout 300</code></td>
+<td>当客户端闲置多长秒后关闭连接，如果指定为 0 ，表示关闭该功能</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>loglevel notice</code></td>
+<td>指定日志记录级别，Redis 总共支持四个级别：debug、verbose、notice、warning，默认为 notice</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>logfile stdout</code></td>
+<td>日志记录方式，默认为标准输出，如果配置 Redis 为守护进程方式运行，而这里又配置为日志记录方式为标准输出，则日志将会发送给 /dev/null</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>databases 16</code></td>
+<td>设置数据库的数量，默认数据库为0，可以使用SELECT 命令在连接上指定数据库id</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>save &lt;seconds&gt; &lt;changes&gt;</code><br>Redis 默认配置文件中提供了三个条件：<br><code>save 900 1</code><br><code>save 300 10</code><br><code>save 60 10000</code><br></td>
+<td>分别表示 900 秒（15 分钟）内有 1 个更改，300 秒（5 分钟）内有 10 个更改以及 60 秒内有 10000 个更改。<br>指定在多长时间内，有多少次更新操作，就将数据同步到数据文件，可以多个条件配合</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>rdbcompression yes</code></td>
+<td>指定存储至本地数据库时是否压缩数据，默认为 yes，Redis 采用 LZF 压缩，如果为了节省 CPU 时间，可以关闭该选项，但会导致数据库文件变的巨大</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>dbfilename dump.rdb</code></td>
+<td>指定本地数据库文件名，默认值为 dump.rdb</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>dir ./</code></td>
+<td>指定本地数据库存放目录，默认运行启动命令时的当前目录</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>slaveof &lt;masterip&gt; &lt;masterport&gt;</code></td>
+<td>设置当本机为 slave 服务时，设置 master 服务的 IP 地址及端口，在 Redis 启动时，它会自动从 master 进行数据同步</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>masterauth &lt;master-password&gt;</code></td>
+<td>当 master 服务设置了密码保护时，slav 服务连接 master 的密码</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>requirepass foobared</code></td>
+<td>设置 Redis 连接密码，如果配置了连接密码，客户端在连接 Redis 时需要通过 AUTH <password> 命令提供密码，默认关闭</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>maxclients 128</code></td>
+<td>设置同一时间最大客户端连接数，默认无限制，Redis 可以同时打开的客户端连接数为 Redis 进程可以打开的最大文件描述符数，如果设置 maxclients 0，表示不作限制。当客户端连接数到达限制时，Redis 会关闭新的连接并向客户端返回 max number of clients reached 错误信息</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>maxmemory &lt;bytes&gt;</code></td>
+<td>指定 Redis 最大内存限制，Redis 在启动时会把数据加载到内存中，达到最大内存后，Redis 会先尝试清除已到期或即将到期的 Key，当此方法处理 后，仍然到达最大内存设置，将无法再进行写入操作，但仍然可以进行读取操作。Redis 新的 vm 机制，会把 Key 存放内存，Value 会存放在 swap 区</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>appendonly no</code></td>
+<td>指定是否在每次更新操作后进行日志记录，Redis 在默认情况下是异步的把数据写入磁盘，如果不开启，可能会在断电时导致一段时间内的数据丢失。因为 redis 本身同步数据文件是按上面 save 条件来同步的，所以有的数据会在一段时间内只存在于内存中。默认为 no</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>appendfilename appendonly.aof</code></td>
+<td>指定更新日志文件名，默认为 appendonly.aof</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>appendfsync everysec</code></td>
+<td>指定更新日志条件，共有 3 个可选值：<br>no：表示等操作系统进行数据缓存同步到磁盘（快）<br>always：表示每次更新操作后手动调用 fsync() 将数据写到磁盘（慢，安全）<br>everysec：表示每秒同步一次（折中，默认值）<br></td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>vm-enabled no</code></td>
+<td>指定是否启用虚拟内存机制，默认值为 no，简单的介绍一下，VM 机制将数据分页存放，由 Redis 将浏览量较少的页即冷数据 swap 到磁盘上，浏览多的页面由磁盘自动换出到内存中（在后面的文章我会仔细分析 Redis 的 VM 机制）</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>vm-swap-file /tmp/redis.swap</code></td>
+<td>虚拟内存文件路径，默认值为 /tmp/redis.swap，不可多个 Redis 实例共享</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>vm-max-memory 0</code></td>
+<td>将所有大于 vm-max-memory 的数据存入虚拟内存，无论 vm-max-memory 设置多小，所有索引数据都是内存存储的(Redis 的索引数据 就是 keys)，也就是说，当 vm-max-memory 设置为 0 的时候，其实是所有 value 都存在于磁盘。默认值为 0</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>vm-page-size 32</code></td>
+<td>Redis swap 文件分成了很多的 page，一个对象可以保存在多个 page 上面，但一个 page 上不能被多个对象共享，vm-page-size 是要根据存储的 数据大小来设定的，作者建议如果存储很多小对象，page 大小最好设置为 32 或者 64bytes；如果存储很大大对象，则可以使用更大的 page，如果不确定，就使用默认值</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>vm-pages 134217728</code></td>
+<td>设置 swap 文件中的 page 数量，由于页表（一种表示页面空闲或使用的 bitmap）是在放在内存中的，，在磁盘上每 8 个 pages 将消耗 1byte 的内存。</td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>vm-max-threads 4</code></td>
+<td>设置连接swap文件的线程数,最好不要超过机器的核数,如果设置为0,那么所有对swap文件的操作都是串行的，可能会造成比较长时间的延迟。默认值为4</td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>glueoutputbuf yes</code></td>
+<td>设置在向客户端应答时，是否把较小的包合并为一个包发送，默认为开启</td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>hash-max-zipmap-entries 64</code><br><code>hash-max-zipmap-value 512</code></td>
+<td>指定在超过一定的数量或者最大的元素超过某一临界值时，采用一种特殊的哈希算法</td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>activerehashing yes</code></td>
+<td>指定是否激活重置哈希，默认为开启（后面在介绍 Redis 的哈希算法时具体介绍）</td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>include /path/to/local.conf</code></td>
+<td>指定包含其它的配置文件，可以在同一主机上多个Redis实例之间使用同一份配置文件，而同时各个实例又拥有自己的特定配置文件</td>
+</tr>
+</tbody>
+</table></div>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/4_redis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/4_redis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A7%A3%E6%9E%90/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/redis/">redis</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/5_redis%E6%8C%81%E4%B9%85%E5%8C%96/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">redis持久化</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/3_redis%E4%BA%94%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/"><span class="paginator-prev__text">reids五大数据类型</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#注意事项"><span class="toc-number">1.</span> <span class="toc-text">
+          注意事项</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#includes包含"><span class="toc-number">2.</span> <span class="toc-text">
+          INCLUDES包含</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#network网络"><span class="toc-number">3.</span> <span class="toc-text">
+          NETWORK网络</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#general通用"><span class="toc-number">4.</span> <span class="toc-text">
+          GENERAL通用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#snapshotting快照"><span class="toc-number">5.</span> <span class="toc-text">
+          SNAPSHOTTING快照</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#replication复制"><span class="toc-number">6.</span> <span class="toc-text">
+          REPLICATION复制</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#security安全"><span class="toc-number">7.</span> <span class="toc-text">
+          SECURITY安全</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#clients"><span class="toc-number">8.</span> <span class="toc-text">
+          CLIENTS</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#memory-management-内存管理"><span class="toc-number">9.</span> <span class="toc-text">
+          MEMORY MANAGEMENT 内存管理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#append-only-mode追加"><span class="toc-number">10.</span> <span class="toc-text">
+          APPEND ONLY MODE追加</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常见配置redisconf介绍"><span class="toc-number">11.</span> <span class="toc-text">
+          常见配置redis.conf介绍</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

@@ -1,0 +1,596 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="提出问题        我们都知道类加载子系统中的解析阶段就是将常量池内的符号引用转换为直接引用(事实上，解析操作往往会伴随着JVM在执行完初始化之后再执行，后面会有解释)，针对这个描述很自然地联想到下面几个问题：  常量池是什么 常量池中的元素都要转吗？ 符号引用是什么 直接引用是什么 转换过程  衍生出的问题  虚方法调用过程 关于偏移量 解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="详解“符号引用转直接引用”">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E8%AF%A6%E8%A7%A3%E2%80%9C%E7%AC%A6%E5%8F%B7%E5%BC%95%E7%94%A8%E8%BD%AC%E7%9B%B4%E6%8E%A5%E5%BC%95%E7%94%A8%E2%80%9D/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="提出问题        我们都知道类加载子系统中的解析阶段就是将常量池内的符号引用转换为直接引用(事实上，解析操作往往会伴随着JVM在执行完初始化之后再执行，后面会有解释)，针对这个描述很自然地联想到下面几个问题：  常量池是什么 常量池中的元素都要转吗？ 符号引用是什么 直接引用是什么 转换过程  衍生出的问题  虚方法调用过程 关于偏移量 解析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200720162751.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200717122431.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200719080601.png">
+<meta property="article:published_time" content="2020-09-16T16:22:27.920Z">
+<meta property="article:modified_time" content="2020-09-16T16:50:17.000Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="jvm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200720162751.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>详解“符号引用转直接引用” | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E8%AF%A6%E8%A7%A3%E2%80%9C%E7%AC%A6%E5%8F%B7%E5%BC%95%E7%94%A8%E8%BD%AC%E7%9B%B4%E6%8E%A5%E5%BC%95%E7%94%A8%E2%80%9D/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">详解“符号引用转直接引用”</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">6.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">42分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="提出问题"   >
+          <a href="#提出问题" class="heading-link"><i class="fas fa-link"></i></a>提出问题</h1>
+      
+<p>我们都知道类加载子系统中的解析阶段就是将<strong>常量池</strong>内的<strong>符号引用</strong>转换为<strong>直接引用</strong>(事实上，解析操作往往会伴随着JVM在执行完初始化之后再执行，后面会有解释)，针对这个描述很自然地联想到下面几个问题：</p>
+<ol>
+<li>常量池是什么</li>
+<li>常量池中的元素都要转吗？</li>
+<li>符号引用是什么</li>
+<li>直接引用是什么</li>
+<li>转换过程</li>
+</ol>
+<p><strong>衍生出的问题</strong></p>
+<ol>
+<li>虚方法调用过程</li>
+<li>关于偏移量</li>
+<li>解析</li>
+</ol>
+<a id="more"></a>
+<p>ok，下面我们使用深度优先抽丝剥茧地解决这几个问题。</p>
+
+        <h1 id="常量池什么"   >
+          <a href="#常量池什么" class="heading-link"><i class="fas fa-link"></i></a>常量池什么</h1>
+      
+<p>我们使用javap或者jclasslib可以解析出原始二进制字节码文件，如下</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200720162751.png"  alt="" />
+      </p>
+<p>Constant pool部分就是常量池，确切地说叫<strong>class文件常量池</strong>(常量池加载到方法区后就叫<strong>运行时常量池</strong>)，它是<strong>class文件的一部分</strong>，用于<strong>保存编译时确定的数据</strong>。这些数据有：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200717122431.png"  alt="img" />
+      </p>
+
+        <h1 id="常量池中的元素都要转吗"   >
+          <a href="#常量池中的元素都要转吗" class="heading-link"><i class="fas fa-link"></i></a>常量池中的元素都要转吗</h1>
+      
+<p>上图将常量池包含的内容划分成了两部分，当然只会转符号引用所代表的那些数据，也就是接口、字段、类方法、接口方法、方法类型等，对应的常量池tag分别是CONSTANT_Class_info、CONSTANT_Fieldref_info、CONSTANT_Methodref_info等</p>
+<p><strong>下面以类方法为例说明符号引用和直接引用</strong></p>
+
+        <h1 id="符号引用是什么"   >
+          <a href="#符号引用是什么" class="heading-link"><i class="fas fa-link"></i></a>符号引用是什么</h1>
+      
+<p>考虑这样一个Java类：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">X</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    bar();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">bar</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>它编译出来的Class文件的文本表现形式如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">Classfile /<span class="keyword">private</span>/tmp/X<span class="class">.<span class="keyword">class</span></span></span><br><span class="line"><span class="class">  <span class="title">Last</span> <span class="title">modified</span> <span class="title">Jun</span> 13, 2015</span>; size <span class="number">372</span> bytes</span><br><span class="line">  MD5 checksum <span class="number">8</span>abb9cbb66266e8bc3f5eeb35c3cc4dd</span><br><span class="line">  Compiled from <span class="string">"X.java"</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">X</span></span></span><br><span class="line">  SourceFile: "X.java"</span><br><span class="line">  minor version: <span class="number">0</span></span><br><span class="line">  major version: <span class="number">51</span></span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line">   #1 = Methodref          #4.#16         //  java/lang/Object."&lt;init&gt;":()V</span><br><span class="line">   #2 = Methodref          #3.#17         //  X.bar:()V</span><br><span class="line">   #3 = Class              #18            //  X</span><br><span class="line">   #4 = Class              #19            //  java/lang/Object</span><br><span class="line">   #5 = Utf8               &lt;init&gt;</span><br><span class="line">   #6 = Utf8               ()V</span><br><span class="line">   #7 = Utf8               Code</span><br><span class="line">   #8 = Utf8               LineNumberTable</span><br><span class="line">   #9 = Utf8               LocalVariableTable</span><br><span class="line">  #10 = Utf8               this</span><br><span class="line">  #11 = Utf8               LX;</span><br><span class="line">  #12 = Utf8               foo</span><br><span class="line">  #13 = Utf8               bar</span><br><span class="line">  #14 = Utf8               SourceFile</span><br><span class="line">  #15 = Utf8               X.java</span><br><span class="line">  #16 = NameAndType        #5:#6          //  "&lt;init&gt;":()V</span><br><span class="line">  #17 = NameAndType        #13:#6         //  bar:()V</span><br><span class="line">  #18 = Utf8               X</span><br><span class="line">  #19 = Utf8               java/lang/Object</span><br><span class="line">&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">X</span><span class="params">()</span></span>;</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">1</span>, locals=<span class="number">1</span>, args_size=<span class="number">1</span></span><br><span class="line">         <span class="number">0</span>: aload_0       </span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object."&lt;init&gt;":()V</span><br><span class="line">         <span class="number">4</span>: <span class="keyword">return</span>        </span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line <span class="number">1</span>: <span class="number">0</span></span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">               <span class="number">0</span>       <span class="number">5</span>     <span class="number">0</span>  <span class="keyword">this</span>   LX;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span></span>;</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">1</span>, locals=<span class="number">1</span>, args_size=<span class="number">1</span></span><br><span class="line">         <span class="number">0</span>: aload_0       </span><br><span class="line">         1: invokevirtual #2                  // Method bar:()V</span><br><span class="line">         <span class="number">4</span>: <span class="keyword">return</span>        </span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line <span class="number">3</span>: <span class="number">0</span></span><br><span class="line">        line <span class="number">4</span>: <span class="number">4</span></span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">               <span class="number">0</span>       <span class="number">5</span>     <span class="number">0</span>  <span class="keyword">this</span>   LX;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">bar</span><span class="params">()</span></span>;</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">0</span>, locals=<span class="number">1</span>, args_size=<span class="number">1</span></span><br><span class="line">         <span class="number">0</span>: <span class="keyword">return</span>        </span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line <span class="number">6</span>: <span class="number">0</span></span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">               <span class="number">0</span>       <span class="number">1</span>     <span class="number">0</span>  <span class="keyword">this</span>   LX;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>来考察foo()方法里的一条字节码指令：</p>
+<p><code>1: invokevirtual #2 // Method bar:()V</code></p>
+<p>对应到二进制字节码文件里就是</p>
+<p><code>[B6] [00 02]</code></p>
+<p>0xB6指令可以在<a href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/jvm%E6%8C%87%E4%BB%A4%E9%9B%86/" title="jvm指令集">jvm指令集</a>中查看含义：</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th><strong>指令码</strong></th>
+<th>助记符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0xb6</td>
+<td>invokevirtual</td>
+<td>调用虚方法</td>
+</tr>
+</tbody>
+</table></div>
+<p>这里先解释下虚方法，和后面出现的虚方法表对应，非虚方法不会出现在虚方法表</p>
+<blockquote>
+<p>如果方法在编译期就确定了具体的调用版本，这个版本在运行时是不可变的。这样的方法称为非虚方法，这样的方法有：</p>
+<ul>
+<li>静态方法</li>
+<li>私有方法</li>
+<li>final方法</li>
+<li>实例构造器</li>
+<li>父类方法</li>
+</ul>
+<p>其他方法称为虚方法，这里的其他就是指实例方法，所以在java里虚方法也可以称作实例方法</p>
+<p>虚方法就相当于C语言中的虚函数（C中则需要使用关键字virtual来显式定义）。如果在Java程序中不希望某个方法拥有虚函数的特征时，则可以使用关键字final来标记这个方法。</p>
+<p>(虚方法，非虚方法)可以跟(早期绑定，晚期绑定)、(静态链接、动态链接)关联起来分析。</p>
+</blockquote>
+<p><code>[B6] [00 02]</code>后面的<code>0x0002</code>是该指令的操作数，用于指定要调用的目标方法。</p>
+<p>这个操作数是Class文件里的常量池的下标。那么去找下标为2的常量池项，是：</p>
+<p><code>#2 = Methodref #3.#17 // X.bar:()V</code></p>
+<p>这在Class文件中的实际编码为（以十六进制表示，Class文件里使用高位在前字节序（big-endian））：</p>
+<p><code>[0A] [00 03] [00 11]</code></p>
+<p>其中0x0A是CONSTANT_Methodref_info的tag，后面的0x0003和0x0011是该常量池项的两个部分：class_index和name_and_type_index。这两部分分别都是常量池下标，引用着另外两个常量池项。</p>
+<p>顺着这条线索把能传递引用到的常量池项都找出来，会看到（按深度优先顺序排列）：</p>
+<figure class="highlight"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#2 = Methodref          #3.#17         //  X.bar:()V</span><br><span class="line"> #3 = Class              #18            //  X</span><br><span class="line">#18 = Utf8               X</span><br><span class="line">#17 = NameAndType        #13:#6         //  bar:()V</span><br><span class="line">#13 = Utf8               bar</span><br><span class="line"> #6 = Utf8               ()V</span><br></pre></td></tr></table></div></figure>
+<p>把引用关系画成一棵树的话：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">			#2 Methodref X.bar:()V</span><br><span class="line">     &#x2F;                     \</span><br><span class="line">#3 Class X       #17 NameAndType bar:()V</span><br><span class="line">    |                &#x2F;             \</span><br><span class="line">#18 Utf8 X    #13 Utf8 bar     #6 Utf8 ()V</span><br></pre></td></tr></table></div></figure>
+<p>标记为Utf8的常量池项在Class文件中实际为CONSTANT_Utf8_info，是以略微修改过的UTF-8编码的字符串文本。</p>
+<p>由此可以看出，Class文件中的invokevirtual指令的操作数<code>#2</code>经过几层间接之后，最后都是由字符串<code>X.bar()V</code>来表示的。这就是Class文件里的“<strong>符号引用</strong>”的实态：带有类型（tag） / 结构（符号间引用层次）的字符串。</p>
+<p>结论：符号引用就是带有tag的字符串，如被调用方法作为操作数 符号引用<code>#2</code>就是<code>Methodref X.bar:()V</code></p>
+
+        <h1 id="直接引用是什么"   >
+          <a href="#直接引用是什么" class="heading-link"><i class="fas fa-link"></i></a>直接引用是什么</h1>
+      
+<p>直接引用就是直接指向目标的指针、相对偏移量或一个间接定位到目标的句柄。</p>
+<p>直接引用是和虚拟机的布局相关的，同一个符号引用在不同的虚拟机实例上翻译出来的直接引用一般不会相同。如果有了直接引用，那引用的目标必定已经被加载入内存中了。</p>
+
+        <h1 id="转换过程"   >
+          <a href="#转换过程" class="heading-link"><i class="fas fa-link"></i></a>转换过程</h1>
+      
+<p>这里就不拿HotSpot VM来举例了，因为它的实现略复杂。下面使用元祖JVM举例</p>
+<blockquote>
+<p><strong>Sun Classic VM</strong>:（以32位Sun JDK 1.0.2在x86上为例）</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">         HObject             ClassObject</span><br><span class="line">                       -4 [ hdr            ]</span><br><span class="line">--&gt; +0 [ obj     ] --&gt; +0 [ ... fields ... ]</span><br><span class="line">    +4 [ methods ] \</span><br><span class="line">                    \         methodtable            ClassClass</span><br><span class="line">                     &gt; +0  [ classdescriptor ] --&gt; +0 [ ... ]</span><br><span class="line">                       +4  [ vtable[0]       ]      methodblock</span><br><span class="line">                       +8  [ vtable[1]       ] --&gt; +0 [ ... ]</span><br><span class="line">                       ... [ vtable...       ]</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+<p>元祖JVM在做类加载的时候会把Class文件的各个部分(类型信息、静态变量、域信息、方法信息等)分别解析（parse）为JVM的内部数据结构。例如说类的元数据记录在ClassClass结构体里，每个方法的元数据记录在各自的methodblock结构体里，等等。</p>
+<p>在刚加载好一个类的时候，Class文件里的常量池和每个方法的字节码（Code属性）会被基本原样的拷贝到内存里先放着，也就是说仍然处于使用“符号引用”的状态；直到真的要被使用到的时候才会被解析（resolve）为直接引用。</p>
+<p>假定我们要<strong>第一次</strong>执行到foo()方法里调用bar()方法的那条invokevirtual指令了。此时JVM会发现该指令尚未被解析（resolve），所以会先去解析一下。</p>
+<blockquote>
+<p>这里也说明了解析执行的时机，并不一定就是和验证、准备连续的，也有可能在初始化后</p>
+</blockquote>
+<p>通过其操作数所记录的常量池下标0x0002，找到常量池项#2，发现该常量池项也尚未被解析（resolve），于是进一步去解析一下。<br />
+通过Methodref所记录的class_index找到类名，进一步找到被调用方法的类的ClassClass结构体；然后通过name_and_type_index找到方法名和方法描述符，到ClassClass结构体上记录的方法列表里找到匹配的那个methodblock；最终把找到的methodblock的指针写回到常量池项#2里。</p>
+<p>也就是说，原本常量池项#2在类加载后的运行时常量池里的内容跟Class文件里的一致，是：</p>
+<p><code>[00 03] [00 11]</code></p>
+<blockquote>
+<p>tag(0A)被放到了别的地方；小细节：刚加载进来的时候数据仍然是按高位在前字节序存储的</p>
+</blockquote>
+<p>而在解析后，假设找到的<code>methodblock*</code>是<code>0x45762300</code>，那么常量池项#2的内容会变为：</p>
+<p><code>[00 23 76 45]</code></p>
+<blockquote>
+<p>解析后字节序使用x86原生使用的低位在前字节序（little-endian），为了后续使用方便</p>
+</blockquote>
+<p>这样，以后再查询到常量池项#2时，里面就不再是一个符号引用，而是一个能直接找到Java方法元数据的<code>methodblock*</code>了。这里的<code>methodblock*</code>就是一个“<strong>直接引用</strong>”。</p>
+
+        <h1 id="实例方法调用过程"   >
+          <a href="#实例方法调用过程" class="heading-link"><i class="fas fa-link"></i></a>实例方法调用过程</h1>
+      
+<p>解析好常量池项#2之后回到invokevirtual指令的解析。回顾一下，在解析前那条指令的内容是：</p>
+<p><code>[B6] [00 02]</code></p>
+<p>而在解析后，这块代码被改写为：</p>
+<p><code>[D6] [06] [01]</code></p>
+<p>其中opcode部分从invokevirtual改写为invokevirtual_quick，以表示该指令已经解析完毕。<br />
+原本存储操作数的2字节空间现在分别存了2个1字节信息，第一个是<strong>虚方法表的下标（vtable index）</strong>，第二个是方法的参数个数。这两项信息都由前面解析常量池项#2得到的methodblock*读取而来。<br />
+也就是：</p>
+<p><code>invokevirtual_quick vtable_index=6, args_size=1</code></p>
+<blockquote>
+<p><strong>如何获取虚方法的直接引用</strong></p>
+<ol>
+<li>
+<p>调用虚方法时，此时操作数栈顶元素就是虚方法所属实例，将该实例的类型记做C</p>
+</li>
+<li>
+<p>尝试在类型C中找到与常量池中的方法描述名称都相符的方法，如果找到则进行访问权限校验，通过则返回这个方法的直接引用，否则报java.lang.IllegalAccessError异常。</p>
+</li>
+<li>
+<p>如果没找到，按照继承关系从下往上依次对C的各个父类执行第2步操作。</p>
+</li>
+<li>
+<p>如果始终没找到则抛出java.lang.AbstractMethodError异常</p>
+</li>
+</ol>
+<p>总结一句话就是通过method tag知道是虚方法，现在需要确定真正调用时的方法是哪个，这也是<strong>重写</strong>的本质。</p>
+<p>上述步骤也被称为<strong>动态分派</strong>：<strong>运行期间根据实际类型确定方法调用版本的分派过程</strong></p>
+<p><strong>虚方法表</strong></p>
+<p>在面向对象的编程中，会很频繁的使用到动态分派，如果在每次<strong>动态分派</strong>的过程中都要重新在类的<strong>方法元数据</strong>中搜索合适的目标的话就可能影响到执行效率。因此，为了提高性能，JVM采用在类的方法区建立一个<strong>虚方法表</strong> （virtual method table）（非虚方法不会出现在表中）来实现。使用索引表来代替查找。</p>
+<p>每个类中都有一个虚方法表，表中存放着<strong>各个方法的实际入口(符号引用)</strong>。</p>
+<p>虚方法表是什么时候被创建的呢？</p>
+<p>虚方法表会在类加载的链接阶段被创建并开始初始化，类的变量初始值准备完成之后，JVM会把该类的方法表也初始化完毕。</p>
+<p>给一个直观的例子，<strong>图片来源于网上</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200719080601.png"  alt="img" />
+      </p>
+</blockquote>
+<p>回到例子中， 这里类X对应在JVM里的虚方法表会是这个样子的：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">0</span>]: java.lang.Object.hashCode:()I</span><br><span class="line">[<span class="number">1</span>]: java.lang.Object.equals:(Ljava/lang/Object;)Z</span><br><span class="line">[<span class="number">2</span>]: java.lang.Object.clone:()Ljava/lang/Object;</span><br><span class="line">[<span class="number">3</span>]: java.lang.Object.toString:()Ljava/lang/String;</span><br><span class="line">[<span class="number">4</span>]: java.lang.Object.finalize:()V</span><br><span class="line">[<span class="number">5</span>]: X.foo:()V</span><br><span class="line">[<span class="number">6</span>]: X.bar:()V</span><br></pre></td></tr></table></div></figure>
+<p>所以JVM在执行invokevirtual_quick要调用X.bar()时，只要顺着对象引用查找到虚方法表，然后从中取出第6项的methodblock*，就可以找到实际应该调用的目标然后调用过去了。</p>
+<p>所以说在解析/改写后的invokevirtual_quick指令里，<strong>虚方法表下标</strong>(vtable index)也是一个“<strong>直接引用</strong>”的表现。</p>
+<blockquote>
+<p><strong>有点类似内存分页存储，页表项的下标表示页块号，页表项的值表示偏移量，从而完成进程中逻辑地址对物理地址的映射。</strong></p>
+<p><strong>这里方法表的下标或者说偏移量(指针)的值就是“直接引用”。</strong></p>
+</blockquote>
+<p>关于这种“_quick”指令的设计，可以参考远古的JVM规范第1版的第9章。这里有一份拷贝：<span class="exturl"><a class="exturl__link"   href="https://link.zhihu.com/?target=http%3A//www.cs.miami.edu/~burt/reference/java/language_vm_specification.pdf" >language_vm_specification.pdf</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>在现在的HotSpot VM里，围绕常量池、invokevirtual的解析（再次强调是resolve）的具体实现方式跟元祖JVM不一样，但是大体的思路还是相通的。</p>
+<p>由此可见，符号引用通常是设计字符串的——用文本形式来表示引用关系。</p>
+<p>而直接引用是JVM（或其它运行时环境）所能直接使用的形式。它既可以表现为直接指针（如上面常量池项#2解析为methodblock*），也可能是其它形式（例如invokevirtual_quick指令里的vtable index）。<br />
+关键点不在于形式是否为“直接指针”，而是在于JVM是否能“直接使用”这种形式的数据。</p>
+<blockquote>
+<p><strong>总结</strong>：</p>
+<p>第一次运行的时候，发现指令没有被解析，根据指令去把常量池中有关系的所有项找出来，得到以“UTF-8”编码描述的此方法所属的“类，方法名，描述符”的常量池项，这就是“<strong>符号引用</strong>”。</p>
+<p>之后根据这些信息去对应类的方法表里寻找对应的方法，得到方法表的偏移量（指针），这个偏移量（指针）就是“<strong>直接引用</strong>”，再将偏移量赋给常量池项#2（根据指令，在常量池里找到的第一个项）。 最后再将指令修改为：invokevirtual_quick，并把操作数修改成指向方法表的偏移量（指针）， 并加上参数个数。</p>
+<p>对“多态”实现的理解，依据的是方法表实现原理，由父类得到想要调用的方法在方法表里的偏移量（解析过程），这个偏移量由父类虚方法表得到的，子类继承父类也必然有此方法（private、static修饰的除外），并且对于继承的方法，在子、父类虚方法表中偏移量是相同的（这个是多态实现的关键），并且，如果子类重写了该方法则会覆盖继承的方法（偏移量不变）。解析完成之后，符号引用替换成直接引用。然后开始实际调用，由传入的实际指向this来确定方法的接收者（receiver）动态绑定（分派）具体对象的类型（因为是多态，所以指向的是子类对象的类型），继而找到方法区里子类的方法表，根据父类方法表对应的该方法的偏移量找到子类方法表对应的方法，实现多态性。多态性：一个方法，不同的实现（一个接口，多种实现）。在子、父类方法表中偏移量是相同的（这个是多态实现的关键）！！ps：静态成员变量，静态成员方法，非静态成员变量，只能被继承和隐藏，也就是private、final、static修饰的字段和方法不能被重写。非静态的成员方法才能被继承和覆盖（重写），只有重写的方法才能实现多态性。</p>
+</blockquote>
+
+        <h1 id="关于偏移量"   >
+          <a href="#关于偏移量" class="heading-link"><i class="fas fa-link"></i></a>关于偏移量</h1>
+      
+<p>符号引用是只包含语义信息，不涉及具体实现的；而解析（resolve）过后的直接引用则是与具体实现息息相关的。所以当谈及某个符号引用被resolve成怎样的直接引用时，必须要结合某个具体实现来讨论才行。</p>
+<blockquote>
+<p>查阅资料后很多人说了一个偏移量的问题，那这个偏移量是相对于什么的偏移量呢？</p>
+</blockquote>
+<p>“相对于什么的偏移量”这就正好是上面说的“实现细节”的一部分了。</p>
+
+        <h2 id="关于对象实例的内存布局"   >
+          <a href="#关于对象实例的内存布局" class="heading-link"><i class="fas fa-link"></i></a>关于对象实例的内存布局</h2>
+      
+<p>举例来说，对于下面的类C，</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">  <span class="keyword">boolean</span> b;</span><br><span class="line">  Object o1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="keyword">extends</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i;</span><br><span class="line">  <span class="keyword">long</span> l;</span><br><span class="line">  Object o2;</span><br><span class="line">  <span class="keyword">float</span> f;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span> <span class="keyword">extends</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">  <span class="keyword">boolean</span> b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>它的实例对象布局就是：（假定是64位HotSpot VM，开启了压缩指针的话）</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">--&gt;  +0 [ _mark     ] (64-bit header word)</span><br><span class="line">     +8 [ _klass    ] (32-bit header word, compressed klass pointer)</span><br><span class="line">    +12 [ A.b       ] (boolean, 1 byte)</span><br><span class="line">    +13 [ (padding) ] (padding for alignment, 3 bytes)</span><br><span class="line">    +16 [ A.o1      ] (reference, compressed pointer, 4 bytes)</span><br><span class="line">    +20 [ B.i       ] (int, 4 bytes)</span><br><span class="line">    +24 [ B.l       ] (long, 8 bytes)</span><br><span class="line">    +32 [ B.f       ] (float, 4 bytes)</span><br><span class="line">    +36 [ B.o2      ] (reference, compressed pointer, 4 bytes)</span><br><span class="line">    +40 [ C.b       ] (boolean, 1 byte)</span><br><span class="line">    +41 [ (padding) ] (padding for object alignment, 7 bytes)</span><br></pre></td></tr></table></div></figure>
+<p>所以C类的对象实例大小，在这个设定下是48字节，其中有10字节是为对齐而浪费掉的padding，12字节是对象头，剩下的26字节是用户自己代码声明的实例字段。</p>
+<p>留意到C类里字段的排布是按照这个顺序的：对象头 - Object声明的字段（无） - A声明的字段 - B声明的字段 - C声明的字段——按继承深度从浅到深排布。而每个类里面的字段排布顺序则按前面说的规则，按宽度来重排序。同时，如果类继承边界上有空隙（例如这里A和B之间其实本来会有一个4字节的空隙，但B里正好声明了一些不宽于4字节的字段，就可以把第一个不宽于4字节的字段拉到该空隙里，也就是 B.i 的位置）。</p>
+<p>同时也请留意到A类和C类都声明了名字为b的字段。它们之间有什么关系？——没关系。<br />
+Java里，字段是不参与多态的。派生类如果声明了跟基类同名的字段，则两个字段在最终的实例中都会存在；派生类的版本只会在名字上遮盖（shadow / hide）掉基类字段的名字，而不会与基类字段合并或令其消失。上面例子特意演示了一下A.b 与 C.b 同时存在的这个情况。</p>
+<p>使用<span class="exturl"><a class="exturl__link"   href="https://link.zhihu.com/?target=http%3A//openjdk.java.net/projects/code-tools/jol/" >JOL</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>工具可以方便地看到同样的信息：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ~&#x2F;sdk&#x2F;jdk1.8.0&#x2F;Contents&#x2F;Home&#x2F;bin&#x2F;java -Xbootclasspath&#x2F;a:. -jar ~&#x2F;Downloads&#x2F;jol-cli-0.5-full.jar internals C</span><br><span class="line">objc[78030]: Class JavaLaunchHelper is implemented in both &#x2F;Users&#x2F;krismo&#x2F;sdk&#x2F;jdk1.8.0&#x2F;Contents&#x2F;Home&#x2F;bin&#x2F;java and &#x2F;Users&#x2F;krismo&#x2F;sdk&#x2F;jdk1.8.0&#x2F;Contents&#x2F;Home&#x2F;jre&#x2F;lib&#x2F;libinstrument.dylib. One of the two will be used. Which one is undefined.</span><br><span class="line"># Running 64-bit HotSpot VM.</span><br><span class="line"># Using compressed oop with 3-bit shift.</span><br><span class="line"># Using compressed klass with 3-bit shift.</span><br><span class="line"># Objects are 8 bytes aligned.</span><br><span class="line"># Field sizes by type: 4, 1, 1, 2, 2, 4, 4, 8, 8 [bytes]</span><br><span class="line"># Array element sizes: 4, 1, 1, 2, 2, 4, 4, 8, 8 [bytes]</span><br><span class="line"></span><br><span class="line">C object internals:</span><br><span class="line"> OFFSET  SIZE    TYPE DESCRIPTION                    VALUE</span><br><span class="line">      0     4         (object header)                09 00 00 00 (00001001 00000000 00000000 00000000) (9)</span><br><span class="line">      4     4         (object header)                00 00 00 00 (00000000 00000000 00000000 00000000) (0)</span><br><span class="line">      8     4         (object header)                be 3b 01 f8 (10111110 00111011 00000001 11111000) (-134136898)</span><br><span class="line">     12     1 boolean A.b                            false</span><br><span class="line">     13     3         (alignment&#x2F;padding gap)        N&#x2F;A</span><br><span class="line">     16     4  Object A.o1                           null</span><br><span class="line">     20     4     int B.i                            0</span><br><span class="line">     24     8    long B.l                            0</span><br><span class="line">     32     4   float B.f                            0.0</span><br><span class="line">     36     4  Object B.o2                           null</span><br><span class="line">     40     1 boolean C.b                            false</span><br><span class="line">     41     7         (loss due to the next object alignment)</span><br><span class="line">Instance size: 48 bytes</span><br><span class="line">Space losses: 3 bytes internal + 7 bytes external &#x3D; 10 bytes total</span><br></pre></td></tr></table></div></figure>
+<p>所以，对一个这样的对象模型，<strong>实例字段的“偏移量”是从对象起始位置开始算的</strong>。对于这样的字节码：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getfield cp#12  &#x2F;&#x2F; C.b:Z</span><br></pre></td></tr></table></div></figure>
+<p>（这里用cp#12来表示常量池的第12项的意思）<br />
+这个C.b:Z的符号引用，最终就会被解析（resolve）为+40这样的偏移量，外加一些VM自己用的元数据。<br />
+这个偏移量加上额外元数据比原本的constant pool index要宽，没办法放在原本的constant pool里，所以HotSpot VM有另外一个叫做constant pool cache的东西来存放它们。<br />
+在HotSpot VM里，上面的字节码经过解析后，就会变成：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fast_bgetfield cpc#5  &#x2F;&#x2F; (offset: +40, type: boolean, ...)</span><br></pre></td></tr></table></div></figure>
+<p>（这里用cpc#5来表示constant pool cache的第5项的意思）<br />
+于是解析后偏移量信息就记录在了constant pool cache里，getfield根据解析出来的constant pool cache entry里记录的类型信息被改写为对应类型的版本的字节码fast_bgetfield来避免以后每次都去解析一次，然后fast_bgetfield就可以根据偏移量信息以正确的类型来访问字段了。</p>
+
+        <h2 id="关于静态对象的内存布局"   >
+          <a href="#关于静态对象的内存布局" class="heading-link"><i class="fas fa-link"></i></a>关于静态对象的内存布局</h2>
+      
+<p>从JDK 1.3到JDK 6的HotSpot VM，静态变量保存在类的元数据（InstanceKlass）的末尾。而从JDK 7开始的HotSpot VM，静态变量则是保存在类的Java镜像（java.lang.Class实例）的末尾。</p>
+<p>在HotSpot VM中，对象、类的元数据（InstanceKlass）、类的Java镜像，三者之间的关系是这样的：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Java object      InstanceKlass       Java mirror</span><br><span class="line"> [ _mark  ]                          (java.lang.Class instance)</span><br><span class="line"> [ _klass ] --&gt; [ ...          ] &lt;-\              </span><br><span class="line"> [ fields ]     [ _java_mirror ] --+&gt; [ _mark  ]</span><br><span class="line">                [ ...          ]   |  [ _klass ]</span><br><span class="line">                                   |  [ fields ]</span><br><span class="line">                                    \ [ klass  ]</span><br></pre></td></tr></table></div></figure>
+<p>每个Java对象的对象头里，_klass字段会指向一个VM内部用来记录类的元数据用的InstanceKlass对象；InsanceKlass里有个_java_mirror字段，指向该类所对应的Java镜像——java.lang.Class实例。HotSpot VM会给Class对象注入一个隐藏字段“klass”，用于指回到其对应的InstanceKlass对象。这样，klass与mirror之间就有双向引用，可以来回导航。<br />
+这个模型里，java.lang.Class实例并不负责记录真正的类元数据，而只是对VM内部的InstanceKlass对象的一个包装供Java的反射访问用。</p>
+<p>在JDK 6及之前的HotSpot VM里，静态字段依附在InstanceKlass对象的末尾；而在JDK 7开始的HotSpot VM里，静态字段依附在java.lang.Class对象的末尾。</p>
+<p>假如有这样的A类：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">int</span> value = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>那么在JDK 6或之前的HotSpot VM里：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Java object      InstanceKlass       Java mirror</span><br><span class="line"> [ _mark  ]                          (java.lang.Class instance)</span><br><span class="line"> [ _klass ] --&gt; [ ...          ] &lt;-\              </span><br><span class="line"> [ fields ]     [ _java_mirror ] --+&gt; [ _mark  ]</span><br><span class="line">                [ ...          ]   |  [ _klass ]</span><br><span class="line">                [ A.value      ]   |  [ fields ]</span><br><span class="line">                                    \ [ klass  ]</span><br></pre></td></tr></table></div></figure>
+<p>可以看到这个A.value静态字段就在InstanceKlass对象的末尾存着了。</p>
+<p>而在JDK 7或之后的HotSpot VM里：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Java object      InstanceKlass       Java mirror</span><br><span class="line"> [ _mark  ]                          (java.lang.Class instance)</span><br><span class="line"> [ _klass ] --&gt; [ ...          ] &lt;-\              </span><br><span class="line"> [ fields ]     [ _java_mirror ] --+&gt; [ _mark   ]</span><br><span class="line">                [ ...          ]   |  [ _klass  ]</span><br><span class="line">                                   |  [ fields  ]</span><br><span class="line">                                    \ [ klass   ]</span><br><span class="line">                                      [ A.value ]</span><br></pre></td></tr></table></div></figure>
+<p>可以看到这个A.value静态字段就在java.lang.Class对象的末尾存着了。</p>
+<p>所以对于HotSpot VM的对象模型，<strong>静态字段的“偏移量”就是</strong>：</p>
+<ul>
+<li>JDK 6或之前：相对该类对应的InstanceKlass（实际上是包装InstanceKlass的klassOopDesc）对象起始位置的偏移量</li>
+<li><strong>JDK 7或之后：相对该类对应的java.lang.Class对象起始位置的偏移量</strong>。</li>
+</ul>
+<p><strong>上面说的HotSpot VM里的InstanceKlass和java.lang.Class实例都是放哪里的呢？</strong></p>
+<p>在JDK 7或之前的HotSpot VM里，InstanceKlass是被包装在由GC管理的klassOopDesc对象中，存放在GC堆中的所谓Permanent Generation（简称PermGen）中。</p>
+<p>从JDK 8开始的HotSpot VM则完全移除了PermGen，改为在native memory里存放这些元数据。<strong>新的用于存放元数据的内存空间叫做Metaspace，InstanceKlass对象就存在这里</strong>。</p>
+<p>至于<strong>java.lang.Class对象，它们从来都是“普通”Java对象，跟其它Java对象一样存在普通的Java堆</strong>（GC堆的一部分）里。</p>
+<p><strong>结论</strong>(jdk8)：实例字段的“偏移量”是从对象起始位置开始算的，静态字段的“偏移量”就是相对该类对应的java.lang.Class对象起始位置的偏移量。</p>
+
+        <h1 id="解析"   >
+          <a href="#解析" class="heading-link"><i class="fas fa-link"></i></a>解析</h1>
+      
+<p>解析是将符号引用替换为直接引用，解析动作针对类或接口，字段，类或接口的方法进行解析。<br />
+首先是用类加载器加载这个类。在加载的过程中逐步解析类中的字段和方法。<br />
+符号引用是以字面量的实形式明确定义在常量池中，直接引用是指向目标的指针，或者相对偏移量。</p>
+<p>类的解析：<br />
+类的解析是将一个类的符号引用变为指向InstanceKlass对象的直接指针。指向这个对象的开头， 当创建对象的时候，这个指针会赋值给对象头中_kclass指针。 这样就定位到了该类的数据。访问类的元数据信息，是通过描述该类的类的对象实现的，当然 每个类只对应一个InstanceKlass对象。这就是类本身如何被描述的内存形态。</p>
+<p>因为对象内部的数据在内存中的连续堆放的，当你访问一个类的某字段，是需要通过元数据InstanceKlass对象 来记录这个字段的与对象头的偏移量来获取。 当然调用对象的方法是定位到虚方法表 而不是定位到对象的内存区域<br />
+创建对象其实就是仅仅向一块内存区域写入与类元数据对应的各种字段的值，当然对象类型的值是一个引用，访问一个对象的字段的值， 是通过定位这个字段在这个对象起始地址的相对偏移量。确定相对偏移量就是在字段解析阶段完成的。</p>
+<p>字段的解析：<br />
+字段的解析是确定一个对象的字段的访问地址，是计算相对对象起始地址的偏移量。<br />
+当第一次用getfield指令访问一个字段，字段的fieldref常量会最终解析成偏移量信息，放入cpc中，然后指令会被修改成fast_bgetfield来避免重复解析而是直接使用偏移量 以使用正确的类型 来访问字段。</p>
+<p>方法的解析：<br />
+这里单独从元组jvm来分析 就是生成一个描述元数据的methodtable结构体。类似虚方法表。每一个类加载后，会对应一个虚方法表。<br />
+当第一次调用方法时，也就是执行invokevirtual指令，指令参数为 该方法的符号引用（包含了参数个数和类型信息，返回值类型，这样就区分了方法重载是不同的方法），也就是对应找到常量表中的methodref类型的项。（class文件中不同类型的项都有标记来标识，从而能够描述并得到这个的项的内部结构 而取到对应的值）。<br />
+解析methodref类型的项， 解析的过程通过该项的class_index项找到类信息，通过name_and_type_index项找到方法名和方法描述符，然后在ClassClass对象（类的元数据信息）中找到虚方法表，根据方法描述符找到对应指向匹配方法的下标，该下标指向methodblock*指针，也就是对应的方法内存地址入口，然后把虚方法表的下标和参数个数 写回到该类型为methodref的常量池项 比如是第二项#2。来取代之前的符号引用。也就是说符号引用变成了虚方法表的下标。这个下标就是一种直接引用的体现。<br />
+类的直接引用–&gt; ClassClass–&gt; methodtable - 下标 -&gt; methodblock结构体(ClassClass)<br />
+第二次调用方法，这时候invokevirtual指令会变成invokevirtual_quick， 该指令的参数为虚方法表的下标（vtable index）和 方法的参数个数。 所以调用方法并不是直接调用方法块，而是先找到虚方法表，再去根据下标调用对应的方法块。<br />
+弄清类的加载机制必须知道class文件结构。</p>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/30300585/answer/51335493"  target="_blank" rel="noopener">JVM里的符号引用如何存储？ - RednaxelaFX的回答 - 知乎</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/50258991/answer/120450561"  target="_blank" rel="noopener">JVM符号引用转换直接引用的过程? - RednaxelaFX的回答</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E8%AF%A6%E8%A7%A3%E2%80%9C%E7%AC%A6%E5%8F%B7%E5%BC%95%E7%94%A8%E8%BD%AC%E7%9B%B4%E6%8E%A5%E5%BC%95%E7%94%A8%E2%80%9D/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E8%AF%A6%E8%A7%A3%E2%80%9C%E7%AC%A6%E5%8F%B7%E5%BC%95%E7%94%A8%E8%BD%AC%E7%9B%B4%E6%8E%A5%E5%BC%95%E7%94%A8%E2%80%9D/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/jvm/">jvm</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E4%BB%A5JDBC%E4%B8%BA%E4%BE%8B%E8%B0%88%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%A0%B4%E5%9D%8F/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">以JDBC为例谈双亲委派模型的破坏</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E5%8E%8B%E7%BC%A9%E6%8C%87%E9%92%88/"><span class="paginator-prev__text">压缩指针</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#提出问题"><span class="toc-number">1.</span> <span class="toc-text">
+          提出问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常量池什么"><span class="toc-number">2.</span> <span class="toc-text">
+          常量池什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常量池中的元素都要转吗"><span class="toc-number">3.</span> <span class="toc-text">
+          常量池中的元素都要转吗</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#符号引用是什么"><span class="toc-number">4.</span> <span class="toc-text">
+          符号引用是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#直接引用是什么"><span class="toc-number">5.</span> <span class="toc-text">
+          直接引用是什么</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#转换过程"><span class="toc-number">6.</span> <span class="toc-text">
+          转换过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实例方法调用过程"><span class="toc-number">7.</span> <span class="toc-text">
+          实例方法调用过程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#关于偏移量"><span class="toc-number">8.</span> <span class="toc-text">
+          关于偏移量</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#关于对象实例的内存布局"><span class="toc-number">8.1.</span> <span class="toc-text">
+          关于对象实例的内存布局</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于静态对象的内存布局"><span class="toc-number">8.2.</span> <span class="toc-text">
+          关于静态对象的内存布局</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#解析"><span class="toc-number">9.</span> <span class="toc-text">
+          解析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">10.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

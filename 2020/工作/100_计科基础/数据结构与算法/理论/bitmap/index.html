@@ -1,0 +1,560 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="基本思想        所谓的Bit-map就是用一个bit位来标记某个元素对应的Value， 而Key即是该元素。由于采用了Bit为单位来存储数据，因此在存储空间方面，可以大大节省。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bitmap">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/bitmap/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="基本思想        所谓的Bit-map就是用一个bit位来标记某个元素对应的Value， 而Key即是该元素。由于采用了Bit为单位来存储数据，因此在存储空间方面，可以大大节省。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200805095525.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200805100559.png">
+<meta property="article:published_time" content="2020-09-16T16:21:55.214Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:55.218Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="排序">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200805095525.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>bitmap | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/bitmap/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">bitmap</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">30分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="基本思想"   >
+          <a href="#基本思想" class="heading-link"><i class="fas fa-link"></i></a>基本思想</h1>
+      
+<p>所谓的Bit-map就是用一个bit位来标记某个元素对应的Value， 而Key即是该元素。由于采用了Bit为单位来存储数据，因此在存储空间方面，可以大大节省。</p>
+<a id="more"></a>
+<p>来看一个具体的例子，假设我们要对0-7内的5个元素(4,7,2,5,3)排序（这里假设这些元素没有重复）。那么我们就可以采用Bit-map的方法来达到排序的目的。</p>
+<p>要表示8个数，我们就只需要8个Bit（1Byte），首先我们开辟1Byte的空间，将这些空间的所有Bit位都置为0<br />
+然后遍历这5个元素，首先第一个元素是4，那么就把4对应的位置为1（可以这样操作 (i/8)|(1&lt;&lt;(i%8)) 当然了这里的操作涉及到Big-ending和Little-ending的情况，这里默认为Big-ending）,因为是从零开始的，所以要把第五位置为1。</p>
+<p>然后再处理第二个元素7，将第八位置为1,，接着再处理第三个元素，一直到最后处理完所有的元素，将相应的位置为1。然后我们现在遍历一遍Bit区域，将该位是一的位的编号输出（2，3，4，5，7），这样就达到了排序的目的。<br />
+其实就是<span style='color:red;background:背景颜色;font-size:文字大小;'>把计数排序用的统计数组的每个单位缩小成bit级别的布尔数组</span></p>
+<blockquote>
+<p>以上内容引用自《编程珠玑》</p>
+</blockquote>
+
+        <h1 id="原理剖析"   >
+          <a href="#原理剖析" class="heading-link"><i class="fas fa-link"></i></a>原理剖析</h1>
+      
+<p>假设现在有一个文件中的数据，该文件存储了N=1000000个无序的整数，需要把这些整数读取到内存并排序再重新写回文件中该如何解决？</p>
+<p>我们知道一个int型的数有4个字节，也就是32位，那么我们可以用N/32个int型数组来表示这N个数：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a[<span class="number">0</span>]表示第<span class="number">1</span>~<span class="number">32</span>个数（<span class="number">0</span>~<span class="number">31</span>）</span><br><span class="line">a[<span class="number">1</span>]表示第<span class="number">33</span>~<span class="number">64</span>个数（<span class="number">32</span>~<span class="number">63</span>）</span><br><span class="line">a[<span class="number">2</span>]表示第<span class="number">65</span>~<span class="number">96</span>个数（<span class="number">64</span>~<span class="number">95</span>）</span><br><span class="line">...... 以此类推</span><br></pre></td></tr></table></div></figure>
+<p>这样，每当输入一个数字m，我们应该先找到该数字在数组的第？个元素，也就是a[?]，然后再确定在这个元素的第几个bit位，找到后设置为1，代表存在该数字。举个例子来说，比如输入40，那么40/32为1余8，则应该将a[1]元素值的第9个bit位置为1(1的二进制左移8位后就是第9个位置)，表示该数字存在。</p>
+<p>大概明白了位向量表示方式后，上述过程的计算方式，通过以下方式可以计算该数存储在数组的第?个元素和元素中第?个bit位置,为了演示方便，我们这里假设整第?个元素中的?为p，余值设置s，数组int[] a, 待排序的整数为m。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//m 除以2^n 的余数(s)表示为 m &amp; (2^n-1) </span></span><br><span class="line"><span class="comment">//等同于： m % 2^5 取余数 即：40 % 32 = 8</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//m=40的二进制</span></span><br><span class="line"><span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00101000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//2^n-1（31）的二进制</span></span><br><span class="line"><span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00011111</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// m &amp; (2^n-1) 即40与31进行与操作得出余数 即 s=8</span></span><br><span class="line"><span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00001000</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">//下面是将a[1]元素值的第(8+1)个bit设置为1，为什么是(8+1)不是8？因为1左移8位就在第9个bit位了，过程如下：</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//1的二进制如下：</span></span><br><span class="line"><span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000001</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//1 &lt;&lt; 8 利用余数8对1进行左移动</span></span><br><span class="line"><span class="number">00000000</span> <span class="number">00000000</span> <span class="number">00000001</span> <span class="number">0000000</span> </span><br><span class="line"></span><br><span class="line"><span class="comment">//然后再与a[1]执行或操作后就可以将对应的bit位设置为1</span></span><br><span class="line"><span class="comment">//a[p] |= 1 &lt;&lt; S 见下述java实现的代码</span></span><br></pre></td></tr></table></div></figure>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> 有<span class="number">32</span>位，也即<span class="number">2</span>^<span class="number">5</span>个bit</span><br><span class="line">p = i &gt;&gt; <span class="number">5</span></span><br><span class="line">s = i &amp; (<span class="number">2</span>^<span class="number">5</span> -<span class="number">1</span>)</span><br><span class="line"><span class="comment">// 将i设置到数组a</span></span><br><span class="line">  a[p] |= <span class="number">1</span> &lt;&lt; s</span><br><span class="line"><span class="comment">// 将i从数组a上清除</span></span><br><span class="line">  a[p] &amp;= ~(<span class="number">1</span> &lt;&lt; s)</span><br><span class="line"><span class="comment">// i在数组a上的bit值，1表示存在元素i，0表示不存在元素i,可以借助Integer.bitCount()方法，Integer.bitCount()是返回指定 int 值的二进制补码(计算机数字的二进制表示法都是使用补码表示的)表示形式的 1 位的数量。</span></span><br><span class="line">	<span class="keyword">int</span> num = Integer.bitCount();</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="示例代码"   >
+          <a href="#示例代码" class="heading-link"><i class="fas fa-link"></i></a>示例代码</h1>
+      
+<p>对1000以内的随机数(1000次随机并去重)排序</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.ftd.bitmap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Random;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * todo</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> David Li</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@create</span> 2020/08/05</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BitMap</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> maxNum; <span class="comment">// 最大值</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span>[] a; <span class="comment">// bitmap数组</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> BIT_LENGTH = <span class="number">32</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> MASK = <span class="number">0x1F</span>; <span class="comment">// 2^5 -1</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> SHIFT = <span class="number">5</span>; <span class="comment">// Integer的位数32，2^5中的5</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化位向量，实际使用时最大值需要自己遍历获取</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BitMap</span><span class="params">(<span class="keyword">int</span> maxNum)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.maxNum = maxNum;</span><br><span class="line">        a = <span class="keyword">new</span> <span class="keyword">int</span>[(maxNum - <span class="number">1</span>) / BIT_LENGTH + <span class="number">1</span>]; <span class="comment">// 最大值32需要2个Integer表示，因为0-32共33个元素</span></span><br><span class="line">        init();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将数组中元素bit位都设置成0</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt;= maxNum; i++) &#123;</span><br><span class="line">            clear(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置元素，置位操作</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        a[i &gt;&gt; SHIFT] |= <span class="number">1</span> &lt;&lt; (i &amp; MASK);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 清除元素, 置0操作</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        a[i &gt;&gt; SHIFT] &amp;= ~(<span class="number">1</span> &lt;&lt; (i &amp; MASK));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 读取元素所在位置的bit位值</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">get</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Integer.bitCount(a[i &gt;&gt; SHIFT] &amp; (<span class="number">1</span> &lt;&lt; (i &amp; MASK)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> count = (<span class="keyword">int</span>) Math.pow(<span class="number">10</span>, <span class="number">3</span>);</span><br><span class="line">        <span class="keyword">int</span> maxNum = (<span class="keyword">int</span>) Math.pow(<span class="number">10</span>, <span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 构造测试元素集合</span></span><br><span class="line">        List&lt;Integer&gt; list = getRandomsList(count, maxNum);</span><br><span class="line">        <span class="comment">// 排序</span></span><br><span class="line">        <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">        BitMap bitMap = <span class="keyword">new</span> BitMap(maxNum);</span><br><span class="line"></span><br><span class="line">        list.forEach(bitMap::set);</span><br><span class="line">        System.out.println(System.currentTimeMillis() - start);</span><br><span class="line">        <span class="comment">// 输出</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt;= maxNum; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (bitMap.get(i) == <span class="number">1</span>) &#123;</span><br><span class="line">                System.out.println(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> List&lt;Integer&gt; <span class="title">getRandomsList</span><span class="params">(<span class="keyword">int</span> count, <span class="keyword">int</span> maxNum)</span> </span>&#123;</span><br><span class="line">        Random random = <span class="keyword">new</span> Random();</span><br><span class="line">        List&lt;Integer&gt; randomsList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">            <span class="keyword">int</span> element = random.nextInt(maxNum); <span class="comment">//element ∈  [1,count)</span></span><br><span class="line">            <span class="keyword">if</span> (!randomsList.contains(element)) &#123;</span><br><span class="line">                randomsList.add(element);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> randomsList;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="应用场景"   >
+          <a href="#应用场景" class="heading-link"><i class="fas fa-link"></i></a>应用场景</h1>
+      
+<ol>
+<li>
+<p>快速排序</p>
+</li>
+<li>
+<p>快速查询</p>
+<blockquote>
+<p>先对所有数字进行一次遍历(相当于一趟一趟快速排序)。遍历完以后就是查询，由于我们的Bit-map采取的是连续存储（整型数组形式，一个数组元素对应32bits），我们实际上是采用了一种分桶的思想。一个数组元素可以存储32个状态位，那将待查询的数字除以32，定位到对应的数组元素（桶），然后再求余（%32），就可以定位到相应的状态位。如果为1，则代表改数字存在；否则，该数字不存在。</p>
+</blockquote>
+</li>
+<li>
+<p>快速去重</p>
+<blockquote>
+<p>在3亿个整数中找出不重复的整数，限制内存不足以容纳3亿个整数。</p>
+<p>对于这种场景我可以采用2-BitMap来解决，即为每个整数分配2bit，用不同的0、1组合来标识特殊意思，如00表示此整数没有出现过，01表示出现一次，11表示出现过多次，就可以找出重复的整数了，其需要的内存空间是正常BitMap的2倍，为：3亿*2/8/1024/1024=71.5MB。</p>
+<p>具体的过程如下：</p>
+<p>扫描着3亿个整数，组BitMap，先查看BitMap中的对应位置，如果00则变成01，是01则变成11，是11则保持不变，当将3亿个整数扫描完之后也就是说整个BitMap已经组装完毕。最后查看BitMap将对应位为01的整数输出即可。</p>
+</blockquote>
+</li>
+<li>
+<p>统计不同号码的个数</p>
+<blockquote>
+<p>已知某个文件内包含一些电话号码，每个号码为8位数字，统计不同号码的个数</p>
+<p>8位最多99 999 999，大概需要99m个bit，大概10几m字节的内存即可。 （可以理解为从0-99 999 999的数字，每个数字对应一个Bit位，所以只需要99M个Bit==1.2MBytes，这样，就用了小小的1.2M左右的内存表示了所有的8位数的电话）</p>
+</blockquote>
+</li>
+<li>
+<p><strong>REDIS bitmap相关应用</strong></p>
+<p>edis提供了类似的命令，最大可以存放2的32次方，即21亿多的数字，主要有以下几个：SETBIT， GETBIT， BITCOUNT， BITOP， BITPOS，BITFIELD</p>
+<p>主要用来做活跃用户在线状态、活跃用户统计、用户签到等场景，特别适合大量用户，几千万上亿级别，当然你用传统数据库也能做，但是redis做起来更简单，更节省空间！</p>
+<p>下面举一个用户签到的功能设计案例：</p>
+<p>很多App都有一个签到功能，比如说连续签到7天或者30天给一些奖励，需求十分简单！</p>
+<p>作为后端，我们需要提供一个签到接口，然后记录用户签到的信息，比如用户uid，签到时间！</p>
+<p>如果使用传统关系型数据库，我们可能需要建一张签到表，大概有id、uid、createdTime等几个字段，当用户签到的时候新增一条记录就行！这种做法肯定是没问题的，但是如果网站每天有千万用户签到，那么这张表每天都会有千万条记录产生，数据的存储是问题！分库分表必不可少！</p>
+<p>假如使用redis的bit操作，我们可以使用setbit，<code>SETBIT key offset value</code> 对指定的key的value的指定偏移(offset)的位置1或0, 其中key我们可以设置为当天的年月日，offset是用户uid（这里暂时只考虑uid是纯数字的情况）,value的话1表示已签到。比如说用户uid位12500的用户在20190501签到了，我们可以执行<code>SETBIT 20190501 12500 1</code>,其它用户依此论推！</p>
+<p>如果我们需要查询用户某天是否签到，只需要使用<code>GETBIT 20190501 12500</code>，返回1表示已签到，0未签到。</p>
+<p>如果需要查询某天有多少人签到，可以使用<code>BITCOUNT 20190501</code>。</p>
+<p>如果要统计连续7天签到的总人数的话可以使用bitop命令，比如<code>bitop AND 7_dasy_sign 20190501 20190502 20190503 ... 20190507</code>。</p>
+<blockquote>
+<p>对一个或多个保存二进制位的字符串key进行位元操作，并将结果保存到destkey上。</p>
+<p>operation可以是AND、OR、NOT、XOR这四种操作中的任意一种。<br />
+　　BITOP AND destkey key [key …]  ，对一个或多个key求逻辑并，并将结果保存到destkey<br />
+　　BITOP OR destkey key [key …] ，对一个或多个key求逻辑或，并将结果保存到destkey<br />
+　　BITOP XOR destkey key [key …] ，对一个或多个key求逻辑异或，并将结果保存到destkey<br />
+　　BITOP NOT destkey key ，对给定key求逻辑非，并将结果保存到destkey<br />
+除了NOT操作外，其他操作都可以接受一个或多个key作为输入<br />
+当BITOP处理不同长度的字符串时，较短的那个字符串所缺少的部分会被看做0<br />
+空的key也被看作是包含0的字符串序列</p>
+</blockquote>
+<p>理论上讲，setbit的大小在0到2的32次方（最大使用512M内存）之间，即0~4294967296之间，也就说最多可以存储42亿用户的签到情况。和数据库相比，这种方式查询的效率非常高，并不会因为数据大而变慢，而且比较节省内存，操作上也不是太复杂！</p>
+</li>
+</ol>
+
+        <h1 id="扩展"   >
+          <a href="#扩展" class="heading-link"><i class="fas fa-link"></i></a>扩展</h1>
+      
+<p><strong>问题</strong></p>
+<p>数据碰撞。比如将字符串映射到 BitMap 的时候会有碰撞的问题，那就可以考虑用 <strong>Bloom Filter</strong> 来解决，Bloom Filter 使用多个 Hash 函数来减少冲突的概率。</p>
+<p>数据稀疏。又比如要存入(10,8887983,93452134)这三个数据，我们需要建立一个 99999999 长度的 BitMap ，但是实际上只存了3个数据，这时候就有很大的空间浪费，碰到这种问题的话，可以通过引入 <strong>Roaring BitMap</strong> 来解决。</p>
+
+        <h2 id="bloom-filter"   >
+          <a href="#bloom-filter" class="heading-link"><i class="fas fa-link"></i></a>Bloom Filter</h2>
+      
+
+        <h3 id="概念"   >
+          <a href="#概念" class="heading-link"><i class="fas fa-link"></i></a>概念</h3>
+      
+<p>布隆过滤器（英语：Bloom Filter）是1970年由布隆提出的。它实际上是一个很长的二进制向量和一系列随机映射函数。布隆过滤器可以用于检索一个元素是否在一个集合中。它的优点是空间效率和查询时间都远远超过一般的算法，缺点是有一定的误识别率和删除困难。</p>
+
+        <h3 id="原理"   >
+          <a href="#原理" class="heading-link"><i class="fas fa-link"></i></a>原理</h3>
+      
+<p>布隆过滤器的原理是，当一个元素被加入集合时，通过K个散列函数将这个元素映射成一个位数组中的K个点，把它们置为1。检索时，我们只要看看这些点是不是都是1就（大约）知道集合中有没有它了：如果这些点有任何一个0，则被检元素一定不在；如果都是1，则被检元素很可能在。这就是布隆过滤器的基本思想。</p>
+<p>Bloom Filter跟单哈希函数Bit-Map不同之处在于：Bloom Filter使用了k个哈希函数，每个字符串跟k个bit对应。从而降低了冲突的概率。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200805095525.png"  alt="" />
+      </p>
+
+        <h3 id="缺点"   >
+          <a href="#缺点" class="heading-link"><i class="fas fa-link"></i></a>缺点</h3>
+      
+<p>bloom filter之所以能做到在时间和空间上的效率比较高，是因为牺牲了判断的准确率、删除的便利性</p>
+<ul>
+<li>
+<p>存在误判，可能要查到的元素并没有在容器中，但是hash之后得到的k个位置上值都是1。如果bloom filter中存储的是黑名单，那么可以通过建立一个白名单来存储可能会误判的元素。</p>
+</li>
+<li>
+<p>删除困难。一个放入容器的元素映射到bit数组的k个位置上是1，删除的时候不能简单的直接置为0，可能会影响其他元素的判断。可以采用<span class="exturl"><a class="exturl__link"   href="http://wiki.corp.qunar.com/confluence/download/attachments/199003276/US9740797.pdf?version=1&amp;modificationDate=1526538500000&amp;api=v2"  target="_blank" rel="noopener">Counting Bloom Filter</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</li>
+</ul>
+
+        <h3 id="应用"   >
+          <a href="#应用" class="heading-link"><i class="fas fa-link"></i></a>应用</h3>
+      
+<p>常见的几个应用场景：</p>
+<ul>
+<li>
+<p>cerberus在收集监控数据的时候, 有的系统的监控项量会很大, 需要检查一个监控项的名字是否已经被记录到db过了, 如果没有的话就需要写入db.</p>
+</li>
+<li>
+<p>爬虫过滤已抓到的url就不再抓，可用bloom filter过滤</p>
+</li>
+<li>
+<p>垃圾邮件过滤。如果用哈希表，每存储一亿个 email地址，就需要 1.6GB的内存（用哈希表实现的具体办法是将每一个 email地址对应成一个八字节的信息指纹，然后将这些信息指纹存入哈希表，由于哈希表的存储效率一般只有 50%，因此一个 email地址需要占用十六个字节。一亿个地址大约要 1.6GB，即十六亿字节的内存）。因此存贮几十亿个邮件地址可能需要上百 GB的内存。而Bloom Filter只需要哈希表 1/8到 1/4 的大小就能解决同样的问题。</p>
+</li>
+</ul>
+
+        <h2 id="roaring-bitmap"   >
+          <a href="#roaring-bitmap" class="heading-link"><i class="fas fa-link"></i></a>Roaring BitMap</h2>
+      
+
+        <h3 id="概念-2"   >
+          <a href="#概念-2" class="heading-link"><i class="fas fa-link"></i></a>概念</h3>
+      
+<p>为了解决位图不适应稀疏存储的问题，大佬们提出了多种算法对稀疏位图进行压缩，减少内存占用并提高效率。比较有代表性的有WAH、EWAH、Concise，以及RoaringBitmap。前三种算法都是基于<span class="exturl"><a class="exturl__link"   href="https://links.jianshu.com/go?to=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FRun-length_encoding"  target="_blank" rel="noopener">行程长度编码</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>（Run-length encoding, RLE）做压缩的，而RoaringBitmap算是它们的改进版，更加优秀。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200805100559.png"  alt="" />
+      </p>
+<p>每个RoaringBitmap<span class="exturl"><a class="exturl__link"   href="https://github.com/RoaringBitmap/RoaringBitmap"  target="_blank" rel="noopener">(GitHub链接)</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>中都包含一个<code>RoaringArray</code>，名字叫<code>highLowContainer</code>。<br />
+<code>highLowContainer</code>存储了<code>RoaringBitmap</code>中的全部数据。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RoaringArray highLowContainer;<span class="number">1</span></span><br></pre></td></tr></table></div></figure>
+<p>这个名字意味着，会将32位的整形（<code>int</code>）拆分成高16位和低16位两部分（两个<code>short</code>）来处理。</p>
+<p>RoaringArray的数据结构很简单，核心为以下三个成员：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">short</span>[] keys;</span><br><span class="line">Container[] values;</span><br><span class="line"><span class="keyword">int</span> size;<span class="number">123</span></span><br></pre></td></tr></table></div></figure>
+<p>每个32位的整形，高16位会被作为key存储到<code>short[] keys</code>中，低16位则被看做value，存储到<code>Container[] values</code>中的某个Container中。<code>keys</code>和<code>values</code>通过下标一一对应。<code>size</code>则标示了当前包含的key-value pair的数量，即<code>keys</code>和<code>values</code>中有效数据的数量。</p>
+<p><code>keys</code>数组永远保持有序，方便二分查找。</p>
+
+        <h3 id="三种container"   >
+          <a href="#三种container" class="heading-link"><i class="fas fa-link"></i></a>三种Container</h3>
+      
+<p>下面介绍到的是RoaringBitmap的核心，三种Container。</p>
+<p>通过上面的介绍我们知道，每个32位整形的高16位已经作为key存储在<code>RoaringArray</code>中了，那么Container只需要处理低16位的数据。</p>
+
+        <h4 id="arraycontainer"   >
+          <a href="#arraycontainer" class="heading-link"><i class="fas fa-link"></i></a>ArrayContainer</h4>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_MAX_SIZE = <span class="number">4096</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">short</span>[] content;<span class="number">123</span></span><br></pre></td></tr></table></div></figure>
+<p>结构很简单，只有一个<code>short[] content</code>，将16位value直接存储。</p>
+<p><code>short[] content</code>始终保持有序，方便使用二分查找，且不会存储重复数值。</p>
+<p>因为这种Container存储数据没有任何压缩，因此只适合存储少量数据。</p>
+<p>ArrayContainer占用的空间大小与存储的数据量为线性关系，每个<code>short</code>为2字节，因此存储了N个数据的ArrayContainer占用空间大致为<code>2N</code>字节。存储一个数据占用2字节，存储4096个数据占用8kb。</p>
+<p>根据源码可以看出，常量<code>DEFAULT_MAX_SIZE</code>值为4096，当容量超过这个值的时候会将当前Container替换为BitmapContainer。</p>
+
+        <h4 id="bitmapcontainer"   >
+          <a href="#bitmapcontainer" class="heading-link"><i class="fas fa-link"></i></a>BitmapContainer</h4>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">long</span>[] bitmap;<span class="number">1</span></span><br></pre></td></tr></table></div></figure>
+<p>这种Container使用<code>long[]</code>存储位图数据。我们知道，每个Container处理16位整形的数据，也就是0~65535，因此根据位图的原理，需要65536个比特来存储数据，每个比特位用1来表示有，0来表示无。每个<code>long</code>有64位，因此需要1024个<code>long</code>来提供65536个比特。</p>
+<p>因此，每个BitmapContainer在构建时就会初始化长度为1024的<code>long[]</code>。这就意味着，不管一个BitmapContainer中只存储了1个数据还是存储了65536个数据，占用的空间都是同样的8kb。</p>
+
+        <h4 id="runcontainer"   >
+          <a href="#runcontainer" class="heading-link"><i class="fas fa-link"></i></a>RunContainer</h4>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">short</span>[] valueslength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> nbrruns = <span class="number">0</span>;<span class="number">123</span></span><br></pre></td></tr></table></div></figure>
+<p>RunContainer中的Run指的是行程长度压缩算法(Run Length Encoding)，对连续数据有比较好的压缩效果。</p>
+<p>它的原理是，对于连续出现的数字，只记录初始数字和后续数量。即：</p>
+<ul>
+<li>对于数列<code>11</code>，它会压缩为<code>11,0</code>；</li>
+<li>对于数列<code>11,12,13,14,15</code>，它会压缩为<code>11,4</code>；</li>
+<li>对于数列<code>11,12,13,14,15,21,22</code>，它会压缩为<code>11,4,21,1</code>；</li>
+</ul>
+<p>源码中的<code>short[] valueslength</code>中存储的就是压缩后的数据。</p>
+<p>这种压缩算法的性能和数据的连续性（紧凑性）关系极为密切，对于连续的100个<code>short</code>，它能从200字节压缩为4字节，但对于完全不连续的100个<code>short</code>，编码完之后反而会从200字节变为400字节。</p>
+<p>如果要分析RunContainer的容量，我们可以做下面两种极端的假设：</p>
+<ul>
+<li>最好情况，即只存在一个数据或只存在一串连续数字，那么只会存储2个<code>short</code>，占用4字节</li>
+<li>最坏情况，0~65535的范围内填充所有的奇数位（或所有偶数位），需要存储65536个<code>short</code>，128kb</li>
+</ul>
+
+        <h4 id="roaringbitmap针对container的优化策略"   >
+          <a href="#roaringbitmap针对container的优化策略" class="heading-link"><i class="fas fa-link"></i></a>RoaringBitmap针对Container的优化策略</h4>
+      
+<p>创建时：</p>
+<ul>
+<li>创建包含单个值的Container时，选用ArrayContainer</li>
+<li>创建包含一串连续值的Container时，比较ArrayContainer和RunContainer，选取空间占用较少的</li>
+</ul>
+<p>转换：</p>
+<p>针对ArrayContainer：</p>
+<ul>
+<li>如果插入值后容量超过4096，则自动转换为BitmapContainer。因此正常使用的情况下<strong>不会出现容量超过4096的ArrayContainer</strong>。</li>
+<li>调用runOptimize()方法时，会比较和RunContainer的空间占用大小，选择是否转换为RunContainer。</li>
+</ul>
+<p>针对BitmapContainer：</p>
+<ul>
+<li>如果删除某值后容量低至4096，则会自动转换为ArrayContainer。因此正常使用的情况下<strong>不会出现容量小于4096的BitmapContainer</strong>。</li>
+<li>调用runOptimize()方法时，会比较和RunContainer的空间占用大小，选择是否转换为RunContainer。</li>
+</ul>
+<p>针对RunContainer：</p>
+<ul>
+<li>只有在调用runOptimize()方法才会发生转换，会分别和ArrayContainer、BitmapContainer比较空间占用大小，然后选择是否转换。</li>
+</ul>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/z941030/p/9218356.html"  target="_blank" rel="noopener">大数据量下的集合过滤—Bloom Filter</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/yizishou/article/details/78342499"  target="_blank" rel="noopener">RoaringBitmap数据结构及原理</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/bitmap/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/bitmap/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%AE%97%E6%B3%95/">算法</a></span><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E6%8E%92%E5%BA%8F/">排序</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/%E5%93%88%E5%B8%8C%E8%A1%A8/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">哈希表</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95/"><span class="paginator-prev__text">贪心算法</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基本思想"><span class="toc-number">1.</span> <span class="toc-text">
+          基本思想</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#原理剖析"><span class="toc-number">2.</span> <span class="toc-text">
+          原理剖析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#示例代码"><span class="toc-number">3.</span> <span class="toc-text">
+          示例代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#应用场景"><span class="toc-number">4.</span> <span class="toc-text">
+          应用场景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#扩展"><span class="toc-number">5.</span> <span class="toc-text">
+          扩展</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#bloom-filter"><span class="toc-number">5.1.</span> <span class="toc-text">
+          Bloom Filter</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念"><span class="toc-number">5.1.1.</span> <span class="toc-text">
+          概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#原理"><span class="toc-number">5.1.2.</span> <span class="toc-text">
+          原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点"><span class="toc-number">5.1.3.</span> <span class="toc-text">
+          缺点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#应用"><span class="toc-number">5.1.4.</span> <span class="toc-text">
+          应用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#roaring-bitmap"><span class="toc-number">5.2.</span> <span class="toc-text">
+          Roaring BitMap</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念-2"><span class="toc-number">5.2.1.</span> <span class="toc-text">
+          概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#三种container"><span class="toc-number">5.2.2.</span> <span class="toc-text">
+          三种Container</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#arraycontainer"><span class="toc-number">5.2.2.1.</span> <span class="toc-text">
+          ArrayContainer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#bitmapcontainer"><span class="toc-number">5.2.2.2.</span> <span class="toc-text">
+          BitmapContainer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#runcontainer"><span class="toc-number">5.2.2.3.</span> <span class="toc-text">
+          RunContainer</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#roaringbitmap针对container的优化策略"><span class="toc-number">5.2.2.4.</span> <span class="toc-text">
+          RoaringBitmap针对Container的优化策略</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">6.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

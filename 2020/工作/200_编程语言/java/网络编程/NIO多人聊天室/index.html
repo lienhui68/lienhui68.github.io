@@ -1,0 +1,461 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;segmentfault.com&#x2F;a&#x2F;1190000021519312                      需求分析        使用NIO实现一个多人聊天室。聊天室包含以下功能。                     服务端         处理客户连接 新连接客户端注册名字，并进行重名判断 新用户注册后向客户端广播新用户加入 接收客户端消息并单播或广播">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NIO多人聊天室">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;segmentfault.com&#x2F;a&#x2F;1190000021519312                      需求分析        使用NIO实现一个多人聊天室。聊天室包含以下功能。                     服务端         处理客户连接 新连接客户端注册名字，并进行重名判断 新用户注册后向客户端广播新用户加入 接收客户端消息并单播或广播">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200901071928.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200901073140.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.071Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.076Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200901071928.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>NIO多人聊天室 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">NIO多人聊天室</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">23分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://segmentfault.com/a/1190000021519312"  target="_blank" rel="noopener">https://segmentfault.com/a/1190000021519312</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h1 id="需求分析"   >
+          <a href="#需求分析" class="heading-link"><i class="fas fa-link"></i></a>需求分析</h1>
+      
+<p>使用NIO实现一个多人聊天室。聊天室包含以下功能。</p>
+
+        <h2 id="服务端"   >
+          <a href="#服务端" class="heading-link"><i class="fas fa-link"></i></a>服务端</h2>
+      
+<ol>
+<li>处理客户连接</li>
+<li>新连接客户端注册名字，并进行重名判断</li>
+<li>新用户注册后向客户端广播新用户加入</li>
+<li>接收客户端消息并单播或广播</li>
+</ol>
+<a id="more"></a>
+
+        <h2 id="客户端"   >
+          <a href="#客户端" class="heading-link"><i class="fas fa-link"></i></a>客户端</h2>
+      
+<ol>
+<li>向服务端发起连接</li>
+<li>用户注册名称</li>
+<li>接收服务端广播消息</li>
+<li>发送聊天消息，支持单播和广播</li>
+</ol>
+
+        <h1 id="系统分析"   >
+          <a href="#系统分析" class="heading-link"><i class="fas fa-link"></i></a>系统分析</h1>
+      
+
+        <h2 id="系统类设计"   >
+          <a href="#系统类设计" class="heading-link"><i class="fas fa-link"></i></a>系统类设计</h2>
+      
+<p>系统包括四个类，分别为：</p>
+<ol>
+<li>消息处理类：Message，处理消息的编解码</li>
+<li>消息枚举：MessageType，定义消息类型</li>
+<li>聊天服务端：ChatServer</li>
+<li>聊天客户端：ChatClient</li>
+</ol>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200901071928.png"  alt="" />
+      </p>
+
+        <h2 id="系统业务流程"   >
+          <a href="#系统业务流程" class="heading-link"><i class="fas fa-link"></i></a>系统业务流程</h2>
+      
+<ol>
+<li>服务端启动</li>
+<li>客户端启动</li>
+<li>客户端注册
+<ol>
+<li>服务端向客户端发送注册用户名提示，消息类型：REG_SERVER_SYN</li>
+<li>客户端向服务端发送注册用户名，消息类型：REG_CLIENT_ACK</li>
+<li>服务端向客户端发送注册确认消息，消息类型：REG_SERVER_ACK</li>
+<li>服务端向所有客户端广播用户列表，消息类型：BROADCAST_USER_LIST</li>
+</ol>
+</li>
+<li>发送聊天信息
+<ol>
+<li>客户端向服务端发送聊天信息，指定toUser为单播，否则广播，消息类型：CHAT_MSG_SEND</li>
+<li>服务端接收聊天信息，进行单播或关闭，消息类型：CHAT_MSG_RECEIVE</li>
+<li>客户端显示消息内容</li>
+</ol>
+</li>
+</ol>
+
+        <h2 id="消息设计"   >
+          <a href="#消息设计" class="heading-link"><i class="fas fa-link"></i></a>消息设计</h2>
+      
+<p>系统消息采用简单的特殊字符串 <code>String MSG_SPLIT = &quot;#@@#&quot;</code> 分割字段的格式，消息格式分两种：</p>
+<ol>
+<li>message_type#@@#message_content格式，即命令+数据的格式</li>
+<li>message_type#@@#option#@@#message_content，其中option为附加消息，比如客户端发送单播聊天信息时指定toUser。</li>
+</ol>
+
+        <h2 id="程序注意点"   >
+          <a href="#程序注意点" class="heading-link"><i class="fas fa-link"></i></a>程序注意点</h2>
+      
+<ol>
+<li>
+<p>服务端为单线程模式，由一个Selector处理所有消息。</p>
+</li>
+<li>
+<p>客户端注册后，用户名信息保存在服务端对应SelectionKey.attachment属性中。</p>
+</li>
+<li>
+<p>通过Selector.keys可获取所有向Selector注册的客户端，获取客户端连接列表时，需要过滤掉ServerSocketChannel和关闭的Channel <code>selector.keys().stream().filter(item -&gt; item.channel() instanceof SocketChannel &amp;&amp; item.channel().isOpen()).collect(Collectors.toSet());</code>。</p>
+</li>
+<li>
+<p>当Socket连接的一端关闭时，另一端会触发 <code>OP_READ</code> 事件，但此时 <code>socketChannel.read(byteBuffer)</code> 返回-1或抛IOException，需要捕获这个异常并关闭socketChannel。</p>
+<blockquote>
+<p>此处通过是否返回-1判断客户端连接是否异常断开</p>
+</blockquote>
+</li>
+<li>
+<p>客户端因为要同时处理服务端发送的数据和接收客户端消息输入，如果单线程，在客户端输入消息时，线程阻塞，无法接受服务端消息。所以客户端使用2个线程，主线程处理服务端消息，启动一个子线程接收用户输入并处理。</p>
+</li>
+<li>
+<p>客户端分为两个阶段</p>
+<ol>
+<li>初始为<strong>注册阶段</strong> <code>messageType = MessageType.REG_CLIENT_ACK</code></li>
+<li>收到服务器端注册成功消息<code>REG_SERVER_ACK</code>后，进入<strong>聊天阶段</strong> <code>messageType = MessageType.CHAT_MSG_SEND</code>。</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>上述第3步，通过Selector.keys获取所有向Selector注册的客户端时，特别注意要过滤已经关闭的Channel，不然处理客户端下线事件时，取到的用户列表会包含刚下线的这个用户，可能是因为Selector只有执行select时才会去刷新并删除关闭的Channel的原因吧。</p>
+</blockquote>
+
+        <h1 id="详细设计"   >
+          <a href="#详细设计" class="heading-link"><i class="fas fa-link"></i></a>详细设计</h1>
+      
+<p>代码比较简单，设计点上面基本都描述了</p>
+
+        <h2 id="message-和-messagetype"   >
+          <a href="#message-和-messagetype" class="heading-link"><i class="fas fa-link"></i></a>Message 和 MessageType</h2>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.nio.chat;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.Data;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.Charset;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Message</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String MSG_SPLIT = <span class="string">"#@@#"</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Charset CHARSET = StandardCharsets.UTF_8;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> MessageType action;</span><br><span class="line">    <span class="keyword">private</span> String option;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Message</span><span class="params">(MessageType action, String option, String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.action = action;</span><br><span class="line">        <span class="keyword">this</span>.option = option;</span><br><span class="line">        <span class="keyword">this</span>.message = message;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Message</span><span class="params">(MessageType action, String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.action = action;</span><br><span class="line">        <span class="keyword">this</span>.message = message;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ByteBuffer <span class="title">encode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        StringBuilder builder = <span class="keyword">new</span> StringBuilder(action.getAction());</span><br><span class="line">        <span class="keyword">if</span> (option != <span class="keyword">null</span> &amp;&amp; option.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            builder.append(MSG_SPLIT);</span><br><span class="line">            builder.append(option);</span><br><span class="line">        &#125;</span><br><span class="line">        builder.append(MSG_SPLIT);</span><br><span class="line">        builder.append(message);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> CHARSET.encode(builder.toString());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Message <span class="title">decode</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (message == <span class="keyword">null</span> || message.length() == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        String[] msgArr = message.split(MSG_SPLIT);</span><br><span class="line">        MessageType messageType = msgArr.length &gt; <span class="number">1</span> ? MessageType.getActionType(msgArr[<span class="number">0</span>]) : <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> (msgArr.length) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Message(messageType, msgArr[<span class="number">1</span>]);</span><br><span class="line">            <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Message(messageType, msgArr[<span class="number">1</span>], msgArr[<span class="number">2</span>]);</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodeRegSyn</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> encodeRegSyn(<span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodeRegSyn</span><span class="params">(<span class="keyword">boolean</span> duplicate)</span> </span>&#123;</span><br><span class="line">        MessageType action = MessageType.REG_SERVER_SYN;</span><br><span class="line">        String message = <span class="string">"Please input your name to register."</span>;</span><br><span class="line">        <span class="keyword">if</span> (duplicate) &#123;</span><br><span class="line">            message = <span class="string">"This name is used, Please input another name."</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Message(action, message).encode();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodeSendMsg</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> encodeSendMsg(<span class="keyword">null</span>, msg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodeSendMsg</span><span class="params">(String toUser, String msg)</span> </span>&#123;</span><br><span class="line">        MessageType action = MessageType.CHAT_MSG_SEND;</span><br><span class="line">        String option = toUser;</span><br><span class="line">        String message = msg;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Message(action, option, message).encode();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodeReceiveMsg</span><span class="params">(String fromUser, String msg)</span> </span>&#123;</span><br><span class="line">        MessageType action = MessageType.CHAT_MSG_RECEIVE;</span><br><span class="line">        String option = fromUser;</span><br><span class="line">        String message = msg;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Message(action, option, message).encode();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodeRegClientAck</span><span class="params">(String username)</span> </span>&#123;</span><br><span class="line">        MessageType action = MessageType.REG_CLIENT_ACK;</span><br><span class="line">        String message = username;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Message(action, message).encode();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodeRegServerAck</span><span class="params">(String username)</span> </span>&#123;</span><br><span class="line">        MessageType action = MessageType.REG_SERVER_ACK;</span><br><span class="line">        String message = username + <span class="string">", Welcome to join the chat room."</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Message(action, message).encode();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ByteBuffer <span class="title">encodePublishUserList</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        MessageType action = MessageType.BROADCAST_USER_LIST;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Message(action, message).encode();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> MessageType &#123;</span><br><span class="line">    REG_SERVER_SYN(<span class="string">"reg_server_syn"</span>),</span><br><span class="line">    CHAT_MSG_SEND(<span class="string">"chat_send"</span>),</span><br><span class="line">    CHAT_MSG_RECEIVE(<span class="string">"chat_receive"</span>),</span><br><span class="line">    UNKNOWN(<span class="string">"unknown"</span>),</span><br><span class="line">    REG_SERVER_ACK(<span class="string">"reg_server_ack"</span>),</span><br><span class="line">    REG_CLIENT_ACK(<span class="string">"reg_client_ack"</span>),</span><br><span class="line">    BROADCAST_USER_LIST(<span class="string">"broadcast_user_list"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String action;</span><br><span class="line"></span><br><span class="line">    MessageType(String action) &#123;</span><br><span class="line">        <span class="keyword">this</span>.action = action;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getAction</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> action;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> MessageType <span class="title">getActionType</span><span class="params">(String action)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (MessageType messageType : MessageType.values()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (messageType.getAction().equals(action)) &#123;</span><br><span class="line">                <span class="keyword">return</span> messageType;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> UNKNOWN;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="chatserver"   >
+          <a href="#chatserver" class="heading-link"><i class="fas fa-link"></i></a>ChatServer</h2>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.nio.chat;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SelectionKey;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.Selector;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.ServerSocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Collectors;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 多人聊天室服务端</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ChatServer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SERVER_PORT = <span class="number">8080</span>;</span><br><span class="line"></span><br><span class="line">    Selector selector;</span><br><span class="line">    ServerSocketChannel serverSocketChannel;</span><br><span class="line">    <span class="keyword">boolean</span> running = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">runServer</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            selector = Selector.open();</span><br><span class="line">            serverSocketChannel = ServerSocketChannel.open();</span><br><span class="line"></span><br><span class="line">            serverSocketChannel.bind(<span class="keyword">new</span> InetSocketAddress(SERVER_PORT));</span><br><span class="line">            serverSocketChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">"Server started."</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (running) &#123;</span><br><span class="line">                <span class="keyword">int</span> eventCount = selector.select(<span class="number">100</span>);</span><br><span class="line">                <span class="keyword">if</span> (eventCount == <span class="number">0</span>)</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                Set&lt;SelectionKey&gt; set = selector.selectedKeys();</span><br><span class="line">                Iterator&lt;SelectionKey&gt; keyIterable = set.iterator();</span><br><span class="line">                <span class="keyword">while</span> (keyIterable.hasNext()) &#123;</span><br><span class="line">                    SelectionKey key = keyIterable.next();</span><br><span class="line">                    keyIterable.remove();</span><br><span class="line">                    dealEvent(key);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (selector != <span class="keyword">null</span> &amp;&amp; selector.isOpen())</span><br><span class="line">                selector.close();</span><br><span class="line">            <span class="keyword">if</span> (serverSocketChannel != <span class="keyword">null</span> &amp;&amp; serverSocketChannel.isOpen())</span><br><span class="line">                serverSocketChannel.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dealEvent</span><span class="params">(SelectionKey key)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (key.isAcceptable()) &#123; <span class="comment">// 建立连接</span></span><br><span class="line">            System.out.println(<span class="string">"Accept client connection."</span>);</span><br><span class="line">            SocketChannel socketChannel = ((ServerSocketChannel) key.channel()).accept();</span><br><span class="line">            socketChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">            socketChannel.register(selector, SelectionKey.OP_READ);</span><br><span class="line">            <span class="comment">// 建立连接后 向客户端发送邀请注册信息</span></span><br><span class="line">            socketChannel.write(Message.encodeRegSyn());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (key.isReadable()) &#123; <span class="comment">// 处理客户端请求，包括退出聊天室</span></span><br><span class="line">            SocketChannel socketChannel = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"Receive message from client."</span>);</span><br><span class="line">                socketChannel = (SocketChannel) key.channel();</span><br><span class="line">                ByteBuffer byteBuffer = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">                <span class="comment">// client主动关闭连接，需要广播给大家知道</span></span><br><span class="line">                <span class="keyword">int</span> ret = socketChannel.read(byteBuffer);</span><br><span class="line">                <span class="keyword">if</span> (ret == -<span class="number">1</span>) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> IOException(<span class="string">"客户端异常关闭"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                byteBuffer.flip();</span><br><span class="line">                String msg = Message.CHARSET.decode(byteBuffer).toString(); <span class="comment">// 转String</span></span><br><span class="line">                dealMsg(msg, key); <span class="comment">// 处理消息</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123; <span class="comment">// client主动关闭连接，需要广播给大家知道</span></span><br><span class="line">                socketChannel.close();</span><br><span class="line">                String username = (String) key.attachment();</span><br><span class="line">                <span class="keyword">if</span> (username == <span class="keyword">null</span> || username.equals(<span class="string">""</span>)) &#123; <span class="comment">// 未注册用户无需广播</span></span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.println(String.format(<span class="string">"User %s disconnected"</span>, username));</span><br><span class="line">                broadcast(String.format(<span class="string">"%s disconnected"</span>, username));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dealMsg</span><span class="params">(String msg, SelectionKey key)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        System.out.println(String.format(<span class="string">"Message info is: %s"</span>, msg));</span><br><span class="line">        Message message = Message.decode(msg);</span><br><span class="line">        <span class="keyword">if</span> (message == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">        SocketChannel currentChannel = (SocketChannel) key.channel();</span><br><span class="line">        Set&lt;SelectionKey&gt; keySet = getConnectedChannel();</span><br><span class="line">        <span class="keyword">switch</span> (message.getAction()) &#123;</span><br><span class="line">            <span class="keyword">case</span> REG_CLIENT_ACK: <span class="comment">// 客户端注册确认</span></span><br><span class="line">                String username = message.getMessage(); <span class="comment">// 获取用户名</span></span><br><span class="line">                <span class="comment">// 去重</span></span><br><span class="line">                <span class="keyword">for</span> (SelectionKey keyItem : keySet) &#123;</span><br><span class="line">                    String channelUser = (String) keyItem.attachment();</span><br><span class="line">                    <span class="keyword">if</span> (channelUser != <span class="keyword">null</span> &amp;&amp; channelUser.equals(username)) &#123;</span><br><span class="line">                        currentChannel.write(Message.encodeRegSyn(<span class="keyword">true</span>));</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                key.attach(username);</span><br><span class="line">                <span class="comment">// 向用户发送注册确认消息</span></span><br><span class="line">                currentChannel.write(Message.encodeRegServerAck(username));</span><br><span class="line">                System.out.println(String.format(<span class="string">"New user joined: %s,"</span>, username));</span><br><span class="line">                <span class="comment">// 对聊天室进行广播</span></span><br><span class="line">                broadcast(<span class="string">"welcome "</span> + username + <span class="string">" join us."</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> CHAT_MSG_SEND: <span class="comment">// 客户端发送消息</span></span><br><span class="line">                String toUser = message.getOption();</span><br><span class="line">                String msg2 = message.getMessage();</span><br><span class="line">                String fromUser = (String) key.attachment();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (SelectionKey keyItem : keySet) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (keyItem == key) &#123; <span class="comment">// 排除自己</span></span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    String channelUser = (String) keyItem.attachment();</span><br><span class="line">                    SocketChannel channel = (SocketChannel) keyItem.channel();</span><br><span class="line">                    <span class="keyword">if</span> (toUser == <span class="keyword">null</span> || toUser.equals(channelUser)) &#123;</span><br><span class="line">                        channel.write(Message.encodeReceiveMsg(fromUser, msg2));</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">broadcast</span><span class="params">(String message)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Set&lt;SelectionKey&gt; keySet = getConnectedChannel();</span><br><span class="line">        <span class="keyword">for</span> (SelectionKey keyItem : keySet) &#123;</span><br><span class="line">            SocketChannel channel = (SocketChannel) keyItem.channel();</span><br><span class="line">            channel.write(Message.encodePublishUserList(message));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Set&lt;SelectionKey&gt; <span class="title">getConnectedChannel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">            Selector只有执行select时才会去刷新并删除关闭的Channel</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">return</span> selector.keys().stream()</span><br><span class="line">                .filter(item -&gt; item.channel() <span class="keyword">instanceof</span> SocketChannel &amp;&amp; item.channel().isOpen())</span><br><span class="line">                .collect(Collectors.toSet());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> ChatServer().runServer();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="chatclient"   >
+          <a href="#chatclient" class="heading-link"><i class="fas fa-link"></i></a>ChatClient</h2>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.nio.chat;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.BufferedReader;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStreamReader;</span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SelectionKey;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.Selector;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 多人聊天室客户端</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ChatClient</span> </span>&#123;</span><br><span class="line">    Selector selector;</span><br><span class="line">    SocketChannel socketChannel;</span><br><span class="line">    <span class="keyword">boolean</span> running = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    MessageType messageType = MessageType.REG_CLIENT_ACK;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String PROMPT_USERNAME = <span class="string">"Username:"</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String PROMPT_INPUT = <span class="string">"Input the message:"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">runClient</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            selector = Selector.open();</span><br><span class="line">            socketChannel = SocketChannel.open();</span><br><span class="line">            socketChannel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">            socketChannel.connect(<span class="keyword">new</span> InetSocketAddress(<span class="string">"127.0.0.1"</span>, ChatServer.SERVER_PORT));</span><br><span class="line">            System.out.println(<span class="string">"Client connecting to server."</span>);</span><br><span class="line"></span><br><span class="line">            socketChannel.register(selector, SelectionKey.OP_CONNECT);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (running) &#123;</span><br><span class="line">                <span class="keyword">int</span> eventCount = selector.select(<span class="number">100</span>);</span><br><span class="line">                <span class="keyword">if</span> (eventCount == <span class="number">0</span>)</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                Set&lt;SelectionKey&gt; set = selector.selectedKeys();</span><br><span class="line">                Iterator&lt;SelectionKey&gt; keyIterable = set.iterator();</span><br><span class="line">                <span class="keyword">while</span> (keyIterable.hasNext()) &#123;</span><br><span class="line">                    SelectionKey key = keyIterable.next();</span><br><span class="line">                    keyIterable.remove();</span><br><span class="line">                    dealEvent(key);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (selector != <span class="keyword">null</span> &amp;&amp; selector.isOpen())</span><br><span class="line">                selector.close();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (socketChannel != <span class="keyword">null</span> &amp;&amp; socketChannel.isConnected())</span><br><span class="line">                socketChannel.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dealEvent</span><span class="params">(SelectionKey key)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">// 建立连接后，主线程负责处理来自服务端的消息</span></span><br><span class="line">        <span class="keyword">if</span> (key.isConnectable()) &#123;</span><br><span class="line">            SocketChannel channel = (SocketChannel) key.channel();</span><br><span class="line">            <span class="keyword">if</span> (channel.isConnectionPending()) &#123;</span><br><span class="line">                channel.finishConnect();</span><br><span class="line">            &#125;</span><br><span class="line">            channel.register(selector, SelectionKey.OP_READ);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 建立连接后，起一个新线程专门负责向服务端发送消息</span></span><br><span class="line">            <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">                    BufferedReader reader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(System.in));</span><br><span class="line">                    <span class="keyword">while</span> (running) &#123;</span><br><span class="line">                        String msg = reader.readLine();</span><br><span class="line">                        <span class="keyword">if</span> (msg == <span class="keyword">null</span> || msg.length() == <span class="number">0</span>)</span><br><span class="line">                            <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">                        <span class="keyword">if</span> (messageType == MessageType.REG_CLIENT_ACK) &#123;</span><br><span class="line">                            ByteBuffer bufferMsg = Message.encodeRegClientAck(msg);</span><br><span class="line">                            channel.write(bufferMsg);</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            String[] msgArr = msg.split(<span class="string">"#"</span>, <span class="number">2</span>);</span><br><span class="line">                            ByteBuffer bufferMsg = Message.encodeSendMsg(msg);</span><br><span class="line">                            <span class="keyword">if</span> (msgArr.length == <span class="number">2</span>) &#123;</span><br><span class="line">                                bufferMsg = Message.encodeSendMsg(msgArr[<span class="number">0</span>], msgArr[<span class="number">1</span>]);</span><br><span class="line">                            &#125;</span><br><span class="line"></span><br><span class="line">                            channel.write(bufferMsg);</span><br><span class="line">                        &#125;</span><br><span class="line">                        printPrompt(PROMPT_INPUT);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                SocketChannel channel = (SocketChannel) key.channel();</span><br><span class="line">                ByteBuffer byteBuffer = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">                channel.read(byteBuffer);</span><br><span class="line">                byteBuffer.flip();</span><br><span class="line">                String msg = Message.CHARSET.decode(byteBuffer).toString();</span><br><span class="line">                dealMsg(msg);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">                System.out.println(<span class="string">"Server exit."</span>);</span><br><span class="line">                System.exit(<span class="number">0</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dealMsg</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        Message message = Message.decode(msg);</span><br><span class="line">        <span class="keyword">if</span> (message == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> (message.getAction()) &#123;</span><br><span class="line">            <span class="keyword">case</span> REG_SERVER_SYN: <span class="comment">// 服务端注册邀请消息</span></span><br><span class="line">                printMsgAndPrompt(message.getMessage(), PROMPT_USERNAME);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> REG_SERVER_ACK:</span><br><span class="line">                messageType = MessageType.CHAT_MSG_SEND; <span class="comment">// 服务端注册确认消息</span></span><br><span class="line">                printMsgAndPrompt(message.getMessage(), PROMPT_INPUT);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> CHAT_MSG_RECEIVE: <span class="comment">// 接受聊天消息</span></span><br><span class="line">                String info = <span class="string">"from "</span> + message.getOption() + <span class="string">": "</span> + message.getMessage();</span><br><span class="line">                printMsgAndPrompt(info, PROMPT_INPUT);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">printPrompt</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        System.out.print(msg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">printMsgAndPrompt</span><span class="params">(String msg, String prompt)</span> </span>&#123;</span><br><span class="line">        System.out.println();</span><br><span class="line">        System.out.println(msg);</span><br><span class="line">        System.out.print(prompt);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> ChatClient().runClient();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="效果演示"   >
+          <a href="#效果演示" class="heading-link"><i class="fas fa-link"></i></a>效果演示</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200901073140.png"  alt="" />
+      </p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%A4%9A%E4%BA%BA%E8%81%8A%E5%A4%A9%E5%AE%A4/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">网络编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E7%BA%BF%E7%A8%8B%E6%B1%A0/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">线程池</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/Zero-Copy/"><span class="paginator-prev__text">Zero-Copy</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#需求分析"><span class="toc-number">1.</span> <span class="toc-text">
+          需求分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#服务端"><span class="toc-number">1.1.</span> <span class="toc-text">
+          服务端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端"><span class="toc-number">1.2.</span> <span class="toc-text">
+          客户端</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#系统分析"><span class="toc-number">2.</span> <span class="toc-text">
+          系统分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#系统类设计"><span class="toc-number">2.1.</span> <span class="toc-text">
+          系统类设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#系统业务流程"><span class="toc-number">2.2.</span> <span class="toc-text">
+          系统业务流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息设计"><span class="toc-number">2.3.</span> <span class="toc-text">
+          消息设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#程序注意点"><span class="toc-number">2.4.</span> <span class="toc-text">
+          程序注意点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#详细设计"><span class="toc-number">3.</span> <span class="toc-text">
+          详细设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#message-和-messagetype"><span class="toc-number">3.1.</span> <span class="toc-text">
+          Message 和 MessageType</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#chatserver"><span class="toc-number">3.2.</span> <span class="toc-text">
+          ChatServer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#chatclient"><span class="toc-number">3.3.</span> <span class="toc-text">
+          ChatClient</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#效果演示"><span class="toc-number">4.</span> <span class="toc-text">
+          效果演示</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

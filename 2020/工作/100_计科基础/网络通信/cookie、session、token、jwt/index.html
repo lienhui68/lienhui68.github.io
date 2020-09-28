@@ -1,0 +1,806 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;164696755                      认证        通俗地讲就是验证当前用户的身份，证明“你是你自己”（比如：你每天上下班打卡，都需要通过指纹打卡，当你的指纹和系统里录入的指纹相匹配时，就打卡成功） 互联网中的认证：   用户名密码登录   邮箱发送登录链接   手机号接收验证码 只要你能收到邮箱&#x2F;验证">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cookie、session、token、jwt">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cookie%E3%80%81session%E3%80%81token%E3%80%81jwt/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;164696755                      认证        通俗地讲就是验证当前用户的身份，证明“你是你自己”（比如：你每天上下班打卡，都需要通过指纹打卡，当你的指纹和系统里录入的指纹相匹配时，就打卡成功） 互联网中的认证：   用户名密码登录   邮箱发送登录链接   手机号接收验证码 只要你能收到邮箱&#x2F;验证">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828013955.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828014021.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828014510.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828014828.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828015418.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828021538.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828021641.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828020252.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828022751.png">
+<meta property="article:published_time" content="2020-09-16T16:21:55.316Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:55.339Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络通信">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828013955.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>cookie、session、token、jwt | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cookie%E3%80%81session%E3%80%81token%E3%80%81jwt/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">cookie、session、token、jwt</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">6.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">37分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://zhuanlan.zhihu.com/p/164696755"  target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/164696755</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h1 id="认证"   >
+          <a href="#认证" class="heading-link"><i class="fas fa-link"></i></a>认证</h1>
+      
+<p>通俗地讲就是<strong>验证当前用户的身份</strong>，证明“你是你自己”（比如：你每天上下班打卡，都需要通过指纹打卡，当你的指纹和系统里录入的指纹相匹配时，就打卡成功）</p>
+<p>互联网中的认证：</p>
+<ul>
+<li>
+<p>用户名密码登录</p>
+</li>
+<li>
+<p>邮箱发送登录链接</p>
+</li>
+<li>
+<p>手机号接收验证码</p>
+<p>只要你能收到邮箱/验证码，就默认你是账号的主人</p>
+</li>
+</ul>
+<a id="more"></a>
+
+        <h1 id="授权"   >
+          <a href="#授权" class="heading-link"><i class="fas fa-link"></i></a>授权</h1>
+      
+<p><strong>用户授予第三方应用访问该用户某些资源的权限</strong></p>
+<ul>
+<li>你在安装手机应用的时候，APP 会询问是否允许授予权限（访问相册、地理位置等权限）</li>
+<li>你在访问微信小程序时，当登录时，小程序会询问是否允许授予权限（获取昵称、头像、地区、性别等个人信息）</li>
+</ul>
+<p>实现授权的方式有：cookie、session、token、OAuth</p>
+
+        <h1 id="凭证"   >
+          <a href="#凭证" class="heading-link"><i class="fas fa-link"></i></a>凭证</h1>
+      
+<p><strong>实现认证和授权的前提是需要一种媒介（证书） 来标记访问者的身份</strong></p>
+<ul>
+<li>在战国时期，商鞅变法，发明了照身帖。照身帖由官府发放，是一块打磨光滑细密的竹板，上面刻有持有人的头像和籍贯信息。国人必须持有，如若没有就被认为是黑户，或者间谍之类的。</li>
+<li>在现实生活中，每个人都会有一张专属的居民身份证，是用于证明持有人身份的一种法定证件。通过身份证，我们可以办理手机卡/银行卡/个人贷款/交通出行等等，这就是<strong>认证的凭证。</strong></li>
+<li>在互联网应用中，一般网站（如掘金）会有两种模式，游客模式和登录模式。游客模式下，可以正常浏览网站上面的文章，一旦想要点赞/收藏/分享文章，就需要登录或者注册账号。当用户登录成功后，服务器会给该用户使用的浏览器颁发一个令牌（token），这个令牌用来表明你的身份，每次浏览器发送请求时会带上这个令牌，就可以使用游客模式下无法使用的功能。</li>
+</ul>
+
+        <h1 id="cookie"   >
+          <a href="#cookie" class="heading-link"><i class="fas fa-link"></i></a>Cookie</h1>
+      
+<p><strong>HTTP 是无状态的协议（对于事务处理没有记忆能力，每次客户端和服务端会话完成时，服务端不会保存任何会话信息</strong>）：每个请求都是完全独立的，服务端无法确认当前访问者的身份信息，无法分辨上一次的请求发送者和这一次的发送者是不是同一个人。所以服务器与浏览器为了进行会话跟踪（知道是谁在访问我），就必须主动的去维护一个状态，这个状态用于告知服务端前后两个请求是否来自同一浏览器。而这个状态需要通过 cookie 或者 session 去实现。</p>
+<p><strong>cookie 存储在客户端：</strong> cookie 是服务器发送到用户浏览器并保存在本地的一小块数据，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>它会在浏览器下次向同一服务器再发起请求时被携带并发送到服务器上</span>。</p>
+<p><strong>cookie 是不可跨域的：</strong> 每个 cookie 都会绑定单一的域名，无法在别的域名下获取使用，<strong>一级域名和二级域名之间是允许共享使用的</strong>（<strong>靠的是 domain）</strong>。</p>
+<p><strong>cookie 重要的属性</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828013955.png"  alt="" />
+      </p>
+
+        <h1 id="session"   >
+          <a href="#session" class="heading-link"><i class="fas fa-link"></i></a>Session</h1>
+      
+<p><strong>session 是另一种记录服务器和客户端会话状态的机制</strong></p>
+<p><strong>session 是基于 cookie 实现的，session 存储在服务器端，sessionId 会被存储到客户端的cookie 中</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828014021.png"  alt="" />
+      </p>
+<p><strong>session 认证流程：</strong></p>
+<ol>
+<li>用户第一次请求服务器的时候，服务器根据用户提交的相关信息，创建对应的 Session</li>
+<li>请求返回时将此 Session 的唯一标识信息 SessionID 返回给浏览器</li>
+<li>浏览器接收到服务器返回的 SessionID 信息后，会将此信息存入到 Cookie 中，同时 Cookie 记录此 SessionID 属于哪个域名</li>
+<li>当用户第二次访问服务器的时候，请求会自动判断此域名下是否存在 Cookie 信息，如果存在自动将 Cookie 信息也发送给服务端，服务端会从 Cookie 中获取 SessionID，再根据 SessionID 查找对应的 Session 信息，如果没有找到说明用户没有登录或者登录失效，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果找到 Session 证明用户已经登录可执行后面操作。</span></li>
+</ol>
+<p>根据以上流程可知，<strong>SessionID 是连接 Cookie 和 Session 的一道桥梁</strong>，大部分系统也是根据此原理来验证用户登录状态。</p>
+
+        <h1 id="cookie和session的区别"   >
+          <a href="#cookie和session的区别" class="heading-link"><i class="fas fa-link"></i></a>Cookie和Session的区别</h1>
+      
+<ul>
+<li><strong>安全性：</strong> Session 比 Cookie 安全，Session 是存储在服务器端的，Cookie 是存储在客户端的。</li>
+<li><strong>存取值的类型不同</strong>：Cookie 只支持存字符串数据，想要设置其他类型的数据，需要将其转换成字符串，Session 可以存任意数据类型。</li>
+<li><strong>有效期不同：</strong> Cookie 可设置为长时间保持，比如我们经常使用的默认登录功能，Session 一般失效时间较短，客户端关闭（默认情况下）或者 Session 超时都会失效。</li>
+<li><strong>存储大小不同：</strong> 单个 Cookie 保存的数据不能超过 4K，Session 可存储数据远高于 Cookie，但是当访问量过多，会占用过多的服务器资源。</li>
+</ul>
+
+        <h1 id="token令牌"   >
+          <a href="#token令牌" class="heading-link"><i class="fas fa-link"></i></a>Token(令牌)</h1>
+      
+<blockquote>
+<p>参考：<span class="exturl"><a class="exturl__link"   href="http://www.mamicode.com/info-detail-2606701.html"  target="_blank" rel="noopener">什么是token及怎样生成token</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p><strong>Acesss Token</strong></p>
+<p><strong>访问资源接口（API）时所需要的资源凭证</strong></p>
+<p><strong>简单 token 的组成：</strong> uid(用户唯一的身份标识)、time(当前时间的时间戳)、sign（签名，token 的前几位以哈希算法压缩成的一定长度的十六进制字符串）</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>服务端无状态化、可扩展性好</strong></li>
+<li><strong>支持移动端设备</strong></li>
+<li>安全</li>
+<li>支持跨程序调用</li>
+</ul>
+<p><strong>token 的身份验证流程</strong>：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828014510.png"  alt="" />
+      </p>
+<p><strong>具体步骤</strong>：</p>
+<ol>
+<li>客户端使用用户名跟密码请求登录</li>
+<li>服务端收到请求，去验证用户名与密码</li>
+<li>验证成功后，服务端会签发一个 token 并把这个 token 发送给客户端</li>
+<li>客户端收到 token 以后，会把它存储起来，比如放在 cookie 里或者 localStorage 里</li>
+<li>客户端每次向服务端请求资源的时候需要带着服务端签发的 token</li>
+<li>服务端收到请求，然后去验证客户端请求里面带着的 token ，如果验证成功，就向客户端返回请求的数据</li>
+</ol>
+<p>注意：</p>
+<ul>
+<li><strong>每一次请求都需要携带 token，需要把 token 放到 HTTP 的 Header 里</strong></li>
+<li><strong>基于 token 的用户认证是一种服务端无状态的认证方式，服务端不用存放 token 数据。用解析 token 的计算时间换取 session 的存储空间，从而减轻服务器的压力，减少频繁的查询数据库</strong></li>
+<li><strong>token 完全由应用管理，所以它可以避开同源策略</strong></li>
+</ul>
+
+        <h1 id="refresh-token"   >
+          <a href="#refresh-token" class="heading-link"><i class="fas fa-link"></i></a>Refresh Token</h1>
+      
+<p>另外一种 token——refresh token，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>refresh token 是专用于刷新 access token 的 token。</span>如果没有 refresh token，也可以刷新 access token，但每次刷新都要用户输入登录用户名与密码，会很麻烦。有了 refresh token，可以减少这个麻烦，客户端直接用 refresh token 去更新 access token，无需用户进行额外的操作。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828014828.png"  alt="" />
+      </p>
+<p>Access Token 的有效期比较短，当 Acesss Token 由于过期而失效时，使用 Refresh Token 就可以获取到新的 Token，如果 Refresh Token 也失效了，用户就只能重新登录了。</p>
+<p>Refresh Token 及过期时间是存储在服务器的数据库中，只有在申请新的 Acesss Token 时才会验证，不会对业务接口响应时间造成影响，也不需要向 Session 一样一直保持在内存中以应对大量的请求。</p>
+
+        <h1 id="token和session的区别"   >
+          <a href="#token和session的区别" class="heading-link"><i class="fas fa-link"></i></a>Token和Session的区别</h1>
+      
+<ul>
+<li>Session 是一种<strong>记录服务器和客户端会话状态的机制，使服务端有状态化，可以记录会话信息</strong>。而 Token 是<strong>令牌</strong>，<strong>访问资源接口（API）时所需要的资源凭证</strong>。Token <strong>使服务端无状态化，不会存储会话信息。</strong></li>
+<li>Session 和 Token 并不矛盾，作为身份认证 Token 安全性比 Session 好，因为每一个请求都有签名还能防止监听以及重放攻击，而 Session 就必须依赖链路层来保障通讯安全了。<strong>如果你需要实现有状态的会话，仍然可以增加 Session 来在服务器端保存一些状态。</strong></li>
+<li>所谓 Session 认证只是简单的把 User 信息存储到 Session 里，因为 SessionID 的不可预测性，暂且认为是安全的。而 Token ，如果指的是 OAuth Token 或类似的机制的话，提供的是 认证 和 授权 ，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>认证是针对用户，授权是针对 App 。</span>其目的是让某 App 有权利访问某用户的信息。这里的 Token 是唯一的。不可以转移到其它 App上，也不可以转到其它用户上。Session 只提供一种简单的认证，即只要有此 SessionID ，即认为有此 User 的全部权利。是需要严格保密的，这个数据应该只保存在站方，不应该共享给其它网站或者第三方 App。所以简单来说：<strong>如果你的用户数据可能需要和第三方共享，或者允许第三方调用 API 接口，用 Token 。如果永远只是自己的网站，自己的 App，用什么就无所谓了。</strong></li>
+</ul>
+
+        <h1 id="jwt"   >
+          <a href="#jwt" class="heading-link"><i class="fas fa-link"></i></a>JWT</h1>
+      
+
+        <h2 id="什么是jwt"   >
+          <a href="#什么是jwt" class="heading-link"><i class="fas fa-link"></i></a>什么是JWT</h2>
+      
+<ul>
+<li>JSON Web Token（简称 JWT）是目前最流行的<strong>跨域认证</strong>解决方案。</li>
+<li>一种<strong>认证授权机制</strong></li>
+<li>JWT 是为了在网络应用环境间<strong>传递声明</strong>而执行的一种基于 JSON 的开放标准（RFC 7519）。JWT 的声明一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，以便于从资源服务器获取资源。比如用在用户登录上。</li>
+<li>可以使用 HMAC 算法或者是 RSA 的公/私秘钥对 JWT 进行签名。因为数字签名的存在，这些传递的信息是可信的。</li>
+</ul>
+
+        <h2 id="生成jwt"   >
+          <a href="#生成jwt" class="heading-link"><i class="fas fa-link"></i></a>生成JWT</h2>
+      
+<ul>
+<li><span class="exturl"><a class="exturl__link"   href="https://link.zhihu.com/?target=https%3A//jwt.io/" >https://jwt.io/</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<li><span class="exturl"><a class="exturl__link"   href="https://link.zhihu.com/?target=https%3A//www.jsonwebtoken.io/" >https://www.jsonwebtoken.io/</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+</ul>
+
+        <h2 id="jwt的原理"   >
+          <a href="#jwt的原理" class="heading-link"><i class="fas fa-link"></i></a>JWT的原理</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828015418.png"  alt="" />
+      </p>
+<p>JWT 的原理是，服务器认证以后，生成一个 JSON 对象，发回给用户，就像下面这样。</p>
+<figure class="highlight javascript"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"姓名"</span>: <span class="string">"张三"</span>,</span><br><span class="line">  <span class="string">"角色"</span>: <span class="string">"管理员"</span>,</span><br><span class="line">  <span class="string">"到期时间"</span>: <span class="string">"2018年7月1日0点0分"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>以后，用户与服务端通信的时候，都要发回这个 JSON 对象。服务器完全只靠这个对象认定用户身份。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>为了防止用户篡改数据，服务器在生成这个对象的时候，会加上签名（详见后文）。</span></p>
+<p>服务器就不保存任何 session 数据了，也就是说，服务器变成无状态了，从而比较容易实现扩展。</p>
+
+        <h2 id="jwt的数据结构"   >
+          <a href="#jwt的数据结构" class="heading-link"><i class="fas fa-link"></i></a>JWT的数据结构</h2>
+      
+<p>实际的 JWT 大概就像下面这样。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828021538.png"  alt="" />
+      </p>
+<p>它是一个很长的字符串，中间用点（<code>.</code>）分隔成三个部分。注意，JWT 内部是没有换行的，这里只是为了便于展示，将它写成了几行。</p>
+<p>JWT 的三个部分依次如下</p>
+<ul>
+<li>Header（头部）</li>
+<li>Payload（负载）</li>
+<li>Signature（签名）</li>
+</ul>
+<p>写成一行，就是下面的样子。</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Header.Payload.Signature</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828021641.png"  alt="" />
+      </p>
+<p>下面依次介绍这三个部分。</p>
+
+        <h3 id="header"   >
+          <a href="#header" class="heading-link"><i class="fas fa-link"></i></a>Header</h3>
+      
+<p>Header 部分是一个 JSON 对象，描述 JWT 的元数据，通常是下面的样子。</p>
+<figure class="highlight javascript"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"alg"</span>: <span class="string">"HS256"</span>,</span><br><span class="line">  <span class="string">"typ"</span>: <span class="string">"JWT"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>上面代码中，<code>alg</code>属性表示签名的算法（algorithm），默认是 HMAC SHA256（写成 HS256）；<code>typ</code>属性表示这个令牌（token）的类型（type），JWT 令牌统一写为<code>JWT</code>。</p>
+<p>最后，将上面的 JSON 对象使用 Base64URL 算法（详见后文）转成字符串。</p>
+
+        <h3 id="payload"   >
+          <a href="#payload" class="heading-link"><i class="fas fa-link"></i></a>Payload</h3>
+      
+<p>Payload 部分也是一个 JSON 对象，用来存放实际需要传递的数据。JWT 规定了7个官方字段，供选用。</p>
+<ul>
+<li>iss (issuer)：签发人</li>
+<li>exp (expiration time)：过期时间</li>
+<li>sub (subject)：主题</li>
+<li>aud (audience)：受众</li>
+<li>nbf (Not Before)：生效时间</li>
+<li>iat (Issued At)：签发时间</li>
+<li>jti (JWT ID)：编号</li>
+</ul>
+<p>除了官方字段，你还可以在这个部分定义私有字段，下面就是一个例子。</p>
+<figure class="highlight javascript"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"sub"</span>: <span class="string">"1234567890"</span>,</span><br><span class="line">  <span class="string">"name"</span>: <span class="string">"John Doe"</span>,</span><br><span class="line">  <span class="string">"admin"</span>: <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>注意，JWT 默认是不加密的，任何人都可以读到，所以不要把秘密信息放在这个部分。</p>
+<p>这个 JSON 对象也要使用 Base64URL 算法转成字符串。</p>
+
+        <h3 id="signature"   >
+          <a href="#signature" class="heading-link"><i class="fas fa-link"></i></a>Signature</h3>
+      
+<p>Signature 部分是对前两部分的签名，防止数据篡改。</p>
+<p>首先，需要指定一个密钥（secret）。这个密钥只有服务器才知道，不能泄露给用户。然后，使用 Header 里面指定的签名算法（默认是 HMAC SHA256），按照下面的公式产生签名。</p>
+<figure class="highlight javascript"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HMACSHA256(</span><br><span class="line">  base64UrlEncode(header) + <span class="string">"."</span> +</span><br><span class="line">  base64UrlEncode(payload),</span><br><span class="line">  secret)</span><br></pre></td></tr></table></div></figure>
+<p>算出签名以后，把 Header、Payload、Signature 三个部分拼成一个字符串，每个部分之间用&quot;点&quot;（<code>.</code>）分隔，就可以返回给用户。</p>
+
+        <h3 id="base64url"   >
+          <a href="#base64url" class="heading-link"><i class="fas fa-link"></i></a>Base64URL</h3>
+      
+<p>前面提到，Header 和 Payload 串型化的算法是 Base64URL。这个算法跟 Base64 算法基本类似，但有一些小的不同。</p>
+<p>JWT 作为一个令牌（token），有些场合可能会放到 URL（比如 <span class="exturl"><a class="exturl__link"   href="http://api.example.com/?token=xxx%EF%BC%89%E3%80%82Base64"  target="_blank" rel="noopener">api.example.com/?token=xxx）。Base64</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 有三个字符<code>+</code>、<code>/</code>和<code>=</code>，在 URL 里面有特殊含义，所以要被替换掉：<code>=</code>被省略、<code>+</code>替换成<code>-</code>，<code>/</code>替换成<code>_</code> 。这就是 Base64URL 算法。</p>
+
+        <h2 id="jwt认证流程"   >
+          <a href="#jwt认证流程" class="heading-link"><i class="fas fa-link"></i></a>JWT认证流程</h2>
+      
+<ol>
+<li>
+<p>用户输入用户名/密码登录，服务端认证成功后，会返回给客户端一个 JWT</p>
+</li>
+<li>
+<p>客户端将 token 保存到本地（通常使用 localstorage，也可以使用 cookie）</p>
+</li>
+<li>
+<p>当用户希望访问一个受保护的路由或者资源的时候，需要请求头的 Authorization 字段中使用Bearer 模式添加 JWT，其内容看起来是下面这样</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Authorization: Bearer &lt;token&gt;</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>服务端的保护路由将会检查请求头 Authorization 中的 JWT 信息，如果合法，则允许用户的行为</p>
+</li>
+<li>
+<p>因为 JWT 是自包含的（内部包含了一些会话信息），因此减少了需要查询数据库的需要</p>
+</li>
+<li>
+<p>因为 JWT 并不使用 Cookie ，所以你可以使用任何域名提供你的 API 服务而不需要担心跨域资源共享问题（CORS）</p>
+</li>
+<li>
+<p>因为用户的状态不再存储在服务端的内存中，所以这是一种无状态的认证机制</p>
+</li>
+</ol>
+
+        <h2 id="jwt-的使用方式"   >
+          <a href="#jwt-的使用方式" class="heading-link"><i class="fas fa-link"></i></a>JWT 的使用方式</h2>
+      
+
+        <h3 id="方式一"   >
+          <a href="#方式一" class="heading-link"><i class="fas fa-link"></i></a>方式一</h3>
+      
+<p>当用户希望访问一个受保护的路由或者资源的时候，可以把它放在 Cookie 里面自动发送，但是这样不能跨域，所以更好的做法是放在 HTTP 请求头信息的 Authorization 字段里，使用 Bearer 模式添加 JWT。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET /calendar/v1/events</span><br><span class="line">Host: api.example.com</span><br><span class="line">Authorization: Bearer &lt;token&gt;</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>用户的状态不会存储在服务端的内存中，这是一种 <strong>无状态的认证机制</strong></li>
+<li>服务端的保护路由将会检查请求头 Authorization 中的 JWT 信息，如果合法，则允许用户的行为。</li>
+<li>由于 JWT 是自包含的，因此减少了需要查询数据库的需要</li>
+<li>JWT 的这些特性使得我们可以完全依赖其无状态的特性提供数据 API 服务，甚至是创建一个下载流服务。</li>
+<li>因为 JWT 并不使用 Cookie ，所以你可以使用任何域名提供你的 API 服务而<strong>不需要担心跨域资源共享问题</strong>（CORS）</li>
+</ul>
+
+        <h3 id="方式二"   >
+          <a href="#方式二" class="heading-link"><i class="fas fa-link"></i></a>方式二</h3>
+      
+<p>跨域的时候，可以把 JWT 放在 POST 请求的数据体里。</p>
+
+        <h3 id="方式三"   >
+          <a href="#方式三" class="heading-link"><i class="fas fa-link"></i></a>方式三</h3>
+      
+<p>通过 URL 传输</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.example.com&#x2F;user?token&#x3D;xxx</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="token-和-jwt-的对比"   >
+          <a href="#token-和-jwt-的对比" class="heading-link"><i class="fas fa-link"></i></a>Token 和 JWT 的对比</h1>
+      
+<p><strong>相同点</strong></p>
+<ul>
+<li>都是访问资源的令牌</li>
+<li>都可以记录用户的信息</li>
+<li>都是使服务端无状态化</li>
+<li>都是只有验证成功后，客户端才能访问服务端上受保护的资源</li>
+</ul>
+<p><strong>异同点</strong></p>
+<ul>
+<li>Token：服务端验证客户端发送过来的 Token 时，还需要查询数据库获取用户信息，然后验证 Token 是否有效。</li>
+<li>JWT：将 Token 和 Payload 加密后存储于客户端，服务端只需要使用密钥解密进行校验（校验也是 JWT 自己实现的）即可，不需要查询或者减少查询数据库，因为 JWT 自包含了用户信息和加密的数据。</li>
+</ul>
+
+        <h1 id="常见的前后端鉴权方式"   >
+          <a href="#常见的前后端鉴权方式" class="heading-link"><i class="fas fa-link"></i></a>常见的前后端鉴权方式</h1>
+      
+<ol>
+<li>Session-Cookie</li>
+<li>Token 验证（包括 JWT，SSO）</li>
+<li>OAuth2.0（开放授权）</li>
+</ol>
+
+        <h1 id="哈希加密算法"   >
+          <a href="#哈希加密算法" class="heading-link"><i class="fas fa-link"></i></a>哈希加密算法</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828020252.png"  alt="" />
+      </p>
+<p>哈希算法(Hash Algorithm)又称散列算法、散列函数、哈希函数，是一种从任何一种数据中创建小的数字“指纹”的方法。哈希算法将数据重新打乱混合，重新创建一个哈希值。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>哈希算法主要用来保障数据真实性(即完整性)</span>，即发信人将原始消息和哈希值一起发送，收信人通过相同的哈希函数来校验原始数据是否真实。</p>
+<p>哈希算法通常有以下几个特点：</p>
+<ul>
+<li>2 的 128 次方为 340282366920938463463374607431768211456，也就是 10 的 39 次方级别</li>
+<li>2 的 160 次方为 1.4615016373309029182036848327163e+48，也就是 10 的 48 次方级别</li>
+<li>2 的 256 次方为 1.1579208923731619542357098500869 × 10 的 77 次方，也就是 10 的 77 次方</li>
+<li>正向快速：原始数据可以快速计算出哈希值</li>
+<li>逆向困难：通过哈希值基本不可能推导出原始数据</li>
+<li>输入敏感：原始数据只要有一点变动，得到的哈希值差别很大</li>
+<li>冲突避免：很难找到不同的原始数据得到相同的哈希值，宇宙中原子数大约在 10 的 60 次方到 80 次方之间，所以 2 的 256 次方有足够的空间容纳所有的可能，算法好的情况下冲突碰撞的概率很低</li>
+</ul>
+<p><strong>注意</strong>：</p>
+<ol>
+<li>以上不能保证数据被恶意篡改，原始数据和哈希值都可能被恶意篡改，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>要保证不被篡改，可以使用RSA 公钥私钥方案，再配合哈希值。</span></li>
+<li>哈希算法主要用来防止计算机传输过程中的错误，早期计算机通过前 7 位数据第 8 位奇偶校验码来保障（12.5% 的浪费效率低），对于一段数据或文件，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>通过哈希算法生成 128bit 或者 256bit 的哈希值，如果校验有问题就要求重传</span>。</li>
+</ol>
+
+        <h1 id="常见问题"   >
+          <a href="#常见问题" class="heading-link"><i class="fas fa-link"></i></a>常见问题</h1>
+      
+
+        <h2 id="使用-cookie-时需要考虑的问题"   >
+          <a href="#使用-cookie-时需要考虑的问题" class="heading-link"><i class="fas fa-link"></i></a>使用 cookie 时需要考虑的问题</h2>
+      
+<ul>
+<li>因为存储在客户端，容易被客户端篡改，使用前需要验证合法性</li>
+<li>不要存储敏感数据，比如用户密码，账户余额</li>
+<li>使用 httpOnly 在一定程度上提高安全性</li>
+<li>尽量减少 cookie 的体积，能存储的数据量不能超过 4kb</li>
+<li>设置正确的 domain 和 path，减少数据传输</li>
+<li><strong>cookie 无法跨域</strong></li>
+<li>一个浏览器针对一个网站最多存 20 个Cookie，浏览器一般只允许存放 300 个Cookie</li>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>移动端对 cookie 的支持不是很好，而 session 需要基于 cookie 实现，所以移动端常用的是 token</span></li>
+</ul>
+
+        <h2 id="使用-session-时需要考虑的问题"   >
+          <a href="#使用-session-时需要考虑的问题" class="heading-link"><i class="fas fa-link"></i></a>使用 session 时需要考虑的问题</h2>
+      
+<ul>
+<li>将 session 存储在服务器里面，当用户同时在线量比较多时，这些 session 会占据较多的内存，需要在服务端定期的去清理过期的 session</li>
+<li>当网站采用<strong>集群部署</strong>的时候，会遇到多台 web 服务器之间如何做 session 共享的问题。因为 session 是由单个服务器创建的，但是处理用户请求的服务器不一定是那个创建 session 的服务器，那么该服务器就无法拿到之前已经放入到 session 中的登录凭证之类的信息了。</li>
+<li>当多个应用要共享 session 时，除了以上问题，还会遇到跨域问题，因为不同的应用可能部署的主机不一样，需要在各个应用做好 cookie 跨域的处理。</li>
+<li><strong>sessionId 是存储在 cookie 中的，假如浏览器禁止 cookie 或不支持 cookie 怎么办？</strong> 一般会把 sessionId 跟在 url 参数后面即重写 url，所以 session 不一定非得需要靠 cookie 实现</li>
+<li><strong>移动端对 cookie 的支持不是很好，而 session 需要基于 cookie 实现，所以移动端常用的是 token</strong></li>
+</ul>
+
+        <h2 id="使用-token-时需要考虑的问题"   >
+          <a href="#使用-token-时需要考虑的问题" class="heading-link"><i class="fas fa-link"></i></a>使用 token 时需要考虑的问题</h2>
+      
+<ul>
+<li>如果你认为用数据库来存储 token 会导致查询时间太长，可以选择放在内存当中。比如 redis 很适合你对 token 查询的需求。</li>
+<li><strong>token 完全由应用管理，所以它可以避开同源策略</strong></li>
+<li><strong>token 可以避免 CSRF 攻击(因为不需要 cookie 了)</strong></li>
+<li><strong>移动端对 cookie 的支持不是很好，而 session 需要基于 cookie 实现，所以移动端常用的是 token</strong></li>
+</ul>
+
+        <h2 id="使用-jwt-时需要考虑的问题"   >
+          <a href="#使用-jwt-时需要考虑的问题" class="heading-link"><i class="fas fa-link"></i></a>使用 JWT 时需要考虑的问题</h2>
+      
+<ul>
+<li>因为 JWT 并不依赖 Cookie 的，所以你可以使用任何域名提供你的 API 服务而不需要担心跨域资源共享问题（CORS）</li>
+<li>JWT 默认是不加密，但也是可以加密的。生成原始 Token 以后，可以用密钥再加密一次。</li>
+<li>JWT 不加密的情况下，不能将秘密数据写入 JWT。</li>
+<li>JWT 不仅可以用于认证，也可以用于交换信息。有效使用 JWT，可以降低服务器查询数据库的次数。</li>
+<li>JWT 最大的优势是服务器不再需要存储 Session，使得服务器认证鉴权业务可以方便扩展。但这也是 JWT 最大的缺点：由于服务器不需要存储 Session 状态，因此使用过程中无法废弃某个 Token 或者更改 Token 的权限。也就是说一旦 JWT 签发了，到期之前就会始终有效，除非服务器部署额外的逻辑。</li>
+<li>JWT 本身包含了认证信息，一旦泄露，任何人都可以获得该令牌的所有权限。为了减少盗用，JWT的有效期应该设置得比较短。对于一些比较重要的权限，使用时应该再次对用户进行认证。</li>
+<li>JWT 适合一次性的命令认证，颁发一个有效期极短的 JWT，即使暴露了危险也很小，由于每次操作都会生成新的 JWT，因此也没必要保存 JWT，真正实现无状态。</li>
+<li>为了减少盗用，JWT 不应该使用 HTTP 协议明码传输，要使用 HTTPS 协议传输。</li>
+</ul>
+
+        <h2 id="使用加密算法时需要考虑的问题"   >
+          <a href="#使用加密算法时需要考虑的问题" class="heading-link"><i class="fas fa-link"></i></a>使用加密算法时需要考虑的问题</h2>
+      
+<ul>
+<li>绝不要以<strong>明文存储</strong>密码</li>
+<li><strong>永远使用 哈希算法 来处理密码，绝不要使用 Base64 或其他编码方式来存储密码，这和以明文存储密码是一样的，使用哈希，而不要使用编码</strong>。编码以及加密，都是双向的过程，而密码是保密的，应该只被它的所有者知道， 这个过程必须是单向的。哈希正是用于做这个的，从来没有解哈希这种说法， 但是编码就存在解码，加密就存在解密。</li>
+<li>绝不要使用弱哈希或已被破解的哈希算法，像 MD5 或 SHA1 ，只使用强密码哈希算法。</li>
+<li>绝不要以明文形式显示或发送密码，即使是对密码的所有者也应该这样。如果你需要 “忘记密码” 的功能，可以随机生成一个新的 <strong>一次性的</strong>（这点很重要）密码，然后把这个密码发送给用户。</li>
+</ul>
+
+        <h1 id="分布式架构下session共享方案"   >
+          <a href="#分布式架构下session共享方案" class="heading-link"><i class="fas fa-link"></i></a>分布式架构下Session共享方案</h1>
+      
+
+        <h2 id="session复制"   >
+          <a href="#session复制" class="heading-link"><i class="fas fa-link"></i></a>session复制</h2>
+      
+<p>任何一个服务器上的 session 发生改变（增删改），该节点会把这个 session 的所有内容序列化，然后广播给所有其它节点，不管其他服务器需不需要 session ，以此来保证 session 同步</p>
+<p><strong>优点：</strong> 可容错，各个服务器间 session 能够实时响应。<br />
+<strong>缺点：</strong> 会对网络负荷造成一定压力，如果 session 量大的话可能会造成网络堵塞，拖慢服务器性能。</p>
+
+        <h2 id="粘性sessionip-绑定策略"   >
+          <a href="#粘性sessionip-绑定策略" class="heading-link"><i class="fas fa-link"></i></a>粘性session/IP 绑定策略</h2>
+      
+<p><strong>采用 Ngnix 中的 ip_hash 机制，将某个 ip的所有请求都定向到同一台服务器上，即将用户与服务器绑定。</strong> 用户第一次请求时，负载均衡器将用户的请求转发到了 A 服务器上，如果负载均衡器设置了粘性 session 的话，那么用户以后的每次请求都会转发到 A 服务器上，相当于把用户和 A 服务器粘到了一块，这就是粘性 session 机制。</p>
+<p><strong>优点：</strong> 简单，不需要对 session 做任何处理。<br />
+<strong>缺点：</strong> 缺乏容错性，如果当前访问的服务器发生故障，用户被转移到第二个服务器上时，他的 session 信息都将失效。<br />
+<strong>适用场景：</strong> 发生故障对客户产生的影响较小；服务器发生故障是低概率事件 。<br />
+<strong>实现方式：</strong> 以 Nginx 为例，在 upstream 模块配置 ip_hash 属性即可实现粘性 session。</p>
+
+        <h2 id="session共享常用"   >
+          <a href="#session共享常用" class="heading-link"><i class="fas fa-link"></i></a>session共享(常用)</h2>
+      
+<p>使用分布式缓存方案比如 Memcached 、Redis 来缓存 session，但是要求 Memcached 或 Redis 必须是集群</p>
+<p>把 session 放到 Redis 中存储，虽然架构上变得复杂，并且需要多访问一次 Redis ，但是这种方案带来的好处也是很大的：</p>
+<ul>
+<li>实现了 session 共享；</li>
+<li>可以水平扩展（增加 Redis 服务器）；</li>
+<li>服务器重启 session 不丢失（不过也要注意 session 在 Redis 中的刷新/失效机制）；</li>
+<li>不仅可以跨服务器 session 共享，甚至可以跨平台（例如网页端和 APP 端）</li>
+</ul>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828022751.png"  alt="" />
+      </p>
+
+        <h2 id="session持久化"   >
+          <a href="#session持久化" class="heading-link"><i class="fas fa-link"></i></a>session持久化</h2>
+      
+<p>将 session 存储到数据库中，保证 session 的持久化</p>
+<p><strong>优点：</strong> 服务器出现问题，session 不会丢失<br />
+<strong>缺点：</strong> 如果网站的访问量很大，把 session 存储到数据库中，会对数据库造成很大压力，还需要增加额外的开销维护数据库。</p>
+
+        <h2 id="只要关闭浏览器-session-真的就消失了"   >
+          <a href="#只要关闭浏览器-session-真的就消失了" class="heading-link"><i class="fas fa-link"></i></a>只要关闭浏览器 ，session 真的就消失了？</h2>
+      
+<p>不对。对 session 来说，除非程序通知服务器删除一个 session，否则服务器会一直保留，程序一般都是在用户做 log off 的时候发个指令去删除 session。</p>
+<p>然而浏览器从来不会主动在关闭之前通知服务器它将要关闭，因此服务器根本不会有机会知道浏览器已经关闭，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>之所以会有这种错觉，是大部分 session 机制都使用会话 cookie 来保存 session id，而关闭浏览器后这个 session id 就消失了，再次连接服务器时也就无法找到原来的 session。</span>如果服务器设置的 cookie 被保存在硬盘上，或者使用某种手段改写浏览器发出的 HTTP 请求头，把原来的 session id 发送给服务器，则再次打开浏览器仍然能够打开原来的 session。</p>
+<p>恰恰是<strong>由于关闭浏览器不会导致 session 被删除，迫使服务器为 session 设置了一个失效时间，当距离客户端上一次使用 session 的时间超过这个失效时间时，服务器就认为客户端已经停止了活动，才会把 session 删除以节省存储空间。</strong></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cookie%E3%80%81session%E3%80%81token%E3%80%81jwt/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cookie%E3%80%81session%E3%80%81token%E3%80%81jwt/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">网络通信</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/SSL-TLS/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">SSL-TLS</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/IO%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/"><span class="paginator-prev__text">IO模型详解</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#认证"><span class="toc-number">1.</span> <span class="toc-text">
+          认证</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#授权"><span class="toc-number">2.</span> <span class="toc-text">
+          授权</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#凭证"><span class="toc-number">3.</span> <span class="toc-text">
+          凭证</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cookie"><span class="toc-number">4.</span> <span class="toc-text">
+          Cookie</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#session"><span class="toc-number">5.</span> <span class="toc-text">
+          Session</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#cookie和session的区别"><span class="toc-number">6.</span> <span class="toc-text">
+          Cookie和Session的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#token令牌"><span class="toc-number">7.</span> <span class="toc-text">
+          Token(令牌)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#refresh-token"><span class="toc-number">8.</span> <span class="toc-text">
+          Refresh Token</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#token和session的区别"><span class="toc-number">9.</span> <span class="toc-text">
+          Token和Session的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#jwt"><span class="toc-number">10.</span> <span class="toc-text">
+          JWT</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是jwt"><span class="toc-number">10.1.</span> <span class="toc-text">
+          什么是JWT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成jwt"><span class="toc-number">10.2.</span> <span class="toc-text">
+          生成JWT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jwt的原理"><span class="toc-number">10.3.</span> <span class="toc-text">
+          JWT的原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jwt的数据结构"><span class="toc-number">10.4.</span> <span class="toc-text">
+          JWT的数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#header"><span class="toc-number">10.4.1.</span> <span class="toc-text">
+          Header</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#payload"><span class="toc-number">10.4.2.</span> <span class="toc-text">
+          Payload</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#signature"><span class="toc-number">10.4.3.</span> <span class="toc-text">
+          Signature</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#base64url"><span class="toc-number">10.4.4.</span> <span class="toc-text">
+          Base64URL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jwt认证流程"><span class="toc-number">10.5.</span> <span class="toc-text">
+          JWT认证流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jwt-的使用方式"><span class="toc-number">10.6.</span> <span class="toc-text">
+          JWT 的使用方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#方式一"><span class="toc-number">10.6.1.</span> <span class="toc-text">
+          方式一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#方式二"><span class="toc-number">10.6.2.</span> <span class="toc-text">
+          方式二</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#方式三"><span class="toc-number">10.6.3.</span> <span class="toc-text">
+          方式三</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#token-和-jwt-的对比"><span class="toc-number">11.</span> <span class="toc-text">
+          Token 和 JWT 的对比</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常见的前后端鉴权方式"><span class="toc-number">12.</span> <span class="toc-text">
+          常见的前后端鉴权方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#哈希加密算法"><span class="toc-number">13.</span> <span class="toc-text">
+          哈希加密算法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常见问题"><span class="toc-number">14.</span> <span class="toc-text">
+          常见问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-cookie-时需要考虑的问题"><span class="toc-number">14.1.</span> <span class="toc-text">
+          使用 cookie 时需要考虑的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-session-时需要考虑的问题"><span class="toc-number">14.2.</span> <span class="toc-text">
+          使用 session 时需要考虑的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-token-时需要考虑的问题"><span class="toc-number">14.3.</span> <span class="toc-text">
+          使用 token 时需要考虑的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-jwt-时需要考虑的问题"><span class="toc-number">14.4.</span> <span class="toc-text">
+          使用 JWT 时需要考虑的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用加密算法时需要考虑的问题"><span class="toc-number">14.5.</span> <span class="toc-text">
+          使用加密算法时需要考虑的问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#分布式架构下session共享方案"><span class="toc-number">15.</span> <span class="toc-text">
+          分布式架构下Session共享方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#session复制"><span class="toc-number">15.1.</span> <span class="toc-text">
+          session复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#粘性sessionip-绑定策略"><span class="toc-number">15.2.</span> <span class="toc-text">
+          粘性session&#x2F;IP 绑定策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#session共享常用"><span class="toc-number">15.3.</span> <span class="toc-text">
+          session共享(常用)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#session持久化"><span class="toc-number">15.4.</span> <span class="toc-text">
+          session持久化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#只要关闭浏览器-session-真的就消失了"><span class="toc-number">15.5.</span> <span class="toc-text">
+          只要关闭浏览器 ，session 真的就消失了？</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

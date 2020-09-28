@@ -1,0 +1,568 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章主要内容  Java 网络编程 Netty 简介 Netty 的核心组件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netty_异步和事件驱动">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/1_Netty_%E5%BC%82%E6%AD%A5%E5%92%8C%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章主要内容  Java 网络编程 Netty 简介 Netty 的核心组件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200903075526.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200903080017.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200903080954.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200903092849.png">
+<meta property="article:published_time" content="2020-08-01T01:04:01.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.609Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200903075526.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Netty_异步和事件驱动 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/1_Netty_%E5%BC%82%E6%AD%A5%E5%92%8C%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Netty_异步和事件驱动</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-08-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">39分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章主要内容</strong></p>
+<ul>
+<li>Java 网络编程</li>
+<li>Netty 简介</li>
+<li>Netty 的核心组件</li>
+</ul>
+<a id="more"></a>
+<p>假设你正在为一个重要的大型公司开发一款全新的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>任务关键型</span>的应用程序。在第一次会议 上，你得知该系统必须要能够扩展到支撑 150 000 名并发用户，并且不能有任何的性能损失，这 时所有的目光都投向了你。你会怎么说呢？</p>
+<p>如果你可以自信地说：“当然，没问题。”那么大家都会向你脱帽致敬。但是，我们大多数人 可能会采取一个更加谨慎的立场，例如：“听上去是可行的。”然后，一回到计算机旁，我们便开 始搜索“high performance Java networking”（高性能 Java 网络编程）。</p>
+<p>如果你现在搜索它，在第一页结果中，你将会看到下面的内容：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Netty: Home</span><br><span class="line"></span><br><span class="line">netty.io&#x2F;</span><br><span class="line"></span><br><span class="line">Netty 是一款异步的事件驱动的网络应用程序框架，支持快速地开发可维护的高性能的面向协议的服务器和客户端。</span><br></pre></td></tr></table></div></figure>
+<p>Netty 是<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>一款异步的事件驱动的网络应用程序框架</span>，支持快速地开发 <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>可维护的 高性能的 面向协议的</span> 服务器和客户端。</p>
+<p>如果你和大多数人一样，通过这样的方式发现了 Netty，那么你的下一步多半是：浏览该网 站，下载源代码，仔细阅读 Javadoc 和一些相关的博客，然后写点儿代码试试。如果你已经有了 扎实的网络编程经验，那么可能进展还不错，不然则可能是一头雾水。</p>
+<p>这是为什么呢？因为像我们例子中那样的高性能系统不仅要求超一流的编程技巧，还需要几 个复杂领域（<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>网络编程、多线程处理和并发</span>）的专业知识。Netty 优雅地处理了这些领域的知识， 使得即使是网络编程新手也能使用。但到目前为止，由于还缺乏一本全面的指南，使得对它的学 习过程比实际需要的艰涩得多——因此便有了这本书。</p>
+<p>我们编写这本书的主要目的是：<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>使得 Netty 能够尽可能多地被更加广泛的开发者采用。</span>这也包括那些拥有创新的内容或者服务，却没有时间或者兴趣成为网络编程专家的人。如果这适用于你， 我们相信你将会非常惊讶自己这么快便可以开始创建你的第一款基于 Netty 的应用程序了。当然在 另一个层面上讲，我们也需要支持那些正在寻找工具来创建他们自己的网络协议的高级从业人员。</p>
+<p>Netty 确实提供了极为丰富的网络编程工具集，我们将花大部分的时间来探究它的能力。但 是，Netty 终究是一个框架，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>它的架构方法和设计原则是：每个小点都和它的工作性内容一样重要，穷其精妙。</span>因此，我们也将探讨很多其他方面的内容，例如：</p>
+<ul>
+<li>关注点分离——业务和网络逻辑解耦；</li>
+<li>模块化和可复用性；</li>
+<li>可测试性作为首要的要求。</li>
+</ul>
+<p>在这第 1 章中，我们将从一些与高性能网络编程相关的背景知识开始铺陈，特别是它在 Java 开发工具包（JDK）中的实现。有了这些背景知识后，我们将介绍 Netty，它的核心概念以及构 建块。在本章结束之后，你就能够编写你的第一款基于 Netty 的客户端和服务器应用程序了。</p>
+
+        <h1 id="java网络编程"   >
+          <a href="#java网络编程" class="heading-link"><i class="fas fa-link"></i></a>Java网络编程</h1>
+      
+<p>早期的网络编程开发人员，需要 花费大量的时间去学习复杂的 C 语言套接字库，去处理它们 在不同的操作系统上出现的古怪问题。虽然最早的 Java（1995—2002）<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>引入了足够多的面向对象 facade（门面）来隐藏一些棘手的细节问题</span>，但是创建一个复杂的客户端/服务器协议仍然需要<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>大量的样板代码</span>（以及相当多的底层研究才能使它整个流畅地运行起来）。</p>
+<p>那些最早期的 Java API（ <span class="exturl"><a class="exturl__link"   href="http://java.net"  target="_blank" rel="noopener">java.net</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> ）只支持由本地系统套接字库提供的所谓的阻塞函数。 代码清单 1-1 展示了一个使用了这些函数调用的服务器代码的普通示例。</p>
+<p><strong>代码清单 1-1 阻塞 I/O 示例</strong></p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.pattern;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.net.ServerSocket;</span><br><span class="line"><span class="keyword">import</span> java.net.Socket;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> portNumber = <span class="number">8080</span>;</span><br><span class="line">      <span class="comment">// 创建一个新的 ServerSocket， 用以监听指定端口上的连接请求</span></span><br><span class="line">        ServerSocket serverSocket = <span class="keyword">new</span> ServerSocket(portNumber);</span><br><span class="line">      <span class="comment">// 对 accept()方法的调用将被阻塞，直到一个连接建立</span></span><br><span class="line">        Socket clientSocket = serverSocket.accept();</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 这些流对象都派生于该套接字的流对象</span></span><br><span class="line">        BufferedReader in = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(clientSocket.getInputStream()));</span><br><span class="line">        PrintWriter out = <span class="keyword">new</span> PrintWriter(clientSocket.getOutputStream(), <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        String request, response;</span><br><span class="line">      <span class="comment">// 3 处理 循环 开始</span></span><br><span class="line">        <span class="keyword">while</span> ((request = in.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">         <span class="comment">// 如果客户端发送了“Done”，则退出处理循环 </span></span><br><span class="line">            <span class="keyword">if</span> (<span class="string">"Done"</span>.equals(request)) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">          <span class="comment">// 4 请求被传递给服 务器的处理方法</span></span><br><span class="line">            response = processRequest(request);</span><br><span class="line">          <span class="comment">// 服务器的响应被发送给了客户端</span></span><br><span class="line">            out.println(response);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        clientSocket.close();</span><br><span class="line">        serverSocket.close();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">processRequest</span><span class="params">(String request)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"recv msg:"</span> + request);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"ok, recv msg: "</span> + request;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 运行结果</span></span><br><span class="line">  recv msg:hello</span><br><span class="line">  recv msg:world</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> port = <span class="number">8080</span>;</span><br><span class="line">        String host = <span class="string">"127.0.0.1"</span>;</span><br><span class="line"></span><br><span class="line">        Socket socket = <span class="keyword">new</span> Socket(host, port);</span><br><span class="line"></span><br><span class="line">        BufferedReader in = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(socket.getInputStream()));</span><br><span class="line">        BufferedWriter out = <span class="keyword">new</span> BufferedWriter(<span class="keyword">new</span> OutputStreamWriter(socket.getOutputStream()));</span><br><span class="line"></span><br><span class="line">        out.write(<span class="string">"hello\nworld\nDone"</span>);</span><br><span class="line">        out.flush();</span><br><span class="line">        String response;</span><br><span class="line">        <span class="keyword">while</span> ((response = in.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">            System.out.println(response);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        socket.close();</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">// 运行结果</span></span><br><span class="line">  ok, recv msg: hello</span><br><span class="line">	ok, recv msg: world</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>代码清单 1-1 实现了 Socket API 的基本模式之一。以下是最重要的几点。</p>
+<ul>
+<li>ServerSocket 上的 accept() 方法将会一直阻塞到一个连接建立,随后返回一个 新的 Socket 用于客户端和服务器之间的通信。该 ServerSocket 将继续监听传入的 连接（如果放在while循环里的话）。</li>
+<li>BufferedReader 和 PrintWriter 都衍生自 Socket 的输入输出流。前者从一个 字符输入流中读取文本，后者<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>打印对象的格式化的表示到文本输出流</span>。</li>
+<li>readLine()方法将会阻塞，直到在<code>//3</code>处一个由换行符或者回车符结尾的字 符串被 读取。</li>
+<li><code>//4</code>客户端的请求已经被处理。</li>
+</ul>
+<p>这段代码片段将只能同时处理一个连接，要管理多个并发客户端，需要为每个新的客户端 Socket 创建一个新的 Thread ，如图 1-1 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200903075526.png"  alt="" />
+      </p>
+<p>让我们考虑一下这种方案的影响。第一，在任何 时候都可能有大量的线程处于休眠状态，只是等待输 入或者输出数据就绪，这可能算是一种<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>资源浪费</span>。第 二，需要为每个线程的调用栈都分配内存，其默认值 大小区间为 64 KB 到 1 MB ，具体取决于操作系统。第三，即使 Java 虚拟机（ JVM ）在物理上可以支持非常 大数量的线程，但是远在到达该极限之前，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>上下文切换所带来的开销</span>就会带来麻烦，例如，在达 到 10 000 个连接的时候。</p>
+<p>虽然这种并发方案对于支撑中小数量的客户端来说还算可以接受，但是为了支撑 100 000 或 者更多的并发连接所需要的资源使得它很不理想。幸运的是，还有一种方案。</p>
+
+        <h2 id="java-nio"   >
+          <a href="#java-nio" class="heading-link"><i class="fas fa-link"></i></a>Java NIO</h2>
+      
+<p>除了代码清单 1-1 中代码底层的阻塞系统调用之外，本地套接字库很早就提供了非阻塞调用， 其为网络资源的利用率提供了相当多的控制：</p>
+<ul>
+<li>
+<p>可以使用 setsockopt() 方法配置 套接字 ，以便读 / 写 也就是说，如果是一个阻塞调用应该已经被阻塞了</p>
+</li>
+<li>
+<p>可以使用操作系统的事件通知 API 注册一组非阻塞套接字，以确定它们中是否有任何的 套接字已经有数据可供读写。</p>
+<blockquote>
+<p>也称为 I/O 多路复用，该接口从最初的 select()和 poll()调用到更加高性能的实现，已经演 多年。</p>
+</blockquote>
+</li>
+</ul>
+<p>Java 对于非阻塞 I/O 的支持是在 2002 年引入的，位于 JDK 1.4 的 java.nio 包中。</p>
+<blockquote>
+<p><strong>新的还是非阻塞的</strong></p>
+<p>NIO 最开始是新的输入/输出（New Input/Output）的英文缩写，但是，该 Java API 已经出现足够长的时间 了，不再是“新的”了，因此，如今大多数的用户认为 NIO 代表非阻塞 I/O（Non-blocking I/O），而阻塞 I/O（blocking I/O）是旧的输入/输出（old input/output，OIO）。你也可能遇到它被称为普通 I/O（plain I/O）的时候。</p>
+</blockquote>
+
+        <h2 id="选择器"   >
+          <a href="#选择器" class="heading-link"><i class="fas fa-link"></i></a>选择器</h2>
+      
+<p>图 1-2 展示了一个非阻塞设计，其实际上消除了 上一节中所描述的那些弊端。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200903080017.png"  alt="" />
+      </p>
+<p>class  java.nio.channels.Selector 是 Java 的非阻塞 I/O 实现的关键。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>它使用了事件通知 API 以确定在一组非阻塞套接字中有哪些已经就绪能够进 行 I/O 相关的操作。因为可以在任何的时间检查任意 的读操作或者写操作的完成状态，所以如图 1-2 所示， 一个单一的线程便可以处理多个并发的连接。</span></p>
+<p>总体来看，与阻塞 I/O 模型相比，这种模型提供 了更好的资源管理：</p>
+<ul>
+<li>使用较少的线程便可以处理许多连接，因此也<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>减少了内存浪费和上下文切换所带来开销</span>；</li>
+<li>当没有 I/O 操作需要处理的时候，线程也可以被用于其他任务。</li>
+</ul>
+<p>尽管已经有许多直接使用 Java NIO API 的应用程序被构建了，但是要做到如此正确和安全并不容易。特别是，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在高负载下可靠和高效地处理和调度 I/O 操作是一项繁琐而且容易出错的任务， 最好留给高性能的网络编程专家——Netty。</span></p>
+
+        <h1 id="netty简介"   >
+          <a href="#netty简介" class="heading-link"><i class="fas fa-link"></i></a>Netty简介</h1>
+      
+<p>不久以前，我们在本章一开始所呈现的场景——支持成千上万的并发客户端——还被认定为 是不可能的。然而今天，作为系统用户，我们将这种能力视为理所当然；同时作为开发人员，我 们期望将水平线提得更高(支撑更多的并发的客户端)。因为我们知道，总会有<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>更高的 吞吐量和可扩展性的要求——在更低 的成本的基础上进行交付</span>。</p>
+<p>不要低估了这最后一点的重要性。我们已经从漫长的痛苦经历中学到：直接使用底层的API 暴露了复杂性，并且引入了对往往供不应求的技能的关键性依赖(这里指熟悉这些底层的 API 的人员少)。这也就是，面向对象的基本概念：用较简单的抽象隐藏底层实现的复杂性。</p>
+<p>这一原则也催生了大量框架的开发，它们 为常见的编程任务封装了解决方案，其中的许多都和分布式系统的开发密切相关。我们可以确定地说：所有专业的Java开发人员都至少对它们熟知 一二。对于我们许多人来说，它们已经变得不可或缺，因为它们既能满足我们的工作需求，又 能满足我们的时间表。</p>
+<blockquote>
+<p>Spring 框架大概是最出名的，并且实际上是一个完整的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>应用程序框架</span>的生态系统，处理了对象的创建、 批量处理、数据库编程等。</p>
+</blockquote>
+<p>在网络编程领域，Netty是Java的卓越框架。它驾驭了Java高级API的能力，并将其隐藏在一个易于使用的API之后。Netty使你可以专注于自己真正感兴趣的——你的应用程序的独一无二的价值（业务和网络处理逻辑解耦）。</p>
+<p>在我们开始首次深入地了解 Netty 之前，请仔细审视表 1-1 中所总结的关键特性。有些是技 术性的，而其他的更多的则是关于架构或设计哲学的。在本书的学习过程中，我们将不止一次地 重新审视它们。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200903080954.png"  alt="" />
+      </p>
+
+        <h2 id="谁在使用netty"   >
+          <a href="#谁在使用netty" class="heading-link"><i class="fas fa-link"></i></a>谁在使用Netty</h2>
+      
+<p>Netty拥有一个充满活力并且不断壮大的用户社区，其中不乏大型公司，如Apple、Twitter、 Facebook、Google、Square和Instagram，还有流行的开源项目，如Infinispan、HornetQ、Vert.x、 Apache Cassandra和Elasticsearch，它们所有的核心代码都利用了Netty强大的网络抽象。在初创企业中，Firebase和Urban Airship也在使用Netty，前者用来做<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>HTTP长连接</span>，而后者用来支持各种各样的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>推送通知</span>。</p>
+<p>每当你使用Twitter，你便是在使用Finagle，它们基于Netty的系统间通信框架。Facebook在 Nifty中使用了Netty，它们的Apache Thrift服务。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>可伸缩性和性能</span>对这两家公司来说至关重要，他 们也经常为Netty贡献代码。</p>
+<p>反过来，Netty 也已从这些项目中受益，通过实现 FTP、SMTP、HTTP 和 WebSocket 以及其他的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>基于二进制和基于文本的协议</span>，Netty 扩展了它的应用范围及灵活性。</p>
+
+        <h2 id="异步和事件驱动"   >
+          <a href="#异步和事件驱动" class="heading-link"><i class="fas fa-link"></i></a>异步和事件驱动</h2>
+      
+<p>因为我们要大量地使用“异步”这个词，所以现在是一个澄清上下文的好时机。异步（也就 是非同步）事件肯定大家都熟悉。考虑一下电子邮件：你可能会也可能不会收到你已经发出去的 电子邮件对应的回复，或者你也可能会在正在发送一封电子邮件的时候收到一个意外的消息。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>异步事件也可以具有某种有序的关系。通常，你只有在已经问了一个问题之后才会得到一个和它对应的答案，而在你等待它的同时你也可以做点别的事情。</span></p>
+<p>在日常的生活中，异步自然而然地就发生了，所以你可能没有对它考虑过多少。但是让一个 计算机程序以相同的方式工作就会产生一些非常特殊的问题。本质上，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>一个既是异步的又是事件驱动的系统会表现出一种特殊的、对我们来说极具价值的行为：它可以以任意的顺序响应在任意的时间点产生的事件。</span></p>
+<p>这种能力对于实现最高级别的可伸缩性至关重要， 定义为：“<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>一种系统、网络或者进程在需要处理的工作不断增长时，可以通过某种可行的方式(性能优化)或者扩大它的处理能力(扩容)来适应这种增长的能力。</span>”</p>
+<p>异步和可伸缩性之间的联系又是什么呢？</p>
+<ul>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>非阻塞网络调用使得我们可以不必等待一个操作的完成。完全异步的 I/O 正是基于这个特性构建的，并且更进一步：异步方法会立即返回，并且在它完成时，会直接或者在稍后的某个时间点通知用户。</span></li>
+<li>选择器使得我们能够通过较少的线程便可监视许多连接上的事件。</li>
+</ul>
+<blockquote>
+<p>架构中的可扩展和可伸缩</p>
+<p>可伸缩性是指系统通过增加或减少硬件水平从而提升或降低系统性能的难易程度。可伸缩性分为scale up和scale out。</p>
+<p>scale up是指提高单台服务器的硬件水平来提高系统的整体处理能力，可以调整的有CPU，存储，内存等；</p>
+<blockquote>
+<p>netty实现可伸缩就是指scale up，软件层面</p>
+</blockquote>
+<p>scale out是指通过增加系统的处理节点的方式来提高系统的整体处理能力。</p>
+<p>可扩展性是软件系统应对需求增加或需求变化的能力。</p>
+</blockquote>
+<p>将这些元素结合在一起，与使用阻塞 I/O 来处理大量事件相比，使用非阻塞 I/O 来处理更快 速、更经济。从网络编程的角度来看，这是构建我们理想系统的关键，而且你会看到，这也是 Netty 的设计底蕴的关键。</p>
+<p>在 1.3 节中，我们将首先看一看 Netty 的核心组件。现在，只需要将它们看作是域对象，而 不是具体的 Java 类。随着时间的推移，我们将看到它们是如何协作，来为在网络上发生的事件 提供通知，并使得它们可以被处理的。</p>
+<blockquote>
+<p>域对象：也是一个属性，不过这个属性是一个对象，不是基本数据类型。</p>
+</blockquote>
+
+        <h1 id="netty的核心组件"   >
+          <a href="#netty的核心组件" class="heading-link"><i class="fas fa-link"></i></a>Netty的核心组件</h1>
+      
+<p>在本节中我将要讨论 Netty 的主要构件块：</p>
+<ul>
+<li>Channel</li>
+<li>回调</li>
+<li>Future</li>
+<li>事件和ChannelHandler</li>
+</ul>
+<p>这些构建块代表了不同类型的构造：资源、逻辑以及通知。你的应用程序将使用它们来访问 网络以及流经网络的数据。</p>
+<blockquote>
+<p>构件：任何可以被Maven的坐标系统唯一标识的对象都是一个Maven构件。大多数情况下，构件是构建Maven项目所生成的文件，如Jar。但是，只包含其他POM(该文件并不产生构件)使用的定义的POM文件也是Maven构件。</p>
+</blockquote>
+<p>对于每个组件来说，我们都将提供一个基本的定义，并且在适当的情况下，还会提供一个简 单的示例代码来说明它的用法。</p>
+
+        <h2 id="channel"   >
+          <a href="#channel" class="heading-link"><i class="fas fa-link"></i></a>Channel</h2>
+      
+<p>Channel 是 Java NIO 的一个基本构造。它代表一个到实体（如一个硬件设备、一个文件、一个网络套接字或者一个能够执行一个或者多个不同的I/O操作的程序组件）的开放连接，可以执行读操作和写操作 。</p>
+<p>目前，可以把 Channel 看作是传入（入站）或者传出（出站）数据的载体。因此，它可以被打开或者被关闭，连接或者断开连接。</p>
+
+        <h2 id="回调"   >
+          <a href="#回调" class="heading-link"><i class="fas fa-link"></i></a>回调</h2>
+      
+<p>一个回调其实就是一个方法，一个指向已经被提供给另外一个方法的方法引用。这使得后者(指接受回调的方法)可以在适当的时候调用前者。回调在广泛的编程场景中都有应用，而且也是在操作完成后通知相关方最常见的方式之一。</p>
+<p>Netty 在内部使用了回调来处理事件；当一个回调被触发时，相关的事件可以被一个 interface ChannelHandler的实现处理。代码清单 1-2 展示了一个例子：当一个新的连接已经被建立时， ChannelHandler 的 channelActive() 回调方法将会被调用，并将打印出一条信息。</p>
+<p><strong>代码清单 1-2 被回调触发的 ChannelHandler</strong></p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConnectHandler</span> <span class="keyword">extends</span> <span class="title">ChannelInboundHandlerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当一个新的连接已经被建立时， channelActive(ChannelHandler Context)将会被调用</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">channelActive</span><span class="params">(ChannelHandlerContext ctx)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Client "</span> + ctx.channel().remoteAddress() + <span class="string">" connected"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="future"   >
+          <a href="#future" class="heading-link"><i class="fas fa-link"></i></a>Future</h2>
+      
+<p>Future 提供了另一种在操作完成时通知应用程序的方式。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这个对象可以看作是一个异步操作的结果的占位符</span>；它将在未来的某个时刻完成，并<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>提供对其结果的访问</span>。</p>
+<blockquote>
+<p>上述要表达的意思和下面操作一样，当Future中填入结果时即可对该结果进行访问。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.supplyAsync(() -&gt; <span class="string">"hello"</span>).thenAccept(System.out::println);</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+<p>JDK 预置了 interface java.util.concurrent.Future ，但是<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>其所提供的实现，只允许手动检查对应的操作是否已经完成，或者一直阻塞直到它完成。这是非常繁琐的</span>，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>所以 Netty 提供了它自己的实现—— ChannelFuture ，用于在执行异步操作的时候使用。</span></p>
+<p>ChannelFuture 提供了几种额外的方法， 这些方法使得我们能够注册一个或者多个 ChannelFutureListener 实例。监听器的回调方法 operationComplete() ，将会在对应的操作完成时被调用 。监听器可以判断该操作是成功地完成了还是出错了。如果是后者，我 们可以检索产生的 Throwable 。简而言之 ，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>由 ChannelFutureListener 提供的通知机制消除 了手动检查对应的操作是否完成的必要。</span></p>
+<blockquote>
+<p>如果在 ChannelFutureListener 添加到 ChannelFuture 的时候，ChannelFuture 已经完成， 那么该 ChannelFutureListener 将会被直接地通知。</p>
+</blockquote>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>每个 Netty 的出站 I/O 操作都将返回一个 ChannelFuture ；也就是说，它们都不会阻塞。</span> 正如我们前面所提到过的一样，Netty 完全是异步和事件驱动的。</p>
+<p>代码清单 1-3 展示了一个 ChannelFuture 作为一个 I/O 操作的一部分返回的例子。这里， connect() 方法将会直接返回，而不会阻塞，该调用将会在后台完成。这究竟什么时候会发生 则取决于若干的因素，但这个关注点已经从代码中抽象出来了。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>因为线程不用阻塞以等待对应的 操作完成，所以它可以同时做其他的工作，从而更加有效地利用资源。</span></p>
+<p><strong>代码清单 1-3 异步地建立连接</strong></p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Channel channel = ...;</span><br><span class="line"><span class="comment">// Does not block, 异步地连接到远程节点</span></span><br><span class="line">ChannelFuture future = channel.connect(<span class="keyword">new</span> InetSocketAddress(<span class="string">"127.0.0.1"</span>, <span class="number">25</span>));</span><br></pre></td></tr></table></div></figure>
+<p>代码清单 1-4 显示了如何利用 ChannelFutureListener 。 首先， 要连接到远程节点 上。 然后， 要<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>注册一个新的 ChannelFutureListener 到对 connect() 方法的调用所返 回的 ChannelFuture 上</span>。 当该监听器被通知连接已经建立的时候， 要<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>检查对应的状态</span> 。 如果该操作是成功的， 那么将数据写到该 Channel 。 否则， 要从 ChannelFuture 中检索 对应的 Throwable 。</p>
+<p><strong>代码清单 1-4 回调实战</strong></p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Channel channel = ...;</span><br><span class="line"><span class="comment">// Does not block, 异步地连接到远程节点</span></span><br><span class="line">ChannelFuture future = channel.connect(<span class="keyword">new</span> InetSocketAddress(<span class="string">"127.0.0.1"</span>, <span class="number">25</span>));</span><br><span class="line"><span class="comment">// 注册一个 ChannelFutureListener， 以便在操作完成时获得通知</span></span><br><span class="line">future.addListener(<span class="keyword">new</span> ChannelFutureListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operationComplete</span><span class="params">(ChannelFuture channelFuture)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 检查操作的状态</span></span><br><span class="line">        <span class="keyword">if</span> (channelFuture.isSuccess()) &#123;</span><br><span class="line">            <span class="comment">// 如果操作是成功的，则创建 一个 ByteBuf 以持有数据</span></span><br><span class="line">            ByteBuf buffer = Unpooled.copiedBuffer(<span class="string">"hello"</span>, Charset.defaultCharset());</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 将数据异步地发送到远程节点。 返回一个 ChannelFuture</span></span><br><span class="line">            ChannelFuture wf = future.channel().writeAndFlush(buffer);</span><br><span class="line">            ...</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果发生错误，则访问描述原因 的 Throwable</span></span><br><span class="line">            Throwable cause = future.cause();</span><br><span class="line">            cause.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></div></figure>
+<p>需要注意的是，对错误的处理完全取决于你、目标，当然也包括目前任何对于特定类型的错误 加以的限制。例如，如果连接失败，你可以尝试重新连接或者建立一个到另一个远程节点的连接。</p>
+<p>如果你把 ChannelFutureListener 看作是回调的一个更加精细的版本，那么你是对的。 事实上，回调和 Future 是相互补充的机制；它们相互结合，构成了 Netty 本身的关键构件块之一。</p>
+
+        <h2 id="事件和channelhandler"   >
+          <a href="#事件和channelhandler" class="heading-link"><i class="fas fa-link"></i></a>事件和ChannelHandler</h2>
+      
+<p>Netty 使用不同的事件来通知我们状态的改变或者是操作的状态。这使得我们能够基于已经发生的事件来触发适当的动作。这些动作可能是：</p>
+<ul>
+<li>记录日志</li>
+<li>数据转换</li>
+<li>流控制</li>
+<li>应用程序逻辑</li>
+</ul>
+<p>Netty 是一个网络编程框架，所以事件是<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>按照它们与入站或出站数据流的相关性进行分类的</span>。</p>
+<p><strong>可能由入站数据或者相关的状态更改而触发的事件包括</strong>：</p>
+<ul>
+<li>连接已被激活或者连接失活；</li>
+<li>数据读取；</li>
+<li>用户事件；</li>
+<li>错误事件。</li>
+</ul>
+<p><strong>出站事件是未来将会触发的某个动作的操作结果，这些动作包括</strong>：</p>
+<ul>
+<li>打开或者关闭到远程节点的连接；</li>
+<li>将数据写到或者冲刷到套接字。</li>
+</ul>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>每个事件都可以被分发给 ChannelHandler 类中的某个用户实现的方法。这是一个很好的将事件驱动范式直接转换为应用程序构件块的例子。</span>图 1-3 展示了一个事件是如何被一个这样的 <strong>ChannelHandler 链</strong>处理的。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200903092849.png"  alt="" />
+      </p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Netty的ChannelHandler 为处理器(应用程序processor方法)提供了基本的抽象</span>，如图 1-3 所示的那些。 我们会 在适当的时候对 ChannelHandler 进行更多的说明， 但是目前你可以认为每个 ChannelHandler 的实例都类似于一种<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>为了响应特定事件而被执行的回调</span>。</p>
+<p>Netty 提供了大量预定义的可以开箱即用的 ChannelHandler 实现，包括用于各种协议 （如 HTTP 和 SSL/TLS）的 ChannelHandler 。在内部， <span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>ChannelHandler 自己也使用了事件 和 Future ，使得它们也成为了你的应用程序将使用的相同抽象的消费者。</span></p>
+
+        <h2 id="把它们放在一起"   >
+          <a href="#把它们放在一起" class="heading-link"><i class="fas fa-link"></i></a>把它们放在一起</h2>
+      
+<p>在本章中，我们介绍了 Netty 实现高性能网络编程的方式，以及它的实现中的一些主要的组 件。让我们大体回顾一下我们讨论过的内容吧。</p>
+
+        <h3 id="future-回调和-channelhandler"   >
+          <a href="#future-回调和-channelhandler" class="heading-link"><i class="fas fa-link"></i></a>Future、回调和 ChannelHandler</h3>
+      
+<p>Netty的异步编程模型是建立在 Future 和回调的概念之上的，而将事件派发到 ChannelHandler 的方法则发生在更深的层次上。结合在一起，这些元素就提供了一个处理环境，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>使你的应用程序逻辑可以独立于任何网络操作相关的顾虑而独立地演变</span>。这也是 Netty 的设计方式的一个关键目标。</p>
+<p>拦截操作以及高速地转换入站数据和出站数据，都只需要你提供回调或者利用操作所返回的 Future 。这使得<strong>链接操作</strong>变得既简单又高效，并且促进了可重用的通用代码的编写。</p>
+
+        <h3 id="选择器-事件和-eventloop"   >
+          <a href="#选择器-事件和-eventloop" class="heading-link"><i class="fas fa-link"></i></a>选择器、事件和 EventLoop</h3>
+      
+<p>Netty 通过触发事件将 Selector 从应用程序中抽象出来，消除了所有本来将需要手动编写 的派发代码。在内部，将会为每个 Channel 分配一个 EventLoop ，用以处理所有事件，包括：</p>
+<ul>
+<li>注册感兴趣的事件；</li>
+<li>将事件派发给 ChannelHandler ；</li>
+<li>安排进一步的动作。</li>
+</ul>
+<p>EventLoop 本身只由一个线程驱动，其处理了一个 Channel 的所有 I/O 事件，并且在该 EventLoop 的整个生命周期内都不会改变。 这个简单而强大的设计消除了你可能有的在 ChannelHandler 实现 中需要进行同步的任何顾虑，因此，你可以专注于提供正确的逻辑，用 来在有感兴趣的数据要处理的时候执行。如同我们在详细探讨 Netty 的线程模型时将会看到的， 该 API 是简单而紧凑的。</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>在这一章中，我们介绍了 Netty 框架的背景知识，包括 Java 网络编程 API 的演变过程，阻塞 和非阻塞网络操作之间的区别，以及异步 I/O 在高容量、高性能的网络编程中的优势。</p>
+<p>然后，我们概述了 Netty 的特性、设计和优点，其中包括 Netty 异步模型的底层机制，包括回调、Future 以及它们的结合使用。。我们还谈到了事件是如何产生的以及如何拦截和处理它们。</p>
+<p>在本书接下来的部分，我们将更加深入地探讨如何利用这些丰富的工具集来满足自己的应用 程序的特定需求。</p>
+<p>在下一章中，我们将要深入地探讨 Netty 的 API 以及编程模型的基础知识，而你则将编写你 的第一款客户端和服务器应用程序。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/1_Netty_%E5%BC%82%E6%AD%A5%E5%92%8C%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/1_Netty_%E5%BC%82%E6%AD%A5%E5%92%8C%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/netty/">netty</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/2_%E7%AC%AC%E4%B8%80%E6%AC%BENetty%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">第一款Netty应用程序</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E7%94%9F%E6%B4%BB/%E7%95%AA%E8%8C%84%E5%B7%A5%E4%BD%9C%E6%B3%95/"><span class="paginator-prev__text">番茄工作法</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#java网络编程"><span class="toc-number">1.</span> <span class="toc-text">
+          Java网络编程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#java-nio"><span class="toc-number">1.1.</span> <span class="toc-text">
+          Java NIO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#选择器"><span class="toc-number">1.2.</span> <span class="toc-text">
+          选择器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#netty简介"><span class="toc-number">2.</span> <span class="toc-text">
+          Netty简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#谁在使用netty"><span class="toc-number">2.1.</span> <span class="toc-text">
+          谁在使用Netty</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异步和事件驱动"><span class="toc-number">2.2.</span> <span class="toc-text">
+          异步和事件驱动</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#netty的核心组件"><span class="toc-number">3.</span> <span class="toc-text">
+          Netty的核心组件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#channel"><span class="toc-number">3.1.</span> <span class="toc-text">
+          Channel</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#回调"><span class="toc-number">3.2.</span> <span class="toc-text">
+          回调</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#future"><span class="toc-number">3.3.</span> <span class="toc-text">
+          Future</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#事件和channelhandler"><span class="toc-number">3.4.</span> <span class="toc-text">
+          事件和ChannelHandler</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#把它们放在一起"><span class="toc-number">3.5.</span> <span class="toc-text">
+          把它们放在一起</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#future-回调和-channelhandler"><span class="toc-number">3.5.1.</span> <span class="toc-text">
+          Future、回调和 ChannelHandler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#选择器-事件和-eventloop"><span class="toc-number">3.5.2.</span> <span class="toc-text">
+          选择器、事件和 EventLoop</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

@@ -1,0 +1,614 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="在内嵌汇编中，可以将C语言表达式指定为汇编指令的操作数，而且不用去管如何将C语言表达式的值读入哪个寄存器，以及如何将计算结果写回C 变量，你只要告诉程序中C语言表达式与汇编指令操作数之间的对应关系即可， GCC会自动插入代码完成必要的操作。 12345678910static inline char * strcpy(char * dest, const char *src)&amp;#123;	char">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内嵌汇编">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/c/%E5%86%85%E5%B5%8C%E6%B1%87%E7%BC%96/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="在内嵌汇编中，可以将C语言表达式指定为汇编指令的操作数，而且不用去管如何将C语言表达式的值读入哪个寄存器，以及如何将计算结果写回C 变量，你只要告诉程序中C语言表达式与汇编指令操作数之间的对应关系即可， GCC会自动插入代码完成必要的操作。 12345678910static inline char * strcpy(char * dest, const char *src)&amp;#123;	char">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-16T16:22:28.425Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.427Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="c">
+<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>内嵌汇编 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/c/%E5%86%85%E5%B5%8C%E6%B1%87%E7%BC%96/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">内嵌汇编</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">16分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>在内嵌汇编中，可以将C语言表达式指定为汇编指令的操作数，而且不用去管如何将C语言表达式的值读入哪个寄存器，以及如何将计算结果写回C 变量，你只要告诉程序中C语言表达式与汇编指令操作数之间的对应关系即可， GCC会自动插入代码完成必要的操作。</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">char</span> * <span class="title">strcpy</span><span class="params">(<span class="keyword">char</span> * dest, <span class="keyword">const</span> <span class="keyword">char</span> *src)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">char</span> *xdest = dest;</span><br><span class="line">	__asm__ __volatile__</span><br><span class="line">	(<span class="string">"1: \tmoeb %1@+, %0@+\n\t"</span>   <span class="string">"jne 1b"</span>  <span class="comment">//这个冒号不是分隔符</span></span><br><span class="line">	: <span class="string">"=a"</span> (dest) , <span class="string">"=a"</span> (stc)</span><br><span class="line">	: <span class="string">"0"</span>(dest), <span class="string">"1"</span> (src)</span><br><span class="line">	 : <span class="string">"memory"</span>);</span><br><span class="line">	<span class="keyword">return</span> xdest;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<a id="more"></a>
+
+        <h1 id="简单的内嵌汇编"   >
+          <a href="#简单的内嵌汇编" class="heading-link"><i class="fas fa-link"></i></a>简单的内嵌汇编</h1>
+      
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__asm__ __volatile__(<span class="string">"hlt"</span>);</span><br></pre></td></tr></table></div></figure>
+<p>&quot;<strong>asm</strong>&quot;表示后面的代码为内嵌汇编，“asm&quot;是”<code>__asm__</code>&quot;的别名。<strong>&quot;<code>__volatile__</code>&quot;表示编译器不要优化代码，后面的指令保留原样</strong>，&quot;volatile&quot;是它的别名。括号里面是汇编指令。</p>
+
+        <h1 id="内嵌汇编举例"   >
+          <a href="#内嵌汇编举例" class="heading-link"><i class="fas fa-link"></i></a>内嵌汇编举例</h1>
+      
+<p>使用内嵌汇编，要先编写汇编指令模板，然后将C语言表达式与指令的操作数相关联，并告诉GCC对这些操作有哪些限制条件。例如在下面的汇编语句：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__asm__ __violate__ (<span class="string">"movl %1,%0"</span> : <span class="string">"=r"</span> (result) : <span class="string">"m"</span> (input));</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>
+<p>&quot;movl %1,%0&quot;是指令模板；</p>
+</li>
+<li>
+<p>“%0&quot;和”%1&quot;代表指令的操作数，称为占位符，内嵌汇编靠它们将C 语言表达式与指令操作数相对应。指令模板后面用小括号括起来的是C语言表达式，本例中只有两个：“result&quot;和&quot;input”，他们按照出现的顺序分别与指令操作数&quot;%0&quot;，&quot;%1&quot;对应。注意对应顺序：第一个C 表达式对应&quot;%0&quot;；第二个表达式对应&quot;%1&quot;，依次类推，操作数至多有10 个，分别用&quot;%0&quot;,&quot;%1&quot;…&quot;%9&quot;表示。</p>
+</li>
+<li>
+<p>在每个操作数前面有一个用引号括起来的字符串，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>字符串的内容是对该操作数的限制或者说要求</span>。 “result&quot;前面的限制字符串是”=r&quot;，其中&quot;=“表示&quot;result&quot;是输出操作数，“r” 表示需要将&quot;result&quot;与某个通用寄存器相关联，先将操作数的值读入寄存器，然后在指令中使用相应寄存器，而不是&quot;result&quot;本身，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>当然指令执行完后需要将寄存器中的值存入变量&quot;result”</span>，从表面上看好像是指令直接对&quot;result&quot;进行操作，实际上GCC做了隐式处理，这样我们可以少写一些指令。&quot;input&quot;前面的&quot;r&quot;表示该表达式需要先放入某个寄存器，然后在指令中使用该寄存器参加运算。</p>
+</li>
+<li>
+<p>C表达式或者变量与寄存器的关系由GCC自动处理，我们只需使用限制字符串指导GCC如何处理即可。限制字符必须与指令对操作数的要求相匹配，否则产生的 汇编代码将会有错，读者可以将上例中的两个&quot;r&quot;，都改为&quot;m&quot;(m表示操作数放在内存，而不是寄存器中)，编译后得到的结果是：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">movl input, result</span><br></pre></td></tr></table></div></figure>
+<p>很明显这是一条非法指令，因此限制字符串必须与指令对操作数的要求匹配。<strong>例如指令movl允许寄存器到寄存器，立即数到寄存器等，但是不允许内存到内存的操作，因此两个操作数不能同时使用&quot;m&quot;作为限定字符。</strong></p>
+</li>
+</ul>
+
+        <h1 id="内嵌汇编语法"   >
+          <a href="#内嵌汇编语法" class="heading-link"><i class="fas fa-link"></i></a>内嵌汇编语法</h1>
+      
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__asm__(汇编语句模板: 输出部分: 输入部分: 破坏描述部分)</span><br></pre></td></tr></table></div></figure>
+<p>共四个部分：汇编语句模板，输出部分，输入部分，破坏描述部分</p>
+<p>各部分使用&quot;:“格开，汇编语句模板必不可少，其他三部分可选，如果使用了后面的部分，而前面部分为空，也需要用”:&quot;格开，相应部分内容为空。例如：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__asm__ __volatile__(<span class="string">"cli"</span>: : :<span class="string">"memory"</span>)</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="汇编语句模板"   >
+          <a href="#汇编语句模板" class="heading-link"><i class="fas fa-link"></i></a>汇编语句模板</h2>
+      
+<ul>
+<li>
+<p>汇编语句模板由汇编语句序列组成，语句之间使用&quot;;&quot;、&quot;\n&quot;或&quot;\n\t&quot;分开。</p>
+</li>
+<li>
+<p>指令中的操作数可以使用占位符引用C语言变量，操作数占位符最多10个，名称如下：%0，%1，…，%9。</p>
+</li>
+<li>
+<p>指令中使用占位符表示的操作数，总被视为long型（4个字节），但对其施加的操作根据指令可以是字或者字节，当把操作数当作字或者字节使用时，默认为低字或者低字节。对字节操作可以显式的指明是低字节还是次字节。方法是在%和序号之间插入一个字母，&quot;b&quot;代表低字节，&quot;h&quot;代表高字节，例如：%h1。</p>
+</li>
+</ul>
+
+        <h2 id="输出部分"   >
+          <a href="#输出部分" class="heading-link"><i class="fas fa-link"></i></a>输出部分</h2>
+      
+<p>输出部分描述输出操作数，不同的操作数描述符之间用逗号格开，每个操作数描述符由限定字符串和C 语言变量组成。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>每个输出操作数的限定字符串必须包含&quot;=&quot;表示他是一个输出操作数。</span></p>
+<p>例：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__asm__ __volatile__(<span class="string">"pushfl ; popl %0 ; cli"</span>:<span class="string">"=g"</span> (x) )</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>描述符字符串表示对该变量的限制条件，这样GCC 就可以根据这些条件决定如何分配寄存器，如何产生必要的代码处理指令操作数与C表达式或C变量之间的联系。</span></p>
+
+        <h2 id="输入部分"   >
+          <a href="#输入部分" class="heading-link"><i class="fas fa-link"></i></a>输入部分</h2>
+      
+<p>输入部分描述输入操作数，不同的操作数描述符之间使用逗号格开，每个操作数描述符由限定字符串和C语言表达式或者C语言变量组成。</p>
+<p>例1：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__asm__ __volatile__ (<span class="string">"lidt %0"</span> : : <span class="string">"m"</span> (real_mode_idt));</span><br></pre></td></tr></table></div></figure>
+<p>例2(bitops.h)：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Static __inline__ <span class="keyword">void</span> __set_bit(<span class="keyword">int</span> nr, <span class="keyword">volatile</span> <span class="keyword">void</span> * addr)</span><br><span class="line">&#123;</span><br><span class="line">         __asm__(</span><br><span class="line">                         <span class="string">"btsl %1,%0"</span></span><br><span class="line">                         :<span class="string">"=m"</span> (ADDR)</span><br><span class="line">                         :<span class="string">"Ir"</span> (nr));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>上例功能是将<code>(*addr)</code>的第nr位设为1。第一个占位符%0与C 语言变量ADDR对应，第二个占位符%1与C语言变量nr对应。因此上面的汇编语句代码与下面的伪代码等价：btsl nr, ADDR，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'><strong>该指令的两个操作数不能全是内存变量，因此将nr的限定字符串指定为&quot;Ir&quot;，将nr 与立即数或者寄存器相关联，这样两个操作数中只有ADDR为内存变量</strong>。</span></p>
+
+        <h2 id="破坏描述部分"   >
+          <a href="#破坏描述部分" class="heading-link"><i class="fas fa-link"></i></a>破坏描述部分</h2>
+      
+<p>破坏描述符用于通知编译器我们使用了哪些寄存器或内存，由逗号格开的字符串组成，每个字符串描述一种情况，一般是寄存器名；除寄存器外还有&quot;memory&quot;。例如：&quot;%eax&quot;，&quot;%ebx&quot;，&quot;memory&quot;等。</p>
+<p>&quot;memory&quot;比较特殊，可能是内嵌汇编中最难懂部分。为解释清楚它，先介绍一下编译器的优化知识，再看C关键字volatile。最后去看该描述符。</p>
+
+        <h1 id="限制字符"   >
+          <a href="#限制字符" class="heading-link"><i class="fas fa-link"></i></a>限制字符</h1>
+      
+<p>限制字符有很多种,有些是与特定体系结构相关,此处仅列出常用的限定字符和i386中可能用到的一些常用的限定符。它们的作用是指示编译器如何处理其后的C语言变量与指令操作数之间的关系。</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>分类</th>
+<th>限定符</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通用寄存器</td>
+<td>“a”</td>
+<td>将输入变量放入eax 这里有一个问题:假设eax已经被使用,那怎么办? 其实很简单:因为GCC 知道eax 已经被使用,它在这段汇编代码的起始处 插入一条语句pushl %eax,将eax 内容保存到堆栈, 然 后在这段代码结束处再增加一条语句popl %eax,恢复eax的内容</td>
+</tr>
+<tr>
+<td></td>
+<td>“b”</td>
+<td>将输入变量放入ebx</td>
+</tr>
+<tr>
+<td></td>
+<td>“c”</td>
+<td>将输入变量放入ecx</td>
+</tr>
+<tr>
+<td></td>
+<td>“d”</td>
+<td>将输入变量放入edx</td>
+</tr>
+<tr>
+<td></td>
+<td>“s”</td>
+<td>将输入变量放入esi</td>
+</tr>
+<tr>
+<td></td>
+<td>“d”</td>
+<td>将输入变量放入edi</td>
+</tr>
+<tr>
+<td></td>
+<td>“q”</td>
+<td>将输入变量放入eax,ebx,ecx,edx中的一个</td>
+</tr>
+<tr>
+<td></td>
+<td>“r”</td>
+<td>将输入变量放入通用寄存器,也就是eax,ebx,ecx,edx,esi,edi中的一个 &quot;A&quot;把eax和edx合成一个64 位的寄存器(use long longs)</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>“m”</td>
+<td>内存变量</td>
+</tr>
+<tr>
+<td></td>
+<td>“o”</td>
+<td>操作数为内存变量,但是其寻址方式是偏移量类型, 也即是基址寻址,或者是基址加变址寻址</td>
+</tr>
+<tr>
+<td></td>
+<td>“V”</td>
+<td>操作数为内存变量,但寻址方式不是偏移量类型</td>
+</tr>
+<tr>
+<td></td>
+<td>&quot; &quot;</td>
+<td>操作数为内存变量,但寻址方式为自动增量</td>
+</tr>
+<tr>
+<td></td>
+<td>“p”</td>
+<td>操作数是一个合法的内存地址(指针)</td>
+</tr>
+<tr>
+<td>寄存器或内存</td>
+<td>“g”</td>
+<td>将输入变量放入eax,ebx,ecx,edx中的一个 或者作为内存变量</td>
+</tr>
+<tr>
+<td></td>
+<td>“X”</td>
+<td>操作数可以是任何类型</td>
+</tr>
+<tr>
+<td>立即数</td>
+<td>“I”</td>
+<td>0-31之间的立即数(用于32位移位指令)</td>
+</tr>
+<tr>
+<td></td>
+<td>“J”</td>
+<td>0-63之间的立即数(用于64位移位指令)</td>
+</tr>
+<tr>
+<td></td>
+<td>“N”</td>
+<td>0-255之间的立即数(用于out指令)</td>
+</tr>
+<tr>
+<td></td>
+<td>“i”</td>
+<td>立即数</td>
+</tr>
+<tr>
+<td></td>
+<td>“n”</td>
+<td>立即数,有些系统不支持除字以外的立即数, 这些系统应该使用&quot;n&quot;而不是&quot;i&quot;</td>
+</tr>
+<tr>
+<td>匹配</td>
+<td>&quot; 0 &quot;,</td>
+<td>表示用它限制的操作数与某个指定的操作数匹配,</td>
+</tr>
+<tr>
+<td></td>
+<td>“1” …</td>
+<td>也即该操作数就是指定的那个操作数,例如&quot;0&quot;</td>
+</tr>
+<tr>
+<td></td>
+<td>“9”</td>
+<td>去描述&quot;%1&quot;操作数,那么&quot;%1&quot;引用的其实就是&quot;%0&quot;操作数, 注意作为限定符字母的0-9 与 指令中的&quot;%0&quot;-&quot;%9&quot;的区别,前者描述操作数,后者代表操作数。</td>
+</tr>
+<tr>
+<td></td>
+<td>&amp;;</td>
+<td>该输出操作数不能使用过和输入操作数相同的寄存器</td>
+</tr>
+<tr>
+<td>操作数类型</td>
+<td>“=”</td>
+<td>操作数在指令中是只写的(输出操作数)</td>
+</tr>
+<tr>
+<td></td>
+<td>“+”</td>
+<td>操作数在指令中是读写类型的(输入输出操作数)</td>
+</tr>
+<tr>
+<td>浮点数</td>
+<td>“f”</td>
+<td>浮点寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>“t”</td>
+<td>第一个浮点寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>“u”</td>
+<td>第二个浮点寄存器</td>
+</tr>
+<tr>
+<td></td>
+<td>“G”</td>
+<td>标准的80387浮点常数</td>
+</tr>
+<tr>
+<td></td>
+<td>%</td>
+<td>该操作数可以和下一个操作数交换位置 例如addl的两个操作数可以交换顺序 (当然两个操作数都不能是立即数)</td>
+</tr>
+<tr>
+<td></td>
+<td>#</td>
+<td>部分注释,从该字符到其后的逗号之间所有字母被忽略</td>
+</tr>
+<tr>
+<td></td>
+<td>*</td>
+<td>表示如果选用寄存器,则其后的字母被忽略</td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>输入/输出</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>=</td>
+<td>O</td>
+<td>表示此Output操作表达式是Write-Only的。</td>
+</tr>
+<tr>
+<td>+</td>
+<td>O</td>
+<td>表示此Output操作表达式是Read-Write的。</td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td>O</td>
+<td>表示此Output操作表达式独占为其指定的寄存器。</td>
+</tr>
+<tr>
+<td>%</td>
+<td>I</td>
+<td>表示此Input 操作表达式中的C/C<ins>表达式可以和下一 个Input操作表达式中的C/C</ins>表达式互换</td>
+</tr>
+</tbody>
+</table></div>
+
+        <h1 id="汇编指令速查"   >
+          <a href="#汇编指令速查" class="heading-link"><i class="fas fa-link"></i></a>汇编指令速查</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/lsgxeva/p/8948153.html"  target="_blank" rel="noopener">汇编指令速查</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><a href="https://cn.aliyun.com/jiaocheng/68768.html" target="_blank" rel="noopener">Linux内核系列—C语言中内嵌汇编 asm <strong>volatile</strong> </a><br />
+<span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/elnino/p/4313340.html"  target="_blank" rel="noopener">linux源码阅读笔记 asm函数</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/c/%E5%86%85%E5%B5%8C%E6%B1%87%E7%BC%96/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/c/%E5%86%85%E5%B5%8C%E6%B1%87%E7%BC%96/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/c/">c</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/c/%E9%94%81/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">锁</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/CopyOnWrite%E5%AE%B9%E5%99%A8/"><span class="paginator-prev__text">CopyOnWrite容器</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#简单的内嵌汇编"><span class="toc-number">1.</span> <span class="toc-text">
+          简单的内嵌汇编</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#内嵌汇编举例"><span class="toc-number">2.</span> <span class="toc-text">
+          内嵌汇编举例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#内嵌汇编语法"><span class="toc-number">3.</span> <span class="toc-text">
+          内嵌汇编语法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#汇编语句模板"><span class="toc-number">3.1.</span> <span class="toc-text">
+          汇编语句模板</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#输出部分"><span class="toc-number">3.2.</span> <span class="toc-text">
+          输出部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#输入部分"><span class="toc-number">3.3.</span> <span class="toc-text">
+          输入部分</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#破坏描述部分"><span class="toc-number">3.4.</span> <span class="toc-text">
+          破坏描述部分</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#限制字符"><span class="toc-number">4.</span> <span class="toc-text">
+          限制字符</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#汇编指令速查"><span class="toc-number">5.</span> <span class="toc-text">
+          汇编指令速查</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">6.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

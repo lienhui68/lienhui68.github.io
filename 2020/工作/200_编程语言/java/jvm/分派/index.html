@@ -1,0 +1,677 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="前言        在学习访问者模式的时候看到有关分派的概念，在网上浏览了不少文章，大多数要么用词模糊要么有些地方乱写，看地我头大，于是有了这篇文章。我会先介绍一些基础概念来帮助大家理解分派是什么；然后引出本文要讲的静态分派和动态分派以及单分派多分派知识点并配以简短有力的解释。接着通过几个案例加上底层原理分析来验证我对第二部">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分派">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E5%88%86%E6%B4%BE/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="前言        在学习访问者模式的时候看到有关分派的概念，在网上浏览了不少文章，大多数要么用词模糊要么有些地方乱写，看地我头大，于是有了这篇文章。我会先介绍一些基础概念来帮助大家理解分派是什么；然后引出本文要讲的静态分派和动态分派以及单分派多分派知识点并配以简短有力的解释。接着通过几个案例加上底层原理分析来验证我对第二部">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817231728.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817231728.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817232230.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817231526.png">
+<meta property="article:published_time" content="2020-09-16T16:22:27.971Z">
+<meta property="article:modified_time" content="2020-09-16T16:51:58.701Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="jvm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817231728.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>分派 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E5%88%86%E6%B4%BE/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><div class="sticky-top" data-popover="置顶文章" data-popover-pos="up"><span class="sticky-top__icon"><i class="fas fa-thumbtack"></i></span></div><h1 class="post-title">分派</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">5.9k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">39分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817231728.png"  alt="" />
+      </p>
+
+        <h1 id="前言"   >
+          <a href="#前言" class="heading-link"><i class="fas fa-link"></i></a>前言</h1>
+      
+<p>在学习访问者模式的时候看到有关<strong>分派</strong>的概念，在网上浏览了不少文章，大多数要么用词模糊要么有些地方乱写，看地我头大，于是有了这篇文章。我会先介绍一些<strong>基础概念</strong>来帮助大家理解分派是什么；然后引出本文要讲的<strong>静态分派</strong>和<strong>动态分派</strong>以及<strong>单分派多分派</strong>知识点并配以简短有力的解释。接着通过几个<strong>案例</strong>加上<strong>底层原理分析</strong>来验证我对第二部分的解释；第四部分是一些<strong>扩展知识</strong>比如可以规避 <code>instanceof</code> 的<strong>伪动态双分派</strong>工作、<strong>静态分派的优先级匹配</strong>以及<strong>强制转换</strong>，最后是本篇的<strong>回顾总结</strong>部分。我会在文中关键地方使用<span style='color:LimeGreen;background:背景颜色;font-size:18px;font-weight:bold'>类比</span>以及<span style='color:LimeGreen;background:背景颜色;font-size:18px;font-weight:bold'>图文</span>的方式增进大家对有关知识点的认识，完成各自的<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>认知升级</span>。另外说明一下，本人工作有限，难免有理解疏漏的地方，欢迎大家在文章后面的留言区指正。</p>
+<a id="more"></a>
+
+        <h1 id="基础概念"   >
+          <a href="#基础概念" class="heading-link"><i class="fas fa-link"></i></a>基础概念</h1>
+      
+
+        <h2 id="重载和重写"   >
+          <a href="#重载和重写" class="heading-link"><i class="fas fa-link"></i></a>重载和重写</h2>
+      
+<p><strong>重载</strong>：Overload，类内部有多个同名方法，参数的个数或者类型不同</p>
+<p><strong>重写</strong>：Override，又名覆写，即子类覆盖父类的方法</p>
+<blockquote>
+<p>注意区分多态和重载，多态是建立在重写的基础之上的，是类与类之间的关系，是发生在不同的类之间的，子类重写父类的方法。不同的子类实现父类有着不同的实现形态。<br />
+多态有3个条件：继承、重写(重写父类继承的方法)、父类引用指向子类对象<br />
+而重载是在类的内部方法构型上的不同，是在同一个类里面的。同一个函数名称不同参数的多个方法，实现同一类型的功能。</p>
+</blockquote>
+
+        <h2 id="静态和动态"   >
+          <a href="#静态和动态" class="heading-link"><i class="fas fa-link"></i></a>静态和动态</h2>
+      
+<p><strong>静态</strong>：对应编译期</p>
+<p><strong>动态</strong>：对应运行时</p>
+
+        <h2 id="静态类型和实际类型"   >
+          <a href="#静态类型和实际类型" class="heading-link"><i class="fas fa-link"></i></a>静态类型和实际类型</h2>
+      
+<p><strong>静态类型</strong>：变量的声明类型</p>
+<p><strong>实际类型</strong>：变量指向堆里对象的真实类型</p>
+
+        <h2 id="宗量"   >
+          <a href="#宗量" class="heading-link"><i class="fas fa-link"></i></a>宗量</h2>
+      
+<p>分为方法的调用者和参数两个宗量</p>
+
+        <h2 id="分派"   >
+          <a href="#分派" class="heading-link"><i class="fas fa-link"></i></a>分派</h2>
+      
+<p>又称绑定，确定目标方法的过程，因为java多态以及方法重载的存在，一个方法的符号引用可能对应多个目标方法</p>
+<blockquote>
+<p>展开来说一下，<strong>分派</strong>是一个动词，肯定有主语和宾语，根据分派的词意，宾语还得分成简宾和直宾。要学习这个动词得先搞清楚它的主语和宾语分别是什么<br />
+<strong>主语</strong>：编译器/虚拟机<br />
+<strong>间接宾语</strong>：一地址指令invoke的操作数<br />
+<strong>直接宾语</strong>：方法入口在jvm进程中的逻辑地址(编译期如果确定不了会给出带参数宗量的符号引用)<br />
+<strong>状语</strong>：在编译期/在运行时<br />
+<strong>组装成句子</strong>：在编译期/运行时，编译器/虚拟机<strong>分派</strong>方法入口在jvm进程中的逻辑地址(编译期如果确定不了会给出带参数宗量的符号引用)给到一地址指令invoke的操作数</p>
+<p>要想搞懂分派这个动词，得先把这个句子中的名词给捋顺，编译器和虚拟机大家都熟悉，方法入口在jvm进程中的逻辑地址和一地址指令invoke，这两块涉及到操作系统和组成原理还有jvm指令集的知识，在此就不展开了，想要了解的话可以在我的博客分类(操作系统、组成原理、JVM)中找到相关内容。</p>
+</blockquote>
+
+        <h2 id="解析"   >
+          <a href="#解析" class="heading-link"><i class="fas fa-link"></i></a>解析</h2>
+      
+<p>在程序运行时，进行方法调用是最普遍最频繁的操作，但Class文件的编译过程不包含传统编译中的链接步骤，一切方法调用在Class文件里存储的都只是符号引用，而不是方法在实际运行时内存布局中的入口地址（直接引用）。这个特性给Java带来了更强大的动态扩展能力，但也使得Java方法调用过程变得相对复杂起来，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>需要在类加载期间，甚至到了运行期间才能确定目标方法的直接引用</span>。</p>
+<blockquote>
+<p>对符号引用和直接引用不清楚的可以看我的这篇博文：<a href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E8%AF%A6%E8%A7%A3%E2%80%9C%E7%AC%A6%E5%8F%B7%E5%BC%95%E7%94%A8%E8%BD%AC%E7%9B%B4%E6%8E%A5%E5%BC%95%E7%94%A8%E2%80%9D/" title="详解“符号引用转直接引用”">详解“符号引用转直接引用”</a></p>
+</blockquote>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>所有方法调用中的目标方法在Class文件里面都是一个常量池中的符号引用，在类加载的解析阶段，会将其中的一部分符号引用转化为直接引用。</span>这种解析能成立的前提是：方法在程序真正运行前就有一个可确定的调用版本，并且该方法版本在运行期不可改变。满足这种“编译期可知，运行期不可变”的要求的方法，主要有<strong>静态方法</strong>和<strong>私有方法</strong>两大类，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>前者与类型直接关联，后者在外部不可访问</span>。将这种方法的符号引用转为直接引用就叫做“解析” Resolution。</p>
+<p>在Java虚拟机里面提供了5条方法调用字节码指令，分别如下：</p>
+<ul>
+<li>
+<p>invokestatic  调用静态方法</p>
+</li>
+<li>
+<p>invokespecial  调用实例构造器<code>&lt;init&gt;</code>方法、私有方法和父类方法(显示使用super)</p>
+</li>
+<li>
+<p>invokevritual  调用所有的虚方法</p>
+</li>
+<li>
+<p>invokeinterface  调用接口方法，会在运行时再确定一个实现此接口的对象</p>
+</li>
+<li>
+<p>invokedynamic 先在运行时动态解析出调用点限定符所引用的方法，然后再执行此方法，在此之前 的4条调用指令，分派逻辑是固化在Java虚拟机内部的，而invokedynamic指令的分派逻辑是由用户所设定的引用方法决定的。</p>
+</li>
+</ul>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'><strong>只要能被invokestatic和invokespecial指令调用的方法，都可以在解析阶段中确定唯一的调用版本，符合这个条件的有静态方法，私有方法，实例构造器，父类方法4类，它们在类加载的时候就会把符号引用解析为该方法的直接引用。这些方法可以称为非虚方法，其他方法称为非虚方法（除了final方法）。</strong></span></p>
+<blockquote>
+<p><strong>final修饰的方法，虽然是使用invokevirtual指令来调用，但由于它无法被覆盖，没有其他版本，因此也是非虚方法。</strong></p>
+</blockquote>
+<p>解析调用一定是个静态的过程，在编译期间就能完全确定，在类加载的解析阶段就会把涉及的符号引号全部转变为可确定的直接引用，不会延迟到运行期去完成。分派(Dispatch)可能是静态也可能是动态的，根据分派依据的宗量数（方法的调用者和方法的参数统称为方法的宗量）可分为单分派和多分派。这两种分派方式的两两组合就构成了静态单分派，静态多分派，动态单分派，动态多分派这4种组合。</p>
+
+        <h2 id="虚方法和非虚方法"   >
+          <a href="#虚方法和非虚方法" class="heading-link"><i class="fas fa-link"></i></a>虚方法和非虚方法</h2>
+      
+<p><strong>非虚方法</strong>：静态方法、私有方法、final修饰的方法</p>
+<p><strong>虚方法</strong>：除上面以外的方法</p>
+
+        <h2 id="虚方法表"   >
+          <a href="#虚方法表" class="heading-link"><i class="fas fa-link"></i></a>虚方法表</h2>
+      
+<p>由于动态分派很频繁，虚拟机在运行时需要频繁地在子类和父类的方法元数据中搜索合适的目标方法，基于性能的考虑，JVM会在方法区中维护一个虚方法表，使用虚方法表来代替元数据查找以提高性能。虚方法表本质就是索引是虚方法方法名，值是内存布局的入口地址(是一个逻辑地址)的一张索引表，存储在方法区对象的klass数据结构中，感兴趣的可自行了解，不影响阅读本篇，可以结合invokevirtual执行流程图理解。</p>
+<blockquote>
+<p>虚方法和虚方法表可以看我的这篇博客：<a href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/5_%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88/" title="虚拟机栈7.4节~7.6节">虚拟机栈7.4节~7.6节</a></p>
+</blockquote>
+
+        <h2 id="静态调用和动态调用"   >
+          <a href="#静态调用和动态调用" class="heading-link"><i class="fas fa-link"></i></a>静态调用和动态调用</h2>
+      
+<p><strong>静态调用</strong>：在编译期确定方法调用者的实际类型 invokestatic、invokespecial</p>
+<p><strong>动态调用</strong>：在运行时确定方法调用者的实际类型除 invokestatic、invokespecial和final</p>
+
+        <h1 id="静态分派和动态分派"   >
+          <a href="#静态分派和动态分派" class="heading-link"><i class="fas fa-link"></i></a>静态分派和动态分派</h1>
+      
+
+        <h2 id="静态分派"   >
+          <a href="#静态分派" class="heading-link"><i class="fas fa-link"></i></a>静态分派</h2>
+      
+<ul>
+<li>
+<p>编译器对目标方法的选择，根据方法调用者的静态类型和参数的静态类型及个数确定目标方法的<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>符号引用</span>，分派的结果是产生一条invoke指令</p>
+<blockquote>
+<p>eg:<code>invokevirtual #7</code></p>
+<p>其中<code>#7</code>表示方法的符号引用</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#7 &#x3D; Methodref          #5.#34         &#x2F;&#x2F; com&#x2F;eh&#x2F;eden&#x2F;java8&#x2F;demo&#x2F;Father.t:(Ljava&#x2F;lang&#x2F;Object;)V</span><br></pre></td></tr></table></div></figure>
+<p>可以看到调用者的静态类型是Father；方法参数是Object，由于是invokevirtual指令，在运行时会将符号引用转为直接引用。</p>
+<p>如果是静态调用，在解析阶段就能将方法的符号引用转为直接引用</p>
+<p>如果是动态调用，需要到运行时才能将符号引用转为直接引用，但是参数依然根据静态类型</p>
+</blockquote>
+</li>
+<li>
+<p>重载的本质是静态分派</p>
+</li>
+</ul>
+
+        <h2 id="动态分派"   >
+          <a href="#动态分派" class="heading-link"><i class="fas fa-link"></i></a>动态分派</h2>
+      
+<ul>
+<li>
+<p>虚拟机对目标方法的选择，虚拟机看到invokevirtual这条指令就会试图将方法的符号引用转为直接引用，这也是解析可能发生在初始化后的原因。虚拟机此时不关心方法的参数是什么静态类型或者实际类型或者是有几个，也就是参数由编译器决定，但是虚拟机会根据方法调用者的实际类型决定调用哪个目标方法，这也就是invokevirtual指令的运行机制，后文会有讲解。</p>
+</li>
+<li>
+<p>重写的本质是动态分派</p>
+</li>
+<li>
+<p>invokevirtual执行过程</p>
+<p>在第一个案例中会结合具体字节码说明，有详细流程图说明</p>
+</li>
+</ul>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>可以使用位向量(大端存储)表示目标方法的符号引用，静态分派负责给位向量赋初始值，其中高位是方法调用者的声明类型，低位是参数的声明类型以及个数。动态调用时虚拟机会使用方法的调用者的实际类型去寻找目标方法，参数保持不变</span>，如下图所示</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817231728.png"  style="zoom:67%;" />
+      
+
+        <h2 id="单分派多分派"   >
+          <a href="#单分派多分派" class="heading-link"><i class="fas fa-link"></i></a>单分派多分派</h2>
+      
+<p>前面给出：方法的调用者与方法的参数称为方法的宗量。单分派是根据一个宗量对目标方法进行选择，多分派是根据多个宗量对目标方法进行选择。</p>
+
+        <h3 id="静态多分派"   >
+          <a href="#静态多分派" class="heading-link"><i class="fas fa-link"></i></a>静态多分派</h3>
+      
+<p>结合神图，先来看编译阶段编译器的选择过程，即静态分派过程。静态分派根据两个宗量确定目标方法，所以Java语言的静态分派属于多分派类型。</p>
+
+        <h3 id="动态单分派"   >
+          <a href="#动态单分派" class="heading-link"><i class="fas fa-link"></i></a>动态单分派</h3>
+      
+<p>再来看运行阶段虚拟机的选择，即动态分派过程。由于编译期已经了确定了目标方法的参数类型，因此唯一可以影响到虚拟机选择的因素只有此方法调用者的实际类型。因为只有一个宗量作为选择依据，所以 Java 语言的动态分派属于单分派类型。</p>
+<p><strong>一句话总结</strong>：<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>Java是一个支持静态双分派的动态单分派语言。</span></p>
+
+        <h1 id="案例说明"   >
+          <a href="#案例说明" class="heading-link"><i class="fas fa-link"></i></a>案例说明</h1>
+      
+
+        <h2 id="案例一"   >
+          <a href="#案例一" class="heading-link"><i class="fas fa-link"></i></a>案例一</h2>
+      
+<blockquote>
+<p><strong>案例意图</strong></p>
+<p>重载的本质是静态分派</p>
+<blockquote>
+<p>网上好多资料说重载选择静态分派实现，重写选择动态分派实现这种说法真的误导人</p>
+<p>如果是先有鸡后有蛋，那么分派就是鸡，重载和重写是蛋。上面这个说法是先有蛋再有鸡，谬之大矣！</p>
+</blockquote>
+</blockquote>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Father -&gt; o"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Father -&gt; i"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; o"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; i"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Object o = <span class="keyword">new</span> Object();</span><br><span class="line">        Integer i = <span class="keyword">new</span> Integer(<span class="number">1</span>);</span><br><span class="line">        Father f = <span class="keyword">new</span> Father();</span><br><span class="line">        f.t(o);</span><br><span class="line">        f.t(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">Father -&gt; o</span><br><span class="line">Father -&gt; i</span><br></pre></td></tr></table></div></figure>
+<p>字节码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"> 0 new #2 &lt;java/lang/Object&gt;</span><br><span class="line"> <span class="number">3</span> dup</span><br><span class="line"> 4 invokespecial #1 &lt;java/lang/Object.&lt;init&gt;&gt;</span><br><span class="line"> <span class="number">7</span> astore_1</span><br><span class="line"> 8 new #3 &lt;java/lang/Integer&gt;</span><br><span class="line"><span class="number">11</span> dup</span><br><span class="line"><span class="number">12</span> iconst_1</span><br><span class="line">13 invokespecial #4 &lt;java/lang/Integer.&lt;init&gt;&gt;</span><br><span class="line"><span class="number">16</span> astore_2</span><br><span class="line">17 new #5 &lt;com/eh/eden/java8/demo/Father&gt;</span><br><span class="line"><span class="number">20</span> dup</span><br><span class="line">21 invokespecial #6 &lt;com/eh/eden/java8/demo/Father.&lt;init&gt;&gt;</span><br><span class="line"><span class="number">24</span> astore_3</span><br><span class="line"><span class="number">25</span> aload_3</span><br><span class="line"><span class="number">26</span> aload_1</span><br><span class="line">27 invokevirtual #7 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br><span class="line"><span class="number">30</span> aload_3</span><br><span class="line"><span class="number">31</span> aload_2</span><br><span class="line">32 invokevirtual #8 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br><span class="line"><span class="number">35</span> <span class="keyword">return</span></span><br></pre></td></tr></table></div></figure>
+<p>我们着重看方法调用部分</p>
+<figure class="highlight"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">25</span> aload_3</span><br><span class="line"><span class="number">26</span> aload_1</span><br><span class="line">27 invokevirtual #7 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br><span class="line"><span class="number">30</span> aload_3</span><br><span class="line"><span class="number">31</span> aload_2</span><br><span class="line">32 invokevirtual #8 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br></pre></td></tr></table></div></figure>
+<p>将参数和方法调用者压操作数栈，然后调用invokevirtual指令</p>
+<p>其中#7和#8在静态常量池中表示的方法符号引用是：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#7 &#x3D; Methodref          #5.#34         &#x2F;&#x2F; com&#x2F;eh&#x2F;eden&#x2F;java8&#x2F;demo&#x2F;Father.t:(Ljava&#x2F;lang&#x2F;Object;)V</span><br><span class="line">#8 &#x3D; Methodref          #5.#35         &#x2F;&#x2F; com&#x2F;eh&#x2F;eden&#x2F;java8&#x2F;demo&#x2F;Father.t:(Ljava&#x2F;lang&#x2F;Integer;)V</span><br></pre></td></tr></table></div></figure>
+<p>可以看到在编译期，静态分派是根据方法调用者和参数的静态类型以及个数确定目标方法(比如<code>com/eh/eden/java8/demo/Father.t:(Ljava/lang/Object;)V</code>)的。</p>
+<p>下面给出invokevirtual指令的执行过程：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817232230.png"  alt="" />
+      </p>
+<p>ok，现在<code>f.t(o)</code>的i由编译器确定是它的静态类型Object，f由虚拟机确定是它的实际类型Father，所以会执行Father.t(Object)方法。<code>f.t(i)</code>的i由编译器确定是它的静态类型Integer，f由虚拟机确定是它的实际类型Father，所以会执行Father.t(Integer)方法。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>综上所述，重载的本质是静态分派，确定了方法参数的类型以及个数</span></p>
+
+        <h2 id="案例二"   >
+          <a href="#案例二" class="heading-link"><i class="fas fa-link"></i></a>案例二</h2>
+      
+<blockquote>
+<p><strong>案例意图</strong></p>
+<p>如果是静态调用，在解析阶段就能将方法的符号引用转为直接引用</p>
+</blockquote>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">t</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; o"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">t</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; i"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Object o = <span class="keyword">new</span> Object();</span><br><span class="line">        Object i = <span class="keyword">new</span> Integer(<span class="number">1</span>);</span><br><span class="line">        Father f = <span class="keyword">new</span> Father();</span><br><span class="line">        f.t(o);</span><br><span class="line">        f.t(i);</span><br><span class="line">        Father s = <span class="keyword">new</span> Son();</span><br><span class="line">        s.t(o);</span><br><span class="line">        s.t(i);</span><br><span class="line">        Son.t(o);</span><br><span class="line">        Son.t(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">Father -&gt; o</span><br><span class="line">Father -&gt; o</span><br><span class="line">Father -&gt; o</span><br><span class="line">Father -&gt; o</span><br><span class="line">Son -&gt; o</span><br><span class="line">Son -&gt; o</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p>注意子类的静态方法不是重载父类</p>
+</blockquote>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"> 0 new #2 &lt;java/lang/Object&gt;</span><br><span class="line"> <span class="number">3</span> dup</span><br><span class="line"> 4 invokespecial #1 &lt;java/lang/Object.&lt;init&gt;&gt;</span><br><span class="line"> <span class="number">7</span> astore_1</span><br><span class="line"> 8 new #3 &lt;java/lang/Integer&gt;</span><br><span class="line"><span class="number">11</span> dup</span><br><span class="line"><span class="number">12</span> iconst_1</span><br><span class="line">13 invokespecial #4 &lt;java/lang/Integer.&lt;init&gt;&gt;</span><br><span class="line"><span class="number">16</span> astore_2</span><br><span class="line">17 new #5 &lt;com/eh/eden/java8/demo/Father&gt;</span><br><span class="line"><span class="number">20</span> dup</span><br><span class="line">21 invokespecial #6 &lt;com/eh/eden/java8/demo/Father.&lt;init&gt;&gt;</span><br><span class="line"><span class="number">24</span> astore_3</span><br><span class="line"><span class="number">25</span> aload_3</span><br><span class="line"><span class="number">26</span> pop</span><br><span class="line"><span class="number">27</span> aload_1</span><br><span class="line">28 invokestatic #7 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br><span class="line"><span class="number">31</span> aload_3</span><br><span class="line"><span class="number">32</span> pop</span><br><span class="line"><span class="number">33</span> aload_2</span><br><span class="line">34 invokestatic #7 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br><span class="line">37 new #8 &lt;com/eh/eden/java8/demo/Son&gt;</span><br><span class="line"><span class="number">40</span> dup</span><br><span class="line">41 invokespecial #9 &lt;com/eh/eden/java8/demo/Son.&lt;init&gt;&gt;</span><br><span class="line"><span class="number">44</span> astore <span class="number">4</span></span><br><span class="line"><span class="number">46</span> aload <span class="number">4</span></span><br><span class="line"><span class="number">48</span> pop</span><br><span class="line"><span class="number">49</span> aload_1</span><br><span class="line">50 invokestatic #7 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br><span class="line"><span class="number">53</span> aload <span class="number">4</span></span><br><span class="line"><span class="number">55</span> pop</span><br><span class="line"><span class="number">56</span> aload_2</span><br><span class="line">57 invokestatic #7 &lt;com/eh/eden/java8/demo/Father.t&gt;</span><br><span class="line"><span class="number">60</span> aload_1</span><br><span class="line">61 invokestatic #10 &lt;com/eh/eden/java8/demo/Son.t&gt;</span><br><span class="line"><span class="number">64</span> aload_2</span><br><span class="line">65 invokestatic #10 &lt;com/eh/eden/java8/demo/Son.t&gt;</span><br><span class="line"><span class="number">68</span> <span class="keyword">return</span></span><br></pre></td></tr></table></div></figure>
+<p>可以注意到不管是f.t还是s.t，o还是i，方法调用指令是invokestatic,所以这个目标方法在编译期根据他们的静态类型就已经确定了，类加载链接阶段就会将目标方法的符号引用转为直接引用，跟虚拟机没关系。所以才有s.t输出也是<code>Father -&gt; o</code></p>
+
+        <h2 id="案例三"   >
+          <a href="#案例三" class="heading-link"><i class="fas fa-link"></i></a>案例三</h2>
+      
+<blockquote>
+<p><strong>案例意图</strong></p>
+<ol>
+<li>如果是动态调用，需要到运行时才能将符号引用转为直接引用，但是参数依然根据静态类型</li>
+<li>重载的本质是动态分派</li>
+</ol>
+</blockquote>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Father -&gt; o"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Father -&gt; i"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; o"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; i"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Object i = <span class="keyword">new</span> Integer(<span class="number">1</span>);</span><br><span class="line">        Father s = <span class="keyword">new</span> Son();</span><br><span class="line">        s.t(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">Son -&gt; o</span><br><span class="line">结合我的神图，第一步静态分派 初始化位向量，第二步动态分派确定方法调用者的实际类型，此时唯一确定目标方法Son.t(Object)</span><br></pre></td></tr></table></div></figure>
+<p>因为是动态调用，所以方法的直接引用地址需要在运行时由虚拟机确定，和案例一中一样使用invokevirtual指令确定方法的直接引用地址。第一步是确定变量的实际类型也就是Son，第二步是将方法的符号引用转为直接引用。</p>
+<p>参数的声明 类型以及个数确定的前提下，确定变量的实际类型就可以可以唯一确定一个方法，由虚拟机确定目标方法的过程叫做动态分派，所以重写的本质是动态分派。</p>
+<blockquote>
+<p>就好比高位和低位确定，一个内存地址也就确定了。再来对照下位向量表示法图</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817231526.png"  style="zoom: 67%;" />
+      
+</blockquote>
+
+        <h1 id="扩展知识"   >
+          <a href="#扩展知识" class="heading-link"><i class="fas fa-link"></i></a>扩展知识</h1>
+      
+
+        <h2 id="伪动态双分派"   >
+          <a href="#伪动态双分派" class="heading-link"><i class="fas fa-link"></i></a>伪动态双分派</h2>
+      
+<p>先来看个小案例：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">(B b)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"b"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">(B1 b1)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"b1"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">(B2 b2)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"b2"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B1</span> <span class="keyword">extends</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B2</span> <span class="keyword">extends</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        B b1 = <span class="keyword">new</span> B1();</span><br><span class="line">        B b2 = <span class="keyword">new</span> B2();</span><br><span class="line">        A a = <span class="keyword">new</span> A();</span><br><span class="line">        a.a(b1);</span><br><span class="line">        a.a(b2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">b</span><br><span class="line">b</span><br></pre></td></tr></table></div></figure>
+<p>通过阅读前面的文章我们知道静态分派是指在编译期就已经确定要执行哪一个方法。方法的重载（方法名相同而参数不同）就是静态分派的，重载时，执行哪一个方法在编译期就已经确定下来，所以运行结果是两个b。</p>
+<p>如果希望使用重载的时候，程序能够根据传入参数的实际类型动态地调用相应的方法，也就是说，我们希望java的重载是动态的，而不是静态的。但是由于java的重载不是动态绑定，只能通过程序来人为判断，我们一般会使用instanceof操作符来进行类型的判断代码如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">a</span><span class="params">(B b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (b <span class="keyword">instanceof</span> B1)</span><br><span class="line">            System.out.println(<span class="string">"b1"</span>);</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (b <span class="keyword">instanceof</span> B2)</span><br><span class="line">            System.out.println(<span class="string">"b2"</span>);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            System.out.println(<span class="string">"b"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B1</span> <span class="keyword">extends</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B2</span> <span class="keyword">extends</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        B b1 = <span class="keyword">new</span> B1();</span><br><span class="line">        B b2 = <span class="keyword">new</span> B2();</span><br><span class="line">        A a = <span class="keyword">new</span> A();</span><br><span class="line">        a.a(b1);</span><br><span class="line">        a.a(b2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">b1</span><br><span class="line">b2</span><br></pre></td></tr></table></div></figure>
+<p>这种方式有个明显的缺点，如果一个类有很多子类，每个子类都使用instanceof来做条件判断显然是不合适的，必须通过其他更好的方式实现才行，这就引出了下面要讲的伪动态双分派工作，这也是访问者模式的精髓。</p>
+<p>使用伪动态双分派工作</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">accept</span><span class="params">(B b)</span> </span>&#123;</span><br><span class="line">        b.visitA(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">visitA</span><span class="params">(A a)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B1</span> <span class="keyword">extends</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">visitA</span><span class="params">(A a)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"b1"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B2</span> <span class="keyword">extends</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">visitA</span><span class="params">(A a)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"b2"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        B b1 = <span class="keyword">new</span> B1();</span><br><span class="line">        B b2 = <span class="keyword">new</span> B2();</span><br><span class="line">        A a = <span class="keyword">new</span> A();</span><br><span class="line">        a.accept(b1);</span><br><span class="line">        a.accept(b2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">b1</span><br><span class="line">b2</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'><strong>所谓的动态双分派就是在运行时依据两个实际类型去确定一个方法的执行版本</strong>，实现的手段是通过两次动态单分派来达到动态双分派的效果，所以称作伪动态双分派。</span></p>
+<p>我们来分析<code>a.accept(b1)</code>的调用过程</p>
+<p>第一次动态双分派就不讲了，方法accept的调用者实际类型是A，进入到方法accept里面</p>
+<p>b1.visit(this)</p>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>大家注意区分 visit(this)中的this变量是静态分派的，你写在哪个类中，它的静态类型就是哪个类，这是在编译期就确定的，不确定的是它的实际类型。</span></p>
+</blockquote>
+<p>通过第一次动态分派a的类型已经确定了，也就是A。此时需要根据b1的实际类型确定visit方法的版本，b1的实际类型是B1，所以visit方法的版本就是B1.accept(A)。如此一来，就完成了动态双分派的过程。</p>
+
+        <h2 id="变量的静态类型发生变化情况"   >
+          <a href="#变量的静态类型发生变化情况" class="heading-link"><i class="fas fa-link"></i></a>变量的静态类型发生变化情况</h2>
+      
+<p>可通过 <strong>强制类型转换</strong> 改变 变量的静态类型</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Father -&gt; o"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Father -&gt; i"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Son</span> <span class="keyword">extends</span> <span class="title">Father</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; o"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(Integer integer)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Son -&gt; i"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Object i = <span class="keyword">new</span> Integer(<span class="number">1</span>);</span><br><span class="line">        Father s = <span class="keyword">new</span> Son();</span><br><span class="line">        s.t((Integer) i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//运行结果</span></span><br><span class="line">Son -&gt; i</span><br></pre></td></tr></table></div></figure>
+<p>本质没变，在编译器确定变量的静态类型是Integer，所以输出Son -&gt; i 也不奇怪了。</p>
+
+        <h2 id="静态分派的优先级匹配问题"   >
+          <a href="#静态分派的优先级匹配问题" class="heading-link"><i class="fas fa-link"></i></a>静态分派的优先级匹配问题</h2>
+      
+
+        <h3 id="基本类型"   >
+          <a href="#基本类型" class="heading-link"><i class="fas fa-link"></i></a>基本类型</h3>
+      
+<p>方法重载，参数是基本类型。程序中没有显示指定静态类型，如何进行静态分派？</p>
+<p>代码如下</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Overload</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">(<span class="keyword">char</span> arg)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"hello char"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">(Object arg)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"hello Object"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"hello int"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">(<span class="keyword">long</span> arg)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"hello long"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 测试代码</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        sayHello(<span class="string">'a'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">hello <span class="keyword">char</span></span><br></pre></td></tr></table></div></figure>
+<p>因为<code>‘a’</code>是一个<code>char</code>类型数据（即静态类型是<code>char</code>），所以会选择参数类型为<code>char</code>的重载方法。</p>
+<p>若注释掉<code>sayHello(char arg)</code>方法，那么会输出</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hello <span class="keyword">int</span></span><br></pre></td></tr></table></div></figure>
+<p>因为<code>‘a’</code>除了可代表字符串，还可代表数字97。因此<strong>当没有最合适的<code>sayHello(char arg)</code>方式进行重载时，会选择第二合适（第二优先级）的方法重载，即<code>sayHello(int arg)</code></strong></p>
+<p>也就是当没有最合适的方法进行重载时，会选优先级第二高的的方法进行重载，以此类推。</p>
+<p>优先级顺序为：<code>char&gt;int&gt;long&gt;float&gt;double&gt;Character&gt;Serializable&gt;Object&gt;...</code></p>
+<p>其中<code>...</code>为变长参数，将其视为一个数组元素。变长参数的重载优先级最低。</p>
+<p>因为 <code>char</code> 转型到 <code>byte</code> 或 <code>short</code> 的过程是不安全的，所以不会选择参数类型为<code>byte</code> 或 <code>short</code>的方法进行重载，故优先级列表里也没有。</p>
+
+        <h3 id="引用类型"   >
+          <a href="#引用类型" class="heading-link"><i class="fas fa-link"></i></a>引用类型</h3>
+      
+<p>根据 <strong>继承关系</strong> 进行优先级匹配</p>
+
+        <h1 id="回顾与总结"   >
+          <a href="#回顾与总结" class="heading-link"><i class="fas fa-link"></i></a>回顾与总结</h1>
+      
+<ul>
+<li>
+<p>Java里的方法分为虚方法和非虚方法，虚方法的调用在编译期由编译器来确定方法的执行版本，在运行时由虚拟机来确定方法的执行版本。</p>
+</li>
+<li>
+<p>静态分派和动态分派</p>
+</li>
+</ul>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>分派原理</th>
+<th>发生阶段</th>
+<th>应用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>静态分派</td>
+<td>根据变量的静态类型</td>
+<td>编译期，由编译器决定选择哪个目标方法</td>
+<td>重载Overload</td>
+</tr>
+<tr>
+<td>动态分派</td>
+<td>根据变量的实际类型</td>
+<td>运行时，由虚拟机决定选择哪个目标方法</td>
+<td>重写Override</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>
+<p>Java是一个支持静态双分派的动态单分派语言</p>
+</li>
+<li>
+<p>可通过 强制类型转换 改变 变量的静态类型</p>
+</li>
+<li>
+<p>当程序没有显示指定变量的静态类型时，会根据变量的真实类型按照一定的优先级匹配规则(分基本类型和引用类型)进行匹配</p>
+</li>
+<li>
+<p>伪动态双分派工作可以规避instanceof</p>
+</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E5%88%86%E6%B4%BE/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E5%88%86%E6%B4%BE/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/jvm/">jvm</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/jvm%E4%B8%ADOOP-KLASS%E6%A8%A1%E5%9E%8B/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">jvm中OOP-KLASS模型</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/%E4%BB%A5JDBC%E4%B8%BA%E4%BE%8B%E8%B0%88%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%A0%B4%E5%9D%8F/"><span class="paginator-prev__text">以JDBC为例谈双亲委派模型的破坏</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#前言"><span class="toc-number">1.</span> <span class="toc-text">
+          前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#基础概念"><span class="toc-number">2.</span> <span class="toc-text">
+          基础概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#重载和重写"><span class="toc-number">2.1.</span> <span class="toc-text">
+          重载和重写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态和动态"><span class="toc-number">2.2.</span> <span class="toc-text">
+          静态和动态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态类型和实际类型"><span class="toc-number">2.3.</span> <span class="toc-text">
+          静态类型和实际类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#宗量"><span class="toc-number">2.4.</span> <span class="toc-text">
+          宗量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分派"><span class="toc-number">2.5.</span> <span class="toc-text">
+          分派</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解析"><span class="toc-number">2.6.</span> <span class="toc-text">
+          解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚方法和非虚方法"><span class="toc-number">2.7.</span> <span class="toc-text">
+          虚方法和非虚方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚方法表"><span class="toc-number">2.8.</span> <span class="toc-text">
+          虚方法表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态调用和动态调用"><span class="toc-number">2.9.</span> <span class="toc-text">
+          静态调用和动态调用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#静态分派和动态分派"><span class="toc-number">3.</span> <span class="toc-text">
+          静态分派和动态分派</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#静态分派"><span class="toc-number">3.1.</span> <span class="toc-text">
+          静态分派</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动态分派"><span class="toc-number">3.2.</span> <span class="toc-text">
+          动态分派</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单分派多分派"><span class="toc-number">3.3.</span> <span class="toc-text">
+          单分派多分派</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#静态多分派"><span class="toc-number">3.3.1.</span> <span class="toc-text">
+          静态多分派</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#动态单分派"><span class="toc-number">3.3.2.</span> <span class="toc-text">
+          动态单分派</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#案例说明"><span class="toc-number">4.</span> <span class="toc-text">
+          案例说明</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#案例一"><span class="toc-number">4.1.</span> <span class="toc-text">
+          案例一</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#案例二"><span class="toc-number">4.2.</span> <span class="toc-text">
+          案例二</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#案例三"><span class="toc-number">4.3.</span> <span class="toc-text">
+          案例三</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#扩展知识"><span class="toc-number">5.</span> <span class="toc-text">
+          扩展知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#伪动态双分派"><span class="toc-number">5.1.</span> <span class="toc-text">
+          伪动态双分派</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#变量的静态类型发生变化情况"><span class="toc-number">5.2.</span> <span class="toc-text">
+          变量的静态类型发生变化情况</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#静态分派的优先级匹配问题"><span class="toc-number">5.3.</span> <span class="toc-text">
+          静态分派的优先级匹配问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本类型"><span class="toc-number">5.3.1.</span> <span class="toc-text">
+          基本类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#引用类型"><span class="toc-number">5.3.2.</span> <span class="toc-text">
+          引用类型</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#回顾与总结"><span class="toc-number">6.</span> <span class="toc-text">
+          回顾与总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

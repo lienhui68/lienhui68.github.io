@@ -1,0 +1,408 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="转载自：详解Java多线程编程中LockSupport类的线程阻塞用法                     简介        LockSupport类是Java6(JSR166-JUC)引入的一个类，提供了基本的线程同步原语。LockSupport实际上是调用了Unsafe类里的函数，归结到Unsafe里，只有两个函数： 12public native void unpark(Thread">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LockSupport">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/LockSupport/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="转载自：详解Java多线程编程中LockSupport类的线程阻塞用法                     简介        LockSupport类是Java6(JSR166-JUC)引入的一个类，提供了基本的线程同步原语。LockSupport实际上是调用了Unsafe类里的函数，归结到Unsafe里，只有两个函数： 12public native void unpark(Thread">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-16T16:22:28.134Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.156Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="并发编程">
+<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>LockSupport | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/LockSupport/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">LockSupport</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.6k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">28分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>转载自：<span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/ldq2016/p/9045772.html"  target="_blank" rel="noopener">详解Java多线程编程中LockSupport类的线程阻塞用法</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h1 id="简介"   >
+          <a href="#简介" class="heading-link"><i class="fas fa-link"></i></a>简介</h1>
+      
+<p>LockSupport类是Java6(JSR166-JUC)引入的一个类，提供了基本的线程同步原语。LockSupport实际上是调用了Unsafe类里的函数，归结到Unsafe里，只有两个函数：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">unpark</span><span class="params">(Thread jthread)</span></span>;  </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">park</span><span class="params">(<span class="keyword">boolean</span> isAbsolute, <span class="keyword">long</span> time)</span></span>;</span><br></pre></td></tr></table></div></figure>
+<a id="more"></a>
+<p>isAbsolute参数是指明时间是绝对的，还是相对的。如果isAbsolute是true则会实现ms定时。如果isAbsolute是false则会实现ns定时。</p>
+<p>仅仅两个简单的接口，就<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>为上层提供了强大的同步原语</span>。</p>
+<p>先来解析下两个函数是做什么的。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>unpark函数为线程提供“许可(permit)”，线程调用park函数则等待“许可”。这个有点像信号量，但是这个“许可”是不能叠加的，“许可”是一次性的。</span></p>
+<p>比如线程B连续调用了三次unpark函数，当线程A调用park函数就使用掉这个“许可”，如果线程A再次调用park，则进入等待状态。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'><strong>注意，unpark函数可以先于park调用。比如线程B调用unpark函数，给线程A发了一个“许可”，那么当线程A调用park时，它发现已经有“许可”了，那么它会马上再继续运行</strong>。</span></p>
+<p>实际上，park函数即使没有“许可”，有时也会无理由地返回，这点等下再解析。</p>
+
+        <h1 id="park和unpark的灵活之处"   >
+          <a href="#park和unpark的灵活之处" class="heading-link"><i class="fas fa-link"></i></a>park和unpark的灵活之处</h1>
+      
+<p>上面已经提到，unpark函数可以先于park调用，这个正是它们的灵活之处。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'><strong>一个线程它有可能在别的线程unPark之前，或者之后，或者同时调用了park，那么因为park的特性，它可以不用担心自己的park的时序问题，否则，如果park必须要在unpark之前，那么给编程带来很大的麻烦！！</strong></span></p>
+<p>考虑一下，两个线程同步，要如何处理？</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在Java5里是用wait/notify/notifyAll来同步的。wait/notify机制有个很蛋疼的地方是，比如<strong>线程B要用notify通知线程A，那么线程B要确保线程A已经在wait调用上等待了，否则线程A可能永远都在等待</strong>。编程的时候就会很蛋疼。</span></p>
+<p>另外，<strong>是调用notify，还是notifyAll？</strong></p>
+<p>notify只会唤醒一个线程，如果错误地有两个线程在同一个对象上wait等待，那么又悲剧了。为了安全起见，貌似只能调用notifyAll了。</p>
+<p><strong>park/unpark模型真正解耦了线程之间的同步，线程之间不再需要一个Object或者其它变量来存储状态，不再需要关心对方的状态。</strong></p>
+
+        <h1 id="hotspot里parkunpark的实现"   >
+          <a href="#hotspot里parkunpark的实现" class="heading-link"><i class="fas fa-link"></i></a>HotSpot里park/unpark的实现</h1>
+      
+<p>每个java线程都有一个Parker实例，Parker类是这样定义的：</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parker</span> :</span> <span class="keyword">public</span> os::PlatformParker &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">volatile</span> <span class="keyword">int</span> _counter ;   <span class="comment">//计数</span></span><br><span class="line">  Parker * FreeNext ;      <span class="comment">//指向下一个Parker</span></span><br><span class="line">  JavaThread * AssociatedWith ; <span class="comment">// 指向parker所属的线程。</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  Parker() : PlatformParker() &#123;</span><br><span class="line">    _counter       = <span class="number">0</span> ;    <span class="comment">//初始化为0</span></span><br><span class="line">    FreeNext       = <span class="literal">NULL</span> ;</span><br><span class="line">    AssociatedWith = <span class="literal">NULL</span> ;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">  ~Parker() &#123; ShouldNotReachHere(); &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// For simplicity of interface with Java, all forms of park (indefinite,</span></span><br><span class="line">  <span class="comment">// relative, and absolute) are multiplexed into one call.</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">park</span><span class="params">(<span class="keyword">bool</span> isAbsolute, jlong time)</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">unpark</span><span class="params">()</span></span>;</span><br><span class="line"> </span><br><span class="line">  <span class="comment">// Lifecycle operators</span></span><br><span class="line">  <span class="function"><span class="keyword">static</span> Parker * <span class="title">Allocate</span> <span class="params">(JavaThread * t)</span> </span>;</span><br><span class="line">  <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">Release</span> <span class="params">(Parker * e)</span> </span>;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">static</span> Parker * <span class="keyword">volatile</span> FreeList ;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> ListLock ;</span><br><span class="line"> </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></div></figure>
+<p>Unsafe调用的park最终会调用Parker类的park函数，Parker继承了PlatformParker。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PlatformParker</span> :</span> <span class="keyword">public</span> CHeapObj&lt;mtInternal&gt; &#123;</span><br><span class="line">  <span class="keyword">protected</span>:</span><br><span class="line">    <span class="keyword">enum</span> &#123;</span><br><span class="line">        REL_INDEX = <span class="number">0</span>,</span><br><span class="line">        ABS_INDEX = <span class="number">1</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">int</span> _cur_index;  <span class="comment">// 条件变量数组下标，which cond is in use: -1, 0, 1</span></span><br><span class="line">    <span class="keyword">pthread_mutex_t</span> _mutex [<span class="number">1</span>] ;  <span class="comment">//pthread互斥锁</span></span><br><span class="line">    <span class="keyword">pthread_cond_t</span>  _cond  [<span class="number">2</span>] ; <span class="comment">// pthread条件变量数组,一个用于相对时间，一个用于绝对时间。</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">public</span>:       <span class="comment">// TODO-<span class="doctag">FIXME:</span> make dtor private</span></span><br><span class="line">    ~PlatformParker() &#123; guarantee (<span class="number">0</span>, <span class="string">"invariant"</span>) ; &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    PlatformParker() &#123;</span><br><span class="line">      <span class="keyword">int</span> status;</span><br><span class="line">      status = pthread_cond_init (&amp;_cond[REL_INDEX], os::Linux::condAttr());</span><br><span class="line">      assert_status(status == <span class="number">0</span>, status, <span class="string">"cond_init rel"</span>);</span><br><span class="line">      status = pthread_cond_init (&amp;_cond[ABS_INDEX], <span class="literal">NULL</span>);</span><br><span class="line">      assert_status(status == <span class="number">0</span>, status, <span class="string">"cond_init abs"</span>);</span><br><span class="line">      status = pthread_mutex_init (_mutex, <span class="literal">NULL</span>);</span><br><span class="line">      assert_status(status == <span class="number">0</span>, status, <span class="string">"mutex_init"</span>);</span><br><span class="line">      _cur_index = <span class="number">-1</span>; <span class="comment">// mark as unused</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></div></figure>
+<p>PlatformParker主要看三个成员变量，_cur_index, _mutex, _cond。其中mutex和cond就是很熟悉的glibc nptl包中符合posix标准的线程同步工具，一个互斥锁一个条件变量。再看thread和Parker的关系，在hotspot的Thread类的NamedThread内部类中有一个 Parker成员变量。说明parker是每线程变量，在创建线程的时候就会生成一个parker实例。</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// JSR166 per-thread parker</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  Parker*    _parker;</span><br></pre></td></tr></table></div></figure>
+<p>可以看到Parker类实际上用Posix(可移值性操作系统接口)的mutex，condition来实现的。</p>
+<p>在Parker类里的<code>_counter</code>字段，就是用来记录所谓的“许可”的。</p>
+<p>当调用park时，先尝试直接能否直接拿到“许可”，即<code>_counter</code>&gt;0时，如果成功，则把<code>_counter</code>设置为0,并返回：</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Parker::park</span><span class="params">(<span class="keyword">bool</span> isAbsolute, jlong time)</span> </span>&#123;  </span><br><span class="line">  <span class="comment">// Ideally we'd do something useful while spinning, such  </span></span><br><span class="line">  <span class="comment">// as calling unpackTime().  </span></span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Optional fast-path check:  </span></span><br><span class="line">  <span class="comment">// Return immediately if a permit is available.  </span></span><br><span class="line">  <span class="comment">// We depend on Atomic::xchg() having full barrier semantics  </span></span><br><span class="line">  <span class="comment">// since we are doing a lock-free update to _counter.  </span></span><br><span class="line">  <span class="keyword">if</span> (Atomic::xchg(<span class="number">0</span>, &amp;_counter) &gt; <span class="number">0</span>) <span class="keyword">return</span>;</span><br></pre></td></tr></table></div></figure>
+<p>如果不成功，则构造一个ThreadBlockInVM，然后检查<code>_counter</code>是不是&gt;0，如果是，则把<code>_counter</code>设置为0，unlock mutex并返回：</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ThreadBlockInVM <span class="title">tbivm</span><span class="params">(jt)</span></span>;  </span><br><span class="line"><span class="keyword">if</span> (_counter &gt; <span class="number">0</span>)  &#123; <span class="comment">// no wait needed  </span></span><br><span class="line">  _counter = <span class="number">0</span>;  </span><br><span class="line">  status = pthread_mutex_unlock(_mutex);</span><br></pre></td></tr></table></div></figure>
+<p>否则，再判断等待的时间，然后再调用pthread_cond_wait函数等待，如果等待返回，则把<code>_counter</code>设置为0，unlock mutex并返回：</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (time == <span class="number">0</span>) &#123;  </span><br><span class="line">  status = pthread_cond_wait (_cond, _mutex) ;  </span><br><span class="line">&#125;  </span><br><span class="line">_counter = <span class="number">0</span> ;  </span><br><span class="line">status = pthread_mutex_unlock(_mutex) ;  </span><br><span class="line">assert_status(status == <span class="number">0</span>, status, <span class="string">"invariant"</span>) ;  </span><br><span class="line">OrderAccess::fence();</span><br></pre></td></tr></table></div></figure>
+<p>park完整实现：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Parker::park</span><span class="params">(<span class="keyword">bool</span> isAbsolute, jlong time)</span> </span>&#123;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//原子交换，如果_counter &gt; 0,则将_counter置为0，直接返回，否则_counter为0</span></span><br><span class="line">  <span class="keyword">if</span> (Atomic::xchg(<span class="number">0</span>, &amp;_counter) &gt; <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line">  <span class="comment">//获取当前线程</span></span><br><span class="line">  Thread* thread = Thread::current();</span><br><span class="line">  assert(thread-&gt;is_Java_thread(), <span class="string">"Must be JavaThread"</span>);</span><br><span class="line">  <span class="comment">//下转型为java线程</span></span><br><span class="line">  JavaThread *jt = (JavaThread *)thread;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">  <span class="comment">//如果当前线程设置了中断标志，调用park则直接返回，所以如果在park之前调用了</span></span><br><span class="line">  <span class="comment">//interrupt就会直接返回</span></span><br><span class="line">  <span class="keyword">if</span> (Thread::is_interrupted(thread, <span class="literal">false</span>)) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="comment">// 高精度绝对时间变量</span></span><br><span class="line">  timespec absTime;</span><br><span class="line">  <span class="comment">//如果time小于0，或者isAbsolute是true并且time等于0则直接返回</span></span><br><span class="line">  <span class="keyword">if</span> (time &lt; <span class="number">0</span> || (isAbsolute &amp;&amp; time == <span class="number">0</span>) ) &#123; <span class="comment">// don't wait at all</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//如果time大于0，则根据是否是高精度定时计算定时时间</span></span><br><span class="line">  <span class="keyword">if</span> (time &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    unpackTime(&amp;absTime, isAbsolute, time);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">  <span class="comment">//进入安全点避免死锁</span></span><br><span class="line">  <span class="function">ThreadBlockInVM <span class="title">tbivm</span><span class="params">(jt)</span></span>;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">  <span class="comment">//如果当前线程设置了中断标志，或者获取mutex互斥锁失败则直接返回</span></span><br><span class="line">  <span class="comment">//由于Parker是每个线程都有的，所以_counter cond mutex都是每个线程都有的，</span></span><br><span class="line">  <span class="comment">//不是所有线程共享的所以加锁失败只有两种情况，第一unpark已经加锁这时只需要返回即可，</span></span><br><span class="line">  <span class="comment">//第二调用调用pthread_mutex_trylock出错。对于第一种情况就类似是unpark先调用的情况，所以</span></span><br><span class="line">  <span class="comment">//直接返回。</span></span><br><span class="line">  <span class="keyword">if</span> (Thread::is_interrupted(thread, <span class="literal">false</span>) || pthread_mutex_trylock(_mutex) != <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">int</span> status ;</span><br><span class="line">  <span class="comment">//如果_counter大于0，说明unpark已经调用完成了将_counter置为了1，</span></span><br><span class="line">  <span class="comment">//现在只需将_counter置0，解锁，返回</span></span><br><span class="line">  <span class="keyword">if</span> (_counter &gt; <span class="number">0</span>)  &#123; <span class="comment">// no wait needed</span></span><br><span class="line">    _counter = <span class="number">0</span>;</span><br><span class="line">    status = pthread_mutex_unlock(_mutex);</span><br><span class="line">    assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">    OrderAccess::fence();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">  <span class="function">OSThreadWaitState <span class="title">osts</span><span class="params">(thread-&gt;osthread(), <span class="literal">false</span> <span class="comment">/* not Object.wait() */</span>)</span></span>;</span><br><span class="line">  jt-&gt;set_suspend_equivalent();</span><br><span class="line">  <span class="comment">// cleared by handle_special_suspend_equivalent_condition() or java_suspend_self()</span></span><br><span class="line"> </span><br><span class="line">  assert(_cur_index == <span class="number">-1</span>, <span class="string">"invariant"</span>);</span><br><span class="line">  <span class="comment">//如果time等于0，说明是相对时间也就是isAbsolute是fasle(否则前面就直接返回了),则直接挂起</span></span><br><span class="line">  <span class="keyword">if</span> (time == <span class="number">0</span>) &#123;</span><br><span class="line">    _cur_index = REL_INDEX; <span class="comment">// arbitrary choice when not timed</span></span><br><span class="line">    status = pthread_cond_wait (&amp;_cond[_cur_index], _mutex) ;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">//如果time非0</span></span><br><span class="line">    <span class="comment">//判断isAbsolute是false还是true，false的话使用_cond[0]，否则用_cond[1]</span></span><br><span class="line">    _cur_index = isAbsolute ? ABS_INDEX : REL_INDEX;</span><br><span class="line">    <span class="comment">//使用条件变量使得当前线程挂起。</span></span><br><span class="line">    status = os::Linux::safe_cond_timedwait (&amp;_cond[_cur_index], _mutex, &amp;absTime) ;</span><br><span class="line">    <span class="comment">//如果挂起失败则销毁当前的条件变量重新初始化。</span></span><br><span class="line">    <span class="keyword">if</span> (status != <span class="number">0</span> &amp;&amp; WorkAroundNPTLTimedWaitHang) &#123;</span><br><span class="line">      pthread_cond_destroy (&amp;_cond[_cur_index]) ;</span><br><span class="line">      pthread_cond_init    (&amp;_cond[_cur_index], isAbsolute ? <span class="literal">NULL</span> : os::Linux::condAttr());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="comment">//如果pthread_cond_wait成功则以下代码都是线程被唤醒后执行的。</span></span><br><span class="line">  _cur_index = <span class="number">-1</span>;</span><br><span class="line">  assert_status(status == <span class="number">0</span> || status == EINTR ||</span><br><span class="line">                status == ETIME || status == ETIMEDOUT,</span><br><span class="line">                status, <span class="string">"cond_timedwait"</span>);</span><br><span class="line"> </span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> ASSERT</span></span><br><span class="line">  pthread_sigmask(SIG_SETMASK, &amp;oldsigs, <span class="literal">NULL</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  <span class="comment">//将_counter变量重新置为1</span></span><br><span class="line">  _counter = <span class="number">0</span> ;</span><br><span class="line">  <span class="comment">//解锁</span></span><br><span class="line">  status = pthread_mutex_unlock(_mutex) ;</span><br><span class="line">  assert_status(status == <span class="number">0</span>, status, <span class="string">"invariant"</span>) ;</span><br><span class="line">  <span class="comment">// 使用内存屏障使_counter对其它线程可见</span></span><br><span class="line">  OrderAccess::fence();</span><br><span class="line"> </span><br><span class="line">  <span class="comment">// 如果在park线程挂起的时候调用了stop或者suspend则还需要将线程挂起不能返回</span></span><br><span class="line">  <span class="keyword">if</span> (jt-&gt;handle_special_suspend_equivalent_condition()) &#123;</span><br><span class="line">    jt-&gt;java_suspend_self();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>当unpark时，则简单多了，直接设置<code>_counter</code>为1，再unlock mutex返回。如果<code>_counter</code>之前的值是0，则还要调用pthread_cond_signal唤醒在park中等待的线程。也就是unpark主要是根据counter和cur_index判断当前线程是否挂在条件变量上，如果是则signal，否则就什么也不做。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Parker::unpark</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> s, status ;</span><br><span class="line">  <span class="comment">//加互斥锁</span></span><br><span class="line">  status = pthread_mutex_lock(_mutex);</span><br><span class="line">  assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>) ;</span><br><span class="line">  s = _counter;</span><br><span class="line">  _counter = <span class="number">1</span>; <span class="comment">//将_counter置1</span></span><br><span class="line">  <span class="comment">//如果_counter是0则说明调用了park或者没调用(初始为counter0）</span></span><br><span class="line">  <span class="comment">//这也说明park和unpark调用没有先后顺序。</span></span><br><span class="line">  <span class="keyword">if</span> (s &lt; <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="comment">// 说明当前parker对应的线程挂起了，因为_cur_index初始是-1，并且等待条件变量的线程被唤醒</span></span><br><span class="line">    <span class="comment">//后也会将_cur_index重置-1</span></span><br><span class="line">    <span class="keyword">if</span> (_cur_index != <span class="number">-1</span>) &#123;</span><br><span class="line">       <span class="comment">//如果设置了WorkAroundNPTLTimedWaitHang先调用signal再调用unlock，否则相反</span></span><br><span class="line">      <span class="comment">//这两个先后顺序都可以，在hotspot在Linux下默认使用这种方式</span></span><br><span class="line">      <span class="comment">//即先调用signal再调用unlock</span></span><br><span class="line">      <span class="keyword">if</span> (WorkAroundNPTLTimedWaitHang) &#123;</span><br><span class="line">        status = pthread_cond_signal (&amp;_cond[_cur_index]);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">        status = pthread_mutex_unlock(_mutex);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        status = pthread_mutex_unlock(_mutex);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">        status = pthread_cond_signal (&amp;_cond[_cur_index]);</span><br><span class="line">        assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; <span class="comment">//如果_cur_index == -1说明线程没在等待条件变量，则直接解锁</span></span><br><span class="line">      pthread_mutex_unlock(_mutex);</span><br><span class="line">      assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>) ;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;<span class="comment">//如果_counter == 1,说明线程调用了一次或多次unpark但是没调用park，则直接解锁</span></span><br><span class="line">    pthread_mutex_unlock(_mutex);</span><br><span class="line">    assert (status == <span class="number">0</span>, <span class="string">"invariant"</span>) ;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></div></figure>
+<p>简而言之，park和unpark和核心就是counter cur_index, mutex,cond，通过使用条件变量对counter进行操作，在调用park的时候如果counter是0则会去执行挂起的流程，否则返回，在挂起恢复后再将counter置为0。在unpark的时候如果counter是0则会执行唤醒的流程，否则不执行唤醒流程，并且不管什么情况始终将counter置为1。<br />
+<strong>值得注意的是在park函数里，调用pthread_cond_wait时，并没有用while来判断，所以posix condition里的&quot;Spurious wakeup&quot;一样会传递到上层Java的代码里。</strong></p>
+<p>关于&quot;Spurious wakeup&quot;，参考上一篇blog：<span class="exturl"><a class="exturl__link"   href="http://blog.csdn.net/hengyunabc/article/details/27969613"  target="_blank" rel="noopener">http://blog.csdn.net/hengyunabc/article/details/27969613</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (time == <span class="number">0</span>) &#123;  </span><br><span class="line">  status = pthread_cond_wait (_cond, _mutex) ;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这也就是为什么Java dos里提到，当下面三种情况下park函数会返回：</p>
+<ul>
+<li>Some other thread invokes unpark with the current thread as the target; or</li>
+<li>Some other thread interrupts the current thread; or</li>
+<li><strong>The call spuriously (that is, for no reason) returns.</strong></li>
+</ul>
+<p>相关的实现代码在：</p>
+<p><span class="exturl"><a class="exturl__link"   href="http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/share/vm/runtime/park.hpp"  target="_blank" rel="noopener">http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/share/vm/runtime/park.hpp</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span><br />
+<span class="exturl"><a class="exturl__link"   href="http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/share/vm/runtime/park.cpp"  target="_blank" rel="noopener">http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/share/vm/runtime/park.cpp</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span><br />
+<span class="exturl"><a class="exturl__link"   href="http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/os/linux/vm/os_linux.hpp"  target="_blank" rel="noopener">http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/os/linux/vm/os_linux.hpp</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span><br />
+<span class="exturl"><a class="exturl__link"   href="http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/os/linux/vm/os_linux.cpp"  target="_blank" rel="noopener">http://hg.openjdk.java.net/jdk7/jdk7/hotspot/file/81d815b05abb/src/os/linux/vm/os_linux.cpp</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h1 id="其它的一些东东"   >
+          <a href="#其它的一些东东" class="heading-link"><i class="fas fa-link"></i></a>其它的一些东东</h1>
+      
+<p>Parker类在分配内存时，使用了一个技巧，重载了new函数来实现了cache line对齐。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// We use placement-new to force ParkEvent instances to be  </span></span><br><span class="line"><span class="comment">// aligned on 256-byte address boundaries.  This ensures that the least  </span></span><br><span class="line"><span class="comment">// significant byte of a ParkEvent address is always 0.  </span></span><br><span class="line">   </span><br><span class="line"><span class="function"><span class="keyword">void</span> * <span class="keyword">operator</span> <span class="title">new</span> <span class="params">(<span class="keyword">size_t</span> sz)</span> </span>;</span><br></pre></td></tr></table></div></figure>
+<p>Parker里使用了一个无锁的队列在分配释放Parker实例：</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="keyword">int</span> Parker::ListLock = <span class="number">0</span> ;  </span><br><span class="line">Parker * <span class="keyword">volatile</span> Parker::FreeList = <span class="literal">NULL</span> ;  </span><br><span class="line">  </span><br><span class="line"><span class="function">Parker * <span class="title">Parker::Allocate</span> <span class="params">(JavaThread * t)</span> </span>&#123;  </span><br><span class="line">  guarantee (t != <span class="literal">NULL</span>, <span class="string">"invariant"</span>) ;  </span><br><span class="line">  Parker * p ;  </span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Start by trying to recycle an existing but unassociated  </span></span><br><span class="line">  <span class="comment">// Parker from the global free list.  </span></span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;  </span><br><span class="line">    p = FreeList ;  </span><br><span class="line">    <span class="keyword">if</span> (p  == <span class="literal">NULL</span>) <span class="keyword">break</span> ;  </span><br><span class="line">    <span class="comment">// 1: Detach  </span></span><br><span class="line">    <span class="comment">// Tantamount to p = Swap (&amp;FreeList, NULL)  </span></span><br><span class="line">    <span class="keyword">if</span> (Atomic::cmpxchg_ptr (<span class="literal">NULL</span>, &amp;FreeList, p) != p) &#123;  </span><br><span class="line">       <span class="keyword">continue</span> ;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">// We've detached the list.  The list in-hand is now  </span></span><br><span class="line">    <span class="comment">// local to this thread.   This thread can operate on the  </span></span><br><span class="line">    <span class="comment">// list without risk of interference from other threads.  </span></span><br><span class="line">    <span class="comment">// 2: Extract -- pop the 1st element from the list.  </span></span><br><span class="line">    Parker * List = p-&gt;FreeNext ;  </span><br><span class="line">    <span class="keyword">if</span> (List == <span class="literal">NULL</span>) <span class="keyword">break</span> ;  </span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;  </span><br><span class="line">        <span class="comment">// 3: Try to reattach the residual list  </span></span><br><span class="line">        guarantee (List != <span class="literal">NULL</span>, <span class="string">"invariant"</span>) ;  </span><br><span class="line">        Parker * Arv =  (Parker *) Atomic::cmpxchg_ptr (List, &amp;FreeList, <span class="literal">NULL</span>) ;  </span><br><span class="line">        <span class="keyword">if</span> (Arv == <span class="literal">NULL</span>) <span class="keyword">break</span> ;  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">// New nodes arrived.  Try to detach the recent arrivals.  </span></span><br><span class="line">        <span class="keyword">if</span> (Atomic::cmpxchg_ptr (<span class="literal">NULL</span>, &amp;FreeList, Arv) != Arv) &#123;  </span><br><span class="line">            <span class="keyword">continue</span> ;  </span><br><span class="line">        &#125;  </span><br><span class="line">        guarantee (Arv != <span class="literal">NULL</span>, <span class="string">"invariant"</span>) ;  </span><br><span class="line">        <span class="comment">// 4: Merge Arv into List  </span></span><br><span class="line">        Parker * Tail = List ;  </span><br><span class="line">        <span class="keyword">while</span> (Tail-&gt;FreeNext != <span class="literal">NULL</span>) Tail = Tail-&gt;FreeNext ;  </span><br><span class="line">        Tail-&gt;FreeNext = Arv ;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">break</span> ;  </span><br><span class="line">  &#125;  </span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (p != <span class="literal">NULL</span>) &#123;  </span><br><span class="line">    guarantee (p-&gt;AssociatedWith == <span class="literal">NULL</span>, <span class="string">"invariant"</span>) ;  </span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">    <span class="comment">// Do this the hard way -- materialize a new Parker..  </span></span><br><span class="line">    <span class="comment">// In rare cases an allocating thread might detach  </span></span><br><span class="line">    <span class="comment">// a long list -- installing null into FreeList --and  </span></span><br><span class="line">    <span class="comment">// then stall.  Another thread calling Allocate() would see  </span></span><br><span class="line">    <span class="comment">// FreeList == null and then invoke the ctor.  In this case we  </span></span><br><span class="line">    <span class="comment">// end up with more Parkers in circulation than we need, but  </span></span><br><span class="line">    <span class="comment">// the race is rare and the outcome is benign.  </span></span><br><span class="line">    <span class="comment">// Ideally, the # of extant Parkers is equal to the  </span></span><br><span class="line">    <span class="comment">// maximum # of threads that existed at any one time.  </span></span><br><span class="line">    <span class="comment">// Because of the race mentioned above, segments of the  </span></span><br><span class="line">    <span class="comment">// freelist can be transiently inaccessible.  At worst  </span></span><br><span class="line">    <span class="comment">// we may end up with the # of Parkers in circulation  </span></span><br><span class="line">    <span class="comment">// slightly above the ideal.  </span></span><br><span class="line">    p = <span class="keyword">new</span> Parker() ;  </span><br><span class="line">  &#125;  </span><br><span class="line">  p-&gt;AssociatedWith = t ;          <span class="comment">// Associate p with t  </span></span><br><span class="line">  p-&gt;FreeNext       = <span class="literal">NULL</span> ;  </span><br><span class="line">  <span class="keyword">return</span> p ;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Parker::Release</span> <span class="params">(Parker * p)</span> </span>&#123;  </span><br><span class="line">  <span class="keyword">if</span> (p == <span class="literal">NULL</span>) <span class="keyword">return</span> ;  </span><br><span class="line">  guarantee (p-&gt;AssociatedWith != <span class="literal">NULL</span>, <span class="string">"invariant"</span>) ;  </span><br><span class="line">  guarantee (p-&gt;FreeNext == <span class="literal">NULL</span>      , <span class="string">"invariant"</span>) ;  </span><br><span class="line">  p-&gt;AssociatedWith = <span class="literal">NULL</span> ;  </span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;  </span><br><span class="line">    <span class="comment">// Push p onto FreeList  </span></span><br><span class="line">    Parker * List = FreeList ;  </span><br><span class="line">    p-&gt;FreeNext = List ;  </span><br><span class="line">    <span class="keyword">if</span> (Atomic::cmpxchg_ptr (p, &amp;FreeList, List) == List) <span class="keyword">break</span> ;  </span><br><span class="line">  &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<ol>
+<li>LockSupport中的park、unpark调用的unsafe里的park、unpark方法</li>
+<li>park和unpark使用volatile 内存屏障保证可见性。</li>
+<li>hotspot实现，每个Java线程都有一个Paker实例，实例维护了一个volatile变量counter(所谓的许可)，Parker类实际上用Posix的mutex，condition来实现的。</li>
+<li>通过lock和unlock对mutex互斥访问</li>
+<li>cas Atomic::xchg来对counter进行赋值操作</li>
+<li>park, 如果count&lt;=0 wait， count&gt;0后被唤醒，最后unlock mutex</li>
+<li>unpark， 先lock mutex， 如果之前count=0则singal，如果之前count&gt;0 执行unlock mutex</li>
+<li>synchronized是使用unsafe的monitorEnter和monitorExit实现的，底层使用lock指令</li>
+</ol>
+
+        <h1 id="扯谈"   >
+          <a href="#扯谈" class="heading-link"><i class="fas fa-link"></i></a>扯谈</h1>
+      
+<p><strong>JUC(Java Util Concurrency)仅用简单的park, unpark和CAS指令就实现了各种高级同步数据结构，而且效率很高，令人惊叹。</strong></p>
+<p>在C++程序员各种自制轮子的时候，Java程序员则有很丰富的并发数据结构，如lock，latch，queue，map等信手拈来。</p>
+<p>要知道像C<ins>直到C</ins>11才有标准的线程库，同步原语，但离高级的并发数据结构还有很远。boost库有提供一些线程，同步相关的类，但也是很简单的。Intel的tbb有一些高级的并发数据结构，但是国内boost都用得少，更别说tbb了。</p>
+<p>最开始研究无锁算法的是C/C<ins>程序员，但是后来很多Java程序员，或者类库开始自制各种高级的并发数据结构，经常可以看到有分析Java并发包的文章。反而C/C</ins>程序员总是在分析无锁的队列算法。高级的并发数据结构，比如并发的HashMap，没有看到有相关的实现或者分析的文章。在C++11之后，这种情况才有好转。</p>
+<p>因为正确高效实现一个Concurrent Hash Map是很困难的，要对内存CPU有深刻的认识，而且还要面对CPU不断升级带来的各种坑。</p>
+<p>我认为真正值得信赖的C++并发库，只有Intel的tbb和微软的PPL。</p>
+<p><span class="exturl"><a class="exturl__link"   href="https://software.intel.com/en-us/node/506042"  target="_blank" rel="noopener">https://software.intel.com/en-us/node/506042</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>   Intel® Threading Building Blocks</p>
+<p><span class="exturl"><a class="exturl__link"   href="http://msdn.microsoft.com/en-us/library/dd492418.aspx"  target="_blank" rel="noopener">http://msdn.microsoft.com/en-us/library/dd492418.aspx</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>  Parallel Patterns Library (PPL)</p>
+<p>另外FaceBook也开源了一个C++的类库，里面也有并发数据结构。</p>
+<p><span class="exturl"><a class="exturl__link"   href="https://github.com/facebook/folly"  target="_blank" rel="noopener">https://github.com/facebook/folly</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/LockSupport/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/LockSupport/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/cas/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">cas</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8/"><span class="paginator-prev__text">并发容器</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#简介"><span class="toc-number">1.</span> <span class="toc-text">
+          简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#park和unpark的灵活之处"><span class="toc-number">2.</span> <span class="toc-text">
+          park和unpark的灵活之处</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#hotspot里parkunpark的实现"><span class="toc-number">3.</span> <span class="toc-text">
+          HotSpot里park&#x2F;unpark的实现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其它的一些东东"><span class="toc-number">4.</span> <span class="toc-text">
+          其它的一些东东</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">5.</span> <span class="toc-text">
+          总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#扯谈"><span class="toc-number">6.</span> <span class="toc-text">
+          扯谈</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

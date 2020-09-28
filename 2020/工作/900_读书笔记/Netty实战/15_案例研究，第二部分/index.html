@@ -1,0 +1,652 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章主要内容  Facebook 的案例研究 Twitter 的案例研究">
+<meta property="og:type" content="article">
+<meta property="og:title" content="案例研究，第二部分">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/15_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章主要内容  Facebook 的案例研究 Twitter 的案例研究">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915213224.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915213740.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915214434.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915215356.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915215426.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915220910.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916082958.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083026.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083110.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083148.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083215.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083239.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083717.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083738.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083831.png">
+<meta property="article:published_time" content="2020-08-01T01:04:15.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.616Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200915213224.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>案例研究，第二部分 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/15_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">案例研究，第二部分</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-08-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">10.5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">57分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章主要内容</strong></p>
+<ul>
+<li>Facebook 的案例研究</li>
+<li>Twitter 的案例研究</li>
+</ul>
+<a id="more"></a>
+<p>在本章中，我们将看到 Facebook 和 Twitter（两个最流行的社交网络）是如何使用 Netty 的。他们都利用了 Netty 灵活和通用的设计来构建框架和服务，以满足对极端伸缩性以及可扩 展性的需求。</p>
+<p>这里所呈现的案例研究都是由那些负责设计和实现所述解决方案的工程师所撰写的。</p>
+
+        <h1 id="netty在facebook的使用nifty和swift"   >
+          <a href="#netty在facebook的使用nifty和swift" class="heading-link"><i class="fas fa-link"></i></a>Netty在Facebook的使用：Nifty和Swift</h1>
+      
+<p><strong>Andrew Cox，Facebook 软件工程师</strong></p>
+<p>在 Facebook，我们在我们的几个后端服务中使用了 Netty（用于处理来自手机应用程序的消 息通信、用于 HTTP 客户端等），但是我们增长最快的用法还是通过我们所开发的用来构建 Java 的 Thrift 服务的两个新框架：Nifty 和 Swift。</p>
+
+        <h2 id="什么是thrift"   >
+          <a href="#什么是thrift" class="heading-link"><i class="fas fa-link"></i></a>什么是Thrift</h2>
+      
+<p>Thrift是一个用来构建服务和客户端的框架， 其通过远程过程调用（RPC）来进行通信。 它最初是在Facebook开发的 ， 用以满足我们构建能够处理客户端和服务器之间的特定类型 的接口不匹配的服务的需要。 这种方式十分便捷， 因为服务器和它们的客户端通常不能全部 同时升级。</p>
+<blockquote>
+<p>Thrift的版本管理是通过字段标识符来实现的。对于每个被Thrift编码的结构的域头，都有一个唯一的字段标识符，这个字段标识符和它的类型说明符构成了对这个字段独一无二的识别。</p>
+<p>Thrift定义语言支持字段标识符的自动分配，但是好的程序实践中是明确指出字段标识符。</p>
+</blockquote>
+<p>Thrift 的另一个重要的特点是它可以被用于多种语言。这使得在 Facebook 的团队可以为工作选择正确的语言， 而不必担心他们是否能够找到和其他的服务相互交互的客户端代码。 在 Facebook，Thrift 已经成为我们的后端服务之间相互通信的主要方式之一，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'> 同时它还被用于非 RPC 的序列化任务，因为它提供了一个通用的、紧凑的存储格式，能够被多种语言读取，以便后续处理。</span></p>
+<p>自从Thrift在Facebook被开发以来，它已经作为一个Apache项目（<span class="exturl"><a class="exturl__link"   href="http://thrift.apache.org/%EF%BC%89%E5%BC%80"  target="_blank" rel="noopener">http://thrift.apache.org/）开</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 源了，在那里它将继续成长以满足服务开发人员的需要，不止在Facebook有使用，在其他公司也 有使用，<span class="exturl"><a class="exturl__link"   href="http://xn--Evernotelast-5l2ur25c.fm"  target="_blank" rel="noopener">如Evernote和last.fm</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> ，以及主要的开源项目如Apache Cassandra和HBase等。</p>
+<p>下面是 Thrift 的主要组件：</p>
+<ul>
+<li>Thrift 的接口定义语言（IDL）——用来定义你的服务，并且编排你的服务将要发送和接收的任何自定义类型；</li>
+<li>协议——用来控制将数据元素编码/解码为一个通用的二进制格式（如 Thrift 的二进制协议或者 JSON）；</li>
+<li>传输—提供了一个用于读/写不同媒体（如 TCP 套接字、管道、内存缓冲区）的通用接口；</li>
+<li>Thrift 编译器——解析 Thrift 的 IDL 文件以生成用于服务器和客户端的存根代码，以及在 IDL 中定义的自定义类型的序列化/反序列化代码；</li>
+<li>服务器实现—处理接受连接、从这些连接中读取请求、派发调用到实现了这些接口的对象，以及将响应发回给客户端；</li>
+<li>客户端实现——将方法调用转换为请求，并将它们发送给服务器。</li>
+</ul>
+
+        <h2 id="使用netty改善java-thrift的现状"   >
+          <a href="#使用netty改善java-thrift的现状" class="heading-link"><i class="fas fa-link"></i></a>使用Netty改善Java Thrift的现状</h2>
+      
+<p>Thrift 的 Apache 分发版本已经被移植到了大约 20 种不同的语言，而且还有用于其他语言的 和 Thrift 相互兼容的独立框架（Twitter 的用于 Scala 的 Finagle 便是一个很好的例子）。这些语言 中的一些在 Facebook 多多少少有被使用，但是在 Facebook 最常用的用来编写 Thrift 服务的还是 C++和 Java。</p>
+<blockquote>
+<p>Libevent 是一个用C语言编写的、轻量级的开源高性能事件通知库，主要有以下几个亮点：事件驱动（ event-driven），高性能;轻量级，专注于网络，不如 ACE 那么臃肿庞大；源代码相当精炼、易读；跨平台，支持 Windows、 Linux、 *BSD 和 Mac Os；支持多种 I/O 多路复用工作， epoll、 poll、 dev/poll、 select 和 kqueue 等；支持 I/O，定时器和信号等事件；注册事件优先级。</p>
+</blockquote>
+<p>当我加入Facebook时，我们已经在使用C++围绕着libevent，顺利地开发可靠的、高性能的、 异步的Thrift实现了。通过libevent，我们得到了OS API之上的跨平台的异步I/O抽象，但是libevent 并不会比，比如说，原始的Java NIO，更加容易使用。因此，我们也在其上构建了抽象，如异步 的消息通道，同时我们还使用了来自Folly 的链式缓冲区尽可能地避免复制。这个框架还具有一 个支持带有多路复用的异步调用的客户端实现，以及一个支持异步的请求处理的服务器实现。（该服务器可以启动一个异步任务来处理请求并立即返回，随后在响应就绪时调用一个回调或者稍后设置一个 Future 。）</p>
+<blockquote>
+<p>Folly 是 Facebook 的开源 C++公共库</p>
+</blockquote>
+<p>同时，我们的 Java Thrift 框架却很少受到关注，而且我们的负载测试工具显示 Java 版本的性 能明显落后于 C<ins>版本。虽然已经有了构建于 NIO 之上的 Java Thrift 框架，并且异步的基于 NIO 的客户端也可用。但是该客户端不支持流水线化以及请求的多路复用，而服务器也不支持异步的 请求处理。由于这些缺失的特性，在 Facebook，这里的 Java Thrift 服务开发人员遇到了那些在 C</ins>（的 Thrift 框架）中已经解决了的问题，并且它也成为了挫败感的源泉。</p>
+<p>我们本来可以在 NIO 之上构建一个类似的自定义框架，并在那之上构建我们新的 Java Thrift 实现，就如同我们为 C++版本的实现所做的一样。但是经验告诉我们，这需要巨大的工作量才能 完成，不过碰巧，我们所需要的框架已经存在了，只等着我们去使用它：Netty。</p>
+<p>我们很快地组装了一个服务器实现，并且将名字“Netty”和“Thrift”混在一起，为新的服 务器实现提出了“Nifty”这个名字。相对于在 C++版本中达到同样的效果我们所需要做的一切， 那么少的代码便可以使得 Nifty 工作，这立即就让人印象深刻。</p>
+<p>接下来，我们使用 Nifty 构建了一个简单的用于负载测试的 Thrift 服务器，并且使用我们的 负载测试工具，将它和我们现有的服务器进行了对比。结果是显而易见的：Nifty 的表现要优于 其他的 NIO 服务器，而且和我们最新的 C++版本的 Thrift 服务器的结果也不差上下。使用 Netty 就是为了要提高性能！</p>
+
+        <h2 id="nifty服务器的设计"   >
+          <a href="#nifty服务器的设计" class="heading-link"><i class="fas fa-link"></i></a>Nifty服务器的设计</h2>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Nifty（<span class="exturl"><a class="exturl__link"   href="https://github.com/facebook/nifty%EF%BC%89%E6%98%AF%E4%B8%80%E4%B8%AA%E5%BC%80%E6%BA%90%E7%9A%84%E3%80%81%E4%BD%BF%E7%94%A8"  target="_blank" rel="noopener">https://github.com/facebook/nifty）是一个开源的、使用</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> Apache 许可的、构建于 Apache Thrift 库之上的 Thrift 客户端/服务器实现。 </span>它被专门设计， 以便无缝地从任何其他的 Java Thrift 服务器实现迁移过来：<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>你可以重用相同的 Thrift IDL 文件、相同的 Thrift 代码生成 器（与 Apache Thrift 库打包在一起）， 以及相同的服务接口实现</span>。 <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>唯一真正需要改变的只是你的服务器的启动代码（Nifty 的设置风格与 Apache Thrift 中的传统的 Thrift 服务器实现稍微 有所不同）</span>。</p>
+
+        <h3 id="nifty的编码器解码器"   >
+          <a href="#nifty的编码器解码器" class="heading-link"><i class="fas fa-link"></i></a>Nifty的编码器/解码器</h3>
+      
+<p>默认的 Nifty 服务器能处理普通消息或者分帧消息（带有 4 字节的前缀）。它通过使用自定义 的 Netty 帧解码器做到了这一点，其首先查看前几个字节，以确定如何对剩余的部分进行解码。 然后，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>当发现了一个完整的消息时，解码器将会把消息的内容和一个指示了消息类型的字段包装 在一起</span>。服务器随后将会根据该字段来以相同的格式对响应进行编码。</p>
+<p>Nifty 还支持接驳你自己的自定义编解码器。例如，我们的一些服务使用了自定义的编解码 器来从客户端在每条消息前面所插入的头部中读取额外的信息（包含可选的元数据、客户端的能 力等）。解码器也可以被方便地扩展以处理其他类型的消息传输，如 HTTP。</p>
+
+        <h3 id="在服务器上排序响应"   >
+          <a href="#在服务器上排序响应" class="heading-link"><i class="fas fa-link"></i></a>在服务器上排序响应</h3>
+      
+<p>Java Thrift 的初始版本使用了 OIO 套接字，并且服务器为每个活动连接都维护了一个线程。使用这种设置，在下一个响应被读取之前，每个请求都将在同一个线程中被读取、处理和应答。 这保证了响应将总会以对应的请求所到达的顺序返回。</p>
+<p>较新的异步 I/O 的服务器实现诞生了，其不需要每个连接一个线程，而且这些服务器可以处理更多的并发连接，但是客户端仍然主要使用同步 I/O，因此服务器可以期望它在发送当前响应 之前，不会收到下一个请求。这个请求/执行流如图 15-1 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915213224.png"  alt="" />
+      </p>
+<p>客户端最初的伪异步用法开始于一些 Thrift 用户利用的一项事实：<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>对于一个生成的客户端方 法 foo() 来说，方法 send_foo() 和 recv_foo() 将会被单独暴露出来。这使得 Thrift 用户可 以发送多个请求（无论是在多个客户端上，还是在同一个客户端上），然后调用相应的接收方法 来开始等待并收集结果</span>。</p>
+<p>在这个新的场景下， 服务器可能会在它完成处理第一个请求之前， 从单个客户端读取多 个请求。 在一个理想的世界中， 我们可以假设所有流水线化请求的异步 Thrift 客户端都能够 处理以任意顺序到达的这些请求所对应的响应。 然而， 在现实生活中， 虽然新的客户端可以 处理这种情况， 而那些旧一点的异步 Thrift 客户端可能会写出多个请求， 但是必须要求按顺 序接收响应。</p>
+<p>这种问题可以通过使用 Netty 4 的 EventExecutor 或者 Netty 3.x 中的 OrderedMemory- AwareThreadPoolExcecutor 解决，其能够保证顺序地处理同一个连接上的所有传入消息， 而不会强制所有这些消息都在同一个执行器线程上运行。</p>
+<p>图 15-2 展示了<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>流水线化的请求</span>是如何被以正确的顺序处理的，这也就意味着对应于第一个 请求的响应将会被首先返回，然后是对应于第二个请求的响应，以此类推。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915213740.png"  alt="" />
+      </p>
+<blockquote>
+<p>上面两个例子展示了同步客户端 vs 异步客户端，对应 rpc中 客户端的同步调用和异步调用</p>
+<p>客户端使用异步调用可以改造成同步调用，使用对回调方法返回对象加锁的方式实现同步调用。</p>
+</blockquote>
+<p>尽管 Nifty 有着特殊的要求：我们的目标是以客户端能够处理的最佳的响应顺序服务于每个 客户端。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>我们希望允许用于来自于单个连接上的多个流水线化的请求的处理器能够被并行处理， 但是那样我们又控制不了这些处理器完成的先后顺序</span>。</p>
+<p>相反，我们使用了一种涉及缓冲响应的方案；如果客户端要求保持顺序的响应，我们将会<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>缓冲后续的响应</span>，直到所有较早的响应也可用，然后我们将按照所要求的顺序将它们一起发送出去。 见图 15-3 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915214434.png"  alt="" />
+      </p>
+<p>当然，Nifty 包括了实实在在支持无序响应的异步 Channel （可以通过 Swift 使用）。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>当使用能够让客户端通知服务器此客户端的能力的自定义的传输时，服务器将会免除缓冲响应的负担， 并且将以请求完成的任意顺序把它们发送回去。</span></p>
+
+        <h2 id="nifty异步客户端的设计"   >
+          <a href="#nifty异步客户端的设计" class="heading-link"><i class="fas fa-link"></i></a>Nifty异步客户端的设计</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Nifty 的客户端开发主要集中在异步客户端上。Nifty 实际上也提供了一个针对 Thrift 的同步传输接口的 Netty 实现，但是它的使用相当受限，因为相对于 Thrift 所提供的标准的套接字传输， 它并没有太多的优势。因此，用户应该尽可能地使用异步客户端。</span></p>
+
+        <h3 id="流水线化"   >
+          <a href="#流水线化" class="heading-link"><i class="fas fa-link"></i></a>流水线化</h3>
+      
+<p>Thrift 库拥有它自己的基于 NIO 的异步客户端实现，但是我们想要的一个特性是请求的流水 线化。流水线化是一种在同一连接上发送多个请求，而不需要等待其响应的能力。如果服务器有 空闲的工作线程，那么它便可以并行地处理这些请求，但是即使所有的工作线程都处于忙绿状态， 流水线化仍然可以有其他方面的裨益。服务器将会花费更少的时间来等待读取数据，而客户端则 可以在一个单一的 TCP 数据包里一起发送多个小请求，从而更好地利用网络带宽。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>使用 Netty，流水线化水到渠成。Netty 做了所有管理各种 NIO 选择键的状态的艰涩的工作， Nifty 则可以专注于解码请求以及编码响应。</span></p>
+
+        <h3 id="多路复用"   >
+          <a href="#多路复用" class="heading-link"><i class="fas fa-link"></i></a>多路复用</h3>
+      
+<p>随着我们的基础设施的增长，我们开始看到在我们的服务器上建立起来了大量的连接。多路 复用（为所有的连接来自于单一的来源的 Thrift 客户端共享连接）可以帮助减轻这种状况。但是在需要按序响应的客户端连接上进行多路复用会导致一个问题：该连接上的客户端可能会招致额外的延迟，因为它的响应必须要跟在对应于其他共享该连接的请求的响应之后。</p>
+<p>基本的解决方案也相当简单：<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>Thrift 已经在发送每个消息时都捎带了一个序列标识符，所以为了支持无序响应，我们只需要客户端 Channel 维护一个从序列 ID 到响应处理器的一个映射， 而不是一个使用队列。</span></p>
+<p>但是问题的关键在于，在标准的同步 Thrift 客户端中，协议层将负责从消息中提取序列标识 符，再由协议层协议调用传输层，而不是其他的方式。</p>
+<p>对于同步客户端来说，这种简单的流程（如图 15-4 所示）能够良好地工作，其协议层可以在传输层上等待， 以实际接收响应。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915215356.png"  alt="" />
+      </p>
+<p>但是对于异步客户端来说，其控制流 就变得更加复杂了。客户端调用将会被分发到 Swift 库 中，其将首先要求协议层将请求编码到一个缓冲区，然 后将编码请求缓冲区传递给 Nifty 的 Channel 以便被写 出。当该 Channel 收到来自服务器的响应时，它将会 通知 Swift 库，其将再次使用协议层以对响应缓冲区进行解码。这就是图 15-5 中所展示的流程。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915215426.png"  alt="" />
+      </p>
+
+        <h2 id="swift一种更快的构建java-thrift服务的方式"   >
+          <a href="#swift一种更快的构建java-thrift服务的方式" class="heading-link"><i class="fas fa-link"></i></a>Swift：一种更快的构建Java Thrift服务的方式</h2>
+      
+<p>我们新的 Java Thrift 框架的另一个关键部分叫作 Swift。它使用了 Nifty 作为它的 I/O 引擎， <span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>但是其服务规范可以直接通过 Java 注解来表示，使得 Thrift 服务开发人员可以纯粹地使用 Java 进行开发</span>。当你的服务启动时，Swift 运行时将通过组合使用反射以及解析 Swift 的注解来收集所有相关服务以及类型的信息。通过这些信息，它可以<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>构建出和 Thrift 编译器在解析 Thrift IDL 文 件时构建的模型一样的模型</span>。然后，它将使用这个模型，并通过从字节码生成用于序列化/反序列化这些自定义类型的新类，来直接运行服务器以及客户端（而不需要任何生成的服务器或者客 户端的存根代码）。</p>
+<p>跳过常规的 Thrift 代码生成，还能使添加新功能变得更加轻松，而无需修改 IDL 编译器，所 以我们的许多新功能（如异步客户端）都是首先在 Swift 中得到支持。如果你感兴趣，可以查阅 Swift 的 GitHub 页面（<span class="exturl"><a class="exturl__link"   href="https://github.com/facebook/swift%EF%BC%89%E4%B8%8A%E7%9A%84%E4%BB%8B%E7%BB%8D%E4%BF%A1%E6%81%AF%E3%80%82"  target="_blank" rel="noopener">https://github.com/facebook/swift）上的介绍信息。</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h2 id="结果"   >
+          <a href="#结果" class="heading-link"><i class="fas fa-link"></i></a>结果</h2>
+      
+<p>在下面的各节中，我们将量化一些我们使用 Netty 的过程中所观察到的一些成果。</p>
+
+        <h3 id="性能比较"   >
+          <a href="#性能比较" class="heading-link"><i class="fas fa-link"></i></a>性能比较</h3>
+      
+<p>一种测量 Thrift 服务器性能的方式是对于空操作的基准测试。这种基准测试使用了长时间运 行的客户端，这些客户端不间断地对发送回空响应的服务器进行 Thrift 调用。虽然这种测量方式 对于大部分的实际 Thrift 服务来说，不是真实意义上的性能测试，但是它仍然很好地度量了 Thrift 服务的最大潜能，而且提高这一基准，通常也就意味着减少了该框架本身的 CPU 使用。</p>
+<p>如表 15-1 所示，在这个基准测试下，Nifty 的性能优于所有其他基于 NIO 的 Thrift 服务器 （TNonblockingServer、TThreadedSelectorServer 以及 TThreadPoolServer）的实现。它甚至轻松地 击败了我们以前的 Java 服务器实现（我们内部使用的一个 Nifty 之前的服务器实现，基于原始的 NIO 以及直接缓冲区）。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200915220910.png"  alt="" />
+      </p>
+<p>我们所测试过的唯一能够和 Nifty 相提并论的 Java 服务器是 TThreadPoolServer。这个服务 器实现使用了原始的 OIO，并且在一个专门的线程上运行每个连接。这使得它在处理少量的连 接时表现不错；然而，使用 OIO，当你的服务器需要处理大量的并发连接时，你将很容易遇到 伸缩性问题。</p>
+<p>Nifty 甚至击败了之前的 C<ins>服务器实现，这是我们开始开发 Nifty 时最夺目的一点，虽然它 相对于我们的下一代 C</ins>服务器框架还有一些差距，但至少也大致相当。</p>
+
+        <h3 id="稳定性问题的例子"   >
+          <a href="#稳定性问题的例子" class="heading-link"><i class="fas fa-link"></i></a>稳定性问题的例子</h3>
+      
+<p>在 Nifty 之前，我们在 Facebook 的许多主要的 Java 服务都使用了一个较老的、自定义的基 于 NIO 的 Thrift 服务器实现，它的工作方式类似于 Nifty。该实现是一个较旧的代码库，有更多 的时间成熟，但是由于它的异步 I/O 处理代码是从零开始构建的，而且因为 Nifty 是构建在 Netty 的异步 I/O 框架的坚实基础之上的，所以（相比之下）它的问题也就少了很多。</p>
+<p>我们的一个自定义的消息队列服务是基于那个较旧的框架构建的，而它开始遭受一种套接字 泄露。大量的连接都停留在了 CLOSE_WAIT 状态，这意味着服务器接收了客户端已经关闭了套 接字的通知，但是服务器从来不通过其自身的调用来关闭套接字进行回应。这使得这些套接字都 停滞在了 CLOSE_WAIT 状态。</p>
+<p>问题发生得很慢；在处理这个服务的整个机器集群中，每秒可能有数以百万计的请求，但是 通常在一个服务器上只有一个套接字会在一个小时之内进入这个状态。这不是一个迫在眉睫的问 题，因为在那种速率下，在一个服务器需要重启前，将需要花费很长的时间，但是这也复杂化了 追查原因的过程。彻底地挖掘代码也没有带来太大的帮助：最初的几个地方看起来可疑，但是最 终都被排除了，而我们也并没有定位到问题所在。</p>
+<p>最终，我们将该服务迁移到了 Nifty 之上。转换（包括在预发环境中进行测试）花了不到一 天的时间，而这个问题就此消失了。使用 Nifty，我们就真的再也没见过类似的问题了。</p>
+<p>这只是在直接使用 NIO 时可能会出现的微妙 bug 的一个例子，而且它类似于那些在我们的 C++ Thrift 框架稳定的过程中，不得不一次又一次地解决的 bug。但是我认为这是一个很好的例 子，它说明了通过使用 Netty 是如何帮助我们利用它多年来收到的稳定性修复的。</p>
+
+        <h3 id="改进c实现的超时处理"   >
+          <a href="#改进c实现的超时处理" class="heading-link"><i class="fas fa-link"></i></a>改进C++实现的超时处理</h3>
+      
+<p>Netty 还通过为改进我们的 C<ins>框架提供一些启发间接地帮助了我们。一个这样的例子是 基于散列轮的计时器。 我们的 C</ins>框架使用了来自于 libevent 的超时事件来驱动客户端以及 服务器的超时， 但是为每个请求都添加一个单独的超时被证明是十分昂贵的， 因此我们一直 都在使用我们称之为超时集的东西。 其思想是：一个到特定服务的客户端连接， 对于由该客 户端发出的每个请求， 通常都具有相同的接收超时， 因此对于一组共享了相同的时间间隔的 超时集合， 我们仅维护一个真正的计时器事件。 每个新的超时都将被保证会在对于该超时集 合的现存的超时被调度之后触发， 因此当每个超时过期或者被取消时， 我们将只会安排下一 个超时。</p>
+<p>然而，我们的用户偶尔想要为每个调用都提供单独的超时，为在相同连接上的不同的请求设 置不同的超时值。在这种情况下，使用超时集合的好处就消失了，因此我们尝试了使用单独的计 时器事件。在大量的超时被同时调度时，我们开始看到了性能问题。我们知道Nifty不会碰到这个 问题，除了它不使用超时集的这个事实—— Netty通过它的 HashedWheelTimer（时间轮） 解决了该问题。 因此，带着来自Netty的灵感，我们为我们的C++ Thrift框架添加了一个基于散列轮的计时器，并 解决了可变的每请求（per-request）超时时间间隔所带来的性能问题。</p>
+
+        <h3 id="未来基于netty4的改进"   >
+          <a href="#未来基于netty4的改进" class="heading-link"><i class="fas fa-link"></i></a>未来基于Netty4的改进</h3>
+      
+<p>Nifty 目前运行在 Netty 3 上，这对我们来说已经很好了，但是我们已经有一个基于 Netty 4的移植版本准备好了，现在第 4 版的 Netty 已经稳定下来了，我们很快就会迁移过去。我们热切 地期待着 Netty 4 的 API 将会带给我们的一些益处。</p>
+<p>一个我们计划如何更好地利用 Netty 4 的例子是实现更好地控制哪个线程将管理一个给定的 连接。我们希望使用这项特性，可以使服务器的处理器方法能够从和该服务器调用所运行的 I/O 线程相同的线程开始异步的客户端调用。这是那些专门的 C++服务器（如 Thrift 请求路由器）已 经能够利用的特性。</p>
+<p>从该例子延伸开来，我们也期待着能够构建更好的客户端连接池，使得能够把现有的池化连接迁移到期望的 I/O 工作线程上，这在第 3 版的 Netty 中是不可能做到的。</p>
+
+        <h2 id="facebook小结"   >
+          <a href="#facebook小结" class="heading-link"><i class="fas fa-link"></i></a>Facebook小结</h2>
+      
+<p>在 Netty 的帮助下，我们已经能够构建更好的 Java 服务器框架了，其几乎能够与我们最快的 C++ Thrift 服务器框架的性能相媲美。我们已经将我们现有的一些主要的 Java 服务迁移到了 Nifty，并解决了一些令人讨厌的稳定性和性能问题，同时我们还开始将一些来自Netty，以及 Nifty 和 Swift 开发过程中的思想，反馈到提高 C++ Thrift 的各个方面中。</p>
+<p>不仅如此，使用 Netty 是令人愉悦的，并且它已经添加了大量的新特性，例如，对于 Thrift 客户端的内置 SOCKS 支持来说，添加起来小菜一碟。</p>
+<p>但是我们并不止步于此。我们还有大量的性能调优工作要做，以及针对将来的大量的其他方 面的改进计划。如果你对使用 Java 进行 Thrift 开发感兴趣，一定要关注哦！</p>
+
+        <h1 id="netty在twitter的使用finagle"   >
+          <a href="#netty在twitter的使用finagle" class="heading-link"><i class="fas fa-link"></i></a>Netty在Twitter的使用：Finagle</h1>
+      
+<p><strong>Jeff Smick，Twitter 软件工程师</strong></p>
+<p>Finagle 是 Twitter 构建在 Netty 之上的容错的、协议不可知的 RPC 框架。从提供用户信息、 推特以及时间线的后端服务到处理 HTTP 请求的前端 API 端点，所有组成 Twitter 架构的核心服 务都建立在 Finagle 之上。</p>
+
+        <h2 id="twitter成长的烦恼"   >
+          <a href="#twitter成长的烦恼" class="heading-link"><i class="fas fa-link"></i></a>Twitter成长的烦恼</h2>
+      
+<p>Twitter 最初是作为一个整体式的 Ruby On Rails 应用程序构建的，我们半亲切地称之为Monorail。随着 Twitter 开始经历大规模的成长，Ruby 运行时以及 Rails 框架开始成为瓶颈。从计 算机的角度来看，Ruby 对资源的利用是相对低效的。从开发的角度来看，该 Monorail 开始变得 难以维护。对一个部分的代码修改将会不透明地影响到另外的部分。代码的不同方面的所属权也 不清楚。无关核心业务对象的小改动也需要一次完整的部署。核心业务对象也没有暴露清晰的 API，其加剧了内部结构的脆弱性以及发生故障的可能性。</p>
+<p>我们决定将该 Monorail 分拆为不同的服务，明确归属人并且精简 API，使迭代更快速，维护 更容易。每个核心业务对象都将由一个专门的团队维护，并且由它自己的服务提供支撑。公司内 部已经有了在 JVM 上进行开发的先例—几个核心的服务已经从该 Monorail 中迁移出去，并已 经用 Scala 重写了。我们的运维团队也有运维 JVM 服务的背景，并且知道如何运维它们。鉴于此， 我们决定使用 Java 或者 Scala 在 JVM 上构建所有的新服务。大多数的服务开发团队都决定选用 Scala 作为他们的 JVM 语言。</p>
+
+        <h2 id="finagle的诞生"   >
+          <a href="#finagle的诞生" class="heading-link"><i class="fas fa-link"></i></a>Finagle的诞生</h2>
+      
+<p>为了构建出这个新的架构，我们需要一个高性能的、容错的、协议不可知的、异步的 RPC 框架。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在面向服务的架构中，服务花费了它们大部分的时间来等待来自其他上游的服务的响应。使用异步 的库使得服务可以并发地处理请求，并且充分地利用硬件资源。</span>尽管 Finagle 可以直接建立在 NIO 之 上，但是 Netty 已经解决了许多我们可能会遇到的问题，并且它提供了一个简洁、清晰的 API。</p>
+<p>Twitter构建在几种开源的协议之上，主要是HTTP、Thrift、Memcached、MySQL以及Redis。 我们的网络栈需要具备足够的灵活性，能够和任何的这些协议进行交流，并且具备足够的可扩展 性，以便我们可以方便地添加更多的协议。Netty并没有绑定任何特定的协议。向它添加协议就 像创建适当的 ChannelHandler 一样简单。这种扩展性也催生了许多社区驱动的协议实现，包 括SPDY、PostgreSQL、WebSockets、IRC以及AWS 。</p>
+<p>Netty的连接管理以及协议不可知的特性为构建Finagle提供了绝佳的基础。但是我们也有一 些其他的Netty不能开箱即满足的需求，因为那些需求都更高级。客户端需要连接到服务器集群， 并且需要做跨服务器集群的负载均衡。所有的服务都需要暴露运行指标（请求率、延迟等），其 可以为调试服务的行为提供有价值的数据。在面向服务的架构中，一个单一的请求都可能需要经 过数十种服务，使得如果没有一个由Dapper启发的跟踪框架，调试性能问题几乎是不可能的 。 Finagle正是为了解决这些问题而构建的。</p>
+
+        <h2 id="finagle是如何工作的"   >
+          <a href="#finagle是如何工作的" class="heading-link"><i class="fas fa-link"></i></a>Finagle是如何工作的</h2>
+      
+<p>Finagle 的内部结构是非常模块化的。组件都是先独立编写，然后再堆叠在一起。根据所提 供的配置，每个组件都可以被换入或者换出。例如，所有的跟踪器都实现了相同的接口，因此可 以创建一个跟踪器用来将跟踪数据发送到本地文件、保存在内存中并暴露一个读取端点，或者将 它写出到网络。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在 Finagle 栈的底部是 Transport 层。这个类表示了一个能够被异步读取和写入的对象流。 Transport 被实现为 Netty 的 ChannelHandler ，并被插入到了 ChannelPipeline 的尾端。</span> 来自网络的消息在被 Netty 接收之后，将经由 ChannelPipeline ，在那里它们将被编解码器解 释，并随后被发送到 Finagle 的 Transport 层。从那里 Finagle 将会从 Transport 层读取消息， 并且通过它自己的栈发送消息。</p>
+<p>对于客户端的连接，Finagle维护了一个可以在其中进行负载均衡的传输（Transport）池。根 据所提供的连接池的语义，Finagle将从Netty请求一个新连接或者复用一个现有的连接。当请求 新连接时，将会根据客户端的编解码器创建一个Netty的 ChannelPipeline 。额外的用于统计、 日志记录以及SSL的 ChannelHandler 将会被添加到该 ChannelPipeline 中。该连接随后将会被递给一个Finagle能够写入和读取的 ChannelTransport 。</p>
+<p>在服务器端，创建了一个 Netty 服务器，然后向其提供一个管理编解码器、统计、超时以及日志 记录的 ChannelPipelineFactory 。位于服务器 ChannelPipeline 尾端的 ChannelHandler 是一个 Finagle 的桥接器。 该桥接器将监控新的传入连接，并为每一个传入连接创建一个新的 Transport 。该 Transport 将在新的 Channel 被递交给某个服务器的实现之前对其进行包装。 随后从 ChannelPipeline 读取消息，并将其发送到已实现的服务器实例。</p>
+<p>图 15-6 展示了 Finagle 的客户端和服务器之间的关系。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916082958.png"  alt="" />
+      </p>
+<p>Netty/Finagle 桥接器</p>
+<p>代码清单 15-1 展示了一个使用默认选项的静态的ChannelFactory。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083026.png"  alt="" />
+      </p>
+<p>这个 ChannelFactory 桥接了 Netty 的 Channel 和 Finagle 的 Transport （为简洁起见， 这里移除了统计代码）。 当通过 apply 方法被调用时， 这将创建一个新的 Channel 以及 Transport 。当该 Channel 已经连接或者连接失败时，将会返回一个被完整填充的 Future 。</p>
+<p>代码清单 15-2 展示了将Channel连接到远程主机的ChannelConnector。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083110.png"  alt="" />
+      </p>
+<p>这个工厂提供了一个 ChannelPipelineFactory ，它是一个 Channel 和 Transport 的 工厂。该工厂是通过 apply 方法调用的。一旦被调用，就会创建一个新的 ChannelPipeline （ newPipeline ）。 ChannelFactory 将 会 使 用 这 个 ChannelPipeline 来 创 建 新 的 Channel ， 随后使用所提供的选项（ newConfiguredChannel ）对它进行配置。 配置好的 Channel 将会被作为一个匿名的工厂传递给一个 ChannelConnector 。该连接器将会被调用， 并返回一个 <code>Future[Transport]</code>。</p>
+<p>代码清单 15-3 展示了细节</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083148.png"  alt="" />
+      </p>
+<p>Finagle 服务器使用 Listener 将自身绑定到给定的地址。在这个示例中，监听器提供了一 个 ChannelPipelineFactory 、一个 ChannelFactory 以及各种选项（为了简洁起见，这 里没包括）。我们使用一个要绑定的地址以及一个用于通信的 Transport 调用了 Listener 。 接着，创建并配置了一个 Netty 的 ServerBootstrap 。然后，创建了一个匿名的 ServerBridge 工厂，递给 ChannelPipelineFactory ，其将被递交给该引导服务器。最后，该服务器将会 被绑定到给定的地址。</p>
+<p>现在，让我们来看看基于 Netty 的 Listener 实现，如代码清单 15-4 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083215.png"  alt="" />
+      </p>
+<p>当一个新的Channel打开时，该桥接器将会创建一个新的 ChannelTransport 并将其递回给 Finagle服务器。代码清单 15-5 展示了所需的代码 。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083239.png"  alt="" />
+      </p>
+
+        <h2 id="finagle的抽象"   >
+          <a href="#finagle的抽象" class="heading-link"><i class="fas fa-link"></i></a>Finagle的抽象</h2>
+      
+<p>Finagle的核心概念是一个从 Request 到 Future[Response] 的的简单函数（函数式编程语言是这里的关键）。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">type</span> <span class="title">Service</span>[<span class="type">Req</span>, <span class="type">Rep</span>] </span>= <span class="type">Req</span> =&gt; <span class="type">Future</span>[<span class="type">Rep</span>]</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p>这里的 <code>Future[Response]</code>相当于 Java 8 中的 <code>CompletionStage&lt;Response&gt;</code>。</p>
+<p>虽然不完全等价，但是可以理解为 Java 8 的 <code>public interface Service&lt;Req, Rep&gt; extends Function&lt;Req, CompletionStage&lt;Rep&gt;&gt;{}</code>。</p>
+</blockquote>
+<p>这种简单性释放了非常强大的组合性。 Service 是一种对称的 API，同时代表了客户端以 及服务器。服务器实现了该服务的接口。该服务器可以被具体地用于测试，或者 Finagle 也可以 将它暴露到网络接口上。客户端将被提供一个服务实现，其要么是虚拟的，要么是某个远程服务 器的具体表示。</p>
+<p>例如，我们可以通过实现一个服务来创建一个简单的 HTTP 服务器，该服务接受 HttpReq 作为参数，返回一个代表最终响应的 <code>Future[HttpRep]</code> 。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> s: <span class="type">Service</span>[<span class="type">HttpReq</span>, <span class="type">HttpRep</span>] = <span class="keyword">new</span> <span class="type">Service</span>[<span class="type">HttpReq</span>, <span class="type">HttpRep</span>] &#123; </span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">apply</span></span>(req: <span class="type">HttpReq</span>): <span class="type">Future</span>[<span class="type">HttpRep</span>] = <span class="type">Future</span>.value(<span class="type">HttpRep</span>(<span class="type">Status</span>.<span class="type">OK</span>, req.body)) </span><br><span class="line">&#125; </span><br><span class="line"><span class="type">Http</span>.serve(<span class="string">":80"</span>, s)</span><br></pre></td></tr></table></div></figure>
+<p>随后，客户端将被提供一个该服务的对称表示。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> client: <span class="type">Service</span>[<span class="type">HttpReq</span>, <span class="type">HttpRep</span>] = <span class="type">Http</span>.newService(<span class="string">"twitter.com:80"</span>) </span><br><span class="line"><span class="keyword">val</span> f: <span class="type">Future</span>[<span class="type">HttpRep</span>] = client(<span class="type">HttpReq</span>(<span class="string">"/"</span>)) </span><br><span class="line">f map &#123; rep =&gt; processResponse(rep) &#125;</span><br></pre></td></tr></table></div></figure>
+<p>这个例子将把该服务器暴露到所有网络接口的 80 端口上，并从 <span class="exturl"><a class="exturl__link"   href="http://twitter.com"  target="_blank" rel="noopener">twitter.com</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 的 80 端口消费。 我们也可以选择不暴露该服务器，而是直接使用它。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server(<span class="type">HttpReq</span>(<span class="string">"/"</span>)) map &#123; rep =&gt; processResponse(rep) &#125;</span><br></pre></td></tr></table></div></figure>
+<p>在这里，客户端代码有相同的行为，只是不需要网络连接。这使得测试客户端和服务器非常 简单直接。</p>
+<p>客户端以及服务器都提供了特定于应用程序的功能。但是，也有对和应用程序无关的功能的 需求。这样的例子如超时、身份验证以及统计等。 Filter为实现应用程序无关的功能提供了抽象。</p>
+<p>过滤器接收一个请求和一个将被它组合的服务：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">type</span> <span class="title">Filter</span>[<span class="type">Req</span>, <span class="type">Rep</span>] </span>= (<span class="type">Req</span>, <span class="type">Service</span>[<span class="type">Req</span>, <span class="type">Rep</span>]) =&gt; <span class="type">Future</span>[<span class="type">Rep</span>]</span><br></pre></td></tr></table></div></figure>
+<p>多个过滤器可以在被应用到某个服务之前链接在一起：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">recordHandletime andThen </span><br><span class="line">traceRequest andThen</span><br><span class="line">collectJvmStats andThen</span><br><span class="line">myService</span><br></pre></td></tr></table></div></figure>
+<p>这允许了清晰的逻辑抽象以及良好的关注点分离。在内部，Finagle 大量地使用了过滤器， 其有助于提高模块化以及可复用性。它们已经被证明，在测试中很有价值，因为它们通过很小的 模拟便可以被独立地单元测试。</p>
+<p>过滤器可以同时修改请求和响应的数据以及类型。图 15-7 展示了一个请求，它在通过一个 过滤器链之后到达了某个服务并返回。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083717.png"  alt="" />
+      </p>
+<p>我们可以使用类型修改来实现身份验证。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083738.png"  alt="" />
+      </p>
+<p>这里我们有一个需要 AuthHttpReq 的服务。为了满足这个需求，创建了一个能接收 HttpReq 并对它进行身份验证的过滤器。随后，该过滤器将和该服务进行组合，产生一个新的可以接受 HttpReq 并产生 HttpRes 的服务。这使得我们可以从该服务隔离，单独地测试身份验证过滤器。</p>
+
+        <h2 id="故障管理"   >
+          <a href="#故障管理" class="heading-link"><i class="fas fa-link"></i></a>故障管理</h2>
+      
+<p>我们假设故障总是会发生；硬件会失效、网络会变得拥塞、网络链接会断开。对于库来说， 如果它们正在上面运行的或者正在与之通信的系统发生故障，那么库所拥有的极高的吞吐量以及 极低的延迟都将毫无意义。为此，Finagle 是建立在有原则地管理故障的基础之上的。为了能够 更好地管理故障，它牺牲了一些吞吐量以及延迟。</p>
+<p>Finagle 可以通过隐式地使用延迟作为启发式（算法的因子）来均衡跨集群主机的负载。Finagle 客户端将在本地通过统计派发到单个主机的还未完成的请求数来追踪它所知道的每个主机上的 负载。有了这些信息，Finagle 会将新的请求（隐式地）派发给具有最低负载、最低延迟的主机。</p>
+<p>失败的请求将导致 Finagle 关闭到故障主机的连接，并将它从负载均衡器中移除。在后台， Finagle 将不断地尝试重新连接。只有在 Finagle 能够重新建立一个连接时，该主机才会被重新加 入到负载均衡器中。然后，服务的所有者可以自由地关闭各个主机，而不会对下游的客户端造成负面的影响。</p>
+
+        <h2 id="组合服务"   >
+          <a href="#组合服务" class="heading-link"><i class="fas fa-link"></i></a>组合服务</h2>
+      
+<p>Finagle 的服务即函数（service-as-a-function）的观点允许编写简单但富有表现力的代码。例 如，一个用户发出的对于他们的主页时间线的请求涉及了大量的服务，其中的核心是身份验证服 务、时间线服务以及推特服务。这些关系可以被简洁地表达。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200916083831.png"  alt="" />
+      </p>
+<p>在这里，我们为时间线服务、推特服务以及身份验证服务都创建了客户端。并且，为了对原 始的请求进行身份验证，创建了一个过滤器。最后，我们实现的服务，结合了身份验证过滤器， 暴露在 80 端口上。</p>
+<p>当收到请求时，身份验证过滤器将尝试对它进行身份验证。错误都会被立即返回，不会影响核 心业务。身份验证成功之后， AuthReq 将会被发送到 API 服务。该服务将会使用附加的 userId 通过时间线服务来查找该用户的时间线。然后，返回一组推特 ID，并在稍后遍历。每个 ID 都会被 用来请求与之相关联的推特。最后，这组推特请求会被收集起来，转换为一个 JSON 格式的响应。</p>
+<p>正如你所看到的，我们定义了数据流，并且将并发的问题留给了 Finagle。我们不必管理线 程池，也不必担心竞态条件。这段代码既清晰又安全。</p>
+
+        <h2 id="未来netty"   >
+          <a href="#未来netty" class="heading-link"><i class="fas fa-link"></i></a>未来：Netty</h2>
+      
+<p>为了改善Netty的各个部分，让Finagle以及更加广泛的社区都能够从中受益，我们一直在与 Netty的维护者密切合作 。最近，Finagle的内部结构已经升级为更加模块化的结构，为升级到Netty 4 铺平了道路。</p>
+
+        <h2 id="twitter小结"   >
+          <a href="#twitter小结" class="heading-link"><i class="fas fa-link"></i></a>Twitter小结</h2>
+      
+<p>Finagle已经取得了辉煌的成绩。我们已经想方设法大幅度地提高了我们所能够处理的流量， 同时也降低了延迟以及硬件需求。例如，在将我们的API端点从Ruby工作栈迁移到Finagle之后， 我们看到，延迟从数百毫秒下降到了数十毫秒之内，同时还将所需要的机器数量从 3 位数减少到 了个位数。我们新的工作栈已经使得我们达到了新的吞吐量记录。在撰写本文时，我们所记录的 每秒的推特数是 143 199 。这一数字对于我们的旧架构来说简直是难以想象的。</p>
+<p>Finagle 的诞生是为了满足 Twitter 横向扩展以支持全球数以亿计的用户的需求，而在当时支 撑数以百万计的用户并保证服务在线已然是一项艰巨的任务了。使用 Netty 作为基础，我们能够 快速地设计和建造 Finagle，以解决我们的伸缩性难题。Finagle 和 Netty 处理了 Twitter 所遇到的 每一个请求。</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>本章深入了解了对于像 Facebook 以及 Twitter 这样的大公司是如何使用 Netty 来保证最高水 准的性能以及灵活性的。</p>
+<ul>
+<li>Facebook 的 Nifty 项目展示了，如何通过提供自定义的协议编码器以及解码器，利用 Netty 来替换现有的 Thrift 实现。</li>
+<li>Twitter 的 Finagle 展示了，如何基于 Netty 来构建你自己的高性能框架，并通过类似于负载均衡以及故障转移这样的特性来增强它的。</li>
+</ul>
+<p>我们希望这里所提供的案例研究，能够成为你打造下一代杰作的时候的信息和灵感的来源。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/15_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/15_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/netty/">netty</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E7%94%9F%E6%B4%BB/%E8%AE%A4%E7%9F%A5/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">认知</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/14_%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%EF%BC%8C%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86/"><span class="paginator-prev__text">案例研究，第一部分</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#netty在facebook的使用nifty和swift"><span class="toc-number">1.</span> <span class="toc-text">
+          Netty在Facebook的使用：Nifty和Swift</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是thrift"><span class="toc-number">1.1.</span> <span class="toc-text">
+          什么是Thrift</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用netty改善java-thrift的现状"><span class="toc-number">1.2.</span> <span class="toc-text">
+          使用Netty改善Java Thrift的现状</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nifty服务器的设计"><span class="toc-number">1.3.</span> <span class="toc-text">
+          Nifty服务器的设计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nifty的编码器解码器"><span class="toc-number">1.3.1.</span> <span class="toc-text">
+          Nifty的编码器&#x2F;解码器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在服务器上排序响应"><span class="toc-number">1.3.2.</span> <span class="toc-text">
+          在服务器上排序响应</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nifty异步客户端的设计"><span class="toc-number">1.4.</span> <span class="toc-text">
+          Nifty异步客户端的设计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#流水线化"><span class="toc-number">1.4.1.</span> <span class="toc-text">
+          流水线化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多路复用"><span class="toc-number">1.4.2.</span> <span class="toc-text">
+          多路复用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#swift一种更快的构建java-thrift服务的方式"><span class="toc-number">1.5.</span> <span class="toc-text">
+          Swift：一种更快的构建Java Thrift服务的方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结果"><span class="toc-number">1.6.</span> <span class="toc-text">
+          结果</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#性能比较"><span class="toc-number">1.6.1.</span> <span class="toc-text">
+          性能比较</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#稳定性问题的例子"><span class="toc-number">1.6.2.</span> <span class="toc-text">
+          稳定性问题的例子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#改进c实现的超时处理"><span class="toc-number">1.6.3.</span> <span class="toc-text">
+          改进C++实现的超时处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#未来基于netty4的改进"><span class="toc-number">1.6.4.</span> <span class="toc-text">
+          未来基于Netty4的改进</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#facebook小结"><span class="toc-number">1.7.</span> <span class="toc-text">
+          Facebook小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#netty在twitter的使用finagle"><span class="toc-number">2.</span> <span class="toc-text">
+          Netty在Twitter的使用：Finagle</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#twitter成长的烦恼"><span class="toc-number">2.1.</span> <span class="toc-text">
+          Twitter成长的烦恼</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#finagle的诞生"><span class="toc-number">2.2.</span> <span class="toc-text">
+          Finagle的诞生</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#finagle是如何工作的"><span class="toc-number">2.3.</span> <span class="toc-text">
+          Finagle是如何工作的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#finagle的抽象"><span class="toc-number">2.4.</span> <span class="toc-text">
+          Finagle的抽象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#故障管理"><span class="toc-number">2.5.</span> <span class="toc-text">
+          故障管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#组合服务"><span class="toc-number">2.6.</span> <span class="toc-text">
+          组合服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#未来netty"><span class="toc-number">2.7.</span> <span class="toc-text">
+          未来：Netty</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#twitter小结"><span class="toc-number">2.8.</span> <span class="toc-text">
+          Twitter小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">3.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

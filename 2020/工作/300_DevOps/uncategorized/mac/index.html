@@ -1,0 +1,473 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="使用问题                            Iterm2闪退        修改ITerm2的perferences -&gt; Profiles -&gt; General 下的Command, 将其从”Login shell”选项修改为”Command: &#x2F;bin&#x2F;bash”，改完重启ITerm2，闪退问题解决。  如果配置zsh， 则改为&#x2F;bin&#x2F;z">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mac">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/uncategorized/mac/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="使用问题                            Iterm2闪退        修改ITerm2的perferences -&gt; Profiles -&gt; General 下的Command, 将其从”Login shell”选项修改为”Command: &#x2F;bin&#x2F;bash”，改完重启ITerm2，闪退问题解决。  如果配置zsh， 则改为&#x2F;bin&#x2F;z">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200720025909.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200720025950.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200720030017.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L21ieXRlcw==,size_16,color_FFFFFF,t_70.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200720064024.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200731202245.png">
+<meta property="article:published_time" content="2020-09-16T16:22:39.273Z">
+<meta property="article:modified_time" content="2020-09-27T11:42:52.627Z">
+<meta property="article:author" content="lienhui68">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200720025909.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>mac | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/uncategorized/mac/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">mac</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">939</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">6分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="使用问题"   >
+          <a href="#使用问题" class="heading-link"><i class="fas fa-link"></i></a>使用问题</h1>
+      
+
+        <h2 id="iterm2闪退"   >
+          <a href="#iterm2闪退" class="heading-link"><i class="fas fa-link"></i></a>Iterm2闪退</h2>
+      
+<p>修改ITerm2的perferences -&gt; Profiles -&gt; General 下的Command, 将其从”Login shell”选项修改为”Command: /bin/bash”，改完重启ITerm2，闪退问题解决。</p>
+<blockquote>
+<p>如果配置zsh， 则改为/bin/zsh</p>
+<p>参考：<span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/xybsos/article/details/51195362"  target="_blank" rel="noopener">https://blog.csdn.net/xybsos/article/details/51195362</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h2 id="使用chrome-文章禁止转载"   >
+          <a href="#使用chrome-文章禁止转载" class="heading-link"><i class="fas fa-link"></i></a>使用chrome 文章禁止转载</h2>
+      
+<p>chrome打开知乎页面，按顺序 F12 - F1 - 在General 里面点选 Disable JavaScript。就可以复制了。</p>
+
+        <h2 id="去除拼写检查"   >
+          <a href="#去除拼写检查" class="heading-link"><i class="fas fa-link"></i></a>去除拼写检查</h2>
+      
+<ol>
+<li>在备忘录里。 第一种情况</li>
+</ol>
+<p>选择顶上的菜单里  “编辑”－&gt; “检查拼写和语法” －&gt;“键入时检查拼写”，点击一下勾去掉就可以了。</p>
+<ol start="2">
+<li>系统中 第二种情况（鄙人是因为在浏览器中搜索收到影响）</li>
+</ol>
+<p>选择设置里的&quot;键盘&quot; －&gt;“文本”－&gt;“自动纠正拼写”</p>
+<a id="more"></a>
+
+        <h2 id="touchbar隐藏siri"   >
+          <a href="#touchbar隐藏siri" class="heading-link"><i class="fas fa-link"></i></a>touchbar隐藏siri</h2>
+      
+<p>系统控制-&gt;键盘-&gt;自定功能栏</p>
+<p><span class="exturl"><a class="exturl__link"   href="https://jingyan.baidu.com/article/59703552980b698fc0074034.html"  target="_blank" rel="noopener">https://jingyan.baidu.com/article/59703552980b698fc0074034.html</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h2 id="mac-high-sierra版本中已损毁打不开-您应该将它移到废纸篓问题的解决办法"   >
+          <a href="#mac-high-sierra版本中已损毁打不开-您应该将它移到废纸篓问题的解决办法" class="heading-link"><i class="fas fa-link"></i></a>Mac High Sierra版本中“已损毁，打不开。您应该将它移到废纸篓”问题的解决办法</h2>
+      
+<p>在mac High Sierra 10.13.4版本上安装CleanMyMac 3是出现如下错误提示：</p>
+<blockquote>
+<p>“cleanMyMac”已损坏，打不开。您应该将它移到废纸篓。</p>
+</blockquote>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200720025909.png"  alt="" />
+      </p>
+<p><strong>原因</strong></p>
+<p>苹果自macOS Sierra 10.12版本以后，去掉了<strong>安全性与隐私</strong>中<strong>允许从以下位置下载的应用</strong>中<strong>任何来源</strong>的选项</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200720025950.png"  alt="" />
+      </p>
+<p><strong>解决办法</strong></p>
+<p>打开<strong>终端</strong> 输入<code>sudo spctl --master-disable</code>，输入密码后即可</p>
+<p>当我们再次打开<strong>安全性与隐私</strong>时，则会出现“<strong>任何来源</strong>”选项</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200720030017.png"  alt="" />
+      </p>
+<p>选中<strong>任何来源</strong>后，再次打开软件，便可以正常使用啦。</p>
+<p><strong>友情提示</strong></p>
+<p>很多朋友比较担心电脑的安全，我们可以在文件可以正常使用后，将修改还原<br />
+打开<strong>终端</strong> 输入<code>sudo spctl --master-enable</code>，输入密码后即可</p>
+
+        <h2 id="sublime"   >
+          <a href="#sublime" class="heading-link"><i class="fas fa-link"></i></a>sublime</h2>
+      
+
+        <h3 id="unable-to-download-xxx"   >
+          <a href="#unable-to-download-xxx" class="heading-link"><i class="fas fa-link"></i></a>Unable to download XXX</h3>
+      
+<blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://github.com/wbond/package_control/issues/1220"  target="_blank" rel="noopener">https://github.com/wbond/package_control/issues/1220</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>安装插件时，弹出提示框：<br />
+Package Control<br />
+Unable to download XXX. Please view the console for more details. 一番搜索后在github上找到答案：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L21ieXRlcw==,size_16,color_FFFFFF,t_70.png"  alt="在这里插入图片描述" />
+      </p>
+<p>解决办法：</p>
+<p>1.打开Sublime Text，Preferences -&gt;Package Settings-&gt;Package Control-&gt;Settings-User,在文件中添加以下几行代码：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&quot;downloader_precedence&quot;:    </span><br><span class="line">    &#123;</span><br><span class="line">    	&quot;linux&quot;: [ &quot;curl&quot;, &quot;urllib&quot;,    &quot;wget&quot; ],</span><br><span class="line">    	&quot;osx&quot;: [ &quot;curl&quot;, &quot;urllib&quot; ],</span><br><span class="line">    	&quot;windows&quot;: [ &quot;wininet&quot; ]</span><br><span class="line">    &#125;,</span><br></pre></td></tr></table></div></figure>
+<p>2.重启Sublime Text，问题解决。</p>
+
+        <h3 id="安装json格式化工具"   >
+          <a href="#安装json格式化工具" class="heading-link"><i class="fas fa-link"></i></a>安装json格式化工具</h3>
+      
+<ul>
+<li>使用 Command（或ctrl）+ Shift + P 调出面板，然后输入pci ，选中“Package Control: Install Package”并回车，然后通过输入插件的名字pretty json找到插件并回车安装即可。</li>
+<li><strong>使用command + ctrl + j快捷键来格式化当前页面的内容</strong></li>
+</ul>
+
+        <h1 id="常用安装"   >
+          <a href="#常用安装" class="heading-link"><i class="fas fa-link"></i></a>常用安装</h1>
+      
+
+        <h2 id="录屏工具-licecap"   >
+          <a href="#录屏工具-licecap" class="heading-link"><i class="fas fa-link"></i></a>录屏工具-licecap</h2>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.cockos.com/licecap/"  target="_blank" rel="noopener">licecap</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>无法录制，保存后的gif 内容是桌面， 这是因为app没有屏幕录制权限导致， 开启权限即可。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200720064024.png"  alt="" />
+      </p>
+
+        <h2 id="typora"   >
+          <a href="#typora" class="heading-link"><i class="fas fa-link"></i></a>Typora</h2>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.typora.io/"  target="_blank" rel="noopener">Typora</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>设置文字颜色可以通过alfred-snippets配合使用</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;span style='color:文字颜色;background:背景颜色;font-size:文字大小;font-family:字体;'&gt;文字&lt;/span&gt;</span><br><span class="line">可以使用&#123;cursor&#125;指定粘贴后光标位置</span><br></pre></td></tr></table></div></figure>
+<p>Typora文字设置-绿色</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;span style&#x3D;&#39;color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:&#39;&gt;&#123;clipboard&#125;&lt;&#x2F;span&gt;</span><br></pre></td></tr></table></div></figure>
+<p>Typora文字设置-红色</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;span style&#x3D;&#39;color:red;background:背景颜色;font-size:文字大小;font-weight:&#39;&gt;&#123;clipboard&#125;&lt;&#x2F;span&gt;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="just-focus"   >
+          <a href="#just-focus" class="heading-link"><i class="fas fa-link"></i></a>Just Focus</h2>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://apps.apple.com/cn/app/just-focus/id1142151959?mt=12"  target="_blank" rel="noopener">Just Focus</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>配合alfred使用</p>
+
+        <h2 id="欧陆词典"   >
+          <a href="#欧陆词典" class="heading-link"><i class="fas fa-link"></i></a>欧陆词典</h2>
+      
+<p>使用alfred websearch</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eudic:&#x2F;&#x2F;dict&#x2F;&#x2F;&#123;query&#125;</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200731202245.png"  alt="" />
+      </p>
+
+        <h2 id="adguard"   >
+          <a href="#adguard" class="heading-link"><i class="fas fa-link"></i></a>Adguard</h2>
+      
+<p>去广告软件，<span class="exturl"><a class="exturl__link"   href="https://xclient.info/s/adguard.html"  target="_blank" rel="noopener">下载地址</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><strong>安装和使用</strong>：</p>
+<ol>
+<li>直接安装，已经是破解版</li>
+<li>选择手动安装，安装过程中会提供选项安装chrome插件扩展，进行插件的安装</li>
+<li>隐私设置里 通用-&gt;打开更改锁-&gt;打开</li>
+<li>到此就可以使用chrome无广告访问了</li>
+</ol>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/uncategorized/mac/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/uncategorized/mac/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/uncategorized/idea/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">idea</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/maven/maven%E4%BD%BF%E7%94%A8%E8%AE%B0%E5%BD%95/"><span class="paginator-prev__text">maven使用记录</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#使用问题"><span class="toc-number">1.</span> <span class="toc-text">
+          使用问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#iterm2闪退"><span class="toc-number">1.1.</span> <span class="toc-text">
+          Iterm2闪退</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用chrome-文章禁止转载"><span class="toc-number">1.2.</span> <span class="toc-text">
+          使用chrome 文章禁止转载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#去除拼写检查"><span class="toc-number">1.3.</span> <span class="toc-text">
+          去除拼写检查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#touchbar隐藏siri"><span class="toc-number">1.4.</span> <span class="toc-text">
+          touchbar隐藏siri</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mac-high-sierra版本中已损毁打不开-您应该将它移到废纸篓问题的解决办法"><span class="toc-number">1.5.</span> <span class="toc-text">
+          Mac High Sierra版本中“已损毁，打不开。您应该将它移到废纸篓”问题的解决办法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sublime"><span class="toc-number">1.6.</span> <span class="toc-text">
+          sublime</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#unable-to-download-xxx"><span class="toc-number">1.6.1.</span> <span class="toc-text">
+          Unable to download XXX</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装json格式化工具"><span class="toc-number">1.6.2.</span> <span class="toc-text">
+          安装json格式化工具</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常用安装"><span class="toc-number">2.</span> <span class="toc-text">
+          常用安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#录屏工具-licecap"><span class="toc-number">2.1.</span> <span class="toc-text">
+          录屏工具-licecap</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#typora"><span class="toc-number">2.2.</span> <span class="toc-text">
+          Typora</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#just-focus"><span class="toc-number">2.3.</span> <span class="toc-text">
+          Just Focus</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#欧陆词典"><span class="toc-number">2.4.</span> <span class="toc-text">
+          欧陆词典</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#adguard"><span class="toc-number">2.5.</span> <span class="toc-text">
+          Adguard</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

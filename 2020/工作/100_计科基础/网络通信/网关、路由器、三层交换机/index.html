@@ -1,0 +1,514 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本文分成两部分，第一部分介绍一些理论，第二部分是一个Demo演示。                     三层交换机的三层是什么意思？                            物理层        三层工业交换机的第一层是物理层，物理层是进行数据传输的基础，完全由硬件够成，由物理层构成数据传输的通信信道。物理层传输的只是bit流，规定了通道的机械，电气特性和跟上一层之间的接口。我门">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网关、路由器、三层交换机">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/%E7%BD%91%E5%85%B3%E3%80%81%E8%B7%AF%E7%94%B1%E5%99%A8%E3%80%81%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本文分成两部分，第一部分介绍一些理论，第二部分是一个Demo演示。                     三层交换机的三层是什么意思？                            物理层        三层工业交换机的第一层是物理层，物理层是进行数据传输的基础，完全由硬件够成，由物理层构成数据传输的通信信道。物理层传输的只是bit流，规定了通道的机械，电气特性和跟上一层之间的接口。我门">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902024956.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902022931.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902022958.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902025344.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902030739.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031138.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830032644.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031211.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830015833.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031402.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031453.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031531.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830032824.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830032905.png">
+<meta property="article:published_time" content="2020-09-16T16:21:55.301Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:55.304Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络通信">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902024956.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>网关、路由器、三层交换机 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/%E7%BD%91%E5%85%B3%E3%80%81%E8%B7%AF%E7%94%B1%E5%99%A8%E3%80%81%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">网关、路由器、三层交换机</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">19分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>本文分成两部分，第一部分介绍一些理论，第二部分是一个Demo演示。</p>
+
+        <h1 id="三层交换机的三层是什么意思"   >
+          <a href="#三层交换机的三层是什么意思" class="heading-link"><i class="fas fa-link"></i></a>三层交换机的三层是什么意思？</h1>
+      
+
+        <h2 id="物理层"   >
+          <a href="#物理层" class="heading-link"><i class="fas fa-link"></i></a>物理层</h2>
+      
+<p>三层工业交换机的第一层是物理层，物理层是进行数据传输的基础，完全由硬件够成，由物理层构成数据传输的通信信道。物理层传输的只是bit流，规定了通道的机械，电气特性和跟上一层之间的接口。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>我门经常用的调制解调器和集线器都是属于物理层的网络设备。</span></p>
+<a id="more"></a>
+
+        <h2 id="数据链路层"   >
+          <a href="#数据链路层" class="heading-link"><i class="fas fa-link"></i></a>数据链路层</h2>
+      
+<p>三层工业交换机的第二层是数据链路层，数据链路层将提供的数据链路的控制和差错校验功能，将不可靠的物理链路变成可靠的数据链路。数据链路层的通信是以贞为单位，我们熟悉的交换工作也就是通过交换机实现的贞的交换工作，传统的交换机（二层交换机）是数据链路层的典型的网络设备，其前身是网桥,<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>网桥工作在网络的第二层，它的作用之一是隔离网络广播风暴.交换机只能连接同一个子网的计算机，如果计算机的IP地址不在同一个子网中则只靠交换机不能实现通信，还要靠第三层中的路由器。</span></p>
+<blockquote>
+<p>二层交换机是靠mac地址进行数据交换的，如果ip地址是在一个子网(下面会有演示，根据路由表能映射到某一个ip即表明在同一个子网)，则直接进行交换，否则还得靠上层路由器进行数据包的转发。</p>
+</blockquote>
+
+        <h2 id="网络层"   >
+          <a href="#网络层" class="heading-link"><i class="fas fa-link"></i></a>网络层</h2>
+      
+<p>三层工业交换机的第三层是网络层，网络层在OSI模型中可以说是至关重要的一层，它起到了承上启下的重要作用，如上段所说它负责子网之间的通信，著名的TCP/IP协议就是网络层中的协议。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>两个子网之间的通信要靠具有路由功能的路由器。从一个子网中发出数据包如果要到达另外一个子网中的计算机结点就要通过路由器计算出传输的路径。</span></p>
+
+        <h2 id="什么是三层工业交换机"   >
+          <a href="#什么是三层工业交换机" class="heading-link"><i class="fas fa-link"></i></a>什么是三层工业交换机？</h2>
+      
+<p>三层工业交换机就是具有部分路由器功能的交换机。三层工业交换机其实就是<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>二层交换工作＋三层转发工作</span>。并不是我们指交换机有&quot;三层&quot;东西。三层工业交换机最重要目的是加快大型局域网内部的数据交换。所具有的路由功能也是为这目的服务的，能够做到一次路由，多次转发。传统的交换工作是在OSI网络标准模型中的第二层——数据链路层进行操作的，而三层交换工作是在网络模型中的第三层实现了数据包的高速转发。对于数据包转发等规律性的过程由硬件高速实现，而像路由信息更新、路由表维护、路由计算、路由确定等功能，由软件实现。既可实现网络路由功能，又可根据不同网络状况做到最优网络性能。</p>
+<p>下面是一个网络模型与通信软硬件的对应图</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902024956.png"  alt="" />
+      </p>
+
+        <h1 id="网关-路由器-三层交换机的区别"   >
+          <a href="#网关-路由器-三层交换机的区别" class="heading-link"><i class="fas fa-link"></i></a>网关、路由器、三层交换机的区别</h1>
+      
+<p>网关是一个抽象的概念，具体说路由器可以做网关，三层交换机也可以做网关，甚至你的电脑也可以做网关。</p>
+<p>而路由器和交换机则是具体的设备。</p>
+<p>至于三层交换机和路由器的区别，其实没啥区别。</p>
+<p>你要说区别的话Cisco/Broadcom更愿意称自己的产品为三层交换机，而Juniper则更愿意称自己产品为路由器。</p>
+<p>交换机主要功能是交换数据，内部是硬件直接处理数据包的，也就是硬件转发。什么叫硬件转发呢？我们来举个简单的例子，比如逻辑电路里有一种零件叫选择器（mux）</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902022931.png"  alt="" />
+      </p>
+<p>也就是可以通过下面的A1A2来控制输出Y到底跟哪个输入连通。内部结构是这样的：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902022958.png"  alt="" />
+      </p>
+<p>硬件处理的好处就是速度爆快，性能无敌好，资源占用极低。来一个数据包，交换机的CPU看都不用看直接怼给芯片，它就从指定的端口出去了。牛不牛？</p>
+<p>二层交换机是看MAC地址，三层交换机则是看IP地址进行高速转发。</p>
+<p>那有什么缺点呢？缺点就是它是一个铁憨憨，只会通过MAC/IP地址来转发数据，用文化人的说法叫缺乏灵活性。打个比方的话就是三层交换机大概相当于一个头脑简单四肢发达的筋肉男，脑子不太灵光但力大无穷。</p>
+<hr />
+<p>路由器是做什么的呢？确实可以跨网段转发数据，但路由器真正的用途是计算路由。什么叫计算路由呢，这就要从互联网的结构说起了。</p>
+<p>大家知道早期互联网其实是军事用途，其目的在于构筑一个几乎无法被摧毁的信息交换网络。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902025344.png"  alt="" />
+      </p>
+<p>树状结构的网络往往有一个或者几个中枢，一旦被摧毁整个网络就瘫痪了。而这种网状结构的网络，即使你摧毁少数节点，或者切断一些径路，数据仍然可以绕路到达，整个网络仍然是有效的。</p>
+<p>节点之间会根据一定的算法计算出到其他节点代价最小的路径，具体怎么算的，随便读个工科应该就懂了，自己想学可以去看看图论哈。</p>
+<p>如果网络结构不变，最短径路算好放在那就行了。但一旦网络发生变化，比如某个节点坏掉了，或者某条线断了，那就要路由器来重新计算。由于路由协议不同，一部分节点甚至全部节点都要重新计算到其他节点的路由，这个计算量其实蛮大的。</p>
+<p>这个计算量有多大的呢？早期互联网并没打算接入那么多设备，网段划的简单粗暴，地址分个ABC类就完事了。后来设备和网络越来越多，大家就只好把大的网络切成小网段用，比如一个/16的网段切成四个/18的网段，一个/20的网段切成16个/24的网段，etc…</p>
+<p>切来切去网段（节点）越来越多，到这些网段（节点）的全部路由信息称之为全路由（Full route），全路由在2020年初这个时间点上大概有70万条，一般的路由器要计算大概3到20分钟吧，而早期的路由器由于内存什么限制恐怕还算不了这么多路由。</p>
+<p>计算路由这个问题太复杂了，加上各种各样的路由协议，很难硬件解决。也就是用常规通用计算机的方案，用高性能的CPU来算，或者说路由器其实跟普通的电脑没有本质差别。顺便说一下Cisco路由器的IOS其实可以拿到模拟器上跑，几乎可以完整的模拟出路由器的各种行为。</p>
+<p>所以打个比方的话路由器就相当于一个瘦弱的学霸，脑子倒是灵感但你指望它转发数据那还是算了吧。</p>
+<hr />
+<p>估计你也发现问题了：那我们给筋肉男安上一个不错的脑子，那不就两全其美了吗？！</p>
+<p>其实大家也是这样做的，所以传统意义上路由器用的越来越少，越来越多的地方（尤其是电信企业）开始用高端三层交换机来替代传统路由器。而高端路由器和高端三层交换机的界限也越来越模糊，所以前面不也跟你说了么，Cisco习惯称这样的产品为三层交换机，Juniper则习惯称之为路由器。</p>
+<p>顺便说一下，现在网络发展的趋势叫做网络扁平化（fabric化），用以替代传统的核心-汇聚-接入三层结构。什么叫扁平化呢？白话解释就是，最好能把所有的网络设备都直接怼到一个巨型的三层交换机上来交换数据，这样对大家都好。</p>
+<p>基于这样的思路，三层交换机逐渐取代传统路由器成为互联网的核心。</p>
+<blockquote>
+<p>三层交换机把二层交换机跟路由器给怼到一起了，tcp/ip模型中的网络层表示osi里的网络层、链路层、物理层，也许不久后会有一个设备同时把这三层做的事情统一给做了。</p>
+</blockquote>
+<p>最后，我知道你们买的无线路由花了不少钱，但也别傻了吧唧的随意就把无线路由的WAN口往上接，能用LAN口尽量用LAN口。除非绝对必要，也就是一定要路由器拨号的情况，你再用WAN口。因为网络扁平化不是说说而已的，交换机的转发性能是压倒性的，真不是你几千元就能抹平的（何况几千也不都使用在路由转发这一块了）。</p>
+<p>最糟糕的情况莫过于光猫已经拨号了，还把无线路由的WAN口往光猫的LAN口上怼。上网是能上的，速度稳定性都不咋样，还可能出各种奇怪问题。</p>
+<p>这时候把光猫换成桥接模式，路由拨号，哎！问题都消失了。然后得出结论就是光猫性能不行。</p>
+<blockquote>
+<p><strong>Lan和Wan的区别</strong><br />
+两者数据的传输方式不同、两者定义不一样、两者的应用场景不一样</p>
+<ul>
+<li>
+<p>两者数据的传输方式不同：</p>
+<p>LAN通过数据通信网或专用数据电路，与远方的局域网、数据库或处理中心相连接，构成一个较大范围的信息处理系统。WLAN的数据通过电磁波传输，也就是常说的空气传输。WLAN 利用电磁波在空气中发送和接受数据，而无需线缆介质。</p>
+</li>
+<li>
+<p>两者定义不一样：</p>
+<p>LAN，全称Local Area Network，中文名叫做局域网。顾名思义，LAN是指在某一区域内由多台计算机互联成的计算机组。WLAN，全称Wireless LAN, 无线局域网，在空中进行通信连接，使得无线局域网络能利用简单的存取架构让用户透过它，达到“信息随身化、便利走天下”的理想境界。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902030739.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>两者的应用场景不一样：</p>
+<p>LAN应用于接电脑的网线，需要插到路由器的LAN口；或者应用于二级路由，一般都是从上级路由的LAN口接线。</p>
+<p>WLAN应用于大楼之间，大楼之间建构网络的连结，取代专线，简单又便宜；或者餐饮及零售，餐饮服务业可使用无线局域网络产品，直接从餐桌即可输入并传送客人点菜内容至厨房、柜台。零售商促销时，可使用无线局域网络产品设置临时收银柜台。</p>
+</li>
+</ul>
+</blockquote>
+
+        <h2 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<ul>
+<li>交换机不认识 IP，只认识 MAC。交换机(二层)是在内网，一个局域网内通信的设备。</li>
+<li>路由器是在不同的网段进行通信的设备。</li>
+<li>网关的英文名称：gateway，又叫做网间连接器、协议转换器。网关是一个网络硬件设备，一般情况下是<strong>路由器</strong>，也可以是一台<strong>服务器</strong>。如果数据是在局域网内通信，则不需要网关，如果数据不在局域网内通信，需要发到其他网段，就需要网关参与通信。<br />
+由于历史的原因，许多有关 TCP/IP 的文献曾经把网络层使用的路由器称为网关，在今天很多局域网采用都是路由来接入网络，因此通常指的网关就是路由器的 IP。<br />
+作为普通的用户，只需要记住，<strong>手动配置 IP 地址</strong>的时候，默认网关的地址就是路由器的 IP 地址，也就是你路由器的管理页面登陆地址。如果你选择自动获取 IP 地址，那么就不需要关注默认网关地址了，但路由器的 DHCP 服务器分配下来的默认网关也一定是路由器的 IP 地址。</li>
+</ul>
+
+        <h1 id="演示"   >
+          <a href="#演示" class="heading-link"><i class="fas fa-link"></i></a>演示</h1>
+      
+<p>创建两个虚拟机</p>
+<p>172.17.0.4</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031138.png"  style="zoom:50%;" />
+      
+<p>172.17.0.2</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830032644.png"  style="zoom:50%;" />
+      
+<p>此时2是可以ping通4的</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031211.png"  alt="" />
+      </p>
+<p>为什么能ping通，我们看下路由表</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830015833.png"  alt="" />
+      </p>
+<p>172.17.0.2 &amp; 255.255.0.0  = 172.17.0.0 匹配上，选择网关0.0.0.0 也就是在同一个局域网直接使用交换机交换，不走网关。</p>
+<blockquote>
+<p>lo 表示 本地回环地址，代表设备的本地虚拟网卡，所以默认被看作是永远不会宕掉的接口。在Windows操作系统中也有相似的定义，所以通常在安装网卡前就可以ping通这个本地回环地址。一般都会用来检查本地网络协议、基本数据接口等是否正常的。</p>
+</blockquote>
+<p>增加一个回环地址</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031402.png"  style="zoom:50%;" />
+      
+<blockquote>
+<p>添加</p>
+<p>ifconfig lo:0 IP地址/掩码</p>
+<p>删除</p>
+<p>ifconfig lo:0 down</p>
+</blockquote>
+<p>172.17.0.2是ping不通172.8.8.8的</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031453.png"  alt="" />
+      </p>
+<p>172.17.0.2 查看路由表</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830031531.png"  alt="" />
+      </p>
+<p>172.8.8.8只能匹配网关172.17.0.1，网关也不知道172.8.8.8在哪儿于是随便往外扔了。</p>
+<p>如何解决</p>
+<p>思路：在172.17.0.3这台主机上增加一行路由，给出正确的下一跳也就是172.8.8.8 物理网卡eth0 的ip地址172.17.0.4</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830032824.png"  style="zoom:50%;" />
+      
+<p>现在就可以ping通我们自己加的回环地址了</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830032905.png"  style="zoom:50%;" />
+      
+<p>172.8.8.8 和 255.255.255.255 与运算 得到目标网关172.17.0.4</p>
+<blockquote>
+<p>vpn就是数据包背着数据包</p>
+<p>ip-香港数据包里包着ip-谷歌数据包，ip-香港数据包到达香港后，香港服务器拆包，将ip-谷歌数据包发到谷歌。</p>
+</blockquote>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/367420262"  target="_blank" rel="noopener">https://www.zhihu.com/question/367420262</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://zhidao.baidu.com/question/7155097.html"  target="_blank" rel="noopener">https://zhidao.baidu.com/question/7155097.html</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/%E7%BD%91%E5%85%B3%E3%80%81%E8%B7%AF%E7%94%B1%E5%99%A8%E3%80%81%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/%E7%BD%91%E5%85%B3%E3%80%81%E8%B7%AF%E7%94%B1%E5%99%A8%E3%80%81%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">网络通信</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/IO%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">IO模型详解</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/"><span class="paginator-prev__text">网络编程基础</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#三层交换机的三层是什么意思"><span class="toc-number">1.</span> <span class="toc-text">
+          三层交换机的三层是什么意思？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#物理层"><span class="toc-number">1.1.</span> <span class="toc-text">
+          物理层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据链路层"><span class="toc-number">1.2.</span> <span class="toc-text">
+          数据链路层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网络层"><span class="toc-number">1.3.</span> <span class="toc-text">
+          网络层</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是三层工业交换机"><span class="toc-number">1.4.</span> <span class="toc-text">
+          什么是三层工业交换机？</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#网关-路由器-三层交换机的区别"><span class="toc-number">2.</span> <span class="toc-text">
+          网关、路由器、三层交换机的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">2.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#演示"><span class="toc-number">3.</span> <span class="toc-text">
+          演示</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="Tair的功能        Tair是一个Key&#x2F;Value结构数据的解决方案，它默认支持基于内存和文件的两种存储方式，分别和我们通常所说的缓存和持久化存储对应。非持久化的 tair 可以看成是一个分布式缓存. 持久化的 tair 将数据存放于磁盘中。为了解决磁盘损坏导致数据丢失, tair 可以配置数据的备份数目, tair 自动将一份数据的不同备份放到不同的主机上；当有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式K&#x2F;V存储方案-Tair">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8FKV%E5%AD%98%E5%82%A8%E6%96%B9%E6%A1%88-Tair/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="Tair的功能        Tair是一个Key&#x2F;Value结构数据的解决方案，它默认支持基于内存和文件的两种存储方式，分别和我们通常所说的缓存和持久化存储对应。非持久化的 tair 可以看成是一个分布式缓存. 持久化的 tair 将数据存放于磁盘中。为了解决磁盘损坏导致数据丢失, tair 可以配置数据的备份数目, tair 自动将一份数据的不同备份放到不同的主机上；当有">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917190405.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917190418.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917193609.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917195643.png">
+<meta property="article:published_time" content="2020-09-27T06:37:48.445Z">
+<meta property="article:modified_time" content="2020-09-27T06:37:48.455Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="tair">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917190405.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>分布式K/V存储方案-Tair | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8FKV%E5%AD%98%E5%82%A8%E6%96%B9%E6%A1%88-Tair/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">分布式K/V存储方案-Tair</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">5.5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">31分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="tair的功能"   >
+          <a href="#tair的功能" class="heading-link"><i class="fas fa-link"></i></a>Tair的功能</h1>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>Tair是一个Key/Value结构数据的解决方案，它默认支持基于内存和文件的两种存储方式，分别和我们通常所说的缓存和持久化存储对应。非持久化的 tair 可以看成是一个分布式缓存. 持久化的 tair 将数据存放于磁盘中。</span>为了解决磁盘损坏导致数据丢失, tair 可以配置数据的备份数目, tair 自动将一份数据的不同备份放到不同的主机上；当有主机发生异常, 无法正常提供服务的时候, 其于的备份会继续提供服务。</p>
+<p>Tair除了普通Key/Value系统提供的功能，比如get、put、delete以及批量接口外，还有一些附加的实用功能，使得其有更广的适用场景，包括：</p>
+<ul>
+<li>Version支持</li>
+<li>原子计数器</li>
+<li>Item支持</li>
+</ul>
+<a id="more"></a>
+
+        <h2 id="version支持"   >
+          <a href="#version支持" class="heading-link"><i class="fas fa-link"></i></a>Version支持</h2>
+      
+<p>Tair中的每个数据都包含版本号，版本号在每次更新后都会递增。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这个特性有助于防止由于数据的并发更新导致的问题</span>。</p>
+<p>比如，系统有一个value为“a,b,c”，A和B同时get到这个value。A执行操作，在后面添加一个d，value为 “a,b,c,d”。B执行操作添加一个e，value为”a,b,c,e”。如果不加控制，无论A和B谁先更新成功，它的更新都会被后到的更新覆盖。</p>
+<p>Tair无法解决这个问题，但是引入了version机制避免这样的问题。还是拿刚才的例子，A和B取到数据，假设版本号为10，A先更新，更新成功 后，value为”a,b,c,d”，与此同时，版本号会变为11。当B更新时，由于其基于的版本号是10，服务器会拒绝更新，从而避免A的更新被覆盖。 B可以选择get新版本的value，然后在其基础上修改，也可以选择强行更新。</p>
+
+        <h2 id="原子计数器"   >
+          <a href="#原子计数器" class="heading-link"><i class="fas fa-link"></i></a>原子计数器</h2>
+      
+<p>Tair从服务器端支持原子的计数器操作，这使得Tair成为一个简单易用的分布式计数器。</p>
+
+        <h2 id="item支持"   >
+          <a href="#item支持" class="heading-link"><i class="fas fa-link"></i></a>Item支持</h2>
+      
+<p>Tair还支持将value视为一个item数组，对value中的部分item进行操作。比如有个key的value为[1,2,3,4,5]，我们可以只获取前两个item，返回[1,2]，也可以删除第一个item，还支持将数据删除，并返回被删除的数据，通过这个接口可以<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>实现一个原子的分布式 FIFO的队列</span>。</p>
+
+        <h1 id="使用场景"   >
+          <a href="#使用场景" class="heading-link"><i class="fas fa-link"></i></a>使用场景</h1>
+      
+
+        <h2 id="非持久化"   >
+          <a href="#非持久化" class="heading-link"><i class="fas fa-link"></i></a>非持久化</h2>
+      
+<p>使用存储引擎：mdb,rdb</p>
+<ul>
+<li>数据可以以key/value的形式存储</li>
+<li>数据可以接受丢失</li>
+<li>访问速度要求很高</li>
+<li>单个数据大小不是很大，一般在KB级别</li>
+<li>数据量很大，并且有较大的增长可能性</li>
+<li>数据更新不频繁</li>
+</ul>
+
+        <h2 id="持久化"   >
+          <a href="#持久化" class="heading-link"><i class="fas fa-link"></i></a>持久化</h2>
+      
+<p>使用存储引擎：kdb,ldb</p>
+<ul>
+<li>数据可以以key/value的形式存储</li>
+<li>数据需要持久化</li>
+<li>单个数据大小不是很大，一般在KB级别</li>
+<li>数据量很大，并且有较大的增长可能性</li>
+<li>数据的读写比例较高</li>
+</ul>
+
+        <h1 id="tair的内部结构"   >
+          <a href="#tair的内部结构" class="heading-link"><i class="fas fa-link"></i></a>Tair的内部结构</h1>
+      
+<p><strong>网络拓补</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917190405.png"  alt="" />
+      </p>
+<p><strong>架构</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917190418.png"  alt="" />
+      </p>
+<p>一个Tair集群主要包括client、configserver和dataserver 3个模块。</p>
+<ul>
+<li>Configserver通过和dataserver的心跳(HeartBeat)维护集群中可用的节点，并根据可用的节点，构建数据在集群中的分布信息(见下文的对照表)。</li>
+<li>Client在初始化时，从configserver处获取数据的分布信息，根据分布信息和相应的dataserver 交互完成用户的请求。</li>
+<li>Dataserver负责数据的存储，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>并按照configserver的指示完成数据的复制和迁移工作</span>。</li>
+</ul>
+<p>tair 作为一个分布式系统, 是由<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>一个中心控制节点和一系列的服务节点组成</span>。我们称中心控制节点为config server。 服务节点是data server， config server 负责管理所有的data server, 维护data server的状态信息。data server 对外提供各种数据服务，并以心跳的形式将自身状况汇报给config server。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>config server是控制点，而且是单点，目前采用一主一备的形式来保证其可靠性，所有的 data server 地位都是等价的。</span></p>
+
+        <h1 id="数据的分布"   >
+          <a href="#数据的分布" class="heading-link"><i class="fas fa-link"></i></a>数据的分布</h1>
+      
+<p>分布式系统需要解决的一个重要问题便是决定数据在集群中的分布策略，好的分布策略应该能将数据均衡地分布到所有节点上，并且还应该能适应集群节点的变化。Tair采用的对照表方式较好地满足了这两点。</p>
+<p>对照表的行数是一个固定值，这个固定值应该远大于一个集群的物理机器数，由于对照表是需要和每个使用Tair的客户端同步的，所以不能太大，不然同步将带来较大的开销。我们在生产环境中的行数一般为1023 。</p>
+
+        <h1 id="对照表简介"   >
+          <a href="#对照表简介" class="heading-link"><i class="fas fa-link"></i></a>对照表简介</h1>
+      
+<p>下面我们看对照表是怎么完成数据的分布功能的，为了方便，我们这里假设对照表的行数为6。最简单的对照表包含两列，第一列为hash桶(存放数据的单位，一个节点保存着多个桶的数据，比如192.168.10.1保存3个桶的数据)的索引，第二列为负责该 hash值对应数据的dataserver节点信息。比如我们有两个节点192.168.10.1和192.168.10.2，那么对照表类似：</p>
+<p>0  192.168.10.1<br />
+1  192.168.10.2<br />
+2  192.168.10.1<br />
+3  192.168.10.2<br />
+4  192.168.10.1<br />
+5  192.168.10.2</p>
+<p>当客户端接收到请求后，将key的hash值和6取模，然后根据取模后的结果查找对照表。比如取模后的值为3，客户端将和192.168.10.2通信。</p>
+
+        <h2 id="对照表如何适应节点数量的变化"   >
+          <a href="#对照表如何适应节点数量的变化" class="heading-link"><i class="fas fa-link"></i></a>对照表如何适应节点数量的变化</h2>
+      
+<p>我们假设新增了一个节点——192.168.10.3，当configserver发现新增的节点后，会重新构建对照表。构建依据以下两个原则：</p>
+<ol>
+<li>数据在新表中均衡地分布到所有节点上。</li>
+<li>尽可能地保持现有的对照关系。</li>
+</ol>
+<p>更新之后的对照表如下所示：</p>
+<p>0  192.168.10.1<br />
+1  192.168.10.2<br />
+2  192.168.10.1<br />
+3  192.168.10.2<br />
+<strong>4  192.168.10.3</strong><br />
+<strong>5  192.168.10.3</strong></p>
+<p>这里将原本由192.168.10.1负责的4和192.168.10.2负责的5交由新加入的节点192.168.10.3负责。如果是节点不可用，则相当于上述过程反过来，道理是一样的。</p>
+
+        <h2 id="多备份的支持"   >
+          <a href="#多备份的支持" class="heading-link"><i class="fas fa-link"></i></a>多备份的支持</h2>
+      
+<p>Tair支持自定义的备份数，比如你可以设置数据备份为2，以提高数据的可靠性。对照表可以很方便地支持这个特性。我们以行数为6，两个节点为例，2个备份的对照表类似：</p>
+<p>0  192.168.10.1  192.168.10.2<br />
+1  192.168.10.2  192.168.10.1<br />
+2  192.168.10.1  192.168.10.2<br />
+3  192.168.10.2  192.168.10.1<br />
+4  192.168.10.1  192.168.10.2<br />
+5  192.168.10.2  192.168.10.1</p>
+<p>第二列为主节点的信息，第三列为辅节点信息。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>在Tair中，客户端的读写请求都是和主节点交互</span>，所以如果一个节点不做主节点，那么它就退化成单纯的备份节点。因此，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>多备份的对照表在构建时需要尽可能保证各个节点作为主节点的个数相近</span>。</p>
+<p>当有节点不可用时，</p>
+<ul>
+<li>如果是辅节点，那么configserver会重新为其指定一个辅节点，如果是持久化存储，还将复制数据到新的辅节点上。</li>
+<li>如果是主节点，那么configserver首先将辅节点提升为主节点，对外提供服务，并指定一个新的辅节点，确保数据的备份数。</li>
+</ul>
+
+        <h2 id="多机架和多数据中心的支持"   >
+          <a href="#多机架和多数据中心的支持" class="heading-link"><i class="fas fa-link"></i></a>多机架和多数据中心的支持</h2>
+      
+<p>对照表在构建时，可以配置将数据的备份分散到不同机架或数据中心的节点上。Tair当前通过设置一个IP掩码来判断机器所属的机架和数据中心信息。</p>
+<p>比如你配置备份数为3，集群的节点分布在两个不同的数据中心A和B，则Tair会确保每个机房至少有一份数据。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>假设A数据中心包含两份数据时，Tair会尽可能将这两份数据分布在不同机架的节点上。这可以减少整个数据中心或某个机架发生故障是数据丢失的风险。</span></p>
+
+        <h1 id="轻量级的configserver"   >
+          <a href="#轻量级的configserver" class="heading-link"><i class="fas fa-link"></i></a>轻量级的ConfigServer</h1>
+      
+<p>从Tair的整体架构图上看，configserver很类似传统分布式集群中的中心节点。整个集群服务都依赖于configserver的正常工作。</p>
+<p>但Tair的configserver却是一个轻量级的中心节点，在大部分时候，configserver不可用对集群的服务是不造成影响的。</p>
+<p><span style='color:red;background:yellow;font-size:文字大小;font-weight:'>Tair用户和configserver的交互主要是为了获取数据分布的对照表，当client获取到对照表后，会cache这张表，然后通过查这张表决定数据存储的节点，所以请求不需要和configserver交互，这使得Tair对外的服务不依赖configserver，所以它不是传统意义上的中心节点。</span></p>
+<p>configserver维护的对照表有一个版本号，每次新生成表，该版本号都会增加。当有数据节点状态发生变化(比如新增节点或者有节点不可用了)时，configserver会根据当前可用的节点重新生成对照表，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>并通过数据节点的心跳，将新表同步给数据节点</span>。</p>
+<p>当客户端请求数据节点时，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>数据节点每次都会将自己的对照表的版本号放入response中返回给客户端，客户端接收到response后，会将数据节点返回的版本号和自己的版本号比较，如果不相同，则主动和configserver通信，请求新的对照表。</span></p>
+<blockquote>
+<p>通过数据节点和版本号完成客户端与configserver的解耦，这样只需要维护数据节点和configserver的连接即可。</p>
+</blockquote>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>所以客户端也不需要和configserver保持心跳，以便及时地更新对照表。这使得在正常的情况下，客户端不需要和configserver通信，即使configserver不可用了，也不会对整个集群的服务造成大的影响。</span></p>
+<p>仅有当configserver不可用，此时有客户端需要初始化，那么客户端将取不到对照表信息，这将使得客户端无法正常工作。</p>
+
+        <h1 id="dataserver内部结构"   >
+          <a href="#dataserver内部结构" class="heading-link"><i class="fas fa-link"></i></a>DataServer内部结构</h1>
+      
+<p>DataServer负责数据的物理存储，并<span style='color:red;background:yellow;font-size:文字大小;font-weight:'>根据configserver构建的对照表完成数据的复制和迁移工作</span>。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>DataServer具备抽象的存储引擎层，可以很方便地添加新存储引擎。DataServer还有一个插件容器，可以动态地加载/卸载插件。</span></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917193609.png"  alt="" />
+      </p>
+<p><span style='text-align: center;display:block;font-size:14px;color:颜色;background:背景颜色;'>DataServer的内部结构示意图</span></p>
+
+        <h1 id="抽象的存储引擎层"   >
+          <a href="#抽象的存储引擎层" class="heading-link"><i class="fas fa-link"></i></a>抽象的存储引擎层</h1>
+      
+<p>Tair的存储引擎有一个抽象层，只要满足存储引擎需要的接口，便可以很方便地替换Tair底层的存储引擎。比如你可以很方便地将bdb、tc甚至MySQL作为Tair的存储引擎，而同时使用Tair的分布方式、同步等特性。</p>
+<p>Tair默认包含两个存储引擎：mdb和fdb。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>mdb是一个高效的缓存存储引擎</span>，它有着和memcached类似的内存管理方式。mdb支持使用share memory，这使得我们在重启Tair数据节点的进程时不会导致数据的丢失，从而使升级对应用来说更平滑，不会导致命中率的较大波动。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>fdb是一个简单高效的持久化存储引擎</span>，使用树的方式根据数据key的hash值索引数据，加快查找速度。索引文件和数据文件分离，尽量保持索引文件在内存中，以便减小IO开销。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>使用空闲空间池管理被删除的空间</span>。</p>
+
+        <h1 id="自动的复制和迁移"   >
+          <a href="#自动的复制和迁移" class="heading-link"><i class="fas fa-link"></i></a>自动的复制和迁移</h1>
+      
+<p>为了增强数据的安全性，Tair支持配置数据的备份数。比如你可以配置备份数为3，则每个数据都会写在不同的3台机器上。得益于抽象的存储引擎层，无论是作为cache的mdb，还是持久化的fdb，都支持可配的备份数。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>当数据写入一个节点(通常我们称其为主节点)后，主节点会根据对照表自动将数据写入到其他备份节点，整个过程对用户是透明的。</span></p>
+<p>当有新节点加入或者有节点不可用时，configserver会根据当前可用的节点，重新build一张对照表。数据节点同步到新的对照表时，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>会自动将在新表中不由自己负责的数据迁移到新的目标节点</span>。迁移完成后，客户端可以从configserver同步到新的对照表，完成扩容或者容灾过程。整个过程对用户是透明的，服务不中断。</p>
+
+        <h1 id="插件容器"   >
+          <a href="#插件容器" class="heading-link"><i class="fas fa-link"></i></a>插件容器</h1>
+      
+<p>Tair还内置了一个插件容器，可以支持热插拔插件。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>插件由configserver配置，configserver会将插件配置同步给各个数据节点，数据节点会负责加载/卸载相应的插件。</span></p>
+<p>插件分为request和response两类，可以分别在request和response时执行相应的操作，比如在put前检查用户的quota信息等。</p>
+<p>插件容器也让Tair在功能方便具有更好的灵活性。</p>
+
+        <h1 id="更多细节"   >
+          <a href="#更多细节" class="heading-link"><i class="fas fa-link"></i></a>更多细节</h1>
+      
+
+        <h2 id="tair-的负载均衡算法是什么"   >
+          <a href="#tair-的负载均衡算法是什么" class="heading-link"><i class="fas fa-link"></i></a>tair 的负载均衡算法是什么</h2>
+      
+<p>tair 的分布采用的是一致性哈希算法， 对于所有的key，分到Q个桶中， 桶是负载均衡和数据迁移的基本单位。 config server 根据一定的策略把每个桶指派到不同的data server上。 因为数据按照key做hash算法， 所以可以认为每个桶中的数据基本是平衡的. 保证了桶分布的均衡性， 就保证了数据分布的均衡性。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917195643.png"  alt="" />
+      </p>
+
+        <h2 id="增加或者减少data-server的时候会发生什么"   >
+          <a href="#增加或者减少data-server的时候会发生什么" class="heading-link"><i class="fas fa-link"></i></a>增加或者减少data server的时候会发生什么</h2>
+      
+<p>当有某台data server故障不可用的时候， config server会发现这个情况， config server负责重新计算一张新的桶在data server上的分布表， 将原来由故障机器服务的桶的访问重新指派到其它的data server中。这个时候， 可能会发生数据的迁移。比如原来由data server A负责的桶，在新表中需要由 B负责。而B上并没有该桶的数据， 那么就将数据迁移到B上来。</p>
+<blockquote>
+<p>B是A的备份节点</p>
+</blockquote>
+<p>同时config server会发现哪些桶的备份数目减少了， 然后根据负载情况在负载较低的data server上增加这些桶的备份。当系统增加data server的时候， config server根据负载，协调data server将他们控制的部分桶迁移到新的data server上。迁移完成后调整路由。</p>
+<p>当然系统中可能出现减少了某些data server 同时增加另外的一些data server。处理原理同上。 每次路由的变更，config server都会将新的配置信息推给data server。在客户端访问data server的时候， 会发送客户端缓存的路由表的版本号。如果data server发现客户端的版本号过旧，则会通知客户端去config server取一次新的路由表。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>如果客户端访问某台data server 发生了不可达的情况(该 data server可能宕机了)，客户端会主动去config server取新的路由表。</span></p>
+
+        <h2 id="发生迁移的时候data-server如何对外提供服务"   >
+          <a href="#发生迁移的时候data-server如何对外提供服务" class="heading-link"><i class="fas fa-link"></i></a>发生迁移的时候data server如何对外提供服务</h2>
+      
+<p>当迁移发生的时候， 我们举个例子， 假设data server A 要把桶 3，4，5 迁移给data server B。因为迁移完成前，客户端的路由表没有变化，客户端对 3， 4， 5 的访问请求都会路由到A。</p>
+<p>现在假设 3还没迁移， 4 正在迁移中， 5已经迁移完成。那么如果是对3的访问， 则没什么特别， 跟以前一样。如果是对5的访问， 则A会把该请求转发给B，并且将B的返回结果返回给客户，如果是对4的访问，在A处理，同时<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果是对4的修改操作会记录修改log。当桶4迁移完成的时候，还要把log发送到B，在B上应用这些log。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>最终A B上对于桶4来说， 数据完全一致才是真正的迁移完成。</span></p>
+<p>当然如果是因为某data server宕机而引发的迁移， 客户端会收到一张中间临时状态的分配表。这张表中，把宕机的data server所负责的桶临时指派给有其备份data server来处理。 这个时候服务是可用的，但是负载可能不均衡。当迁移完成之后，才能重新达到一个新的负载均衡的状态。</p>
+
+        <h2 id="桶在data-server上分布时候的策略"   >
+          <a href="#桶在data-server上分布时候的策略" class="heading-link"><i class="fas fa-link"></i></a>桶在data server上分布时候的策略</h2>
+      
+<p>程序提供了两种生成分配表的策略， 一种叫做负载均衡优先， 一种叫做位置安全优先。</p>
+<p>我们先看负载优先策略。当采用负载优先策略的时候，config server会尽量的把桶均匀的分布到各个data server上。 所谓尽量是指在不违背下面的原则的条件下尽量负载均衡。</p>
+<ol>
+<li>每个桶必须有COPY_COUNT份数据</li>
+<li>一个桶的各份数据不能在同一台主机上</li>
+</ol>
+<p>位置安全优先原则是说， 在不违背上面两个原则的条件下， 还要满足位置安全条件，然后再考虑负载均衡。</p>
+<p>位置信息的获取是通过 <code>_pos_mask</code>(参见安装部署文档中关于配置项的解释) 计算得到。一般我们通过控制 <code>_pos_mask</code> 来使得不同的机房具有不同的位置信息。 那么在位置安全优先的时候，必须被满足的条件要增加一条， 一个桶的各份数据不能都位于相同的一个位置(不在同一个机房)。</p>
+<p>这里有一个问题， 假如只有两个机房， 机房1中有100台data server， 机房2中只有1台data server。这个时候， 机房2中data server的压力必然会非常大。于是这里产生了一个控制参数 <code>_build_diff_ratio</code>(参见安装部署文档)。 当机房差异比率大于这个配置值时， config server也不再build新表。 机房差异比率是如何计出来的呢? 首先找到机器最多的机房，不妨设使RA， data server数量是SA。 那么其余的data server的数量记做SB。则<code>机房差异比率=|SA – SB|/SA</code>。 因为一般我们线上系统配置的COPY_COUNT是3。 在这个情况下， 不妨设只有两个机房RA和RB， 那么两个机房什么样的data server数量是均衡的范围呢? 当差异比率小于 0。5的时候是可以做到各台data server负载都完全均衡的。这里有一点要注意：假设RA机房有机器6台，RB有机器3台。那么差异比率 = 6 – 3 / 6 = 0.5。这个时候如果进行扩容，在机房A增加一台data server，扩容后的差异比率 = 7 – 3 / 7 = 0.57。也就是说，只在机器数多的机房增加data server会扩大差异比率。 如果我们的<code>_build_diff_ratio</code>配置值是0.5。那么进行这种扩容后， config server会拒绝再继续build新表。</p>
+
+        <h2 id="tair-的一致性和可靠性问题"   >
+          <a href="#tair-的一致性和可靠性问题" class="heading-link"><i class="fas fa-link"></i></a>tair 的一致性和可靠性问题</h2>
+      
+<p>分布式系统中的可靠性和一致性是无法同时保证的，因为我们必须允许网络错误的发生。tair 采用复制技术来提高可靠性，并且为了提高效率做了一些优化，事实上在没有错误发生的时候，tair 提供的是一种强一致性。但是在有data server发生故障的时候，客户有可能在一定时间窗口内读不到最新的数据。 甚至发生最新数据丢失的情况。</p>
+
+        <h2 id="tair提供的客户端"   >
+          <a href="#tair提供的客户端" class="heading-link"><i class="fas fa-link"></i></a>tair提供的客户端</h2>
+      
+<p>tair 的server端是C<ins>写的， 因为server和客户端之间使用socket通信， <span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>理论上只要可以实现socket操作的语言都可以直接实现成tair客户端。</span> 目前实际提供的客户端有java 和 C</ins>。 客户端只需要知道config server的位置信息就可以享受tair集群提供的服务了。</p>
+
+        <h1 id="tair的未来"   >
+          <a href="#tair的未来" class="heading-link"><i class="fas fa-link"></i></a>Tair的未来</h1>
+      
+<p>我们将Tair开源，希望有更多的用户能从我们开发的产品中受益，更希望依托社区的力量，使Tair有更广阔的发展空间。</p>
+<p>Tair开源后，有很多用户关心我们是否会持续维护这个项目。我们将Tair开源后，淘宝内部已经不再有私有的Tair分支，所有的开发和应用都基于开源 分支。Tair在淘宝有非常广的应用，我们内部有一个团队，专门负责Tair的开发和维护，相信我们会和社区一起，将Tair越做越好。</p>
+<p>有很多用户在淘宝开源平台上申请加入Tair项目，加入项目在我们的开源平台上意味着成为项目的提交者，可以向代码库直接提交代码。所以我们暂时还没有批 准外部用户加入，我们将在大家对Tair有更深入的了解后和社区一起决定是否批准加入项目的申请，在此之前，如果你有对代码的改进，欢迎使用patch的 方式提交给我们，我们将在review后决定是否合并到代码库。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8FKV%E5%AD%98%E5%82%A8%E6%96%B9%E6%A1%88-Tair/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8FKV%E5%AD%98%E5%82%A8%E6%96%B9%E6%A1%88-Tair/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/tair/">tair</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/BSON%E5%92%8CJSON%E7%9A%84%E5%8C%BA%E5%88%AB/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">BSON和JSON的区别</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E7%BC%93%E5%AD%98%E5%88%86%E7%B1%BB%E4%B8%8E%E9%80%89%E6%8B%A9/"><span class="paginator-prev__text">缓存分类与选择</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#tair的功能"><span class="toc-number">1.</span> <span class="toc-text">
+          Tair的功能</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#version支持"><span class="toc-number">1.1.</span> <span class="toc-text">
+          Version支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#原子计数器"><span class="toc-number">1.2.</span> <span class="toc-text">
+          原子计数器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#item支持"><span class="toc-number">1.3.</span> <span class="toc-text">
+          Item支持</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#使用场景"><span class="toc-number">2.</span> <span class="toc-text">
+          使用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#非持久化"><span class="toc-number">2.1.</span> <span class="toc-text">
+          非持久化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#持久化"><span class="toc-number">2.2.</span> <span class="toc-text">
+          持久化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#tair的内部结构"><span class="toc-number">3.</span> <span class="toc-text">
+          Tair的内部结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据的分布"><span class="toc-number">4.</span> <span class="toc-text">
+          数据的分布</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#对照表简介"><span class="toc-number">5.</span> <span class="toc-text">
+          对照表简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#对照表如何适应节点数量的变化"><span class="toc-number">5.1.</span> <span class="toc-text">
+          对照表如何适应节点数量的变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多备份的支持"><span class="toc-number">5.2.</span> <span class="toc-text">
+          多备份的支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多机架和多数据中心的支持"><span class="toc-number">5.3.</span> <span class="toc-text">
+          多机架和多数据中心的支持</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#轻量级的configserver"><span class="toc-number">6.</span> <span class="toc-text">
+          轻量级的ConfigServer</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dataserver内部结构"><span class="toc-number">7.</span> <span class="toc-text">
+          DataServer内部结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#抽象的存储引擎层"><span class="toc-number">8.</span> <span class="toc-text">
+          抽象的存储引擎层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#自动的复制和迁移"><span class="toc-number">9.</span> <span class="toc-text">
+          自动的复制和迁移</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#插件容器"><span class="toc-number">10.</span> <span class="toc-text">
+          插件容器</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#更多细节"><span class="toc-number">11.</span> <span class="toc-text">
+          更多细节</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#tair-的负载均衡算法是什么"><span class="toc-number">11.1.</span> <span class="toc-text">
+          tair 的负载均衡算法是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增加或者减少data-server的时候会发生什么"><span class="toc-number">11.2.</span> <span class="toc-text">
+          增加或者减少data server的时候会发生什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#发生迁移的时候data-server如何对外提供服务"><span class="toc-number">11.3.</span> <span class="toc-text">
+          发生迁移的时候data server如何对外提供服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#桶在data-server上分布时候的策略"><span class="toc-number">11.4.</span> <span class="toc-text">
+          桶在data server上分布时候的策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tair-的一致性和可靠性问题"><span class="toc-number">11.5.</span> <span class="toc-text">
+          tair 的一致性和可靠性问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tair提供的客户端"><span class="toc-number">11.6.</span> <span class="toc-text">
+          tair提供的客户端</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#tair的未来"><span class="toc-number">12.</span> <span class="toc-text">
+          Tair的未来</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

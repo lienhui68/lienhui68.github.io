@@ -1,0 +1,595 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="连接        连接是一个逻辑概念，物理层面就是一个对象(Socket)代表着若干资源 多线程复用一个连接                  需要保证并发的安全性，互斥地使用连接。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP-IP协议栈">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/TCP-IP%E5%8D%8F%E8%AE%AE%E6%A0%88/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="连接        连接是一个逻辑概念，物理层面就是一个对象(Socket)代表着若干资源 多线程复用一个连接                  需要保证并发的安全性，互斥地使用连接。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828234720.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828234807.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829202611.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829002948.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829003927.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829004018.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829004712.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829024419.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829195204.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829195650.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829201542.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204330.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204400.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204422.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204735.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829205201.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829212158.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829212357.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829212925.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829214036.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829214145.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829214943.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829221249.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829222306.png">
+<meta property="article:published_time" content="2020-09-16T16:21:55.364Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:55.369Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络通信">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828234720.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>TCP-IP协议栈 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/TCP-IP%E5%8D%8F%E8%AE%AE%E6%A0%88/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">TCP-IP协议栈</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">13分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="连接"   >
+          <a href="#连接" class="heading-link"><i class="fas fa-link"></i></a>连接</h1>
+      
+<p>连接是一个逻辑概念，物理层面就是一个对象(Socket)代表着若干资源</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>多线程复用一个连接</span></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828234720.png"  alt="" />
+      </p>
+<p>需要保证并发的安全性，互斥地使用连接。</p>
+<a id="more"></a>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>一个线程一个连接</span></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828234807.png"  alt="" />
+      </p>
+<p>连接数会很多</p>
+<blockquote>
+<p>注意多线程复用连接和连接池复用连接是两个维度的概念。</p>
+<p>多线程复用连接是多个线程互斥地使用连接，连接池复用连接是客户端使用完连接后并不销毁，而是将连接放回连接池，以供下一个请求访问使用。</p>
+</blockquote>
+<p><strong>演示</strong></p>
+<p>服务端：</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash">  nc -l localhost 8081</span></span><br></pre></td></tr></table></div></figure>
+<p>客户端：</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> nc localhost 8081</span></span><br></pre></td></tr></table></div></figure>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc只接受一个连接，一对一的方式，再有连接请求进来不接受accept，可以使用程序的方式进行连接</span><br><span class="line">两个终端不能同时使用nc连接服务端</span><br></pre></td></tr></table></div></figure>
+<p>查看资源占用情况：</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> netstat -natp</span></span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829202611.png"  alt="" />
+      </p>
+
+        <h1 id="tcpip-协议栈"   >
+          <a href="#tcpip-协议栈" class="heading-link"><i class="fas fa-link"></i></a>TCP/IP 协议栈</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829002948.png"  alt="" />
+      </p>
+<ul>
+<li>软件工程学中分层的目的是为了解耦</li>
+<li>https看似tcp/ip协议，实际上有点osi参考模型的影子，是否加密在表示层，token、证书的验证在会话层。</li>
+<li>每一层都有各自的协议指导工作以及库函数辅助工作</li>
+<li>rpc自定义协议是在应用层自定义协议，比如嫌弃http协议低效自定义应用层协议，这一层协议是由程序员赋能出来的。</li>
+<li>应用层以下是内核帮我们实现好的，对程序员透明。</li>
+</ul>
+
+        <h1 id="应用层"   >
+          <a href="#应用层" class="heading-link"><i class="fas fa-link"></i></a>应用层</h1>
+      
+
+        <h2 id="模拟应用层通信"   >
+          <a href="#模拟应用层通信" class="heading-link"><i class="fas fa-link"></i></a>模拟应用层通信</h2>
+      
+<p>首先使用nc与服务器建立连接，这一步相当于应用层以下已经建立好连接，后面要做的就是在应用层与服务器根据<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>应用层协议</span>进行通信。</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ nc www.baidu.com 80</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829003927.png"  alt="" />
+      </p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> netstat -natp</span></span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829004018.png"  alt="" />
+      </p>
+<p>基于HTTP协议通信</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET / HTTP/1.0 换行符</span><br></pre></td></tr></table></div></figure>
+<p>回车</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829004712.png"  alt="" />
+      </p>
+<p>响应头 两个换行符 响应体(BODY)</p>
+<p>再比如连接redis服务器</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829024419.png"  alt="" />
+      </p>
+<p>如上就是按照redis-cli和redis-server之间的协议进行交互。</p>
+
+        <h1 id="tcp层"   >
+          <a href="#tcp层" class="heading-link"><i class="fas fa-link"></i></a>TCP层</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829195204.png"  alt="" />
+      </p>
+<p>通过三次数据包的交互，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>开辟资源socket代表对方</span></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829195650.png"  alt="" />
+      </p>
+<p>连接 三次握手 四次挥手</p>
+<p>为什么是三次的， 连接是双向的，服务端发送ack之后需要客户端给到一个确认</p>
+<p>连接走通之后需要开辟资源 开辟内存空间接受队列 发送队列，用socket表示，连接是逻辑概念，资源是物理概念。</p>
+<p>可靠的传输协议：确认机制，传输控制层发送确认，如果没确认则重传，一定次数后就算失败。</p>
+<p>三次握手进行连接，确认机制保证了可靠的传输。</p>
+<p>释放端口号 释放内存空间</p>
+<p>socket 代表了应用层访问tcp层的sap(服务访问点)，四元组(唯一性，ip:port + ip:port 唯一确认，区分每个socket对应关系)</p>
+<p>之前jdk使用socket对象代表socket，通过socket对象获取独立的输入输出流。jdk7有了nio，使用channel表示socket，channel可读可写，再也不用获得独立的输入输出流了。跟linux中的文件描述符保持一致(0 1 2)。</p>
+<p>ip:为了找到主机</p>
+<p>port:为了找到运行在主机上的进程，进程映射</p>
+<ol>
+<li>连接一台服务器的某个进程，客户端消耗多少个端口号 65535</li>
+<li>连接一台服务器的某个进程，服务端消耗多少个端口号 1</li>
+<li>连接两台服务器，消耗多少个端口号 2 * 65535</li>
+<li>第一个问题，如何突破65535， 客户端增加一个网卡</li>
+</ol>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829201542.png"  alt="" />
+      </p>
+<p>jmeter就可以通过这种方式在单机情况下造成更多连接</p>
+<p><strong>端口号</strong></p>
+<p>服务端 确定的端口号，比如80</p>
+<p>客户端 随机端口号 最多65535个</p>
+<p>为什么断开连接需要四次挥手？</p>
+<p>三次握手，建立了资源，断开连接就是释放资源</p>
+<p>客户端发送FIN后， 接受队列得保留着，服务端发送FIN+ACK只是表示接受到了FIN信号，但是可能还会继续发送数据包</p>
+<p>当服务端也发送FIN后表示不再继续发送数据包，客户端发送ACK，再等待一定时间后(TIME_WAIT 默认两个传送时间，防止对方让我重传)就可以释放资源了。服务端收到ACK同样等待一段时间后就可以释放资源。</p>
+<p>任何一方都可以发起断开连接请求。</p>
+<p>耳听为虚眼见为实，使用tcpdump抓包看一下这个过程</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> tcpdump -nn -i eth0 port 80</span></span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204330.png"  alt="" />
+      </p>
+<p>客户端使用curl 模拟三次握手，四次挥手过程</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204400.png"  alt="" />
+      </p>
+<p>连接过程详情：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204422.png"  alt="" />
+      </p>
+<p>页面内容是1400+1381这么大， 分成两个数据包发送</p>
+<p>最上面3次握手，中间内容传输，下面是4次挥手</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829204735.png"  alt="" />
+      </p>
+<p>1500个字节，抛开协议头大小，就是1400</p>
+<p>tcpdump 可以使用<code>-X</code>显示数据包详情</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829205201.png"  alt="" />
+      </p>
+<blockquote>
+<p>ddos 分布式拒绝服务</p>
+<p>在全球抓一些肉鸡，给对方发第一个包，不发送最后一个确认包，消耗对方资源。一般是通过 规则数据库 特征抽取， 建立黑名单进行防范。</p>
+</blockquote>
+
+        <h1 id="网络层"   >
+          <a href="#网络层" class="heading-link"><i class="fas fa-link"></i></a>网络层</h1>
+      
+<p>传输层产生的握手包如何发出去？</p>
+<p>多个网卡， 从哪发出去  ip route</p>
+<p>什么是ip?</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">172.17.0.1</span><br></pre></td></tr></table></div></figure>
+<p>ip由两部分网络号 和 序号 组成，ip和掩码与运算得到 网络号，网络号是由网卡eth0配置的，连到一个局域网，这台机器是这个局域网的第多少号(序号)机器，同一个局域网网络号不会变。同一个网络号的机器只需要经过交换机(第二层链路层)交换数据不通过路由器。</p>
+<blockquote></blockquote>
+<p>掩码</p>
+<p>网关 下一跳， 大门</p>
+<p>把世界所有的设备节点信息保存到内存 组成网络拓补结构，根据图计算最小路径？</p>
+<p>使用另一种方式，不安全的传递机制，下一跳</p>
+<p>路由器，<code>route -n</code> 得到路由表</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829212158.png"  alt="" />
+      </p>
+<p>172.17.0.1就是下一跳</p>
+<p><code>ping www.baidu.com</code>,</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829212357.png"  alt="" />
+      </p>
+<p>数据包从哪发出去?</p>
+<p>目标地址180.101.49.11路由表的掩码进行与运算，255.255.0.0 得到180.101.0.0没匹配上， 换成0.0.0.0 匹配上。所以172.17.0.1就是这个数据包的下一跳，也就是路由器的地址。</p>
+<p>再比如ping局域网里的一台机器</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829212925.png"  alt="" />
+      </p>
+<p>和255.255.0.0与运算匹配上，下一跳是0.0.0.0，不需要网关不需要下一跳，网关直接转发出去就行。转发不走网关，公网就得走网关。</p>
+<p>ip协议层做了两件事， ip协议中 数据包 目标ip 180.101.49.11， 并且选择下一跳(网关)172.17.0.1</p>
+
+        <h1 id="链路层"   >
+          <a href="#链路层" class="heading-link"><i class="fas fa-link"></i></a>链路层</h1>
+      
+<p>如果没有链路层，得把世界所有的设备节点信息保存到内存 组成网络拓补结构，根据图计算最小路径。现在只需要记录下一跳的mac地址即可。</p>
+<p>链路层协议arp</p>
+<p><code>arp -d</code>是ARP协议中bai删除ARP缓存列表的命令，du可以删除所有的ARP缓存，也可以删除指定的ARP缓存。zhi</p>
+<p>ARP协议是将目标IP地址dao映射为目标MAC地址的协议，其在协议上使用ARP请求及ARP应答报文来实现。例如arp -a命令是显示ARP缓存的命令命令，它可以显示电脑上所有的ARP缓存条目。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829214036.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829214145.png"  alt="" />
+      </p>
+<p>到链路层，既有传输层的端口号又有网络层的ip地址，还有链路层的mac地址(放的是下一跳的mac地址，由网关广播然后局域网中的各台进行设置)</p>
+<p>端点间通信，数据包是在节点间传递，跳跃</p>
+<p>每个三层设备都有自己的路由表，都存放着下一跳的mac地址</p>
+<p>路由器的目标mac地址换成运营商的mac地址。目标ip地址不变，目标mac地址会变化，像是一个链表，所以叫链路层。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829214943.png"  alt="" />
+      </p>
+<p>DNS 域名通过DNS转换为IP</p>
+<p>mac地址全球唯一， 可以刷，只要在一跳之内mac地址唯一不重复即可。</p>
+<p>如果没有目标mac地址，需要走arp协议请求mac地址。</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arp -d 192.168.3.76 &amp;&amp; curl www.baidu.com</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829221249.png"  alt="" />
+      </p>
+<p>会先请求下一跳mac地址，放入自己的arp 缓存列表中。</p>
+
+        <h1 id="物理层"   >
+          <a href="#物理层" class="heading-link"><i class="fas fa-link"></i></a>物理层</h1>
+      
+<p>网卡的事情，电 波 光 ，信号</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>多层映射，唯一路径</p>
+<p>一个进程会线程创建一个socket</p>
+<p>多个socket对应一个进程或一个线程 就是 多路复用器 epoll</p>
+<p>应用层让内核创建一个连接，</p>
+<p>传输层 握手包</p>
+<p>网络层 下一跳的ip地址</p>
+<p>mac层 下一跳的mac地址</p>
+<p>物理层 电 光 波 信号</p>
+<hr />
+
+        <h1 id="高并发-负载均衡"   >
+          <a href="#高并发-负载均衡" class="heading-link"><i class="fas fa-link"></i></a>高并发 负载均衡</h1>
+      
+<p>七层 ngix 基于反向代理的负载均衡，往后代的时候解决高并发，后面可以有几千台服务器。ngix 握手， ngix节点支持的连接数比tomcat多。</p>
+<p>四层 LVS 不能破坏连接(一对资源)的原子性，握手还是客户端和服务端握手。LVS不握手 只负责数据包转发。</p>
+<p>LVS 负责维护客户端和服务端连接的全声明周期，监控、偷窥、记事本。 负载均衡算法。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829222306.png"  alt="" />
+      </p>
+<blockquote>
+<p>没有并发就没有juc、负载均衡，就不用考虑是每请求每连接还是连接复用，连接是否要加锁，连接池，是否要用threadlocal。</p>
+<p>网络 分布式 微服务 服务治理 service mesh。</p>
+<p>mmap RandomAccessFile</p>
+</blockquote>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/TCP-IP%E5%8D%8F%E8%AE%AE%E6%A0%88/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/TCP-IP%E5%8D%8F%E8%AE%AE%E6%A0%88/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">网络通信</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/java%E5%9F%BA%E7%A1%80/SPI%E6%9C%BA%E5%88%B6/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">SPI机制</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Socket%E3%80%81%E7%AB%AF%E5%8F%A3%E3%80%81%E8%BF%9B%E7%A8%8B/"><span class="paginator-prev__text">Socket、端口、进程</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#连接"><span class="toc-number">1.</span> <span class="toc-text">
+          连接</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#tcpip-协议栈"><span class="toc-number">2.</span> <span class="toc-text">
+          TCP&#x2F;IP 协议栈</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#应用层"><span class="toc-number">3.</span> <span class="toc-text">
+          应用层</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#模拟应用层通信"><span class="toc-number">3.1.</span> <span class="toc-text">
+          模拟应用层通信</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#tcp层"><span class="toc-number">4.</span> <span class="toc-text">
+          TCP层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#网络层"><span class="toc-number">5.</span> <span class="toc-text">
+          网络层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#链路层"><span class="toc-number">6.</span> <span class="toc-text">
+          链路层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#物理层"><span class="toc-number">7.</span> <span class="toc-text">
+          物理层</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">8.</span> <span class="toc-text">
+          小结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#高并发-负载均衡"><span class="toc-number">9.</span> <span class="toc-text">
+          高并发 负载均衡</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

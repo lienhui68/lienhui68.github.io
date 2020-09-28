@@ -1,0 +1,445 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="转载自：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;huangfuyuan&#x2F;p&#x2F;9476951.html  首先关于共享内存的链接：共享内存。里面包含了创建共享内存区域的函数，以及两个进程怎么挂载共享内存通信，分离、释放共享内存。 共享内存的好处就是效率高，不需要太多次的进行数据的copy。可以直接进行读写内存。所以，相对来说在IPC进程间通信三大主题（消息队列，信号量，共享内存）里面，共享">
+<meta property="og:type" content="article">
+<meta property="og:title" content="共享内存与内存映射(mmap)">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/linux/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E4%B8%8E%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="转载自：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;huangfuyuan&#x2F;p&#x2F;9476951.html  首先关于共享内存的链接：共享内存。里面包含了创建共享内存区域的函数，以及两个进程怎么挂载共享内存通信，分离、释放共享内存。 共享内存的好处就是效率高，不需要太多次的进行数据的copy。可以直接进行读写内存。所以，相对来说在IPC进程间通信三大主题（消息队列，信号量，共享内存）里面，共享">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917180539.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917180729.png">
+<meta property="article:published_time" content="2020-09-17T09:45:16.424Z">
+<meta property="article:modified_time" content="2020-09-17T11:50:13.528Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917180539.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>共享内存与内存映射(mmap) | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/linux/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E4%B8%8E%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">共享内存与内存映射(mmap)</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">1.5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">8分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>转载自：<span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/huangfuyuan/p/9476951.html"  target="_blank" rel="noopener">https://www.cnblogs.com/huangfuyuan/p/9476951.html</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>首先关于共享内存的链接：<span class="exturl"><a class="exturl__link"   href="http://blog.csdn.net/qq_26768741/article/details/56014845"  target="_blank" rel="noopener">共享内存</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>。<strong>里面包含了创建共享内存区域的函数，以及两个进程怎么挂载共享内存通信，分离、释放共享内存</strong>。</p>
+<p>共享内存的好处就是效率高，不需要太多次的进行数据的copy。可以直接进行读写内存。所以，相对来说在IPC进程间通信三大主题（消息队列，信号量，共享内存）里面，共享内存要比消息队列使用多，而且消息队列只在有血缘关系的进程间通信；<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>但是，共享内存不保证同步，可以使用信号量来保证共享内存同步</span>。<strong>Linux中的两种共享内存</strong>。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>一种是我们的IPC通信System V版本的共享内存，另外的一种就是我们今天提到的存储映射I/O（mmap函数）</span>，当然还有一种POSIX的共享内存，它是在mmap基础之上构建的。</p>
+<a id="more"></a>
+
+        <h1 id="mmap"   >
+          <a href="#mmap" class="heading-link"><i class="fas fa-link"></i></a>mmap</h1>
+      
+<p>mmap I/O的描述符间接说明内存映射是对文件操作。另外，mmap另外可以在无亲缘的进程之间提供共享内存区。这样，类似的两个进程之间就是可以进行了通信。</p>
+<p>Linux提供了内存映射函数mmap, 它把文件内容映射到一段内存上(准确说是<strong>虚拟内存</strong>上，运行着进程), <strong>通过对这段内存的读取和修改, 实现对文件的读取和修改</strong>。mmap()系统调用使得进程之间可以通过映射一个普通的文件实现共享内存。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>普通文件映射到进程地址空间后，进程可以像访问内存的方式对文件进行访问，不需要其他内核态的系统调用(read,write)去操作。</span></p>
+<p>这里是讲设备或者硬盘存储的一块空间映射到物理内存，然后操作这块物理内存就是在操作实际的硬盘空间，不需要经过内核态传递。比如你的硬盘上有一个文件，你可以使用linux系统提供的mmap接口，将这个文件映射到进程一块虚拟地址空间，这块空间会对应一块物理内存，当你读写这块物理空间的时候，就是在读取实际的磁盘文件，就是这么直接高效。<strong>通常诸如共享库的加载都是通过内存映射的方式加载到物理内存的</strong>。</p>
+<p>mmap系统调用并不完全是为了共享内存来设计的，它本身提供了不同于一般对<strong>普通文件</strong>的访问的方式，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>进程可以像读写内存一样对普通文件进行操作（无需系统调用）</span>，IPC的共享内存是纯粹为了共享。</p>
+
+        <h2 id="mmap系统调用介绍"   >
+          <a href="#mmap系统调用介绍" class="heading-link"><i class="fas fa-link"></i></a>mmap系统调用介绍</h2>
+      
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">mmap</span><span class="params">(<span class="keyword">void</span> *addr, <span class="keyword">size_t</span> length, <span class="keyword">int</span> prot, <span class="keyword">int</span> flags, <span class="keyword">int</span> fd, <span class="keyword">off_t</span> offset)</span></span>;</span><br></pre></td></tr></table></div></figure>
+<p>这就是mmap系统调用的接口，mmap函数成功返回指向内存区域的指针，失败返回MAP_FAILED。</p>
+<ul>
+<li>
+<p>addr，某个特定的地址作为起始地址，当被设置为NULL，标识系统自动分配地址。实实在在的物理区域。</p>
+</li>
+<li>
+<p>length说的是内存段的长度。</p>
+</li>
+<li>
+<p>prot是用来设定内存段的访问权限。</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>prot参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PROT_READ</td>
+<td>内存段可读</td>
+</tr>
+<tr>
+<td>PROT_WRITE</td>
+<td>内存段可写</td>
+</tr>
+<tr>
+<td>PROT_EXEC</td>
+<td>内存段可执行</td>
+</tr>
+<tr>
+<td>PROT_NONE</td>
+<td>内存段不能被访问</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p>fd参数是用来被映射文件对应的文件描述符。通过open系统调用得到。</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>flags参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MAP_SHARED</td>
+<td>进程间共享内存，对该内存段修改反映到映射文件中。提供了POSIX共享内存</td>
+</tr>
+<tr>
+<td>MAP_PRIVATE</td>
+<td>内存段为调用进程所私有。对该内存段的修改不会反映到映射文件</td>
+</tr>
+<tr>
+<td>MAP_ANNOYMOUS</td>
+<td>这段内存不是从文件映射而来的。内容被初始化为全0</td>
+</tr>
+<tr>
+<td>MAP_FIXED</td>
+<td>内存段必须位于start参数指定的地址处，start必须是页大小的整数倍（4K整数倍）</td>
+</tr>
+<tr>
+<td>MAP_HUGETLB</td>
+<td>按照大内存页面来分配内存空间</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p>offset设定从何处进行映射。</p>
+</li>
+</ul>
+
+        <h2 id="mmap用于共享内存的方式"   >
+          <a href="#mmap用于共享内存的方式" class="heading-link"><i class="fas fa-link"></i></a>mmap用于共享内存的方式</h2>
+      
+<ol>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>我们可以使用普通文件进行提供内存映射，例如，open系统调用打开一个文件，然后进行mmap操作，得到共享内存，这种方式适用于任何进程之间。</span></li>
+<li>以使用特殊文件进行匿名内存映射，这个相对的是具有血缘关系的进程之间，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>当父进程调用mmap，然后进行fork，这样父进程创建的子进程会继承父进程匿名映射后的地址空间，这样，父子进程之间就可以进行通信了</span>。相当于是mmap的返回地址此时是父子进程同时来维护。</li>
+<li><strong>另外<span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/LubinLew/p/POSIX-shared_memory.html"  target="_blank" rel="noopener">POSIX版本的共享内存</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>底层也是使用了mmap。所以，共享内存在在posix上一定程度上就是指的内存映射了</strong>。</li>
+</ol>
+
+        <h1 id="mmap和system-v共享内存的比较"   >
+          <a href="#mmap和system-v共享内存的比较" class="heading-link"><i class="fas fa-link"></i></a>mmap和System V共享内存的比较</h1>
+      
+
+        <h2 id="system-v版本的共享内存以下我们统称为shm"   >
+          <a href="#system-v版本的共享内存以下我们统称为shm" class="heading-link"><i class="fas fa-link"></i></a>System V版本的共享内存（以下我们统称为shm）</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917180539.png"  alt="" />
+      </p>
+
+        <h2 id="mmap版本的共享内存"   >
+          <a href="#mmap版本的共享内存" class="heading-link"><i class="fas fa-link"></i></a>mmap版本的共享内存</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917180729.png"  alt="" />
+      </p>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<ol>
+<li>mmap是在磁盘上<strong>建立一个文件</strong>，每个进程地址空间中开辟出一块空间进行映射。而shm共享内存，每个进程最终会<strong>映射到同一块物理内存</strong>。shm保存在物理内存，这样读写的速度肯定要比磁盘要快，但是存储量不是特别大。</li>
+<li>相对于shm来说，mmap更加简单，调用更加方便，所以这也是大家都喜欢用的原因。</li>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>另外mmap有一个好处是当机器重启，因为mmap把文件保存在磁盘上，这个文件还保存了操作系统同步的映像，所以mmap不会丢失，但是shmget在内存里面就会丢失。</span></li>
+<li>总之，shm是在内存中创建空间，每个进程映射到此处。内存映射是创建一个文件，并且映射到每个进程开辟的空间中。</li>
+</ol>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/linux/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E4%B8%8E%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/300_DevOps/linux/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E4%B8%8E%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/linux/">linux</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/CAP%E5%8E%9F%E7%90%86%E5%92%8CBASE%E6%80%9D%E6%83%B3/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">CAP原理和BASE思想</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/910_toolbox/katex/"><span class="paginator-prev__text">katex</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#mmap"><span class="toc-number">1.</span> <span class="toc-text">
+          mmap</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#mmap系统调用介绍"><span class="toc-number">1.1.</span> <span class="toc-text">
+          mmap系统调用介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mmap用于共享内存的方式"><span class="toc-number">1.2.</span> <span class="toc-text">
+          mmap用于共享内存的方式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#mmap和system-v共享内存的比较"><span class="toc-number">2.</span> <span class="toc-text">
+          mmap和System V共享内存的比较</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#system-v版本的共享内存以下我们统称为shm"><span class="toc-number">2.1.</span> <span class="toc-text">
+          System V版本的共享内存（以下我们统称为shm）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mmap版本的共享内存"><span class="toc-number">2.2.</span> <span class="toc-text">
+          mmap版本的共享内存</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">3.</span> <span class="toc-text">
+          总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

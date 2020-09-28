@@ -1,0 +1,669 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;blog.csdn.net&#x2F;second60&#x2F;article&#x2F;details&#x2F;81252106                      惊群效应简介        当你往一群鸽子中间扔一块食物，虽然最终只有一个鸽子抢到食物，但所有鸽子都会被惊动来争夺，没有抢到食物的鸽子只好回去继续睡觉， 等待下一块食物到来。这样，每扔一块食物，都会惊动所有的鸽子，即为惊群。 简单地说：就">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发中的惊群效应">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E6%83%8A%E7%BE%A4%E6%95%88%E5%BA%94/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;blog.csdn.net&#x2F;second60&#x2F;article&#x2F;details&#x2F;81252106                      惊群效应简介        当你往一群鸽子中间扔一块食物，虽然最终只有一个鸽子抢到食物，但所有鸽子都会被惊动来争夺，没有抢到食物的鸽子只好回去继续睡觉， 等待下一块食物到来。这样，每扔一块食物，都会惊动所有的鸽子，即为惊群。 简单地说：就">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200914110654.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.389Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.397Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="并发编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200914110654.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>高并发中的惊群效应 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E6%83%8A%E7%BE%A4%E6%95%88%E5%BA%94/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">高并发中的惊群效应</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">23分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/second60/article/details/81252106"  target="_blank" rel="noopener">https://blog.csdn.net/second60/article/details/81252106</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h1 id="惊群效应简介"   >
+          <a href="#惊群效应简介" class="heading-link"><i class="fas fa-link"></i></a>惊群效应简介</h1>
+      
+<p>当你往一群鸽子中间扔一块食物，虽然最终只有一个鸽子抢到食物，但所有鸽子都会被惊动来争夺，没有抢到食物的鸽子只好回去继续睡觉， 等待下一块食物到来。这样，每扔一块食物，都会惊动所有的鸽子，即为惊群。</p>
+<p>简单地说：就是扔一块食物，所有鸽子来抢，但最终只一个鸽子抢到了食物。</p>
+<p>语义分析：食物只有一块，最终只有一个鸽子抢到，但是惊动了所有鸽子，每个鸽子都跑过来，消耗了每个鸽子的能量。（这个很符合达尔文的进化论，物种之间的竞争，适者生存。）</p>
+<a id="more"></a>
+
+        <h1 id="操作系统的惊群"   >
+          <a href="#操作系统的惊群" class="heading-link"><i class="fas fa-link"></i></a>操作系统的惊群</h1>
+      
+<p>在多进程/多线程等待同一资源时，也会出现惊群。即当某一资源可用时，多个进程/线程会惊醒，竞争资源。这就是操作系统中的惊群。</p>
+
+        <h1 id="惊群的坏处"   >
+          <a href="#惊群的坏处" class="heading-link"><i class="fas fa-link"></i></a>惊群的坏处</h1>
+      
+<ol>
+<li>惊醒所有进程/线程，导致n-1个进程/线程做了无效的调度，上下文切换，cpu瞬时增高</li>
+<li>多个进程/线程争抢资源，所以涉及到同步问题，需对资源进行加锁保护，加解锁加大系统CPU开销</li>
+</ol>
+<blockquote>
+<p>在某些情况:惊群次数少/进（线）程负载不高，惊群可以忽略不计</p>
+</blockquote>
+
+        <h1 id="惊群的几种情况"   >
+          <a href="#惊群的几种情况" class="heading-link"><i class="fas fa-link"></i></a>惊群的几种情况</h1>
+      
+<p>在高并发（多线程/多进程/多连接）中，会产生惊群的情况有：</p>
+<ul>
+<li>accept惊群</li>
+<li>epoll惊群</li>
+<li>nginx惊群</li>
+<li>线程池惊群</li>
+</ul>
+
+        <h2 id="accept惊群新版内核已解决"   >
+          <a href="#accept惊群新版内核已解决" class="heading-link"><i class="fas fa-link"></i></a>accept惊群(新版内核已解决)</h2>
+      
+<p>以多进程为例，在主进程创建监听描述符listenfd后，fork()多个子进程，多个进程共享listenfd，accept是在每个子进程中，当一个新连接来的时候，会发生惊群。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200914110654.png"  alt="" />
+      </p>
+<p>由上图所示：</p>
+<ol>
+<li>主线程创建了监听描述符listenfd = 3</li>
+<li>主线程fork 三个子进程共享listenfd=3</li>
+<li>当有新连接进来时，内核进行处理</li>
+</ol>
+<p>在内核2.6之前，所有进程accept都会惊醒，但只有一个可以accept成功，其他返回EGAIN。</p>
+<p>在内核2.6及之后，解决了惊群，在内核中增加了一个互斥等待变量。一个互斥等待的行为与睡眠基本类似，主要的不同点在于：</p>
+<ol>
+<li>当一个等待队列入口有 <strong>WQ_FLAG_EXCLUSEVE</strong> 标志置位, 它被添加到等待队列的尾部. 没有这个标志的入口项, 相反, 添加到开始.</li>
+<li>当 wake_up 被在一个等待队列上调用时, 它在唤醒第一个有 WQ_FLAG_EXCLUSIVE 标志的进程后停止。</li>
+</ol>
+<p>对于互斥等待的行为，比如如对一个listen后的socket描述符，多线程阻塞accept时，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>系统内核只会唤醒所有正在等待此时间的队列 的第一个</span>，队列中的其他人则继续等待下一次事件的发生，这样就避免的多个线程同时监听同一个socket描述符时的惊群问题。</p>
+
+        <h2 id="epoll惊群"   >
+          <a href="#epoll惊群" class="heading-link"><i class="fas fa-link"></i></a>epoll惊群</h2>
+      
+<p>epoll惊群分两种：</p>
+<p>1 是在fork之前创建epollfd,所有进程共用一个epoll;</p>
+<p>2 是在fork之后创建epollfd,每个进程独用一个epoll.</p>
+
+        <h3 id="fork之前创建epollfd新版内核已解决"   >
+          <a href="#fork之前创建epollfd新版内核已解决" class="heading-link"><i class="fas fa-link"></i></a>fork之前创建epollfd(新版内核已解决)</h3>
+      
+<ol>
+<li>
+<p>主进程创建listenfd, 创建epollfd</p>
+</li>
+<li>
+<p>主进程fork多个子进程</p>
+</li>
+<li>
+<p>每个子进程把listenfd,加到epollfd中</p>
+</li>
+<li>
+<p>当一个连接进来时，会触发epoll惊群，多个子进程的epoll同时会触发</p>
+</li>
+</ol>
+<p><strong>分析</strong>：这里的epoll惊群跟accept惊群是类似的，共享一个epollfd, 加锁或标记解决。在新版本的epoll中已解决。但在内核2.6及之前是存在的。</p>
+
+        <h3 id="fork之后创建epollfd内核未解决"   >
+          <a href="#fork之后创建epollfd内核未解决" class="heading-link"><i class="fas fa-link"></i></a>fork之后创建epollfd(内核未解决)</h3>
+      
+<ol>
+<li>
+<p>主进程创建listendfd</p>
+</li>
+<li>
+<p>主进程创建多个子进程</p>
+</li>
+<li>
+<p>每个子进程创建自已的epollfd</p>
+</li>
+<li>
+<p>每个子进程把listenfd加入到epollfd中</p>
+</li>
+<li>
+<p>当一个连接进来时，会触发epoll惊群，多个子进程epoll同时会触发</p>
+</li>
+</ol>
+<p><strong>分析</strong>：因为每个子进程的epoll是不同的epoll, 虽然listenfd是同一个，但新连接过来时, accept会触发惊群，但内核不知道该发给哪个监听进程，因为不是同一个epoll。所以这种惊群内核并没有处理。惊群还是会出现。</p>
+
+        <h2 id="nginx惊群的解决"   >
+          <a href="#nginx惊群的解决" class="heading-link"><i class="fas fa-link"></i></a>nginx惊群的解决</h2>
+      
+<p>这里说的nginx惊群，其实就是上面的问题(fork之后创建epollfd)，下面看看nginx是怎么处理惊群的。</p>
+<p>在nginx中使用的epoll，是在创建进程后创建的epollfd。因此会出现上面的惊群问题。即每个子进程worker都会惊醒。</p>
+<p>在nginx中流程如下：</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>1</th>
+<th>主线程创建listenfd</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>主线程fork多个子进程（根据配置）</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>子进程创建epollfd</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td><span style='color:red;background:yellow;font-size:文字大小;font-weight:bold'>获到accept锁，只有一个子进程把listenfd加到epollfd中</span></td>
+<td>同一时间只有一个进程会把监听描述符加到epoll中</td>
+</tr>
+<tr>
+<td>5</td>
+<td>循环监听</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>在nginx中，解决惊群的方法，使用了互斥锁还解决。</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ngx_process_events_and_timers</span><span class="params">(<span class="keyword">ngx_cycle_t</span> *cycle)</span></span></span><br><span class="line"><span class="function"> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 忽略....</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//ngx_use_accept_mutex表示是否需要通过对accept加锁来解决惊群问题。</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//当nginx worker进程数&gt;1时且配置文件中打开accept_mutex时，这个标志置为1</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (ngx_use_accept_mutex) &#123;</span><br><span class="line"> </span><br><span class="line">     <span class="comment">//ngx_accept_disabled表示此时满负荷，没必要再处理新连接了，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//我们在nginx.conf曾经配置了每一个nginx worker进程能够处理的最大连接数，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//当达到最大数的7/8时，ngx_accept_disabled为正，说明本nginx worker进程非常繁忙，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//将不再去处理新连接，这也是个简单的负载均衡</span></span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (ngx_accept_disabled &gt; <span class="number">0</span>) &#123;</span><br><span class="line"> </span><br><span class="line">            ngx_accept_disabled--;</span><br><span class="line"> </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"> </span><br><span class="line">         <span class="comment">//获得accept锁，多个worker仅有一个可以得到这把锁。</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//获得锁不是阻塞过程，都是立刻返回，获取成功的话ngx_accept_mutex_held被置为1。</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//拿到锁，意味着监听句柄被放到本进程的epoll中了，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//如果没有拿到锁，则监听句柄会被从epoll中取出。</span></span><br><span class="line"> </span><br><span class="line">            <span class="keyword">if</span> (ngx_trylock_accept_mutex(cycle) == NGX_ERROR) &#123;</span><br><span class="line"> </span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line"> </span><br><span class="line">            &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">//拿到锁的话，置flag为NGX_POST_EVENTS，这意味着ngx_process_events函数中，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//任何事件都将延后处理，会把accept事件都放到ngx_posted_accept_events链表中，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// epollin|epollout事件都放到ngx_posted_events链表中</span></span><br><span class="line"> </span><br><span class="line">            <span class="keyword">if</span> (ngx_accept_mutex_held) &#123;</span><br><span class="line"> </span><br><span class="line">                flags |= NGX_POST_EVENTS;</span><br><span class="line"> </span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"> </span><br><span class="line">             <span class="comment">//拿不到锁，也就不会处理监听的句柄，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//这个timer实际是传给epoll_wait的超时时间，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//修改为最大ngx_accept_mutex_delay意味着epoll_wait更短的超时返回，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//以免新连接长时间没有得到处理</span></span><br><span class="line"> </span><br><span class="line">                <span class="keyword">if</span> (timer == NGX_TIMER_INFINITE</span><br><span class="line"> </span><br><span class="line">                    || timer &gt; ngx_accept_mutex_delay)</span><br><span class="line"> </span><br><span class="line">                &#123;</span><br><span class="line"> </span><br><span class="line">                    timer = ngx_accept_mutex_delay;</span><br><span class="line"> </span><br><span class="line">                &#125;</span><br><span class="line"> </span><br><span class="line">            &#125;</span><br><span class="line"> </span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 忽略....</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//linux下，调用ngx_epoll_process_events函数开始处理</span></span><br><span class="line"> </span><br><span class="line">    (<span class="keyword">void</span>) ngx_process_events(cycle, timer, flags);</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 忽略....</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//如果ngx_posted_accept_events链表有数据，就开始accept建立新连接</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (ngx_posted_accept_events) &#123;</span><br><span class="line"> </span><br><span class="line">        ngx_event_process_posted(cycle, &amp;ngx_posted_accept_events);</span><br><span class="line"> </span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">//释放锁后再处理下面的EPOLLIN EPOLLOUT请求</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (ngx_accept_mutex_held) &#123;</span><br><span class="line"> </span><br><span class="line">        ngx_shmtx_unlock(&amp;ngx_accept_mutex);</span><br><span class="line"> </span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (delta) &#123;</span><br><span class="line"> </span><br><span class="line">        ngx_event_expire_timers();</span><br><span class="line"> </span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle-&gt;<span class="built_in">log</span>, <span class="number">0</span>,</span><br><span class="line"> </span><br><span class="line">                   <span class="string">"posted events %p"</span>, ngx_posted_events);</span><br><span class="line"> </span><br><span class="line"><span class="comment">//然后再处理正常的数据读写请求。因为这些请求耗时久，</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//所以在ngx_process_events里NGX_POST_EVENTS标志将事件</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">//都放入ngx_posted_events链表中，延迟到锁释放了再处理。</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (ngx_posted_events) &#123;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (ngx_threaded) &#123;</span><br><span class="line"> </span><br><span class="line">            ngx_wakeup_worker_thread(cycle);</span><br><span class="line"> </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"> </span><br><span class="line">            ngx_event_process_posted(cycle, &amp;ngx_posted_events);</span><br><span class="line"> </span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">｝</span><br></pre></td></tr></table></div></figure>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>步骤</th>
+<th><em><em><em>*</em>*nginx主动解决惊群流程**</em>*</em>*</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>子进程loop</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>判断是否使用accept加锁</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>判断是否满负荷最大连接数的7/8(是不处理)</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td><em><strong>*多个worker********竞争********accept_mutex锁********(主动精髓)*</strong></em></td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>获得锁成功</td>
+<td>获得锁失败</td>
+</tr>
+<tr>
+<td>6</td>
+<td>(****监听句柄****加到本进程的epoll)</td>
+<td>****监听句柄****会被从epoll中取出</td>
+</tr>
+<tr>
+<td>7</td>
+<td>事件加入到链表中(accept事件放到ngx_posted_accept_events链表epollin|out事件放到ngx_posted_events链表)</td>
+<td>修改epoll_wait的超时时间（为了下次更早抢锁）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>如果有accept_event就处理新连接</td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>释放锁accept_mutex</td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>处理正常的数据读写请求</td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>子进程继续loop</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>分析</strong>：</p>
+<ol>
+<li>nginx里采用了主动的方法去把监听描述符放到epoll中或从epoll移出（这个是nginx的精髓所在，因为大部份的并发架构都是被动的）</li>
+<li>nginx中用采互斥锁去解决谁来accept问题，保证了同一时刻，只有一个worker接收新连接（所以nginx并没有惊群问题）</li>
+<li>nginx根据自已的载负（最大连接的7/8）情况，决定去不去抢锁，简单方便地解决负载，防止进程因业务太多而导致所有业务都不及时处理</li>
+</ol>
+<p><strong>小结</strong>： nginx采用互斥锁和主动的方法，避免了惊群，使得nginx中并无惊群</p>
+
+        <h2 id="线程池惊群"   >
+          <a href="#线程池惊群" class="heading-link"><i class="fas fa-link"></i></a>线程池惊群</h2>
+      
+<p>在多线程设计中，经常会用到互斥和条件变量的问题。当一个线程解锁并通知其他线程的时候，就会出现惊群的现象。</p>
+<ul>
+<li>pthread_mutex_lock/pthread_mutex_unlock：线程互斥锁的加锁及解锁函数。</li>
+<li>pthread_cond_wait：线程池中的消费者线程等待线程条件变量被通知；</li>
+<li>pthread_cond_signal/pthread_cond_broadcast：生产者线程通知线程池中的某个或一些消费者线程池，接收处理任务；</li>
+</ul>
+<p>这里的惊群现象出现在3里，pthread_cond_signal，语义上看，是通知一个线程。调用此函数后，系统会唤醒在相同条件变量上等待的一个或多个线程（可参看手册）。如果通知了多个线程，则发生了惊群。</p>
+<p>正常的用法：</p>
+<ol>
+<li>所有线程共用一个锁，共用一个条件变量</li>
+<li>当pthread_cond_signal通知时，就可能会出现惊群</li>
+</ol>
+<p>解决惊群的方法：</p>
+<ol>
+<li>所有线程共用一个锁，每个线程有自已的条件变量</li>
+<li>pthread_cond_signal通知时，定向通知某个线程的条件变量，不会出现惊群</li>
+</ol>
+
+        <h1 id="高并发设计"   >
+          <a href="#高并发设计" class="heading-link"><i class="fas fa-link"></i></a>高并发设计</h1>
+      
+<p>以多线程为例，进程同理</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>例</th>
+<th>主线程</th>
+<th>子线程epoll</th>
+<th>是否有惊群</th>
+<th>参考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>listenfd/epollfd</td>
+<td>共用listenfd/epollfd子线程accept</td>
+<td>epoll惊群</td>
+<td>被动</td>
+</tr>
+<tr>
+<td>2</td>
+<td>listenfd</td>
+<td>共用listenfd，每个线程创建epollfdlistenfd加入epoll</td>
+<td>epoll惊群</td>
+<td>被动</td>
+</tr>
+<tr>
+<td>3</td>
+<td>listenfd主线程accept并分发connfd</td>
+<td>每个线程创建epollfd接收主线程分发的connfd</td>
+<td>无惊群accept瓶颈</td>
+<td>被动</td>
+</tr>
+<tr>
+<td>4</td>
+<td>listenfd</td>
+<td>共用listenfd，每个线程创建epollfd互斥锁决定加入/移出epoll</td>
+<td>无惊群</td>
+<td>nginx</td>
+</tr>
+</tbody>
+</table></div>
+
+        <h2 id="例1"   >
+          <a href="#例1" class="heading-link"><i class="fas fa-link"></i></a>例1</h2>
+      
+<p>分析</p>
+<p>主线程创建listenfd和epollfd, 子线程共享并把listenfd加入到epoll中，旧版中会出现惊群，新版中已解决了惊群。</p>
+<p>缺点：</p>
+<ol>
+<li>应用层并不知道内核会把新连接分给哪个线程，可能平均，也可能不平均</li>
+<li>如果某个线程已经最大负载了，还分过来，会增加此线程压力甚至崩溃</li>
+</ol>
+<p>总结：因为例1并不是最好的方法，因为没有解决负载和分配问题</p>
+
+        <h2 id="例2"   >
+          <a href="#例2" class="heading-link"><i class="fas fa-link"></i></a>例2</h2>
+      
+<p>分析</p>
+<p>主线程创建listenfd, 子线程创建epollfd, 把listenfd加入到epoll中, 这种方法是无法避免惊群的问题。每次有新连接时，都会唤醒所有的accept线程，但只有一个accept成功，其他的线程accept失败EAGAIN。</p>
+<p>总结：例2 解决不了惊群的问题，如果线程超多，惊群越明显，如果真正开发中，可忽略惊群，或者需要用惊群，那么使用此种设计也是可行的。</p>
+
+        <h2 id="例3"   >
+          <a href="#例3" class="heading-link"><i class="fas fa-link"></i></a>例3</h2>
+      
+<p>分析：</p>
+<p>主线程创建listenfd, 每个子线程创建epollfd，主线程负责accept，并发分新connfd给负载最低的一个线程，然后线程再把connfd加入到epoll中。无惊群现象。</p>
+<p>总结：</p>
+<ol>
+<li>主线程只用accept用，可能会主线程没干，或连接太多处理不过来，accept瓶颈（一般情况不会产生）</li>
+<li>主线程可以很好地根据子线程的连接来分配新连接，有比较好的负载</li>
+<li>并发量也比较大，自测（单进程十万并发连接QPS十万，四核四G内存，很稳定）</li>
+</ol>
+
+        <h2 id="例4"   >
+          <a href="#例4" class="heading-link"><i class="fas fa-link"></i></a>例4</h2>
+      
+<p>这是nginx的设计，无疑是目前最优的一种高并发设计，无惊群。</p>
+<p>nginx本质：</p>
+<p>同一时刻只允许一个nginx worker在自己的epoll中处理监听句柄。它的负载均衡也很简单，当达到最大connection的7/8时，本worker不会去试图拿accept锁，也不会去处理新连接，这样其他nginx worker进程就更有机会去处理监听句柄，建立新连接了。而且，由于timeout的设定，使得没有拿到锁的worker进程，去拿锁的频繁更高。</p>
+<p>总结：</p>
+<p>nginx的设计非常巧妙，很好的解决了惊群的产生，所以没有惊群，同时也根据各进程的负载<strong>主动</strong>去决定要不要接受新连接，负载比较优。</p>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<p>高并发设计，仁者见仁，智者见智，如果要求不高，随便拿个常用的开源库，就可能支撑。如果对业务有特殊要求，那么根据业务去选择，如网关（可用高并发连接的开源库libevent/libev）,消息队列（zmq/RabbitMQ/ActiveMQ/Kafka）,数据缓存（redis/memcached），分布式等。</p>
+<p>研究高并发有一段时间了，总结下我自已的理解，怎么样才算是高并发呢？单进程百万连接，单进程百万QPS？</p>
+<p>先说说基本概念</p>
+<p><strong>高并发连接</strong>：指的是连接的数量，对服务端来说，一个套接字对就是一个连接，连接和本地 文件描述符无关，不受本地文件描述符限制，只跟内存有关，假设一个套接字对占用服 务器8k内存,那么1G内存=1024*1024/8 = 131072。因此连接数跟内存有关。</p>
+<p>1G = 10万左右连接，当然这是理论，实际要去除内核占用，其他进程占用，和本进程其他占用。</p>
+<p>假哪一个机器32G内存，那个撑个100万个连接是没有问题的。</p>
+<p>如果是单个进程100万连，那就更牛B了，但一般都不会这么做，因为如果此进程宕了，那么，所有业务都影响了。所以一般都会分布到不同进程，不同机器，一个进程出问题了，不会影响其他进程的处理。（这也是nginx原理）</p>
+<p><strong>PV</strong> : 每天的总访问量pave view, PV = QPS * (24*0.2) * 3600 (二八原则)</p>
+<p><strong>QPS</strong>: 每秒请求量。假如每秒请求量10万，假如机器为16核，那么启16个线程同时工作， 那么每个线程同时的请求量= 10万/ 16核 =  6250QPS。</p>
+<p>按照二八原则，一天24小时，忙时=24*0.2 = 4.8小时。</p>
+<p>则平均一天总请求量=4.8 * 3600 *10万QPS = 172亿8千万。</p>
+<p>那么每秒请求10万并发量，每天就能达到172亿的PV。这算高并发吗？</p>
+<p><strong>丢包率</strong>: 如果客端端发10万请求，服务端只处理了8万，那么就丢了2万。丢包率=2/10 = 20%。丢包率是越小越好，最好是没有。去除，网络丢包，那么就要考虑内核里的丢包 问题，因此要考虑网卡的吞吐量，同一时间发大多请求过来，内核会不会处理不过来， 导致丢包。</p>
+<p><strong>稳定性</strong>：一个高并发服务，除了高并发外，最重要的就是稳定了，这是所有服务都必须的。 一千QPS能处理，一万QPS也能处理，十万QPS也能处理，当然越多越好。不要因为 业务骤增导致业务瘫痪，那失败是不可估量的。因为，要有个度，当业务增加到一定程 度，为了保证现有业务的处理，不处理新请求业务，延时处理等。同时保证代码的可靠。</p>
+<p>因此，说到高并发，其实跟机器，内存，网卡，CPU核数等有关，一个强大的服务器，比如：32核，64G内存，网卡吞吐很大，那么单个进程，开32个线程，做一个百万连接，百万QPS的服务，是可行的。</p>
+<p>本身 按例3去做了个高并发的设计，做到了四核4G内存的虚拟机里，十万连接，十万QPS，很稳定，没加业务，每核CPU %sys 15左右 %usr 5%左右。如果加了业务，应该也是比较稳定的。有待测试。当然例3是有自已的缺点的。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E6%83%8A%E7%BE%A4%E6%95%88%E5%BA%94/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E6%83%8A%E7%BE%A4%E6%95%88%E5%BA%94/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%A4%9A%E7%BA%BF%E7%A8%8BCallable%E6%8E%A5%E5%8F%A3/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">多线程Callable接口</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E9%87%8D%E6%8E%92%E5%BA%8F/"><span class="paginator-prev__text">重排序</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#惊群效应简介"><span class="toc-number">1.</span> <span class="toc-text">
+          惊群效应简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#操作系统的惊群"><span class="toc-number">2.</span> <span class="toc-text">
+          操作系统的惊群</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#惊群的坏处"><span class="toc-number">3.</span> <span class="toc-text">
+          惊群的坏处</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#惊群的几种情况"><span class="toc-number">4.</span> <span class="toc-text">
+          惊群的几种情况</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#accept惊群新版内核已解决"><span class="toc-number">4.1.</span> <span class="toc-text">
+          accept惊群(新版内核已解决)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#epoll惊群"><span class="toc-number">4.2.</span> <span class="toc-text">
+          epoll惊群</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#fork之前创建epollfd新版内核已解决"><span class="toc-number">4.2.1.</span> <span class="toc-text">
+          fork之前创建epollfd(新版内核已解决)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#fork之后创建epollfd内核未解决"><span class="toc-number">4.2.2.</span> <span class="toc-text">
+          fork之后创建epollfd(内核未解决)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nginx惊群的解决"><span class="toc-number">4.3.</span> <span class="toc-text">
+          nginx惊群的解决</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#线程池惊群"><span class="toc-number">4.4.</span> <span class="toc-text">
+          线程池惊群</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#高并发设计"><span class="toc-number">5.</span> <span class="toc-text">
+          高并发设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#例1"><span class="toc-number">5.1.</span> <span class="toc-text">
+          例1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例2"><span class="toc-number">5.2.</span> <span class="toc-text">
+          例2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例3"><span class="toc-number">5.3.</span> <span class="toc-text">
+          例3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#例4"><span class="toc-number">5.4.</span> <span class="toc-text">
+          例4</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">
+          总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

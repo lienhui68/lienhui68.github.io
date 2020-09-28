@@ -1,0 +1,677 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="RMI                            介绍        远程方法调用（RMI）顾名思义是一台机器上的程序调用另一台机器上的方法。这样可以大致知道RMI是用来干什么的，但是这种理解还不太确切。RMI是Java支撑分布式系统的基石，例如著名的EJB组件。RMI是远程过程调用（RPC）的一种面向对象实现，RMI底层是通过socket通信和对象序列化工作来实">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rmi、rpc、netty">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/rmi%E3%80%81rpc%E3%80%81netty/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="RMI                            介绍        远程方法调用（RMI）顾名思义是一台机器上的程序调用另一台机器上的方法。这样可以大致知道RMI是用来干什么的，但是这种理解还不太确切。RMI是Java支撑分布式系统的基石，例如著名的EJB组件。RMI是远程过程调用（RPC）的一种面向对象实现，RMI底层是通过socket通信和对象序列化工作来实">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828031515.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828031828.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828033223.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828034027.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902004924.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902010936.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902013342.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014026.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014041.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014210.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014219.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828035052.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828035120.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.029Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.036Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828031515.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>rmi、rpc、netty | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/rmi%E3%80%81rpc%E3%80%81netty/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">rmi、rpc、netty</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">40分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="rmi"   >
+          <a href="#rmi" class="heading-link"><i class="fas fa-link"></i></a>RMI</h1>
+      
+
+        <h2 id="介绍"   >
+          <a href="#介绍" class="heading-link"><i class="fas fa-link"></i></a>介绍</h2>
+      
+<p>远程方法调用（RMI）顾名思义是一台机器上的程序调用另一台机器上的方法。这样可以大致知道RMI是用来干什么的，但是这种理解还不太确切。RMI是Java支撑分布式系统的基石，例如著名的EJB组件。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>RMI是远程过程调用（RPC）的一种面向对象实现</span>，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>RMI底层是通过socket通信和对象序列化工作来实现的。</span></p>
+<a id="more"></a>
+
+        <h2 id="rmi基本原理"   >
+          <a href="#rmi基本原理" class="heading-link"><i class="fas fa-link"></i></a>RMI基本原理</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>RMI的目的就是要使运行在不同的计算机中的对象之间的调用表现得像本地调用一样。</span>RMI应用程序通常包括两个独立的程序:服务器程序和客户机程序。RMI 需要将行为的定义与行为的实现分别定义, 并允许<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>将行为定义代码与行为实现代码存放并运行在不同的 JVM 上</span>。在 RMI 中, 远程服务的定义是存放在继承了 Remote的接口中。远程服务的实现代码存放在实现该定义接口的类中。</p>
+<p>RMI 支持<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>两个类实现一个相同的远程服务接口</span>: 一个类实现行为并运行在服务器上, 而<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>另一个类作为一个远程服务的代理运行在客户机上</span>。客户程序发出关于代理对象的调用方法, RMI 将该调用请求发送到远程 JVM 上, 并且进一步发送到实现的方法中。实现方法将结果发送给代理, 再通过代理将结果返回给调用者。</p>
+<p>RMI 构建三个抽象层, 高层覆盖低层, 分别<strong>负责Socket通信</strong>, <strong>参数和结果的序列化和反序列化</strong>等工作。存根( Stub) 和骨架( Skeleton) 合在一起形成了 RMI 构架协议。下面的<strong>引用层被用来寻找各自的通信伙伴</strong>,在这一层还有一个提供名字服务的部分, 称为注册表( registry) 。最下一层是传输层, 是依赖于 TCP/IP 协议实现客户机与服务器的互联。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828031515.png"  alt="" />
+      </p>
+<p>当客户端调用远程对象方法时, 存根负责把要调用的远程对象方法的方法名及其参数编组打包,并将该包向下经远程引用层、传输层转发给远程对象所在的服务器。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>通过 RMI 系统的 RMI 注册表实现的简单服务器名字服务, 可定位远程对象所在的服务器。</span></p>
+<p>该包到达服务器后, 向上经远程引用层, 被远程对象的 Skeleton 接收, 此 Skeleton 解析客户包中的方法名及编组的参数后, 在服务器端执行客户要调用的远程对象方法, 然后将该方法的返回值( 或产生的异常) 打包后通过相反路线返回给客户端, 客户端的 Stub 将返回结果解析后传递给客户程序。事实上, 不仅客户端程序可以通过存根调用服务器端的远程对象的方法, 而服务器端的程序亦可通过由客户端传递的远程接口回调客户端的远程对象方法。在分布式系统中, 所有的计算机可以是服务器, 同时又可以是客户机。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828031828.png"  alt="" />
+      </p>
+
+        <h2 id="rmi示例"   >
+          <a href="#rmi示例" class="heading-link"><i class="fas fa-link"></i></a>RMI示例</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Remote接口用于标识其方法可以从非本地虚拟机上调用的接口。</span>任何远程对象都必须直接或间接实现此接口。只有在“远程接口”（扩展 java.rmi.Remote 的接口）中指定的这些方法才可远程使用。 也就是说需要远程调用的方法必须在扩展Remote接口的接口中声名并且要抛出RemoteException异常才能被远程调用。</p>
+<p>远程对象必须实现java.rmi.server.UniCastRemoteObject类，这样才能保证客户端访问获得远程对象时，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>该远程对象将会把自身的一个拷贝序列化后以Socket的形式传输给客户端，此时客户端所获得的这个拷贝称为“存根”，而服务器端本身已存在的远程对象则称之为“骨架”。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>其实此时的存根是客户端的一个代理，用于与服务器端的通信，而骨架也可认为是服务器端的一个代理，用于接收客户端的请求之后调用远程方法来响应客户端的请求。 </span>远程对象的接口和实现必须在客户端和服务器端同时存在并且保持一致才行。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.pattern;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.rmi.Naming;</span><br><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.UnicastRemoteObject;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IService</span> <span class="keyword">extends</span> <span class="title">Remote</span> </span>&#123;</span><br><span class="line">    <span class="comment">//声明服务器端必须提供的服务</span></span><br><span class="line">    <span class="function">String <span class="title">service</span><span class="params">(String content)</span> <span class="keyword">throws</span> RemoteException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// UnicastRemoteObject用于导出的远程对象和获得与该远程对象通信的存根。</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ServiceImpl</span> <span class="keyword">extends</span> <span class="title">UnicastRemoteObject</span> <span class="keyword">implements</span> <span class="title">IService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ServiceImpl</span><span class="params">(String name)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">service</span><span class="params">(String content)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"server &gt;&gt; "</span> + content;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Server</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 实例化实现了IService接口的远程服务ServiceImpl对象</span></span><br><span class="line">            IService service02 = <span class="keyword">new</span> ServiceImpl(<span class="string">"service02"</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 本地主机上的远程对象注册表Registry的实例，并指定端口为8888，这一步必不可少（Java默认端口是1099），必不可缺的一步，缺少注册表创建，则无法绑定对象到远程注册表上</span></span><br><span class="line">            LocateRegistry.createRegistry(<span class="number">8888</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 把远程对象注册到RMI注册服务器上，并命名为service02</span></span><br><span class="line">            <span class="comment">//绑定的URL标准格式为：rmi://host:port/name(其中协议名可以省略，下面两种写法都是正确的）</span></span><br><span class="line">            Naming.bind(<span class="string">"rmi://localhost:8888/service02"</span>, service02);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"服务器向命名表注册了1个远程服务对象！"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String url = <span class="string">"rmi://localhost:8888/"</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 在RMI服务注册表中查找名称为service02的对象，并调用其上的方法</span></span><br><span class="line">            IService service02 = (IService) Naming.lookup(url + <span class="string">"service02"</span>);</span><br><span class="line"></span><br><span class="line">            Class stubClass = service02.getClass();</span><br><span class="line">            System.out.println(service02 + <span class="string">" 是 "</span> + stubClass.getName() + <span class="string">" 的实例！"</span>);</span><br><span class="line">            <span class="comment">// 获得本底存根已实现的接口类型</span></span><br><span class="line">            Class[] interfaces = stubClass.getInterfaces();</span><br><span class="line">            <span class="keyword">for</span> (Class c : interfaces) &#123;</span><br><span class="line">                System.out.println(<span class="string">"存根类实现了 "</span> + c.getName() + <span class="string">" 接口！"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(service02.service(<span class="string">"你好！"</span>));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">Proxy[IService,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">50667</span>](remote),objID:[<span class="number">2</span>d2c01c3:<span class="number">17431676983</span>:-<span class="number">7f</span>ff, -<span class="number">151566034752698272</span>]]]]] 是 com.eh.eden.pattern.$Proxy0 的实例！</span><br><span class="line">存根类实现了 java.rmi.Remote 接口！</span><br><span class="line">存根类实现了 com.eh.eden.pattern.IService 接口！</span><br><span class="line">server &gt;&gt; 你好！</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="时序图"   >
+          <a href="#时序图" class="heading-link"><i class="fas fa-link"></i></a>时序图</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828033223.png"  alt="" />
+      </p>
+
+        <h1 id="rpc"   >
+          <a href="#rpc" class="heading-link"><i class="fas fa-link"></i></a>RPC</h1>
+      
+<p>rpc是远端过程调用，其调用协议通常包含传输协议和序列化协议。</p>
+<p>传输协议包含: 如著名的 gRPC 使用的 http2 协议，也有如dubbo一类的自定义报文的tcp协议。</p>
+<p>序列化协议包含: 如基于文本编码的 xml json，也有二进制编码的 protobuf hessian等。</p>
+<p><strong>为什么要使用自定义 tcp 协议的 rpc 做后端进程通信</strong>?</p>
+<p>要解决这个问题就应该搞清楚 http 使用的 tcp 协议，和我们自定义的 tcp 协议在报文上的区别。</p>
+<p>首先要否认一点 http 协议相较于自定义tcp报文协议 增加的开销在于连接的建立与断开。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>http协议是支持连接池复用的，也就是建立一定数量的连接不断开，并不会频繁的创建和销毁连接</span>。二要说的是<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>http也可以使用protobuf这种二进制编码协议对内容进行编码</span>，因此<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>二者最大的区别还是在传输协议上</span>。</p>
+<p>通用定义的http1.1协议的tcp报文包含太多废信息，一个POST协议的格式大致如下</p>
+<figure class="highlight javascript"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">HTTP/<span class="number">1.0</span> <span class="number">200</span> OK </span><br><span class="line">Content-Type: text/plain</span><br><span class="line">Content-Length: <span class="number">137582</span></span><br><span class="line">Expires: Thu, <span class="number">05</span> Dec <span class="number">1997</span> <span class="number">16</span>:<span class="number">00</span>:<span class="number">00</span> GMT</span><br><span class="line">Last-Modified: Wed, <span class="number">5</span> August <span class="number">1996</span> <span class="number">15</span>:<span class="number">55</span>:<span class="number">28</span> GMT</span><br><span class="line">Server: Apache <span class="number">0.84</span></span><br><span class="line"></span><br><span class="line">&lt;html&gt;</span><br><span class="line">  &lt;body&gt;Hello World&lt;<span class="regexp">/body&gt;</span></span><br><span class="line"><span class="regexp">&lt;/</span>html&gt;</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>即使编码协议也就是body是使用二进制编码协议，报文元数据也就是header头的键值对却用了文本编码，非常占字节数。</span>如上图所使用的报文中有效字节数仅仅占约 30%，也就是70%的时间用于传输元数据废编码。当然实际情况下报文内容可能会比这个长，但是报头所占的比例也是非常可观的。</p>
+<p>那么假如我们使用自定义tcp协议的报文如下</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828034027.png"  alt="" />
+      </p>
+<p>报头占用的字节数也就只有16个byte，极大地精简了传输内容。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>这也就是为什么后端进程间通常会采用自定义tcp协议的rpc来进行通信的原因</span>。</p>
+<p>所谓的效率优势是针对http1.1协议来讲的，http2.0协议已经优化编码效率问题，像grpc这种rpc库使用的就是http2.0协议。这么来说吧http容器的性能测试单位通常是kqps，自定义tpc协议则通常是以10kqps到100kqps为基准</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>简单来说成熟的rpc库相对http容器，更多的是封装了“服务发现”，“负载均衡”，“熔断降级”一类面向服务的高级特性。</span>可以这么理解，rpc框架是面向服务的更高级的封装。如果把一个http servlet容器上封装一层服务发现和函数代理调用，那它就已经可以做一个rpc框架了。</p>
+<p>所以为什么要用rpc调用？</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>因为良好的rpc调用是面向服务的封装，针对服务的可用性和效率等都做了优化。单纯使用http调用则缺少了这些特性。</span></p>
+<p>RPC的协议有很多，比如最早的CORBA，Java RMI，Web Service的RPC风格，Hessian，Thrift，甚至Rest API。</p>
+<hr />
+<p>公司的系统都由成千上万大大小小的服务组成，各服务部署在不同的机器上，由不同的团队负责。这时就会遇到两个问题：1）要搭建一个新服务，免不了需要依赖他人的服务，而现在他人的服务都在远端，怎么调用？2）其它团队要使用我们的新服务，我们的服务该怎么发布以便他人调用？下文将对这两个问题展开探讨。</p>
+
+        <h2 id="如何调用他人的远程服务"   >
+          <a href="#如何调用他人的远程服务" class="heading-link"><i class="fas fa-link"></i></a>如何调用他人的远程服务</h2>
+      
+<p>由于各服务部署在不同机器，服务间的调用免不了网络通信过程，服务消费方每调用一个服务都要写一坨网络通信相关的代码，不仅复杂而且极易出错。</p>
+<p>如果有一种方式能让我们像调用本地服务一样调用远程服务，而让调用者对网络通信这些细节透明，那么将大大提高生产力，比如服务消费方在执行helloWorldService.sayHello(“test”)时，实质上调用的是远端的服务。这种方式其实就是RPC（Remote Procedure Call Protocol），在各大互联网公司中被广泛使用，如阿里巴巴的hsf、dubbo（开源）、Facebook的thrift（开源）、Google grpc（开源）、Twitter的finagle（开源）等。</p>
+<p>要让网络通信细节对使用者透明，我们需要对通信细节进行封装，我们先看下一个RPC调用的流程涉及到哪些通信细节：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902004924.png"  alt="" />
+      </p>
+<ol>
+<li>服务消费方（client）调用以本地调用方式调用服务；</li>
+<li>client stub接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体；</li>
+<li>client stub找到服务地址，并将消息发送到服务端；</li>
+<li>server stub收到消息后进行解码；</li>
+<li>server stub根据解码结果调用本地的服务；</li>
+<li>本地服务执行并将结果返回给server stub；</li>
+<li>server stub将返回结果打包成消息并发送至消费方；</li>
+<li>client stub接收到消息，并进行解码；</li>
+<li>服务消费方得到最终结果。</li>
+</ol>
+<blockquote>
+<p>Stub可以理解为存根</p>
+<p>客户端存根：存放服务端的地址信息，再将客户端的请求参数按照应用层自定义协议打包成网络消息，然后通过网络远程发送给服务方。</p>
+<p>服务端存根：接收客户端发送过来的消息，将消息应用层自定义协议解包，并调用本地的方法。</p>
+</blockquote>
+<p>RPC的目标就是要2~8这些步骤都封装起来，让用户对这些细节透明。</p>
+
+        <h3 id="怎么做到透明化远程服务调用"   >
+          <a href="#怎么做到透明化远程服务调用" class="heading-link"><i class="fas fa-link"></i></a>怎么做到透明化远程服务调用</h3>
+      
+<p>怎么封装通信细节才能让用户像以本地调用方式调用远程服务呢？对java来说就是使用代理！java代理有两种方式：1） jdk 动态代理；2）字节码生成。尽管字节码生成方式实现的代理更为强大和高效，但代码维护不易，大部分公司实现RPC框架时还是选择动态代理方式。</p>
+<p>下面简单介绍下动态代理怎么实现我们的需求。我们需要实现RPCProxyClient代理类，代理类的invoke方法中封装了与远端服务通信的细节，消费方首先从RPCProxyClient获得服务提供方的接口，当执行helloWorldService.sayHello(“test”)方法时就会调用invoke方法。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RPCProxyClient</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">lang</span>.<span class="title">reflect</span>.<span class="title">InvocationHandler</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Object obj;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RPCProxyClient</span><span class="params">(Object obj)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.obj=obj;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 得到被代理对象;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getProxy</span><span class="params">(Object obj)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> java.lang.reflect.Proxy.newProxyInstance(obj.getClass().getClassLoader(),</span><br><span class="line">                obj.getClass().getInterfaces(), <span class="keyword">new</span> RPCProxyClient(obj));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 调用此方法执行</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        <span class="comment">//结果参数;</span></span><br><span class="line">        Object result = <span class="keyword">new</span> Object();</span><br><span class="line">        <span class="comment">// ...执行通信相关逻辑</span></span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">         HelloWorldService helloWorldService = (HelloWorldService)RPCProxyClient.getProxy(HelloWorldService<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">         helloWorldService.sayHello(<span class="string">"test"</span>);</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="怎么对消息进行编码和解码"   >
+          <a href="#怎么对消息进行编码和解码" class="heading-link"><i class="fas fa-link"></i></a>怎么对消息进行编码和解码</h3>
+      
+<ol>
+<li>
+<p>确定消息数据结构</p>
+<p>上节讲了invoke里需要封装通信细节，而通信的第一步就是要确定客户端和服务端相互通信的消息结构。</p>
+<p>客户端的请求消息结构一般需要包括以下内容：</p>
+<ol>
+<li>
+<p>接口名称</p>
+</li>
+<li>
+<p>方法名</p>
+</li>
+<li>
+<p>参数类型&amp;参数值</p>
+</li>
+<li>
+<p>超时时间</p>
+<blockquote>
+<p>这里设置的超时时间是供client stub执行wait(timeout)使用的</p>
+<p>注意区分客户端超时和服务端超时</p>
+<ul>
+<li>
+<p>当服务端调用的方法执行时间超过设置的超时时间，方法还是会一直执行，只是执行结束后会拿设置的timeout进行比较，如果超过timeout则会输出警告信息打印到日志里。</p>
+</li>
+<li>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>如果客户端调用方法返回超时，则会直接报超时。当一个请求发出去，当前的请求线程处于锁等待的阻塞状态，而这个condition的唤醒条件1、超时，2、接收到provider的返回。</span></p>
+</li>
+<li>
+<p>不管客户端是否超时，服务端只要被调用了，就会一直执行下去。这个时间是在server stub里打印的。</p>
+</li>
+<li>
+<p>所以说客户端管理的超时时间是针对服务端响应的时间，而服务端的超时间是用来为分析日志提供一些系统运行的情况，并不影响实际的调用过程</p>
+</li>
+</ul>
+</blockquote>
+</li>
+<li>
+<p>requestID，标识唯一请求id，在下面一节会详细描述requestID的用处。</p>
+</li>
+</ol>
+<p>同理服务端返回的消息结构一般包括以下内容</p>
+<ol>
+<li>返回值</li>
+<li>状态code</li>
+<li>requestId</li>
+</ol>
+</li>
+<li>
+<p>序列化</p>
+<p>一旦确定了消息的数据结构后，下一步就是要考虑序列化与反序列化了。</p>
+<p>什么是序列化？序列化就是将数据结构或对象转换成二进制串的过程，也就是编码的过程。</p>
+<p>什么是反序列化？将在序列化过程中所生成的二进制串转换成数据结构或者对象的过程。</p>
+<p>为什么需要序列化？转换为二进制串后才好进行网络传输嘛！</p>
+<p>为什么需要反序列化？将二进制转换为对象才好进行后续处理！</p>
+<p>现如今序列化的方案越来越多，每种序列化方案都有优点和缺点，它们在设计之初有自己独特的应用场景，那到底选择哪种呢？从RPC的角度上看，主要看三点：</p>
+<ol>
+<li>通用性，比如是否能支持Map等复杂的数据结构；</li>
+<li>性能，包括时间复杂度和空间复杂度，由于RPC框架将会被公司几乎所有服务使用，如果序列化上能节约一点时间，对整个公司的收益都将非常可观，同理如果序列化上能节约一点内存，网络带宽也能省下不少；</li>
+<li>可扩展性，对互联网公司而言，业务变化飞快，如果序列化协议具有良好的可扩展性，支持自动增加新的业务字段，而不影响老的服务，这将大大提供系统的灵活度。</li>
+</ol>
+</li>
+</ol>
+
+        <h3 id="通信"   >
+          <a href="#通信" class="heading-link"><i class="fas fa-link"></i></a>通信</h3>
+      
+<p>消息数据结构被序列化为二进制串后，下一步就要进行网络通信了。目前有两种常用IO通信模型：1）BIO；2）NIO。一般RPC框架需要支持这两种IO模型</p>
+<p>如何实现RPC的IO通信框架呢？1）使用java nio方式自研，这种方式较为复杂，而且很有可能出现隐藏bug，但也见过一些互联网公司使用这种方式；2）基于mina，mina在早几年比较火热，不过这些年版本更新缓慢；3）基于netty，现在很多RPC框架都直接基于netty这一IO通信框架，省力又省心，比如阿里巴巴的HSF、dubbo，Twitter的finagle等。</p>
+
+        <h3 id="为什么要有requestid"   >
+          <a href="#为什么要有requestid" class="heading-link"><i class="fas fa-link"></i></a>为什么要有requestID</h3>
+      
+<p>如果使用netty的话，一般会用channel.writeAndFlush()方法来发送消息二进制串，这个方法调用后对于整个远程调用(从发出请求到接收到结果)来说是一个异步的，即对于当前线程来说，将请求发送出来后，线程就可以往后执行了，至于服务端的结果，是服务端处理完成后，再以消息的形式发送给客户端的。于是这里出现以下两个问题：</p>
+<ol>
+<li>
+<p>怎么让当前线程“暂停”，等结果回来后，再向后执行？</p>
+</li>
+<li>
+<p>单一长连接与多线程并发如何协同工作</p>
+<p>如果有多个线程同时进行远程方法调用，这时建立在client server之间的socket连接上会有很多双方发送的消息传递，前后顺序也可能是随机的，server处理完结果后，将结果消息发送给client，client收到很多消息，怎么知道哪个消息结果是原先哪个线程调用的？</p>
+<p>如下图所示，线程A和线程B同时向client socket发送请求requestA和requestB，socket先后将requestB和requestA发送至server，而server可能将responseA先返回，尽管requestA请求到达时间更晚。我们需要一种机制保证responseA丢给ThreadA，responseB丢给ThreadB。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902010936.png"  alt="" />
+      </p>
+</li>
+</ol>
+<p><strong>如何解决呢</strong>？</p>
+<ol>
+<li>
+<p>client线程每次通过socket调用一次远程接口前，生成一个唯一的ID，即requestID（requestID必需保证在一个Socket连接里面是唯一的），一般常常使用AtomicLong从0开始累计数字生成唯一ID；</p>
+</li>
+<li>
+<p>将处理结果的回调对象callback，存放到全局ConcurrentHashMap里面put(requestID, callback)；</p>
+</li>
+<li>
+<p>线程调用channel.writeAndFlush()发送消息后，紧接着执行callback的get()方法试图获取远程返回的结果。在get()内部，则使用synchronized获取回调对象callback的锁，再先检测是否已经获取到结果，如果没有，然后调用callback的wait()方法，释放callback上的锁，让当前线程处于等待状态。</p>
+<blockquote>
+<p>callback对象用于在调用线程和监听服务端消息的线程之间通信，传递返回结果。</p>
+</blockquote>
+</li>
+<li>
+<p>服务端接收到请求并处理后，将response结果（此结果中包含了前面的requestID）发送给客户端，客户端socket连接上<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>专门监听服务端消息的线程</span>收到消息，分析结果，取到requestID，再从前面的ConcurrentHashMap里面get(requestID)，从而找到callback对象，再用synchronized获取callback上的锁，将方法调用结果设置到callback对象里，再调用callback.notifyAll()唤醒前面处于等待状态的线程。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123; <span class="comment">// 旋锁</span></span><br><span class="line">            <span class="keyword">while</span> (!isDone) &#123; <span class="comment">// 是否有结果了</span></span><br><span class="line">                wait(); <span class="comment">//没结果是释放锁，让当前线程处于等待状态</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setDone</span><span class="params">(Response res)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.res = res;</span><br><span class="line">        isDone = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123; <span class="comment">//获取锁，因为前面wait()已经释放了callback的锁了</span></span><br><span class="line">            notifyAll(); <span class="comment">// 唤醒处于等待的线程</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+</li>
+</ol>
+
+        <h2 id="如何发布自己的服务"   >
+          <a href="#如何发布自己的服务" class="heading-link"><i class="fas fa-link"></i></a>如何发布自己的服务</h2>
+      
+<p>如何让别人使用我们的服务呢？有同学说很简单嘛，告诉使用者服务的IP以及端口就可以了啊。确实是这样，这里问题的关键在于是自动告知还是人肉告知。</p>
+<p>人肉告知的方式：如果你发现你的服务一台机器不够，要再添加一台，这个时候就要告诉调用者我现在有两个ip了，你们要轮询调用来实现负载均衡；调用者咬咬牙改了，结果某天一台机器挂了，调用者发现服务有一半不可用，他又只能手动修改代码来删除挂掉那台机器的ip。现实生产环境当然不会使用人肉方式。</p>
+<p>有没有一种方法能实现自动告知，即机器的增添、剔除对调用方透明，调用者不再需要写死服务提供方地址？当然可以，现如今zookeeper被广泛用于实现服务自动注册与发现功能！</p>
+<p>简单来讲，zookeeper可以充当一个<code>服务注册表</code>（Service Registry），让多个<code>服务提供者</code>形成一个集群，让<code>服务消费者</code>通过服务注册表获取具体的服务访问地址（ip+端口）去访问具体的服务提供者。如下图所示：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902013342.png"  alt="" />
+      </p>
+<p>zookeeper提供了“心跳检测”功能，它会定时向各个服务提供者发送一个请求（实际上建立的是一个 Socket 长连接），如果长期没有响应，服务中心就认为该服务提供者已经“挂了”，并将其剔除，比如100.19.20.02这台机器如果宕机了，那么zookeeper上的路径就会只剩/HelloWorldService/1.0.0/100.19.20.01:16888。</p>
+<blockquote>
+<p><strong>服务分组与服务版本</strong></p>
+<p>在Dubbo中接口类并不能唯一确定一个服务，在dubbo中接口+服务分组+版本号才能唯一确定一个服务，下面来讲解下服务分组和版本号的使用。</p>
+<p><strong>服务分组</strong></p>
+<p>当一个接口有多种实现时，可以用 group 区分。</p>
+<ul>
+<li>
+<p>服务提供方：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014026.png"  alt="" />
+      </p>
+<p>上面配置在服务提供方法提供了com.test.UserServiceBo接口的两套实现，服务分组分别为olddubbo,newdubbo。</p>
+</li>
+<li>
+<p>服务消费方：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014041.png"  alt="" />
+      </p>
+<p>上面配置在服务消费方消费com.test.UserServiceBo接口的两套实现，服务分组分别为olddubbo,newdubbo。</p>
+</li>
+</ul>
+<p>需要注意的是消费方只能消费与自己服务分组相同的提供方的服务，这里userServiceOld生成的是服务提供方分组为olddubbo的接口的代理。<br />
+userServiceNew生成的是服务提供方分组为newdubbo的接口的代理。</p>
+<p><strong>服务版本</strong></p>
+<p>当同一个服务分组的接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。<br />
+可以按照以下的步骤进行版本迁移：</p>
+<ol>
+<li>在低压力时间段，先升级一半提供者为新版本</li>
+<li>再将所有消费者升级为新版本</li>
+<li>然后将剩下的一半提供者升级为新版本</li>
+</ol>
+<p>比如：</p>
+<ul>
+<li>
+<p>服务提供方</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014210.png"  alt="" />
+      </p>
+<p>服务提供方法在分组dubbo下提供了两个版本号的服务</p>
+</li>
+<li>
+<p>服务消费方</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200902014219.png"  alt="" />
+      </p>
+</li>
+</ul>
+<p>同理需要注意的是服务消费方只能消费与自己接口+分组+版本一致的服务提供方的服务。</p>
+<p><strong>小结</strong></p>
+<p>dubbo中唯一确定一个服务的是接口+服务分组+版本号，服务提供方和消费方提供和消费服务时候显示的配置服务分组和版本号是一一对应的。</p>
+</blockquote>
+<p>服务消费者会去监听相应路径（/HelloWorldService/1.0.0），一旦路径上的数据有任务变化（增加或减少），zookeeper都会通知服务消费方服务提供者地址列表已经发生改变，从而进行更新。</p>
+<p>更为重要的是zookeeper与生俱来的容错容灾能力（比如leader选举），可以确保服务注册表的高可用性。</p>
+<hr />
+
+        <h2 id="rpc服务和http服务的区别"   >
+          <a href="#rpc服务和http服务的区别" class="heading-link"><i class="fas fa-link"></i></a>rpc服务和http服务的区别</h2>
+      
+<p><strong>传输协议</strong></p>
+<ul>
+<li>http服务是基于http协议</li>
+<li>rpc服务是基于自定义的应用层协议</li>
+</ul>
+<p><strong>传输效率</strong></p>
+<ul>
+<li>RPC，使用自定义的应用层协议，可以让请求报文体积更小，提高传输效率</li>
+<li>如果是基于HTTP1.1的协议，请求中会包含很多无用的内容，如果是基于HTTP2.0，那么简单的封装以下是可以作为一个RPC来使用的</li>
+</ul>
+<p><strong>性能消耗</strong></p>
+<p>主要在于序列化和反序列化的耗时</p>
+<ul>
+<li>RPC，可以基于thrift实现高效的二进制传输</li>
+<li>HTTP，大部分是通过json来实现的，字节大小和序列化耗时都比thrift要更消耗性能</li>
+</ul>
+<p><strong>负载均衡</strong></p>
+<ul>
+<li>RPC，基本都自带了负载均衡策略</li>
+<li>HTTP，需要配置Nginx，HAProxy来实现</li>
+</ul>
+<p><strong>服务治理</strong></p>
+<p>下游服务新增，重启，下线时如何不影响上游调用者</p>
+<ul>
+<li>RPC，能做到自动通知，不影响上游</li>
+<li>HTTP，需要事先通知，修改Nginx/HAProxy配置</li>
+</ul>
+<p><strong>小结</strong></p>
+<ul>
+<li>RPC主要用于公司内部的服务调用，性能消耗低，传输效率高，服务治理方便。</li>
+<li>HTTP主要用于对外的异构环境，浏览器接口调用，APP接口调用，第三方接口调用等。</li>
+</ul>
+
+        <h1 id="关于netty"   >
+          <a href="#关于netty" class="heading-link"><i class="fas fa-link"></i></a>关于Netty</h1>
+      
+<p>Netty框架不局限于RPC，更多的是作为一种网络协议的实现框架，比如HTTP，由于RPC需要高效的网络通信，就可能选择以Netty作为基础。除了网络通信，RPC还需要有比较高效的序列化框架，以及一种寻址方式。如果是带会话（状态）的RPC调用，还需要有会话和状态保持的功能。</p>
+<p>大体上来说，Netty就是提供一种事件驱动的，责任链式（也可以说是流水线）的网络协议实现方式。网络协议包含很多层次，很多部分组成，如传输层协议，编码解码，压缩解压，身份认证，加密解密，请求的处理逻辑，怎么能够更好的复用，扩展，业界通用的方法就是责任链。</p>
+<p>一个请求应答网络交互通常包含两条链，一条链（Upstream）是从传输层，经过一系列步骤，如身份认证，解密，日志，流控，最后到达业务层，一条链（DownStream）是业务层返回后，又经过一系列步骤，如加密等，又回到传输层。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828035052.png"  alt="" />
+      </p>
+<p>这样每一层都有一个处理接口，都可以进行不同的操作，比如身份认证，加解密，日志，流控，将不同的处理实现像拼积木那样插接起来就可以实现一个网络协议了（快速开发）。每一层都有自己的实现，上层不需要关注面向网络的操作（可维护）。Netty已经提供了很多实现。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828035120.png"  alt="" />
+      </p>
+<p>当然Netty还有许多好处，比如对非阻塞IO（NIO）的支持，比如在链上传递时最大程度的减少buffer的copy（高性能）。</p>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.jianshu.com/p/d8ffa1ff0727"  target="_blank" rel="noopener">RMI(远程方法调用)</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/41609070/answer/1030913797"  target="_blank" rel="noopener">既然有 HTTP 请求，为什么还要用 RPC 调用？</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/rmi%E3%80%81rpc%E3%80%81netty/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/rmi%E3%80%81rpc%E3%80%81netty/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">网络编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/%E5%BC%82%E6%AD%A5%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">异步事件驱动机制详解</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/jvm/ClassLoader/"><span class="paginator-prev__text">ClassLoader</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#rmi"><span class="toc-number">1.</span> <span class="toc-text">
+          RMI</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#介绍"><span class="toc-number">1.1.</span> <span class="toc-text">
+          介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rmi基本原理"><span class="toc-number">1.2.</span> <span class="toc-text">
+          RMI基本原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rmi示例"><span class="toc-number">1.3.</span> <span class="toc-text">
+          RMI示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#时序图"><span class="toc-number">1.4.</span> <span class="toc-text">
+          时序图</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#rpc"><span class="toc-number">2.</span> <span class="toc-text">
+          RPC</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#如何调用他人的远程服务"><span class="toc-number">2.1.</span> <span class="toc-text">
+          如何调用他人的远程服务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#怎么做到透明化远程服务调用"><span class="toc-number">2.1.1.</span> <span class="toc-text">
+          怎么做到透明化远程服务调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#怎么对消息进行编码和解码"><span class="toc-number">2.1.2.</span> <span class="toc-text">
+          怎么对消息进行编码和解码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#通信"><span class="toc-number">2.1.3.</span> <span class="toc-text">
+          通信</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么要有requestid"><span class="toc-number">2.1.4.</span> <span class="toc-text">
+          为什么要有requestID</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何发布自己的服务"><span class="toc-number">2.2.</span> <span class="toc-text">
+          如何发布自己的服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rpc服务和http服务的区别"><span class="toc-number">2.3.</span> <span class="toc-text">
+          rpc服务和http服务的区别</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#关于netty"><span class="toc-number">3.</span> <span class="toc-text">
+          关于Netty</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

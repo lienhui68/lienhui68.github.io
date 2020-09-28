@@ -1,0 +1,419 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本附录中， 我们会讨论Java 8中其他的三个语言特性的更新， 分别是重复注解（repeated annotation）、类型注解（type annotation）和通用目标类型推断（generalized target-type inference）。 附录B会讨论Java 8中类库的更新。我们不会涉及JDK 8中的所有内容，比如我们不会谈及Nashorn 或者是精简运行时（Compact Pr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="附录A_其他语言特性的更新">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/17_%E9%99%84%E5%BD%95A_%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7%E7%9A%84%E6%9B%B4%E6%96%B0/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本附录中， 我们会讨论Java 8中其他的三个语言特性的更新， 分别是重复注解（repeated annotation）、类型注解（type annotation）和通用目标类型推断（generalized target-type inference）。 附录B会讨论Java 8中类库的更新。我们不会涉及JDK 8中的所有内容，比如我们不会谈及Nashorn 或者是精简运行时（Compact Pr">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-01T01:04:17.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.866Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="java8">
+<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>附录A_其他语言特性的更新 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/17_%E9%99%84%E5%BD%95A_%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7%E7%9A%84%E6%9B%B4%E6%96%B0/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">附录A_其他语言特性的更新</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">16分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>本附录中， 我们会讨论Java 8中其他的三个语言特性的更新， 分别是重复注解（repeated annotation）、类型注解（type annotation）和通用目标类型推断（generalized target-type inference）。 附录B会讨论Java 8中类库的更新。我们不会涉及JDK 8中的所有内容，比如我们不会谈及Nashorn 或者是精简运行时（Compact Profiles），因为它们属于JVM的新特性。本书专注于介绍类库和语 言的更新。</p>
+<a id="more"></a>
+
+        <h1 id="注解"   >
+          <a href="#注解" class="heading-link"><i class="fas fa-link"></i></a>注解</h1>
+      
+<p>Java 8在两个方面对注解机制进行了改进，分别为：</p>
+<ul>
+<li>你现在可以定义重复注解</li>
+<li>使用新版Java，你可以为任何类型添加注解</li>
+</ul>
+<p>正式开始介绍之前，我们先快速地回顾一下Java 8之前的版本能用注解做什么，这有助于我 们加深对新特性的理解。 Java中的注解是一种对程序元素进行配置，提供附加信息的机制（注意，在Java 8之前，只 有声明可以被注解）。换句话说，它是某种形式的语法元数据（syntactic metadata）。比如，注解 在JUnit框架中就使用得非常频繁。下面这段代码中，setUp方法使用了@Before进行注解，而 testAlgorithm使用了@Test进行注解：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Before</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testAlgorithm</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    assertEquals(<span class="number">5</span>, list.size());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>注解尤其适用于下面这些场景。</p>
+<ul>
+<li>在JUnit的上下文中，使用注解能帮助区分哪些方法用于单元测试，哪些用于做环境搭建 工作。</li>
+<li>注解可以用于文档编制。比如，@Deprecated注解被广泛应用于说明某个方法不再推荐使用。</li>
+<li>Java编译器还可以依据注解检查错误，禁止报警输出，甚至还能生成代码。</li>
+<li>注解在Java企业版中尤其流行，它们经常用于配置企业应用程序。</li>
+</ul>
+
+        <h2 id="重复注解"   >
+          <a href="#重复注解" class="heading-link"><i class="fas fa-link"></i></a>重复注解</h2>
+      
+<p>之前版本的Java禁止对同样的注解类型声明多次。由于这个原因，下面的第二句代码是无 效的：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@interface</span> Author &#123;</span><br><span class="line">    <span class="function">String <span class="title">name</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Raoul"</span>)</span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Mario"</span>)</span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Alan"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>Java企业版的程序员经常通过一些惯用法绕过这一限制。你可以声明一个新的注解，它包含 了你希望重复的注解数组。这种方法的形式如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Authors</span>(</span><br><span class="line">        &#123;</span><br><span class="line">                <span class="meta">@Author</span>(name = <span class="string">"Raoul"</span>),</span><br><span class="line">                <span class="meta">@Author</span>(name = <span class="string">"Mario"</span>),</span><br><span class="line">                <span class="meta">@Author</span>(name = <span class="string">"Alan"</span>)&#125;</span><br><span class="line">)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>Book类的嵌套注解相当难看。这就是Java 8想要从根本上移除这一限制的原因，去掉这一限 制后，代码的可读性会好很多。现在，如果你的配置允许重复注解，你可以毫无顾虑地一次声明 多个同一种类型的注解。它目前还不是默认行为，你需要显式地要求进行重复注解。</p>
+
+        <h3 id="创建一个重复注解"   >
+          <a href="#创建一个重复注解" class="heading-link"><i class="fas fa-link"></i></a>创建一个重复注解</h3>
+      
+<p>如果一个注解在设计之初就是可重复的，你可以直接使用它。但是，如果你提供的注解是为 用户提供的，那么就需要做一些工作，说明该注解可以重复。下面是你需要执行的两个步骤：</p>
+<ol>
+<li>
+<p>将注解标记为@Repeatable</p>
+</li>
+<li>
+<p>提供一个注解的容器</p>
+</li>
+</ol>
+<p>下面的例子展示了如何将@Author注解修改为可重复注解：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Repeatable</span>(Authors<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">@<span class="title">interface</span> <span class="title">Author</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">name</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@interface</span> Authors &#123;</span><br><span class="line">    Author[] value();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>完成了这样的定义之后，Book类可以通过多个@Author注解进行注释，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Raoul"</span>)</span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Mario"</span>)</span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Alan"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>编译时， Book 会被认为使用了 @Authors({@Author(name=“Raoul”), @Author(name =”Mario”), @Author(name=”Alan”)})这样的形式进行了注解，所以，你可以把这种新的机制看成是一种语法糖，它提供了Java程序员之前利用的惯用法类似的功能。</span>为了确保与反射方法 在行为上的一致性， 注解会被封装到一个容器中。 Java API中的 <code>getAnnotation(Class&lt;T&gt; annotation-Class)</code>方法会为注解元素返回类型为T的注解。如果实际情况有多个类型为T的注 解，该方法的返回到底是哪一个呢？</p>
+<p>我们不希望一下子就陷入细节的魔咒，类Class提供了一个新的getAnnotationsByType 方法，它可以帮助我们更好地使用重复注解。比如，你可以像下面这样打印输出Book类的所有 Author注解：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 方式一 通过容器注解获取</span></span><br><span class="line">        Author[] authors = Book<span class="class">.<span class="keyword">class</span>.<span class="title">getAnnotation</span>(<span class="title">Authors</span>.<span class="title">class</span>).<span class="title">value</span>()</span>;</span><br><span class="line">        System.out.println(Arrays.toString(authors));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 方式二 通过元素注解获取</span></span><br><span class="line">        Author[] authors1 = Book<span class="class">.<span class="keyword">class</span>.<span class="title">getAnnotationsByType</span>(<span class="title">Author</span>.<span class="title">class</span>)</span>;</span><br><span class="line">        System.out.println(Arrays.toString(authors1));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这段代码要正常工作的话，需要确保重复注解及它的容器都有运行时保持策略。</p>
+<p>完整代码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(ElementType.TYPE)</span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="meta">@Repeatable</span>(Authors<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">@<span class="title">interface</span> <span class="title">Author</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">name</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Target</span>(ElementType.TYPE)</span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="meta">@interface</span> Authors &#123;</span><br><span class="line">    Author[] value();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Raoul"</span>)</span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Mario"</span>)</span><br><span class="line"><span class="meta">@Author</span>(name = <span class="string">"Alan"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Book</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 方式一 通过容器注解获取</span></span><br><span class="line">        Author[] authors = Book<span class="class">.<span class="keyword">class</span>.<span class="title">getAnnotation</span>(<span class="title">Authors</span>.<span class="title">class</span>).<span class="title">value</span>()</span>;</span><br><span class="line">        System.out.println(Arrays.toString(authors));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 方式二 通过元素注解获取</span></span><br><span class="line">        Author[] authors1 = Book<span class="class">.<span class="keyword">class</span>.<span class="title">getAnnotationsByType</span>(<span class="title">Author</span>.<span class="title">class</span>)</span>;</span><br><span class="line">        System.out.println(Arrays.toString(authors1));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="类型注解"   >
+          <a href="#类型注解" class="heading-link"><i class="fas fa-link"></i></a>类型注解</h2>
+      
+<blockquote>
+<p>原文链接：<span class="exturl"><a class="exturl__link"   href="https://www.jianshu.com/p/0a076ae4a11b"  target="_blank" rel="noopener">https://www.jianshu.com/p/0a076ae4a11b</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p><code>Lambda</code>表达式是迄今为止Java 8讨论和推广最多的特性。我同意<code>Lambda</code>是一个很大的改进，但是我认为其他一些Java 8特性由于<code>Lambda</code>而显得有点暗淡。在这篇文章中，我想展示另一个很好的Java 8特性的一些例子：类型注解</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>类型注解是一种可以放在任何使用类型的位置上的注释（注：在 Java 8 之前的版本中，只能在声明式前使用注解）</span>。这包括new运算符，类型转换，<code>implements</code>子句和<code>throws</code>子句。类型注解加强了分析Java代码的能力，并能够确保更强大的类型检查。</p>
+<p>在代码实现上，Java 8为注解增加了两个新的注解类型：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(&#123;ElementType.TYPE_USE, ElementType.TYPE_PARAMETER&#125;)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Test &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li><code>TYPE_PARAMETER</code> 允许注解被用在类型参数（注：即泛型）的声明中(比如 <code>MyClass&lt;@Test T&gt;</code>)。</li>
+<li><code>TYPE_USE</code> 允许注解可以被用在任何类型使用的地方。</li>
+</ul>
+<p>请注意，在Java 8中，以下示例中的注解没有实际作用。Java 8仅提供定义这些类型的注释的功能，然后由框架和工具开发者来实际上使用它们。所以这是一个将来框架会提供给我们的一个注解集合。以下大多数示例都来自<span class="exturl"><a class="exturl__link"   href="https://links.jianshu.com/go?to=http%3A%2F%2Ftypes.cs.washington.edu%2Fjsr308%2Fspecification%2Fjava-annotation-design.html"  target="_blank" rel="noopener">Type Annotations规范</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>和各种Java 8演示文稿。</p>
+<p>带有类型注解的简单类型定义如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NotNull</span> String str1 = ...</span><br><span class="line"><span class="meta">@Email</span> String str2 = ...</span><br><span class="line"><span class="meta">@NotNull</span> <span class="meta">@NotBlank</span> String str3 = ...</span><br></pre></td></tr></table></div></figure>
+<p>类型注解也可以用于嵌套类型</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map.<span class="meta">@NonNull</span> Entry = ...</span><br></pre></td></tr></table></div></figure>
+<p>用于构造函数</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="meta">@Interned</span> MyObject()</span><br><span class="line"><span class="keyword">new</span> <span class="meta">@NonEmpty</span> <span class="meta">@Readonly</span> List&lt;String&gt;(myNonEmptyStringSet)</span><br><span class="line">myObject.<span class="keyword">new</span> <span class="meta">@Readonly</span> NestedClass()</span><br></pre></td></tr></table></div></figure>
+<p>类型转换</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">myString = (<span class="meta">@NonNull</span> String) myObject;</span><br><span class="line">query = (<span class="meta">@Untainted</span> String) str;</span><br></pre></td></tr></table></div></figure>
+<p>继承</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UnmodifiableList</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> @<span class="title">Readonly</span> <span class="title">List</span>&lt;<span class="title">T</span>&gt; </span>&#123; ... &#125;</span><br></pre></td></tr></table></div></figure>
+<p>泛型</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;<span class="meta">@Email</span> String&gt; emails = ...</span><br><span class="line">List&lt;<span class="meta">@ReadOnly</span> <span class="meta">@Localized</span> Message&gt; messages = ...</span><br><span class="line">Graph&lt;<span class="meta">@Directional</span> Node&gt; directedGraph = ...</span><br><span class="line">Map&lt;<span class="meta">@NonNull</span> String, <span class="meta">@NonEmpty</span> List&lt;<span class="meta">@Readonly</span> Document&gt;&gt; documents;</span><br></pre></td></tr></table></div></figure>
+<p>包括参数边界和通配符边界</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Folder</span>&lt;<span class="title">F</span> <span class="keyword">extends</span> @<span class="title">Existing</span> <span class="title">File</span>&gt; </span>&#123; ... &#125;</span><br><span class="line">Collection&lt;? <span class="keyword">super</span> <span class="meta">@Existing</span> File&gt; c = ...</span><br><span class="line">List&lt;<span class="meta">@Immutable</span> ? extends Comparable&lt;T&gt;&gt; unchangeable = ...</span><br></pre></td></tr></table></div></figure>
+<p>抛出异常</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">monitorTemperature</span><span class="params">()</span> <span class="keyword">throws</span> @Critical TemperatureException </span>&#123; ... &#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">authenticate</span><span class="params">()</span> <span class="keyword">throws</span> @Fatal @Logged AccessDeniedException </span>&#123; ... &#125;</span><br></pre></td></tr></table></div></figure>
+<p><code>instanceof</code> 语句</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> isNonNull = myString <span class="keyword">instanceof</span> <span class="meta">@NonNull</span> String;</span><br><span class="line"><span class="keyword">boolean</span> isNonBlankEmail = myString <span class="keyword">instanceof</span> <span class="meta">@NotBlank</span> <span class="meta">@Email</span> String;</span><br></pre></td></tr></table></div></figure>
+<p>以及最后Java 8 的方法引用</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Vernal</span> Date::getDay</span><br><span class="line">List&lt;<span class="meta">@English</span> String&gt;::size</span><br><span class="line">Arrays::&lt;<span class="meta">@NonNegative</span> Integer&gt;sort</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h3>
+      
+<p>类型注解是Java类型系统的一个有趣的补充。它们可以应用于任何类型的使用，并启用更详细的代码分析。如果您现在要使用类型注解，您应该查看<span class="exturl"><a class="exturl__link"   href="https://links.jianshu.com/go?to=http%3A%2F%2Ftypes.cs.washington.edu%2Fchecker-framework%2F"  target="_blank" rel="noopener">Checker Framework</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>。</p>
+
+        <h1 id="通用目标类型推断"   >
+          <a href="#通用目标类型推断" class="heading-link"><i class="fas fa-link"></i></a>通用目标类型推断</h1>
+      
+<p>Java 8对泛型参数的推断进行了增强。相信你对Java 8之前版本中的类型推断已经比较熟悉 了。比如，Java中的方法emptyList方法定义如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Collections</span> </span>&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">emptyList</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> (List&lt;T&gt;) EMPTY_LIST;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></div></figure>
+<p>emptyList方法使用了类型参数T进行参数化。你可以像下面这样为该类型参数提供一个显 式的类型进行函数调用：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; ss = Collections.&lt;String&gt;emptyList(); <span class="comment">// 编译器会提示 可推断的显示类型</span></span><br></pre></td></tr></table></div></figure>
+<p>不过Java也可以推断泛型参数的类型。上面的代码和下面这段代码是等价的：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; ss = Collections.emptyList();</span><br></pre></td></tr></table></div></figure>
+<p>Java 8出现之前，这种推断机制依赖于程序的上下文（即目标类型），具有一定的局限性。比 如，下面这种情况就不能完成推断：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    t(Collections.emptyList()); <span class="comment">// 编译器会提示错误：List&lt;String&gt;  can not be applied to List&lt;Object&gt;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">t</span><span class="params">(List&lt;String&gt; sss)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>为了修复这一问题，你只能像我们之前展示的那样提供一个显式的类型参数。 Java 8中，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>目标类型包括向方法传递的参数，因此你不再需要提供显式的泛型参数</span>：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    t(Collections.emptyList());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">t</span><span class="params">(List&lt;String&gt; sss)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这也是为什么lambda表达式和方法引用能够推断类型。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Car&gt; cleanCars = dirtyCars.stream()</span><br><span class="line">        .filter(Car::isClean)</span><br><span class="line">        .collect(Collectors.toList());</span><br></pre></td></tr></table></div></figure>
+<p>通过这段代码， 我们能很清晰地了解到， 正是伴随Java 8而来的改进让你只需要一句 Collectors.toList()就能完成期望的工作，不再需要编写像<code>Collectors.&lt;Car&gt;toList()</code> 这么复杂的代码了。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/17_%E9%99%84%E5%BD%95A_%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7%E7%9A%84%E6%9B%B4%E6%96%B0/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/17_%E9%99%84%E5%BD%95A_%E5%85%B6%E4%BB%96%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7%E7%9A%84%E6%9B%B4%E6%96%B0/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/java8/">java8</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/18_%E9%99%84%E5%BD%95B_%E7%B1%BB%E5%BA%93%E7%9A%84%E6%9B%B4%E6%96%B0/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">附录B_类库的更新</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/16_%E7%BB%93%E8%AE%BA%E4%BB%A5%E5%8F%8AJava%E7%9A%84%E6%9C%AA%E6%9D%A5/"><span class="paginator-prev__text">结论以及Java的未来</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#注解"><span class="toc-number">1.</span> <span class="toc-text">
+          注解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#重复注解"><span class="toc-number">1.1.</span> <span class="toc-text">
+          重复注解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建一个重复注解"><span class="toc-number">1.1.1.</span> <span class="toc-text">
+          创建一个重复注解</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#类型注解"><span class="toc-number">1.2.</span> <span class="toc-text">
+          类型注解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">1.2.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#通用目标类型推断"><span class="toc-number">2.</span> <span class="toc-text">
+          通用目标类型推断</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

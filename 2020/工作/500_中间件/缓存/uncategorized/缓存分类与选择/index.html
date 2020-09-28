@@ -1,0 +1,399 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="缓存分类        在分布式环境下，为了提高系统的性能，常常会引入不同类型的缓存存储系统（算法优化所带来的的效果可能远远不如缓存带来的优化效果）。缓存已经是一个老生常谈的技术了， memcache、redis、squid、varnish、web cache、 CDN等等技术五花八门，缓存的好处自然不必多说，但是缓存都适用于什么场景呢。接下来从一次完整的请求开始来分别介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="缓存分类与选择">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E7%BC%93%E5%AD%98%E5%88%86%E7%B1%BB%E4%B8%8E%E9%80%89%E6%8B%A9/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="缓存分类        在分布式环境下，为了提高系统的性能，常常会引入不同类型的缓存存储系统（算法优化所带来的的效果可能远远不如缓存带来的优化效果）。缓存已经是一个老生常谈的技术了， memcache、redis、squid、varnish、web cache、 CDN等等技术五花八门，缓存的好处自然不必多说，但是缓存都适用于什么场景呢。接下来从一次完整的请求开始来分别介绍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-27T06:37:48.442Z">
+<meta property="article:modified_time" content="2020-09-27T06:37:48.445Z">
+<meta property="article:author" content="lienhui68">
+<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>缓存分类与选择 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E7%BC%93%E5%AD%98%E5%88%86%E7%B1%BB%E4%B8%8E%E9%80%89%E6%8B%A9/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">缓存分类与选择</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.3k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">12分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="缓存分类"   >
+          <a href="#缓存分类" class="heading-link"><i class="fas fa-link"></i></a>缓存分类</h1>
+      
+<p>在分布式环境下，为了提高系统的性能，常常会引入不同类型的缓存存储系统（算法优化所带来的的效果可能远远不如缓存带来的优化效果）。缓存已经是一个老生常谈的技术了， memcache、redis、squid、varnish、web cache、 CDN等等技术五花八门，缓存的好处自然不必多说，但是缓存都适用于什么场景呢。接下来从一次完整的请求开始来分别介绍。</p>
+<a id="more"></a>
+
+        <h2 id="客户端缓存"   >
+          <a href="#客户端缓存" class="heading-link"><i class="fas fa-link"></i></a>客户端缓存</h2>
+      
+<p>首先是客户端的缓存，包括app客户端和浏览器。这是离请求发起最接近的一方，如果数据在这个环节被缓存住，连网络请求都免掉了，相当于直接在本地取数据，那性能也必然不在话下，一般常见的缓存技术包括cookie，localstorage，sessionstorage，本地文件或者本地数据库等，当然也包括http头相关设置，比如cache-control，last-modified等参数。本地缓存的一个缺点就是刷新机制不会特别友好，所以一般缓存对数据实时性要求不高的，或者和客户端有关的数据</p>
+
+        <h2 id="cdn"   >
+          <a href="#cdn" class="heading-link"><i class="fas fa-link"></i></a>cdn</h2>
+      
+<p>如果客户端没有命中缓存，那接下来就要发起一次网络请求，根据网络环境，一般大型站点都会配置CDN，CDN会找一个最合适的服务节点接管网络请求，CDN技术不在这里详细讲，CDN节点都会在本地缓存静态文件数据，一旦命中直接返回，不会穿透去请求应用服务器。并且CDN会通过在不同的网络，策略性地通过部署边缘服务器和应用大量的技术和算法，把用户的请求指定到最佳响应节点上。所以会减少非常多的网络开销和响应延迟。有条件的公司自己搭建CDN，没条件的也可以购买商用的。一般CDN缓存静态文件。</p>
+
+        <h2 id="负载均衡服务器缓存"   >
+          <a href="#负载均衡服务器缓存" class="heading-link"><i class="fas fa-link"></i></a>负载均衡服务器缓存</h2>
+      
+<p>如果没有部署CDN或者CDN没有命中，请求最终才会落入应用服务器，现在的http服务器都会添加一层反向代理，例如nginx，在这一层同样会添加缓存层，代表技术是squid，varnish，当然nginx作为http服务器而言也支持静态文件访问和本地缓存技术，当然也可以使用远程缓存，如redis，memcache，这里缓存的内容一般为静态文件或者由服务器已经生成好的动态页面，在返回用户之前缓存。</p>
+
+        <h2 id="应用缓存"   >
+          <a href="#应用缓存" class="heading-link"><i class="fas fa-link"></i></a>应用缓存</h2>
+      
+<p>如果前面的缓存机制全部失效，请求才会落入真正的服务器节点。服务端的缓存主要分两种，一种是应用程序自身实现的本地缓存，一种是借助分布式缓存例如memcache，redis。也有既可以实现本地又可以用于分布式缓存的框架如Cacheonix，EHCache等。</p>
+
+        <h3 id="本地缓存"   >
+          <a href="#本地缓存" class="heading-link"><i class="fas fa-link"></i></a>本地缓存</h3>
+      
+<p>其中本地缓存又可以分为两种：<strong>本地磁盘缓存（又称文件缓存）</strong>（现在一般都采用读写性能比较优异的SSD来做存储）和<strong>本地内存缓存</strong>。在系统中，为了提高缓存存储系统的性能以及热点数据的命中率，一般在本地磁盘缓存中也会引入内存缓存用于存储经常访问的数据。有时为了减少客户端对服务器的请求，也会在客户端上使用缓存，当然这是要考虑安全问题的。</p>
+
+        <h3 id="分布式缓存"   >
+          <a href="#分布式缓存" class="heading-link"><i class="fas fa-link"></i></a>分布式缓存</h3>
+      
+<p>一般机器的内存都不会特别大，所以本地缓存的数据有限，一般缓存命中率特别高访问量又特别大的数据，而分布式缓存刚好避免了本地缓存的这一缺点，理论上分布式缓存的大小是无上限的。但是比本地缓存又多了一次网络请求。这里缓存的数据不一定是某一次请求用到的完整数据，这里使用缓存的设计可以使用多种数据结构，并且可以根据业务场景自行组织需要缓存的数据。一般是一类的数据结合。请求可能只使用一部分缓存数据即可。</p>
+
+        <h2 id="数据库缓存"   >
+          <a href="#数据库缓存" class="heading-link"><i class="fas fa-link"></i></a>数据库缓存</h2>
+      
+<p>如果应用缓存没有命中，这个时候请求的数据一般会落到相关数据库了，数据库作为一个应用程序，又是io密集型操作，自然少不了缓存的使用，常见的数据库MySQL，PosgreSQL都有自身定制的查询缓存，并且可以做到强一致。当然代价也更高昂，一般这里的缓存不会单独设计，都是使用数据库自身的配置。</p>
+
+        <h2 id="操作系统缓存"   >
+          <a href="#操作系统缓存" class="heading-link"><i class="fas fa-link"></i></a>操作系统缓存</h2>
+      
+<p>如果数据库缓存也没有命中呢，不要担心，操作系统在磁盘io层面还有一级缓存，记不记得在free命令下，有个cache和buffer，这两个分别是写入和读取使用的缓存空间。当然这是操作系统为了提高性能采用的方式，对于我们来讲，可优化空间的非常渺茫。在往后的话不同厂家的磁盘也会有一定的缓存，这里有点超纲就不多说了。</p>
+<blockquote>
+<p><strong>buffer 与 cache 区别</strong></p>
+<p>A buffer is something that has yet to be “written” to disk.<br />
+A cache is something that has been “read” from the disk and stored for later use.</p>
+<p><strong>buffers</strong> 就是存放要输出到disk（块设备）的数据，缓冲满了一次写，提高io性能（内存 -&gt; 磁盘）<br />
+<strong>cached</strong> 就是存放从disk上读出的数据，常用的缓存起来，减少io（磁盘 -&gt; 内存）</p>
+<p>buffer 和 cache，两者都是RAM中的数据。简单来说，buffer是即将要被写入磁盘的，cache是被从磁盘中读出来的</p>
+<p><strong>1） buffer 缓冲</strong></p>
+<p>buffer是用于存储速度不同步的设备或优先级不同的设备之间传输数据的区域。<br />
+缓冲（buffers）是根据磁盘的读写设计的，把分散的写操作集中进行，减少磁盘碎片和硬盘的反复寻道，从而提高系统性能。</p>
+<p><strong>2） cache 缓存</strong></p>
+<p>cache经常被用在磁盘的I/O请求上，如果有多个进程都要访问某个文件，于是该文件便被做成cache以方便下次被访问，这样可提供系统性能。</p>
+<p>缓存（cached）是把读取过的数据保存起来，重新读取时若命中（找到需要的数据）就不要去读硬盘了，若没有命中就读硬盘。其中的数据会根据读取频率进行组织，把最频繁读取的内容放在最容易找到的位置，把不再读的内容不断往后排，直至从中删除。</p>
+</blockquote>
+
+        <h1 id="选择"   >
+          <a href="#选择" class="heading-link"><i class="fas fa-link"></i></a>选择</h1>
+      
+<p>到这里，基本上一次完整的请求就结束了，在哪个环节可以使用缓存并且适用的场景也介绍完了。到底哪一款更适合你呢，下面举一个例子：</p>
+<p><strong>使用本地内存缓存的快还是使用redis缓存的好？</strong></p>
+<p>Redis早已家喻户晓，其性能自不必多说。</p>
+<p>但是总有些时候，我们想把性能再提升一点，想着redis是个远程服务，性能也许不够，于是想用本地缓存试试！想法是不错的。那么就让我们来比较下二者的差别吧！</p>
+<ul>
+<li>读写速度，不考虑并发问题，本地缓存自然是最快的。但是如果本地缓存不加锁，那应用并发了咋办呢？所以，我们以加锁方式再比较一次。</li>
+<li>各位开发同学水平差别大，使用本地缓存极有可能导致严重的线程安全问题，并发考虑严重。</li>
+<li>本地缓存无法用于重复点击，重复点击会分发请求到多台服务器，而用本地缓存只能防止本机重复点击，redis则可以防止，但是时间间隔也需要在redis的读写差之外。</li>
+<li>场景使用，同一数据，从数据库取出来，放到redis只要一次，而放到本地缓存，则需要n（集群的节点个数）次</li>
+<li>redis内存可以无限扩充，而本地扩大堆内存代价是很大的而且有瓶颈。</li>
+<li>本地缓存需要自己实现过期功能，实现不好可能导致极其严重的后果，而redis经过大量的流量验证非常安全。</li>
+<li>本地缓存无法提供丰富的数据结构，redis可以。</li>
+<li>redis可以写磁盘，持久化，本地缓存不可以或者说很麻烦要考虑的东西太多。</li>
+<li>加本地缓存后，代码复杂度急剧上升，后面进来的开发很难一下领会原有开发想法。间接提升维护成本。</li>
+</ul>
+<p>是求快还是求稳，举两个实际应用的小例子，使用本地缓存用于生成分布式ID，使用redis用于缓存用户信息。</p>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/cywosp/article/details/23970017"  target="_blank" rel="noopener">https://blog.csdn.net/cywosp/article/details/23970017</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://zhuanlan.zhihu.com/p/40222159"  target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/40222159</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E7%BC%93%E5%AD%98%E5%88%86%E7%B1%BB%E4%B8%8E%E9%80%89%E6%8B%A9/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E7%BC%93%E5%AD%98%E5%88%86%E7%B1%BB%E4%B8%8E%E9%80%89%E6%8B%A9/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8FKV%E5%AD%98%E5%82%A8%E6%96%B9%E6%A1%88-Tair/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">分布式K/V存储方案-Tair</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E6%B4%BB%E9%94%81/"><span class="paginator-prev__text">活锁</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#缓存分类"><span class="toc-number">1.</span> <span class="toc-text">
+          缓存分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端缓存"><span class="toc-number">1.1.</span> <span class="toc-text">
+          客户端缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cdn"><span class="toc-number">1.2.</span> <span class="toc-text">
+          cdn</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#负载均衡服务器缓存"><span class="toc-number">1.3.</span> <span class="toc-text">
+          负载均衡服务器缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#应用缓存"><span class="toc-number">1.4.</span> <span class="toc-text">
+          应用缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#本地缓存"><span class="toc-number">1.4.1.</span> <span class="toc-text">
+          本地缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分布式缓存"><span class="toc-number">1.4.2.</span> <span class="toc-text">
+          分布式缓存</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据库缓存"><span class="toc-number">1.5.</span> <span class="toc-text">
+          数据库缓存</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#操作系统缓存"><span class="toc-number">1.6.</span> <span class="toc-text">
+          操作系统缓存</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#选择"><span class="toc-number">2.</span> <span class="toc-text">
+          选择</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">3.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

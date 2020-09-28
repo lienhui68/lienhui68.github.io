@@ -1,0 +1,919 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="概述                            nosql出现的原因        互联网时代大背景下，为什么使用NoSQL  大数据时代的3V  海量Volume 多样Variety 实时Velocity  互联网需求的3高  高并发 高可扩（可伸缩） 高性能（高可用）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NoSql详解">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/1_NoSql%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="概述                            nosql出现的原因        互联网时代大背景下，为什么使用NoSQL  大数据时代的3V  海量Volume 多样Variety 实时Velocity  互联网需求的3高  高并发 高可扩（可伸缩） 高性能（高可用）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917223914.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917230913.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917235230.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917235828.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200918000042.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200918000215.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200923153115.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/09.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/10.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/11.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200923155424.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/13.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/14.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200923160128298.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/16-20200923160337572.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200923161900117.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200923163337826.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/18.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/17.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/19.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20.png">
+<meta property="article:published_time" content="2020-09-25T07:04:02.000Z">
+<meta property="article:modified_time" content="2020-09-27T06:37:48.407Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200917223914.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>NoSql详解 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/1_NoSql%E8%AF%A6%E8%A7%A3/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">NoSql详解</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-25</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">5.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">29分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="概述"   >
+          <a href="#概述" class="heading-link"><i class="fas fa-link"></i></a>概述</h1>
+      
+
+        <h2 id="nosql出现的原因"   >
+          <a href="#nosql出现的原因" class="heading-link"><i class="fas fa-link"></i></a>nosql出现的原因</h2>
+      
+<p>互联网时代大背景下，为什么使用NoSQL</p>
+<blockquote>
+<p><strong>大数据时代的3V</strong></p>
+<ul>
+<li>海量Volume</li>
+<li>多样Variety</li>
+<li>实时Velocity</li>
+</ul>
+<p><strong>互联网需求的3高</strong></p>
+<ul>
+<li>高并发</li>
+<li>高可扩（可伸缩）</li>
+<li>高性能（高可用）</li>
+</ul>
+</blockquote>
+<a id="more"></a>
+
+        <h3 id="单机mysql的美好年代"   >
+          <a href="#单机mysql的美好年代" class="heading-link"><i class="fas fa-link"></i></a>单机MySQL的美好年代</h3>
+      
+<p>在90年代，一个网站的浏览量一般都不大，用单个数据库完全可以轻松应付。 在那个时候，更多的都是静态网页，动态交互类型的网站不多。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917223914.png"  alt="" />
+      </p>
+<blockquote>
+<p>DAL：Data Access Layer  数据访问层</p>
+</blockquote>
+<p>上述架构下，我们来看看数据存储的瓶颈是什么?</p>
+<ol>
+<li>数据量的总大小一个机器放不下时</li>
+<li>数据的索引(B+ Tree)一个机器的内存放不下时</li>
+<li>浏览量(读写混合)一个实例不能承受</li>
+</ol>
+<p>如果满足了上述1or3个，进化…</p>
+
+        <h3 id="memcached缓存mysql垂直拆分"   >
+          <a href="#memcached缓存mysql垂直拆分" class="heading-link"><i class="fas fa-link"></i></a>Memcached(缓存)+MySQL+垂直拆分</h3>
+      
+<p>后来，随着网站浏览量的增多，几乎大部分使用MySQL架构的网站在数据库方面都开始出现了性能问题，web程序不再仅仅专注在功能业务，同时也在追求性能。程序员们开始大量的使用缓存技术来缓解数据库的压力，优化数据库的结构和索引。开始比较流行的是通过文件缓存来缓解数据库压力，但是当浏览量继续增大的时候，多台web机器通过文件缓存不能共享，大量的小文件缓存也带了了比较高的IO压力。在这个时候，Memcached就自然的成为一个非常时尚的技术产品。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917230913.png"  alt="" />
+      </p>
+
+        <h3 id="mysql主从读写分离"   >
+          <a href="#mysql主从读写分离" class="heading-link"><i class="fas fa-link"></i></a>Mysql主从读写分离</h3>
+      
+<p>由于数据库的写入压力增加，Memcached 只能缓解数据库的读取压力。读写集中在一个数据库上让数据库不堪重负，大部分网站开始使用主从复制技术来达到读写分离，以提高读写性能和读库的可扩展性。Mysql的master-slave模式成为这个时候的网站标配了。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917235230.png"  alt="" />
+      </p>
+
+        <h3 id="分表分库水平拆分mysql集群"   >
+          <a href="#分表分库水平拆分mysql集群" class="heading-link"><i class="fas fa-link"></i></a>分表分库+水平拆分+mysql集群</h3>
+      
+<p>在Memcached的高速缓存，MySQL的主从复制， 读写分离的基础之上，这时MySQL主库的<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>写压力</span>开始出现瓶颈，而数据量的持续猛增，由于MyISAM使用表锁，在高并发下会出现严重的锁问题，大量的高并发MySQL应用开始使用InnoDB引擎代替MyISAM。</p>
+<p>同时，开始流行使用分表分库来缓解写压力和数据增长的扩展问题。这个时候，分表分库成了一个热门技术，是面试的热门问题也是业界讨论的热门技术问题。也就在这个时候，MySQL推出了还不太稳定的表分区，这也给技术实力一般的公司带来了希望。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>虽然MySQL推出了MySQL Cluster集群，但性能(可用性)也不能很好满足互联网的要求，只是在高可靠性(分区容忍性)上提供了非常大的保证。</span></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200917235828.png"  alt="" />
+      </p>
+
+        <h3 id="mysql的扩展性瓶颈"   >
+          <a href="#mysql的扩展性瓶颈" class="heading-link"><i class="fas fa-link"></i></a>MySQL的扩展性瓶颈</h3>
+      
+<p>MySQL数据库也经常存储一些大文本字段，导致数据库表非常的大，在做数据库恢复的时候就导致非常的慢，不容易快速恢复数据库。比如1000万4KB大小的文本就接近40GB的大小， 如果能把这些数据从MySQL省去，MySQL将变得非常的小。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>关系数据库很强大，但是它并不能很好的应付所有的应用场景。MySQL的扩展性差(需要复杂的技术来实现)，大数据下IO压力大，表结构更改困难，正是当前使用MySOL的开发人员面临的问题。</span></p>
+
+        <h3 id="今天是什么样子"   >
+          <a href="#今天是什么样子" class="heading-link"><i class="fas fa-link"></i></a>今天是什么样子?</h3>
+      
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200918000042.png"  style="zoom:80%;" />
+      
+
+        <h3 id="为什么用nosql"   >
+          <a href="#为什么用nosql" class="heading-link"><i class="fas fa-link"></i></a>为什么用NoSQL</h3>
+      
+<p>今天我们可以通过第三方平台( 如: Google，Facebook等) 可以很容易获取数据。用户的个人信息，社交网络，地理位置，用户生成的数据和用户操作日志已经成倍的增加。我们如果要对这些用户数据进行挖掘，那SQL数据库已经不适合这些应用了，NoSQL数据库的发展却能很好的处理这些大的数据。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200918000215.png"  alt="" />
+      </p>
+
+        <h2 id="nosql是什么"   >
+          <a href="#nosql是什么" class="heading-link"><i class="fas fa-link"></i></a>nosql是什么？</h2>
+      
+<p>NoSQL(NoSQL = Not Only SQL)，意即“不仅仅是SQL”，<strong>泛指非关系型的数据库</strong>。随着互联网<strong>web2.0</strong>网站的兴起，传统的关系数据库在应付web2.0网站，特别是超大规模和高并发的SNS类型的web2.0纯动态网站已经显得力不从心，暴露了很多难以克服的问题，而非关系型的数据库则由于其本身的特点得到了非常迅速的发展。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>NoSQL 数据库的产生就是为了应对大规模数据集合多重数据种类带来的挑战，尤其是大数据应用难题，包括超大规模数据的存储。</span></p>
+<blockquote>
+<p>Web2.0是相对于Web1.0的新的时代。指的是一个利用Web的平台，由用户主导而生成的内容互联网产品模式，为了区别传统由网站雇员主导生成的内容而定义为第二代互联网，web2.0是一个新的时代。 抛开纷繁芜杂的Web 2.0现象，进而将其放到科技发展与社会变革的大视野下来看，Web 2.0可以说是信息技术发展引发网络革命所带来的面向未来、以人为本的<span class="exturl"><a class="exturl__link"   href="https://baike.baidu.com/item/%E5%88%9B%E6%96%B02.0"  target="_blank" rel="noopener">创新2.0</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>模式在互联网领域的典型体现，是由专业人员织网到所有用户参与织网的创新民主化进程的生动注释。</p>
+<blockquote>
+<p>以上来自百度百科</p>
+</blockquote>
+</blockquote>
+<p>(例如谷歌或Facebook每天为他们的用户收集万亿比特的数据)。这些类型的数据存储不需要固定的模式，<strong>无需多余操作就可以横向扩展</strong>。</p>
+
+        <h2 id="能干嘛"   >
+          <a href="#能干嘛" class="heading-link"><i class="fas fa-link"></i></a>能干嘛</h2>
+      
+<ul>
+<li>
+<p>易扩展</p>
+<p>NoSQL数据库种类繁多，但是一个共同的特点都是<strong>去掉关系数据库的关系型特性</strong>。数据之间无关系，这样就非常容易扩展。也无形之间，在架构的层面上带来了可扩展的能力。</p>
+</li>
+<li>
+<p>大数据量高性能</p>
+<p>NoSQL数据库都具有非常高的读写性能，尤其在大数据量下，同样表现优秀。</p>
+<p>这得益于它的<strong>无关系性</strong>，数据库的结构简单。</p>
+<p>一般MySQL使用Query Cache，每次表的更新Cache就失效，是一种<strong>大粒度的Cache</strong>，在针对web2.0的交互频繁的应用，Cache性能不高。</p>
+<p>而NoSQL的Cache是<strong>记录级</strong>的，是一种<strong>细粒度的Cache</strong>，所以NoSQL在这个层面上来说就要性能高很多了。</p>
+</li>
+<li>
+<p>多样灵活的数据模型</p>
+<p>NoSQL无需事先为要存储的数据建立字段，随时可以存储自定义的数据格式。</p>
+<p>而在关系数据库里，增删字段是一件非常麻烦的事情。如果是非常大数据量的表，增加字段简直就是一个噩梦。</p>
+</li>
+</ul>
+
+        <h2 id="传统的rdbms-vs-nosql"   >
+          <a href="#传统的rdbms-vs-nosql" class="heading-link"><i class="fas fa-link"></i></a>传统的RDBMS vs NoSQL</h2>
+      
+
+        <h3 id="rdbms"   >
+          <a href="#rdbms" class="heading-link"><i class="fas fa-link"></i></a>RDBMS</h3>
+      
+<ul>
+<li>高度组织化结构化数据</li>
+<li>结构化查询语言(SQL)</li>
+<li>数据和关系都存储在单独的表中</li>
+<li>数据操纵语言，数据定义语言</li>
+<li>严格的一致性</li>
+<li>基础事务</li>
+</ul>
+
+        <h3 id="nosql"   >
+          <a href="#nosql" class="heading-link"><i class="fas fa-link"></i></a>NoSQL</h3>
+      
+<ul>
+<li>代表着不仅仅是SQL</li>
+<li>没有声明性查询语言</li>
+<li>没有预定义的模式</li>
+<li>键-值对存储，列存储，文档存储，图形数据库</li>
+<li>最终一致性，而非ACID属性</li>
+<li>非结构化和不可预知的数据:</li>
+<li>CAP定理</li>
+<li>高性能，高可用性和可伸缩性</li>
+</ul>
+
+        <h2 id="nosql-产品"   >
+          <a href="#nosql-产品" class="heading-link"><i class="fas fa-link"></i></a>NoSQL 产品</h2>
+      
+<ul>
+<li>Redis</li>
+<li>Memcached</li>
+<li>MongDB</li>
+</ul>
+
+        <h2 id="怎么用"   >
+          <a href="#怎么用" class="heading-link"><i class="fas fa-link"></i></a>怎么用</h2>
+      
+<ul>
+<li>KV</li>
+<li>Cache</li>
+<li>Persistence</li>
+</ul>
+
+        <h1 id="当下nosql应用场景简介"   >
+          <a href="#当下nosql应用场景简介" class="heading-link"><i class="fas fa-link"></i></a>当下NoSQL应用场景简介</h1>
+      
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>SQL和NoSQL双剑合璧</span></p>
+</blockquote>
+
+        <h2 id="alibaba中文站商品信息如何存放"   >
+          <a href="#alibaba中文站商品信息如何存放" class="heading-link"><i class="fas fa-link"></i></a>Alibaba中文站商品信息如何存放</h2>
+      
+<blockquote>
+<p>看看阿里巴巴中文网站首页以女装/女包包为例</p>
+</blockquote>
+<p><strong>架构发展历程</strong>：</p>
+<ol>
+<li>演变过程</li>
+</ol>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200923153115.png"  alt="" />
+      </p>
+<ol start="2">
+<li>
+<p>第5代</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/09.png"  alt="img" />
+      </p>
+</li>
+<li>
+<p>第5代架构使命</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/10.png"  alt="img" />
+      </p>
+</li>
+</ol>
+<p><strong>和我们相关的，多数据源类型的存储问题</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/11.png"  alt="img" />
+      </p>
+
+        <h2 id="商品信息的存储方案"   >
+          <a href="#商品信息的存储方案" class="heading-link"><i class="fas fa-link"></i></a>商品信息的存储方案</h2>
+      
+<ol>
+<li>商品基本信息
+<ul>
+<li>名称、价格，出厂日期，生产厂商等</li>
+<li>关系型数据库，mysql/oracle目前淘宝在去O化(也即拿掉Oracle)，注意，淘宝内部用的Mysql是里面的大牛自己改造过的
+<ul>
+<li>为什么去IOE（在IT建设过程中，去除IBM小型机、Oracle数据库及EMC存储设备） 简而意之，可不用穿脚链跳舞。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>商品描述、详情、评价信息(多文字类)
+<ul>
+<li>多文字信息描述类，IO读写性能变差</li>
+<li>文档数据库MongDB</li>
+</ul>
+</li>
+<li>商品的图片
+<ul>
+<li>商品图片展现类</li>
+<li>分布式的文件系统中
+<ul>
+<li>淘宝自家TFS</li>
+<li>Google的GFS</li>
+<li>Hadoop的HDFS</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>商品的关键字
+<ul>
+<li>淘宝自家</li>
+<li>ISearch</li>
+</ul>
+</li>
+<li>商品的波段性的热点高频信息（如，情人节的巧克力）
+<ul>
+<li>内存数据库</li>
+<li>Tair、Redis、Memcache</li>
+</ul>
+</li>
+<li>商品的交易、价格计算、积分累计
+<ul>
+<li>外部系统，外部第3方支付接口</li>
+<li>支付宝</li>
+</ul>
+</li>
+</ol>
+
+        <h2 id="总结大型互联网应用大数据-高并发-多样数据类型的难点和解决方案"   >
+          <a href="#总结大型互联网应用大数据-高并发-多样数据类型的难点和解决方案" class="heading-link"><i class="fas fa-link"></i></a>总结大型互联网应用(大数据、高并发、多样数据类型)的难点和解决方案</h2>
+      
+<ul>
+<li>
+<p>难点</p>
+<ul>
+<li>数据类型多样性</li>
+<li>数据源多样性和变化重构</li>
+<li>数据源改造而数据服务平台不需要大面积重构</li>
+</ul>
+</li>
+<li>
+<p>解决方法</p>
+<ul>
+<li>
+<p>EAI</p>
+<p>EAI（<strong>E</strong>nterprise <strong>A</strong>pplication <strong>I</strong>ntegration，企业应用集成）是将基于各种不同平台、用不同方案建立的异构应用集成的一种方法和技术。EAI 通过建立底层结构，来联系横贯整个企业的异构系统、应用、数据源等，实现企业内部的 ERP、CRM、SCM、数据库、数据仓库，以及其他重要的内部系统之间无缝地共享和交换数据。有了 EAI，企业就可以将企业核心应用和新的 Internet解决方案结合在一起。</p>
+</li>
+<li>
+<p>UDSL 统一数据平台服务层</p>
+<ul>
+<li>
+<p>是什么</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200923155424.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>什么样</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/13.png"  alt="img" />
+      </p>
+<ul>
+<li>
+<p>映射</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/14.png"  alt="img" />
+      </p>
+</li>
+<li>
+<p>API</p>
+<p>统一查询更新API</p>
+<p>UDSL采用统一的查询/更新API，统一了不同数据源的查询方式</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200923160128298.png"  alt="image-20200923160128298" />
+      </p>
+</li>
+<li>
+<p>热点缓存</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/16-20200923160337572.png"  alt="img" />
+      </p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        <h1 id="nosql数据模型简介"   >
+          <a href="#nosql数据模型简介" class="heading-link"><i class="fas fa-link"></i></a>NoSQL数据模型简介</h1>
+      
+<p>以一个电商系统中的 客户、订单、订购(支付payment)、地址模型来对比关系型数据库和非关系型数据库</p>
+
+        <h2 id="传统关系型数据库如何设计"   >
+          <a href="#传统关系型数据库如何设计" class="heading-link"><i class="fas fa-link"></i></a>传统关系型数据库如何设计</h2>
+      
+<p>ER图（1：1、1：N、N：1）主外键等</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200923161900117.png"  alt="image-20200923161900117" />
+      </p>
+
+        <h2 id="nosql如何设计"   >
+          <a href="#nosql如何设计" class="heading-link"><i class="fas fa-link"></i></a>NOSQL如何设计</h2>
+      
+<ul>
+<li>
+<p>BSON ()是一种类json的一种二进制形式的存储格式，简称Binary JSON，它和JSON一样，支持内嵌的文档对象和数组对象</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200923163337826.png"  alt="image-20200923163337826" />
+      </p>
+</li>
+</ul>
+
+        <h2 id="两者对比问题和难点"   >
+          <a href="#两者对比问题和难点" class="heading-link"><i class="fas fa-link"></i></a>两者对比，问题和难点</h2>
+      
+<p>NoSQL处理多样性数据，可分可合。</p>
+<p><strong>为什么用聚合模型来处理</strong></p>
+<ul>
+<li>高并发的操作是不太建议用关联查询的(分布式系统中非常忌讳关联查询)，互联网公司用冗余数据来避免关联查询</li>
+<li>分布式事务是支持不了太多的并发的</li>
+</ul>
+
+        <h2 id="聚合模型"   >
+          <a href="#聚合模型" class="heading-link"><i class="fas fa-link"></i></a>聚合模型</h2>
+      
+<ul>
+<li>
+<p>KV</p>
+</li>
+<li>
+<p>BSON</p>
+</li>
+<li>
+<p>列族</p>
+<p>顾名思义，是按列存储数据的。最大的特点是方便存储结构化和半结构化数据，方便做数据压缩，对针对某一 列或者某几列的查询有非常大的IO优势。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/18.png"  alt="img" />
+      </p>
+</li>
+<li>
+<p>图</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/17.png"  alt="img" />
+      </p>
+</li>
+</ul>
+
+        <h1 id="nosql数据库的四大分类"   >
+          <a href="#nosql数据库的四大分类" class="heading-link"><i class="fas fa-link"></i></a>NoSQL数据库的四大分类</h1>
+      
+<ul>
+<li>
+<p>KV</p>
+<ul>
+<li>新浪：BerkeleyDB + Redis</li>
+<li>美团：Redis + tair</li>
+<li>阿里、百度：memcache + Redis</li>
+</ul>
+</li>
+<li>
+<p>文档型数据库（bson格式比较多）</p>
+<ul>
+<li>CouchDB</li>
+<li>MongoDB
+<ul>
+<li>MongoDB是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。</li>
+<li>MongoDB是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>列存储数据库</p>
+<ul>
+<li>Cassandra、HBase</li>
+<li>分布式文件系统</li>
+</ul>
+</li>
+<li>
+<p>图关系数据库</p>
+<ul>
+<li>它不是放图形的、放的是关系比如：朋友圈社交网络、广告推荐系统</li>
+<li>社交网络、推荐系统。专注于构建关系图谱</li>
+<li>Neo4j、InfoGrid</li>
+</ul>
+</li>
+<li>
+<p>四者对比</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/19.png"  alt="img" />
+      </p>
+</li>
+</ul>
+
+        <h1 id="在分布式数据库中cap原理"   >
+          <a href="#在分布式数据库中cap原理" class="heading-link"><i class="fas fa-link"></i></a>在分布式数据库中CAP原理</h1>
+      
+
+        <h2 id="传统的acid分别是什么"   >
+          <a href="#传统的acid分别是什么" class="heading-link"><i class="fas fa-link"></i></a>传统的ACID分别是什么</h2>
+      
+<ul>
+<li>A (Atomicity) 原子性</li>
+<li>C (Consistency) 一致性</li>
+<li>I (Isolation) 独立性</li>
+<li>D (Durability) 持久性</li>
+</ul>
+<p>关系型数据库遵循ACID规则，事务在英文中是transaction，和现实世界中的交易很类似，它有如下四个特性：</p>
+<p><strong>1、A (Atomicity) 原子性</strong> 原子性很容易理解，也就是说事务里的所有操作要么全部做完，要么都不做，事务成功的条件是事务里的所有操作都成功，只要有一个操作失败，整个事务就失败，需要回滚。比如银行转账，从A账户转100元至B账户，分为两个步骤：1）从A账户取100元；2）存入100元至B账户。这两步要么一起完成，要么一起不完成，如果只完成第一步，第二步失败，钱会莫名其妙少了100元。</p>
+<p><strong>2、C (Consistency) 一致性</strong> 一致性也比较容易理解，也就是说数据库要一直处于一致的状态，事务的运行不会改变数据库原本的一致性约束。</p>
+<p><strong>3、I (Isolation) 独立性</strong> 所谓的独立性是指并发的事务之间不会互相影响，如果一个事务要获取的数据正在被另外一个事务修改，只要另外一个事务未提交，它所获取的数据就不受未提交事务的影响。比如现有有个交易是从A账户转100元至B账户，在这个交易还未完成的情况下，如果此时B查询自己的账户，是看不到新增加的100元的</p>
+<p><strong>4、D (Durability) 持久性</strong> 持久性是指一旦事务提交后，它所做的修改将会永久的保存在数据库上，即使出现宕机也不会丢失。</p>
+
+        <h2 id="cap"   >
+          <a href="#cap" class="heading-link"><i class="fas fa-link"></i></a>CAP</h2>
+      
+<ul>
+<li>C:Consistency（强一致性）</li>
+<li>A:Availability（可用性）</li>
+<li>P:Partition tolerance（分区容错性）</li>
+</ul>
+<p>CAP理论就是说在<strong>分布式存储系统</strong>中，最多只能实现上面的两点。</p>
+<p>而由于当前的网络硬件肯定会出现延迟丢包等问题，所以<strong>分区容忍性</strong>是我们必须需要实现的。所以我们只能在<strong>一致性</strong>和<strong>可用性</strong>之间进行权衡，<strong>没有</strong>NoSQL系统能同时保证这三点。</p>
+<blockquote>
+<p>网络抖动：</p>
+<p>网络抖动是指最大延迟与最小延迟的时间差，如最大延迟是20毫秒，最小延迟为5毫秒，那么网络抖动就是15毫秒，它主要标识一个网络的稳定性。抖动越小，网络越稳定。</p>
+<p>丢包：</p>
+<p>丢包是指一个或多个数据包的数据无法通过网络到达目的地。可能原因是多方面的，或是网络中<strong>多路径衰落造成信号衰减</strong>；或是<strong>通道阻塞</strong>造成丢包；或是<strong>损坏的数据包被拒绝通过</strong>等等。接收端如果发现数据丢失，会根据队列序号向发送端发出请求，进行丢包重传。</p>
+</blockquote>
+<ul>
+<li>CA 传统Oracle数据库，XA协议</li>
+<li>AP 大多数网站架构的选择</li>
+<li>CP Redis、Mongodb</li>
+</ul>
+<blockquote>
+<p>可以通过 CP+AP 结合三者来接近 CAP ，利用redis这个内存数据库做缓存以及分布式架构的AP特性实现或者接近CAP</p>
+<p><strong>XA两阶段提交的不足</strong></p>
+<p><strong>1.性能问题</strong></p>
+<p>XA协议遵循强一致性。在事务执行过程中，各个节点占用着数据库资源，只有当所有节点准备完毕，事务协调者才会通知提交，参与者提交后释放资源。这样的过程有着非常明显的性能问题。</p>
+<p><strong>2.协调者单点故障问题</strong></p>
+<p>事务协调者是整个XA模型的核心，一旦事务协调者节点挂掉，参与者收不到提交或是回滚通知，参与者会一直处于中间状态无法完成事务。</p>
+<p><strong>3.丢失消息导致的不一致问题</strong></p>
+<p>在XA协议的第二个阶段，如果发生局部网络问题，一部分事务参与者收到了提交消息，另一部分事务参与者没收到提交消息，那么就导致了节点之间数据的不一致。</p>
+<p>如果避免XA两阶段提交的种种问题呢？有许多其他的分布式事务方案可供选择：</p>
+<p><strong>1.XA三阶段提交</strong></p>
+<p>XA三阶段提交在两阶段提交的基础上增加了CanCommit阶段，并且引入了超时机制。一旦事物参与者迟迟没有接到协调者的commit请求，会自动进行本地commit。这样有效解决了协调者单点故障的问题。但是性能问题和不一致的问题仍然没有根本解决。</p>
+<p><strong>2.MQ事务</strong></p>
+<p>利用消息中间件来异步完成事务的后一半更新，实现系统的最终一致性。这个方式避免了像XA协议那样的性能问题。</p>
+<p><strong>3.TCC事务</strong></p>
+<p>TCC事务是Try、Commit、Cancel三种指令的缩写，其逻辑模式类似于XA两阶段提交，但是实现方式是在代码层面来人为实现。</p>
+</blockquote>
+<p>注意：分布式系统必有P，剩下的就是在A和C中取舍</p>
+<p>一致性和可用性之间取一个平衡。多余大多数web应用，其实并不需要强一致性。因此牺牲C换取P，这是目前分布式数据库产品的方向。</p>
+<blockquote>
+<p>弱一致性+高可用+分区容忍性</p>
+</blockquote>
+<p><strong>对于web2.0网站来说，关系数据库的很多主要特性却往往无用武之地</strong></p>
+<ul>
+<li>
+<p><strong>数据库事务一致性需求</strong></p>
+<p>很多web实时系统并不要求严格的数据库事务，对读一致性的要求很低， 有些场合对写一致性要求并不高。允许实现最终一致性。</p>
+</li>
+<li>
+<p><strong>数据库的写实时性和读实时性需求</strong></p>
+<p>对关系数据库来说，插入一条数据之后立刻查询，是肯定可以读出来这条数据的，但是对于很多web应用来说，并不要求这么高的实时性，比方说在微博发一条消息之后，过几秒乃至十几秒之后，我的订阅者才看到这条动态是完全可以接受的。</p>
+</li>
+<li>
+<p><strong>对复杂的SQL查询，特别是多表关联查询的需求</strong></p>
+<p>任何大数据量的web系统，都非常忌讳多个大表的关联查询，以及复杂的数据分析类型的报表查询，特别是SNS类型的网站，从需求以及产品设计角 度，就避免了这种情况的产生。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>往往更多的只是单表的主键查询，以及单表的简单条件分页查询，SQL的功能被极大的弱化了。</span></p>
+</li>
+</ul>
+<p><strong>经典CAP图</strong></p>
+<p>CAP理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求，<strong>最多只能同时较好的满足两个</strong>。</p>
+<p>因此，根据 CAP 原理将 NoSQL 数据库分成了满足 CA 原则、满足 CP 原则和满足 AP 原则三 大类：</p>
+<ul>
+<li>CA - 单点集群，满足一致性，可用性的系统，通常在可扩展性上不太强大。</li>
+<li>CP - 满足一致性，分区容忍性的系统，通常性能不是特别高。</li>
+<li>AP - 满足可用性，分区容忍性的系统，通常可能对一致性要求低一些。</li>
+</ul>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20.png"  alt="img" />
+      </p>
+
+        <h1 id="base"   >
+          <a href="#base" class="heading-link"><i class="fas fa-link"></i></a>BASE</h1>
+      
+<p>BASE就是为了解决关系数据库强一致性引起的问题而引起的可用性降低而提出的解决方案。</p>
+<p>BASE其实是下面三个术语的缩写：</p>
+<ul>
+<li>基本可用（Basically Available）</li>
+<li>软状态（Soft state）</li>
+<li>最终一致（Eventually consistent）</li>
+</ul>
+<p>它的思想是通过<strong>让系统放松对某一时刻数据一致性的要求来换取系统整体伸缩性和性能上改观</strong>。为什么这么说呢，缘由就在于大型系统往往由于地域分布和极高性能的要求，不可能采用分布式事务来完成这些指标，要想获得这些指标，我们必须采用另外一种方式来完成，这里BASE就是解决这个问题的办法</p>
+
+        <h1 id="分布式集群简介"   >
+          <a href="#分布式集群简介" class="heading-link"><i class="fas fa-link"></i></a>分布式+集群简介</h1>
+      
+<p>分布式系统（distributed system）</p>
+<p>由多台计算机和通信的软件组件通过计算机网络连接（本地网络或广域网）组成。分布式系统是建立在网络之上的软件系统。正是因为软件的特性，所以分布式系统具有高度的内聚性和透明性。因此，网络和分布式系统之间的区别更多的在于高层软件（特别是操作系统），而不是硬件。分布式系统可以应用在在不同的平台上如：PC、工作站、局域网和广域网上等。</p>
+<p>简单来讲：</p>
+<ol>
+<li>分布式：不同的多台服务器上面部署<strong>不同</strong>的服务模块（工程），他们之间通过Rpc/Rmi之间通信和调用，对外提供服务和组内协作。</li>
+<li>集群：不同的多台服务器上面部署<strong>相同</strong>的服务模块，通过分布式调度软件进行统一的调度，对外提供服务和连接。</li>
+</ol>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/1_NoSql%E8%AF%A6%E8%A7%A3/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/1_NoSql%E8%AF%A6%E8%A7%A3/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/redis/">redis</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/3_redis%E4%BA%94%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">reids五大数据类型</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/2_redis%E6%A6%82%E8%BF%B0/"><span class="paginator-prev__text">redis概述</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">
+          概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#nosql出现的原因"><span class="toc-number">1.1.</span> <span class="toc-text">
+          nosql出现的原因</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#单机mysql的美好年代"><span class="toc-number">1.1.1.</span> <span class="toc-text">
+          单机MySQL的美好年代</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#memcached缓存mysql垂直拆分"><span class="toc-number">1.1.2.</span> <span class="toc-text">
+          Memcached(缓存)+MySQL+垂直拆分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql主从读写分离"><span class="toc-number">1.1.3.</span> <span class="toc-text">
+          Mysql主从读写分离</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分表分库水平拆分mysql集群"><span class="toc-number">1.1.4.</span> <span class="toc-text">
+          分表分库+水平拆分+mysql集群</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql的扩展性瓶颈"><span class="toc-number">1.1.5.</span> <span class="toc-text">
+          MySQL的扩展性瓶颈</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#今天是什么样子"><span class="toc-number">1.1.6.</span> <span class="toc-text">
+          今天是什么样子?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么用nosql"><span class="toc-number">1.1.7.</span> <span class="toc-text">
+          为什么用NoSQL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nosql是什么"><span class="toc-number">1.2.</span> <span class="toc-text">
+          nosql是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#能干嘛"><span class="toc-number">1.3.</span> <span class="toc-text">
+          能干嘛</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#传统的rdbms-vs-nosql"><span class="toc-number">1.4.</span> <span class="toc-text">
+          传统的RDBMS vs NoSQL</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#rdbms"><span class="toc-number">1.4.1.</span> <span class="toc-text">
+          RDBMS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nosql"><span class="toc-number">1.4.2.</span> <span class="toc-text">
+          NoSQL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nosql-产品"><span class="toc-number">1.5.</span> <span class="toc-text">
+          NoSQL 产品</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#怎么用"><span class="toc-number">1.6.</span> <span class="toc-text">
+          怎么用</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#当下nosql应用场景简介"><span class="toc-number">2.</span> <span class="toc-text">
+          当下NoSQL应用场景简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#alibaba中文站商品信息如何存放"><span class="toc-number">2.1.</span> <span class="toc-text">
+          Alibaba中文站商品信息如何存放</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#商品信息的存储方案"><span class="toc-number">2.2.</span> <span class="toc-text">
+          商品信息的存储方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结大型互联网应用大数据-高并发-多样数据类型的难点和解决方案"><span class="toc-number">2.3.</span> <span class="toc-text">
+          总结大型互联网应用(大数据、高并发、多样数据类型)的难点和解决方案</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nosql数据模型简介"><span class="toc-number">3.</span> <span class="toc-text">
+          NoSQL数据模型简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传统关系型数据库如何设计"><span class="toc-number">3.1.</span> <span class="toc-text">
+          传统关系型数据库如何设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nosql如何设计"><span class="toc-number">3.2.</span> <span class="toc-text">
+          NOSQL如何设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#两者对比问题和难点"><span class="toc-number">3.3.</span> <span class="toc-text">
+          两者对比，问题和难点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#聚合模型"><span class="toc-number">3.4.</span> <span class="toc-text">
+          聚合模型</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nosql数据库的四大分类"><span class="toc-number">4.</span> <span class="toc-text">
+          NoSQL数据库的四大分类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#在分布式数据库中cap原理"><span class="toc-number">5.</span> <span class="toc-text">
+          在分布式数据库中CAP原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#传统的acid分别是什么"><span class="toc-number">5.1.</span> <span class="toc-text">
+          传统的ACID分别是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cap"><span class="toc-number">5.2.</span> <span class="toc-text">
+          CAP</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#base"><span class="toc-number">6.</span> <span class="toc-text">
+          BASE</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#分布式集群简介"><span class="toc-number">7.</span> <span class="toc-text">
+          分布式+集群简介</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

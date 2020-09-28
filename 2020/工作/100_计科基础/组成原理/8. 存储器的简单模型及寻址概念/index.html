@@ -1,0 +1,548 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="主存的简单模型                         存储体同一时刻只有一行有效，其他行需要设置无效。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="存储器的简单模型及寻址概念">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/8.%20%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E5%9E%8B%E5%8F%8A%E5%AF%BB%E5%9D%80%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="主存的简单模型                         存储体同一时刻只有一行有效，其他行需要设置无效。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712051329.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712051611.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712052008.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712052547.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712053157.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712053308.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712054304.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712055824.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712060202.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712060434.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712060936.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712061848.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712062112.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712062254.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072037.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072424.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072639.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072714.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712073109.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712073218.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712074241.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712075521.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712080423.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712080554.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712084032.png">
+<meta property="article:published_time" content="2020-09-16T16:21:54.861Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:54.864Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="组成原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200712051329.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>存储器的简单模型及寻址概念 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/8.%20%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E5%9E%8B%E5%8F%8A%E5%AF%BB%E5%9D%80%E6%A6%82%E5%BF%B5/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">存储器的简单模型及寻址概念</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">940</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">5分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="主存的简单模型"   >
+          <a href="#主存的简单模型" class="heading-link"><i class="fas fa-link"></i></a>主存的简单模型</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712051329.png"  alt="" />
+      </p>
+<p>存储体同一时刻只有一行有效，其他行需要设置无效。</p>
+<a id="more"></a>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712051611.png"  alt="" />
+      </p>
+<p>这些部件在时序控制逻辑的统一管理下协调工作。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712052008.png"  alt="" />
+      </p>
+<p>片选线 整个芯片的开关，1表示开0表示关， 或者0表示开1表示关</p>
+<p>因为同一时刻要么读要么写， 读控制线和写控制线也可以合并成读写控制线。</p>
+
+        <h1 id="存储器芯片的基本结构"   >
+          <a href="#存储器芯片的基本结构" class="heading-link"><i class="fas fa-link"></i></a>存储器芯片的基本结构</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712052547.png"  alt="" />
+      </p>
+<p>驱动器， 之前的1控制一个存储元，现在1需要控制8个存储元，所以信号需要增强。</p>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mn>1</mn></msup><mn>3</mn><mo>∗</mo><mn>8</mn><mi>b</mi><mi>i</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">2^13 * 8bit</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141079999999999em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord">8</span><span class="mord mathdefault">b</span><span class="mord mathdefault">i</span><span class="mord mathdefault">t</span></span></span></span> 表明13根地址线，8根数据线。</p>
+
+        <h1 id="寻址"   >
+          <a href="#寻址" class="heading-link"><i class="fas fa-link"></i></a>寻址</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712053157.png"  alt="" />
+      </p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712053308.png"  alt="" />
+      </p>
+
+        <h1 id="半导体存储芯片的基本结构"   >
+          <a href="#半导体存储芯片的基本结构" class="heading-link"><i class="fas fa-link"></i></a>半导体存储芯片的基本结构</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712054304.png"  alt="" />
+      </p>
+<p>片选线，多个存储器同时开同时关可以扩充数据位数，轮流开关可以扩充存储单元个数也就是字的开关。把这些芯片分组，每一组内部同时开关，组与组之间轮流开关，既可以扩充位数也可以扩充字。</p>
+
+        <h1 id="半导体随机存取存储器"   >
+          <a href="#半导体随机存取存储器" class="heading-link"><i class="fas fa-link"></i></a>半导体随机存取存储器</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712055824.png"  alt="" />
+      </p>
+<p>随机存取存储器 RAM：给出一个地址，只要这个地址的电信号准备好了，那么电流迅速流到对应的存储单元。所以不管存储单元在存储矩阵的哪个位置，从给出地址信号到取出存储单元所耗费的时间基本是一样的，都是电流流动的时间。也就是访问存储单元的时间跟它所在的物理位置没关系，这样的存储器就叫做随机存取存储器 RAM。</p>
+<p>电容：给电容充上电之后，这些电荷会缓慢地流失，没有办法像触发器那样保持两种稳定的状态。所以使用电容来存储信息需要不停地进行充放电</p>
+<p>破坏性读出，读完之后需要重新充电。</p>
+<p>刷新：DRAM， 每隔2ms就需要重写一遍。</p>
+
+        <h1 id="dram的刷新"   >
+          <a href="#dram的刷新" class="heading-link"><i class="fas fa-link"></i></a>DRAM的刷新</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712060202.png"  alt="" />
+      </p>
+<p>地址线太多，无法忍受</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712060434.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712060936.png"  alt="" />
+      </p>
+
+        <h1 id="rom"   >
+          <a href="#rom" class="heading-link"><i class="fas fa-link"></i></a>ROM</h1>
+      
+<p>掉电后不丢失数据又跟cpu直接通信，容量不会太大，存储关键信息。开机之后必要的信息。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712061848.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712062112.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712062254.png"  alt="" />
+      </p>
+
+        <h1 id="存储器的分类"   >
+          <a href="#存储器的分类" class="heading-link"><i class="fas fa-link"></i></a>存储器的分类</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072037.png"  alt="" />
+      </p>
+
+        <h1 id="存储器的性能指标"   >
+          <a href="#存储器的性能指标" class="heading-link"><i class="fas fa-link"></i></a>存储器的性能指标</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072424.png"  alt="" />
+      </p>
+
+        <h1 id="存储器的层次化结构"   >
+          <a href="#存储器的层次化结构" class="heading-link"><i class="fas fa-link"></i></a>存储器的层次化结构</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072639.png"  alt="" />
+      </p>
+
+        <h2 id="小结-2"   >
+          <a href="#小结-2" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712072714.png"  alt="" />
+      </p>
+
+        <h1 id="主存与cpu的连接"   >
+          <a href="#主存与cpu的连接" class="heading-link"><i class="fas fa-link"></i></a>主存与cpu的连接</h1>
+      
+
+        <h2 id="位扩展"   >
+          <a href="#位扩展" class="heading-link"><i class="fas fa-link"></i></a>位扩展</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712073109.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712073218.png"  alt="" />
+      </p>
+
+        <h2 id="字扩展"   >
+          <a href="#字扩展" class="heading-link"><i class="fas fa-link"></i></a>字扩展</h2>
+      
+<p>线选法</p>
+<p>译码片选法</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712074241.png"  alt="" />
+      </p>
+<p>![image-20200712074436096](/Users/david/Library/Application Support/typora-user-images/image-20200712074436096.png)</p>
+
+        <h1 id="多体并行存储器提升主存速度"   >
+          <a href="#多体并行存储器提升主存速度" class="heading-link"><i class="fas fa-link"></i></a>多体并行存储器：提升主存速度</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712075521.png"  alt="" />
+      </p>
+
+        <h1 id="高速缓冲存储器"   >
+          <a href="#高速缓冲存储器" class="heading-link"><i class="fas fa-link"></i></a>高速缓冲存储器</h1>
+      
+
+        <h2 id="局部性原理"   >
+          <a href="#局部性原理" class="heading-link"><i class="fas fa-link"></i></a>局部性原理</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712080423.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712080554.png"  alt="" />
+      </p>
+
+        <h1 id="字长"   >
+          <a href="#字长" class="heading-link"><i class="fas fa-link"></i></a>字长</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200712084032.png"  alt="" />
+      </p>
+<p>机器字长：CPU一次能处理数据的位数，通常与CPU的寄存器位数有关。<br />
+存储字长：存储器中一个存储单元(存储地址)所存储的二进制代码的位数，即存储器中的MDR的位数。<br />
+指令字长：是指机器指令中二进制代码的总位数，指令字长取决于从操作码的长度、操作数地址的长度和操作数地址的个数，不同的指令的字长是不同的。<br />
+数据字长：计算机数据存储所占用的位数。</p>
+<p>平时说的64位机器 指的就是机器字长</p>
+<p>里面说有24跟地址线，也就是说存储单元的个数有2^24个，一个存储单元放一个存储字，存储字长是32位， 那为什么按字寻址是4M而不是16M?这里的按字寻址这个“字&quot;具体指什么？？是指一个存储字吗？</p>
+<p>一个存储字四个字节，所以要拿出两根线做字内字节寻址（00，01，10，11)，所以剩下22根线按字寻址，也就是4M了。<strong>地址线的位数永远对应的是按字节寻址</strong>。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/8.%20%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E5%9E%8B%E5%8F%8A%E5%AF%BB%E5%9D%80%E6%A6%82%E5%BF%B5/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/8.%20%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84%E7%AE%80%E5%8D%95%E6%A8%A1%E5%9E%8B%E5%8F%8A%E5%AF%BB%E5%9D%80%E6%A6%82%E5%BF%B5/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/">组成原理</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">计算机系统层次结构</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/4_%E6%95%B0%E5%88%B6%E4%B8%8E%E7%BC%96%E7%A0%81/"><span class="paginator-prev__text">数制与编码</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#主存的简单模型"><span class="toc-number">1.</span> <span class="toc-text">
+          主存的简单模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#存储器芯片的基本结构"><span class="toc-number">2.</span> <span class="toc-text">
+          存储器芯片的基本结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#寻址"><span class="toc-number">3.</span> <span class="toc-text">
+          寻址</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">4.</span> <span class="toc-text">
+          小结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#半导体存储芯片的基本结构"><span class="toc-number">5.</span> <span class="toc-text">
+          半导体存储芯片的基本结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#半导体随机存取存储器"><span class="toc-number">6.</span> <span class="toc-text">
+          半导体随机存取存储器</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#dram的刷新"><span class="toc-number">7.</span> <span class="toc-text">
+          DRAM的刷新</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#rom"><span class="toc-number">8.</span> <span class="toc-text">
+          ROM</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#存储器的分类"><span class="toc-number">9.</span> <span class="toc-text">
+          存储器的分类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#存储器的性能指标"><span class="toc-number">10.</span> <span class="toc-text">
+          存储器的性能指标</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#存储器的层次化结构"><span class="toc-number">11.</span> <span class="toc-text">
+          存储器的层次化结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-2"><span class="toc-number">11.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#主存与cpu的连接"><span class="toc-number">12.</span> <span class="toc-text">
+          主存与cpu的连接</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#位扩展"><span class="toc-number">12.1.</span> <span class="toc-text">
+          位扩展</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字扩展"><span class="toc-number">12.2.</span> <span class="toc-text">
+          字扩展</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#多体并行存储器提升主存速度"><span class="toc-number">13.</span> <span class="toc-text">
+          多体并行存储器：提升主存速度</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#高速缓冲存储器"><span class="toc-number">14.</span> <span class="toc-text">
+          高速缓冲存储器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#局部性原理"><span class="toc-number">14.1.</span> <span class="toc-text">
+          局部性原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#字长"><span class="toc-number">15.</span> <span class="toc-text">
+          字长</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

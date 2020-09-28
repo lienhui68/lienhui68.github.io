@@ -1,0 +1,553 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="什么是NIO        Java NIO（ New IO） 是从Java 1.4版本开始引入的一个新的IO API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同， NIO支持面向缓冲区的、基于通道的IO操作。 NIO将以更加高效的方式进行文件的读写操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NIO简述">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="什么是NIO        Java NIO（ New IO） 是从Java 1.4版本开始引入的一个新的IO API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同， NIO支持面向缓冲区的、基于通道的IO操作。 NIO将以更加高效的方式进行文件的读写操作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211304.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211359.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211404.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211415.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.052Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.054Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211304.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>NIO简述 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%9F%BA%E7%A1%80/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">NIO简述</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">12分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="什么是nio"   >
+          <a href="#什么是nio" class="heading-link"><i class="fas fa-link"></i></a>什么是NIO</h1>
+      
+<p>Java NIO（ New IO） 是从Java 1.4版本开始引入的一个新的IO API，可以替代标准的Java IO API。NIO与原来的IO有同样的作用和目的，但是使用的方式完全不同， NIO支持面向缓冲区的、基于通道的IO操作。 NIO将以更加高效的方式进行文件的读写操作。</p>
+<a id="more"></a>
+
+        <h1 id="nio与普通io的主要区别"   >
+          <a href="#nio与普通io的主要区别" class="heading-link"><i class="fas fa-link"></i></a>NIO与普通IO的主要区别</h1>
+      
+<div class="table-container"><table>
+<thead>
+<tr>
+<th style="text-align:left">IO</th>
+<th style="text-align:left">NIO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">面向流(Stream Oriented)</td>
+<td style="text-align:left">面向缓冲区(Buffer Oriented)</td>
+</tr>
+<tr>
+<td style="text-align:left">阻塞IO(Blocking IO)</td>
+<td style="text-align:left">非阻塞IO(Non Blocking IO)</td>
+</tr>
+<tr>
+<td style="text-align:left">(无)</td>
+<td style="text-align:left">选择器(Selectors)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>
+<p>Channels and Buffers（通道和缓冲区）</p>
+<p>标准的IO基于字节流和字符流进行操作的，而NIO是基于通道（Channel）和缓冲区（Buffer）进行操作，数据总是从通道读取到缓冲区中，或者从缓冲区写入到通道中。</p>
+</li>
+<li>
+<p>Asynchronous IO（异步IO）</p>
+<p>Java NIO可以让你异步的使用IO，例如：当线程从通道读取数据到缓冲区时，线程还是可以进行其他事情。当数据被写入到缓冲区时，线程可以继续处理它。从缓冲区写入通道也类似。</p>
+<blockquote>
+<p>上面说法不太严谨，因为dma的存在以及操作系统系统提供非阻塞的支持，所以用户进程可以异步执行其他工作。</p>
+</blockquote>
+</li>
+<li>
+<p>Selectors（选择器）</p>
+<p>Java NIO引入了选择器的概念，选择器用于监听多个通道的事件（比如：连接打开，数据到达）。因此，单个的线程可以监听多个数据通道。</p>
+</li>
+</ul>
+
+        <h1 id="缓冲区buffer"   >
+          <a href="#缓冲区buffer" class="heading-link"><i class="fas fa-link"></i></a>缓冲区（Buffer）</h1>
+      
+<p>通过上面NIO与普通IO的主要区别也可以看到在基本的IO操作中所有的操作都是基于流进行操作的，而在NIO中所有的操作都是基于缓冲区继续操作的，所有的读写操作都是通过缓存区来进行完成，缓冲区（Buffer）是一个线性的、有序的数据集，只能容纳特定的数据类型（基本就是基本数据类型对应的Buffer或者其子类）。</p>
+
+        <h1 id="各种数据类型的缓冲区类"   >
+          <a href="#各种数据类型的缓冲区类" class="heading-link"><i class="fas fa-link"></i></a>各种数据类型的缓冲区类</h1>
+      
+<div class="table-container"><table>
+<thead>
+<tr>
+<th style="text-align:left">缓存区类</th>
+<th style="text-align:left">相关描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ByteBuffer</td>
+<td style="text-align:left">存储字节的Buffer</td>
+</tr>
+<tr>
+<td style="text-align:left">CharBuffer</td>
+<td style="text-align:left">存储字符的Buffer</td>
+</tr>
+<tr>
+<td style="text-align:left">ShortBuffer</td>
+<td style="text-align:left">存储短整型的Buffer</td>
+</tr>
+<tr>
+<td style="text-align:left">IntBuffer</td>
+<td style="text-align:left">存储整型的Buffer</td>
+</tr>
+<tr>
+<td style="text-align:left">LongBuffer</td>
+<td style="text-align:left">存储长整型的Buffer</td>
+</tr>
+<tr>
+<td style="text-align:left">FloatBuffer</td>
+<td style="text-align:left">存储单精度浮点型Buffer</td>
+</tr>
+<tr>
+<td style="text-align:left">DoubleBuffer</td>
+<td style="text-align:left">存储双精度浮点型Buffer</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>**备注：**看到上面这几类是不是想起了JAVA的8种基本数据类型，<strong>唯一缺少boolean</strong>对于的类型。</p>
+<p><strong>为什么boolean不需要缓存呢</strong>？</p>
+<p>boolean所占位数1bit（取值只有true或者false），由于字节(byte)是操作系统和所有I/O设备使用的基本数据类型，所以基本都是以字节或者连续的一段字节来存储表示，所以就没有boolean，感觉也没有必要boolean类型的缓存操作（像RocketMQ源码里面可能把一个Int里面的某位来表示boolean，其他位继续来存储数据。</p>
+</blockquote>
+
+        <h1 id="buffer的使用"   >
+          <a href="#buffer的使用" class="heading-link"><i class="fas fa-link"></i></a>Buffer的使用</h1>
+      
+<p><strong>读数据：</strong></p>
+<ul>
+<li>
+<p>flip()方法</p>
+<ul>
+<li>将Buffer从写模式切换到读模式</li>
+<li>调用flip()方法会将position设回0，并将limit设置成之前position的值。</li>
+<li>buf.flip();</li>
+</ul>
+</li>
+<li>
+<p>buf.get()</p>
+<ul>
+<li>读取数据</li>
+</ul>
+</li>
+<li>
+<p>Buffer.rewind()</p>
+<ul>
+<li>将position设回0，所以你可以重读Buffer中的所有数据</li>
+<li>limit保持不变，仍然表示能从Buffer中读取多少个元素（byte、char等）</li>
+</ul>
+</li>
+<li>
+<p>Buffer.mark()方法，可以标记Buffer中的一个特定position。之后可以通过调用。</p>
+</li>
+<li>
+<p>Buffer.reset()方法，恢复到Buffer.mark()标记时的position。</p>
+</li>
+<li>
+<p>clear()方法会：</p>
+<ul>
+<li>清空整个缓冲区。</li>
+<li>position将被设回0，limit被设置成 capacity的值</li>
+</ul>
+</li>
+<li>
+<p>compact()方法：</p>
+<ul>
+<li>只会清除已经读过的数据；任何未读的数据都被移到缓冲区的起始处，新写入的数据将放到缓冲区未读数据的后面。</li>
+<li>将position设到最后一个未读元素正后面，limit被设置成 capacity的值。</li>
+</ul>
+</li>
+</ul>
+<p>**写数据：**buf.put(127);</p>
+
+        <h1 id="缓冲区的基本属性"   >
+          <a href="#缓冲区的基本属性" class="heading-link"><i class="fas fa-link"></i></a>缓冲区的基本属性</h1>
+      
+<ul>
+<li><strong>容量 (capacity)</strong>:表示 Buffer 最大数据容量，缓冲区容量不能为负，并且创建后不能更改。</li>
+<li><strong>限制 (limit)</strong>:第一个不应该读取或写入的数据的索引，即位于 limit 后的数据不可读写。缓冲区的限制不能为负，并且不能大于其容量。</li>
+<li><strong>位置 (position)</strong>:下一个要读取或写入的数据的索引。缓冲区的位置不能为负，并且不能大于其限制。</li>
+</ul>
+<blockquote>
+<p><strong>备注</strong>：标记、 位置、 限制、 容量遵守以下不变式： <code>0 &lt;= position &lt;= limit &lt;= capacity</code>。</p>
+</blockquote>
+<p><strong>为了更形象解释上面重要属性，准备配上简单代码以及图来进行说明就容易懂了。</strong></p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.pattern;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.nio.IntBuffer;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//第一步，获取IntBuffer，通过IntBuffer.allocate操作</span></span><br><span class="line">        IntBuffer buf = IntBuffer.allocate(<span class="number">10</span>); <span class="comment">// 准备出10个大小的缓冲区</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//第二步未操作前输出属性值</span></span><br><span class="line">        System.out.println(<span class="string">"position = "</span> + buf.position() + <span class="string">", limit = "</span> + buf.limit() + <span class="string">", capacity = "</span> + buf.capacity());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//第三步进行设置数据</span></span><br><span class="line">        buf.put(<span class="number">5</span>); <span class="comment">// 设置第一个数据</span></span><br><span class="line">        buf.put(<span class="number">15</span>); <span class="comment">// 设置第二个数据</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//第四步操作后输出属性值</span></span><br><span class="line">        System.out.println(<span class="string">"position = "</span> + buf.position() + <span class="string">", limit = "</span> + buf.limit() + <span class="string">", capacity = "</span> + buf.capacity());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//第五步将Buffer从写模式切换到读模式 postion = 0 ,limit = 原本position</span></span><br><span class="line">        buf.flip();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//第六步操作后输出属性值</span></span><br><span class="line">        System.out.println(<span class="string">"position = "</span> + buf.position() + <span class="string">", limit = "</span> + buf.limit() + <span class="string">", capacity = "</span> + buf.capacity());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">position = <span class="number">0</span>, limit = <span class="number">10</span>, capacity = <span class="number">10</span></span><br><span class="line">position = <span class="number">2</span>, limit = <span class="number">10</span>, capacity = <span class="number">10</span></span><br><span class="line">position = <span class="number">0</span>, limit = <span class="number">2</span>, capacity = <span class="number">10</span></span><br></pre></td></tr></table></div></figure>
+<p>使用下图来进行说明：</p>
+<p>分配内存空间</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211304.png"  alt="" />
+      </p>
+<p>设置设局</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211359.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211404.png"  alt="" />
+      </p>
+<p>切换到读模式</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831211415.png"  alt="" />
+      </p>
+
+        <h1 id="通道channel"   >
+          <a href="#通道channel" class="heading-link"><i class="fas fa-link"></i></a>通道（Channel）</h1>
+      
+<p>通道表示打开到 IO 设备(例如：文件、套接字)的连接。若需要使用 NIO 系统，需要获取用于连接 IO 设备的通道以及用于容纳数据的缓冲区。然后操作缓冲区，对数据进行处理。Channel 负责传输， Buffer 负责存储。通道是由 java.nio.channels 包定义的。 Channel 表示 IO 源与目标打开的连接。Channel 类似于传统的“流”。只不过 Channel本身不能直接访问数据， Channel 只能与Buffer 进行交互。</p>
+<p><strong>通道都是操作缓存区完成全部的功能的</strong>。</p>
+
+        <h1 id="java中所有已知channel实现类"   >
+          <a href="#java中所有已知channel实现类" class="heading-link"><i class="fas fa-link"></i></a>Java中所有已知Channel实现类</h1>
+      
+<ul>
+<li>AbstractInterruptibleChannel</li>
+<li>AbstractSelectableChannel</li>
+<li>DatagramChannel</li>
+<li>FileChannel</li>
+<li>Pipe.SinkChannel</li>
+<li>Pipe.SourceChannel</li>
+<li>SelectableChannel</li>
+<li>ServerSocketChannel</li>
+<li>SocketChannel</li>
+</ul>
+<p><strong>常用的有入下几个</strong>：</p>
+<ul>
+<li>FileChannel：用于读取、写入、映射和操作文件的通道。</li>
+<li>DatagramChannel：通过 UDP 读写网络中的数据通道。</li>
+<li>SocketChannel：通过 TCP 读写网络中的数据。</li>
+<li>ServerSocketChannel：可以监听新进来的 TCP 连接，对每一个新进来的连接都会创建一个 SocketChannel。</li>
+</ul>
+
+        <h1 id="获取通道"   >
+          <a href="#获取通道" class="heading-link"><i class="fas fa-link"></i></a>获取通道</h1>
+      
+<p>获取通道的一种方式是对支持通道的对象调用getChannel() 方法。支持通道的类如下：</p>
+<ul>
+<li>FileInputStream</li>
+<li>FileOutputStream</li>
+<li>RandomAccessFile</li>
+<li>DatagramSocket</li>
+<li>Socket</li>
+<li>ServerSocket</li>
+</ul>
+<p>获取通道的其他方式是使用 Files 类的静态方法 newByteChannel() 获取字节通道。或者通过通道的静态方法 open() 打开并返回指定通道。</p>
+
+        <h1 id="通道的使用"   >
+          <a href="#通道的使用" class="heading-link"><i class="fas fa-link"></i></a>通道的使用</h1>
+      
+<ul>
+<li>为了更形象解释说明的Channel，下面准备以FileChannel的一些简单代码进行说明就容易懂了。</li>
+<li>准备以FileOutputStream类为准，这两个类都是支持通道操作的。</li>
+</ul>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.eh.eden.pattern;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.io.FileOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.FileChannel;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Demo</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        String s = <span class="string">"为了更形象解释说明的Channel，下面准备以FileChannel的一些简单代码进行说明就容易懂了。"</span>;</span><br><span class="line">        <span class="keyword">try</span> (</span><br><span class="line">                FileOutputStream fos = <span class="keyword">new</span> FileOutputStream(<span class="keyword">new</span> File(<span class="string">"/tmp/com.eh/aaa.txt"</span>));</span><br><span class="line">                FileChannel channel = fos.getChannel()</span><br><span class="line">        ) &#123;</span><br><span class="line">            ByteBuffer buf = ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">            buf.put(s.getBytes());</span><br><span class="line">            buf.put(<span class="string">"\n"</span>.getBytes()); <span class="comment">// 换行</span></span><br><span class="line">            buf.flip();</span><br><span class="line">            channel.write(buf); <span class="comment">// 将缓冲区的内容从源(buf)输出到目标(文件)</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">$ cat /tmp/com.eh/aaa.txt</span><br><span class="line">为了更形象解释说明的Channel，下面准备以FileChannel的一些简单代码进行说明就容易懂了。</span><br></pre></td></tr></table></div></figure>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%9F%BA%E7%A1%80/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E5%9F%BA%E7%A1%80/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">网络编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/510_%E6%A1%86%E6%9E%B6/rpc/Sofa-Bolt/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">Sofa-Bolt框架结构分析</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/NIO%E8%AF%A6%E8%A7%A3/"><span class="paginator-prev__text">NIO实战</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是nio"><span class="toc-number">1.</span> <span class="toc-text">
+          什么是NIO</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nio与普通io的主要区别"><span class="toc-number">2.</span> <span class="toc-text">
+          NIO与普通IO的主要区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#缓冲区buffer"><span class="toc-number">3.</span> <span class="toc-text">
+          缓冲区（Buffer）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#各种数据类型的缓冲区类"><span class="toc-number">4.</span> <span class="toc-text">
+          各种数据类型的缓冲区类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#buffer的使用"><span class="toc-number">5.</span> <span class="toc-text">
+          Buffer的使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#缓冲区的基本属性"><span class="toc-number">6.</span> <span class="toc-text">
+          缓冲区的基本属性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#通道channel"><span class="toc-number">7.</span> <span class="toc-text">
+          通道（Channel）</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#java中所有已知channel实现类"><span class="toc-number">8.</span> <span class="toc-text">
+          Java中所有已知Channel实现类</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#获取通道"><span class="toc-number">9.</span> <span class="toc-text">
+          获取通道</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#通道的使用"><span class="toc-number">10.</span> <span class="toc-text">
+          通道的使用</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

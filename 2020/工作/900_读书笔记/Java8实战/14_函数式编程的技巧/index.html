@@ -1,0 +1,709 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章内容  一等成员、高阶方法、科里化以及局部应用 持久化数据结构 生成Java Stream时的延迟计算和延迟列表 模式匹配以及如何在Java中应用 引用透明性和缓存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="函数式编程的技巧">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/14_%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%8A%80%E5%B7%A7/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章内容  一等成员、高阶方法、科里化以及局部应用 持久化数据结构 生成Java Stream时的延迟计算和延迟列表 模式匹配以及如何在Java中应用 引用透明性和缓存">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817133659.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817142413.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817150011.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817153330.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817162555.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817163508.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817165643.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817150011.png">
+<meta property="article:published_time" content="2020-07-01T01:04:14.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.710Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="java8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200817133659.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>函数式编程的技巧 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/14_%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%8A%80%E5%B7%A7/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">函数式编程的技巧</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">14.6k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">89分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章内容</strong></p>
+<ul>
+<li>一等成员、高阶方法、科里化以及局部应用</li>
+<li>持久化数据结构</li>
+<li>生成Java Stream时的延迟计算和延迟列表</li>
+<li>模式匹配以及如何在Java中应用</li>
+<li>引用透明性和缓存</li>
+</ul>
+<a id="more"></a>
+<p>第13章中，你了解了如何进行函数式的思考；以构造无副作用方法的思想指导你的程序设计 能帮助你编写更具维护性的代码。这一章，我们会介绍更高级的函数式编程技巧。你可以将本章 看作实战技巧和学术知识的大杂烩，它既包含了能直接用于代码编写的技巧，也包含了能让你知 识更渊博的学术信息。我们会讨论高阶函数、科里化、持久化数据结构、延迟列表、模式匹配、 具备引用透明性的缓存，以及结合器。</p>
+
+        <h1 id="无处不在的函数"   >
+          <a href="#无处不在的函数" class="heading-link"><i class="fas fa-link"></i></a>无处不在的函数</h1>
+      
+<p>第13章中<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>我们使用术语“函数式编程”意指函数或者方法的行为应该像“数学函数”一样—— 没有任何副作用。</span>对于使用函数式语言的程序员而言，这个术语的范畴更加宽泛，它还意味着函数可以像任何其他值一样随意使用：<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>可以作为参数传递，可以作为返回值，还能存储在数据结构中</span>。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>能够像普通变量一样使用的函数称为一等函数（first-class function）</span>。这是Java 8补充的全新 内容：通过::操作符，你可以创建一个方法引用，像使用函数值一样使用方法，也能使用Lambda 表达式（比如，(int x) -&gt; x + 1）直接表示方法的值。Java 8中使用下面这样的方法引用将一个方法引用保存到一个变量是合理合法的：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Function&lt;String, Integer&gt; strToInt = Integer::parseInt;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="高阶函数"   >
+          <a href="#高阶函数" class="heading-link"><i class="fas fa-link"></i></a>高阶函数</h2>
+      
+<p>目前为止，我们使用函数值属于一等这个事实只是为了将它们传递给Java 8的流处理操作（正 如我们在第4~7章看到的一样）， 达到行为参数化的效果， 类似我们在第1章和第2章中将Apple::isGreenApple作为参数值传递给filterApples方法那样。但这仅仅是个开始。另一 个有趣的例子是静态方法Comparator.comparing的使用，它接受一个函数作为参数同时返回 另一个函数（一个比较器，函数式接口），代码如下所示。图14-1对这段逻辑进行了解释。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Comparator&lt;Apple&gt; c = comparing(Apple::getWeight);</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817133659.png"  alt="" />
+      </p>
+<p>第3章我们构造函数创建流水线时，做了一些类似的事：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Function&lt;String,String&gt;transformationPipeline = addHeader</span><br><span class="line">  .andThen(Letter::checkSpelling)</span><br><span class="line">  .andThen(Letter::addFooter);</span><br></pre></td></tr></table></div></figure>
+<p>函数式编程的世界里，如果函数，比如Comparator.comparing，能满足下面任一要求就可以被称为高阶函数（higher-order function）：</p>
+<ul>
+<li>
+<p>接受至少一个函数作为参数</p>
+</li>
+<li>
+<p>返回的结果是一个函数</p>
+</li>
+</ul>
+<p>这些都和Java 8直接相关。因为Java 8中，函数不仅可以作为参数传递，还可以作为结果返回， 能赋值给本地变量，也可以插入到某个数据结构。比如，一个计算三角函数的程序可能有这样的一个 <code>Map&lt;String, Function&lt;Double, Double&gt;&gt;</code>，它将字符串sin映射到方法<code>Function&lt;Double, Double&gt;</code>，实现对<code>Math::sin</code>的方法引用。我们在第8章介绍工厂方法时进行了类似的操作。</p>
+<p>对于喜欢第3章结尾的那个微积分示例的读者， 由于它接受一个函数作为参数（比如，<code>(Double x) -&gt; x \* x</code>），又返回一个函数作为结果（这个例子中返回值是<code>(Double x) -&gt; 2 * x</code>），你可以用不同的方式实现类型定义，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Function&lt;Function&lt;Double,Double&gt;, Function&lt;Double,Double&gt;&gt;</span><br></pre></td></tr></table></div></figure>
+<p>我们把它定义成Function类型（最左边的Function），目的是想显式地向你确认可以将这 个函数传递给另一个函数。但是，最好使用差异化的类型定义，函数签名如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Function&lt;Double,Double&gt; <span class="title">differentiate</span><span class="params">(Function&lt;Double,Double&gt; func)</span></span></span><br></pre></td></tr></table></div></figure>
+<p>其实二者说的是同一件事。</p>
+<blockquote>
+<p><strong>副作用和高阶函数</strong></p>
+<p>第7章中我们了解到传递给流操作的函数应该是无副作用的，否则会发生各种各样的问题（比如错误的结果，有时由于竞争条件甚至会产生我们无法预期的结果）。这一原则在你使用高阶函数时也同样适用。编写高阶函数或者方法时，你无法预知会接收什么样的参数——一旦传入的参数有某些副作用，我们将会一筹莫展！如果作为参数传入的函数可能对你程序的状态产生某些无法预期的改变，一旦发生问题，你将很难理解程序中发生了什么；它们甚至会用某种难于调试的方式调用你的代码。因此，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>将所有你愿意接收的作为参数的函数可能带来的副作用以文档的方式记录下来是一个不错的设计原则，最理想的情况下你接收的函数参数应该没有任何副作用！</span></p>
+</blockquote>
+<p>现在我们转向讨论科里化：它是一种可以帮助你<strong>模块化函数</strong>、<strong>提高代码重用性</strong>的工作。</p>
+
+        <h2 id="科里化"   >
+          <a href="#科里化" class="heading-link"><i class="fas fa-link"></i></a>科里化</h2>
+      
+<p>给出科里化的理论定义之前，让我们先来看一个例子。应用程序通常都会有国际化的需求， 将一套单位转换到另一套单位是经常碰到的问题。 单位转换通常都会涉及转换因子以及基线调整因子的问题。比如，将摄氏度转换到华氏度的 公式是<code>CtoF(x) = x*9/5 + 32</code>。</p>
+<p>所有的单位转换几乎都遵守下面这种模式：</p>
+<ol>
+<li>
+<p>乘以转换因子</p>
+</li>
+<li>
+<p>如果需要，进行基线调整</p>
+</li>
+</ol>
+<p>你可以使用下面这段通用代码表达这一模式：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">double</span> <span class="title">converter</span><span class="params">(<span class="keyword">double</span> x, <span class="keyword">double</span> f, <span class="keyword">double</span> b)</span> </span>&#123; <span class="keyword">return</span> x * f + b; &#125;</span><br></pre></td></tr></table></div></figure>
+<p>这里x是你希望转换的数量，f是转换因子，b是基线值。但是这个方法有些过于宽泛了。通 常， 你还需要在同一类单位之间进行转换， 比如公里和英里。 当然， 你也可以在每次调用 converter方法时都使用3个参数，但是每次都提供转换因子和基准比较繁琐，并且你还极有可 能输入错误。</p>
+<p>当然，你也可以为每一个应用编写一个新方法，不过这样就无法对底层的逻辑进行复用。</p>
+<p>这里我们提供一种简单的解法，它<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>既能充分利用已有的逻辑，又能让converter针对每个应用进行定制</span>。你可以定义一个“工厂”方法，它生产带一个参数的转换方法，我们希望借此来说明科里化。下面是这段代码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> DoubleUnaryOperator <span class="title">curriedConverter</span> <span class="params">( <span class="keyword">double</span> f, <span class="keyword">double</span> b)</span></span>&#123;</span><br><span class="line">            <span class="keyword">return</span> (<span class="keyword">double</span> x) -&gt; x * f + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>现在，你要做的只是向它传递转换因子和基准值（f和b），它会不辞辛劳地按照你的要求返 回一个方法（使用参数 x ）。 比如， 你现在可以按照你的需求使用工厂方法产生你需要的任何 converter：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DoubleUnaryOperator convertCtoF = curriedConverter(<span class="number">9.0</span> / <span class="number">5</span>, <span class="number">32</span>);</span><br><span class="line">DoubleUnaryOperator convertUSDtoGBP = curriedConverter(<span class="number">0.6</span>, <span class="number">0</span>);</span><br><span class="line">DoubleUnaryOperator convertKmtoMi = curriedConverter(<span class="number">0.6214</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></div></figure>
+<p>由于 DoubleUnaryOperator 定义了方法 applyAsDouble ， 你可以像下面这样使用你的 converter：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> gbp = convertUSDtoGBP.applyAsDouble(<span class="number">1000</span>);</span><br></pre></td></tr></table></div></figure>
+<p>这样一来，你的代码就更加灵活了，同时它又复用了现有的转换逻辑！让我们一起回顾下你 都做了哪些工作。你并没有一次性地向converter方法传递所有的参数x、f和b，相反，你只是 使用了参数f和b并返回了另一个方法，这个方法会接收参数x，最终返回你期望的值<code>x * f + b</code>。 通过这种方式，你复用了现有的转换逻辑，同时又为不同的转换因子创建了不同的转换方法。</p>
+<p><strong>科里化的理论定义</strong></p>
+<blockquote>
+<p>科里化的概念最早由俄国数学家<code>Moses Schönfinkel</code>引入， 而后由著名的数理逻辑学家哈斯格尔·科里（Haskell Curry）丰富和发展，科里化由此得名。它表示一种将一个带有n元组参数的函数转换成n个一元函数链的方法。</p>
+</blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>科里化是一种将具备2个参数（比如，x和y）的函数f转化为使用一个参数的函数g，并且这个函数的返回值也是一个函数</span>，它会作为新函数的一个参数。后者的返回值和初始函数的返回值相同，即<code>f(x,y) = (g(x))(y)</code>。</p>
+<p>当然，我们可以由此推出：你可以将一个使用了6个参数的函数科里化成一个接受第2、4、6号参数，并返回一个接受5号参数的函数，这个函数又返回一个接受剩下的第1号和第3号参数的函数。</p>
+<p>一个函数使用所有参数仅有部分被传递时，通常我们说这个函数是部分应用的（partiallyapplied）。</p>
+<p>现在我们转而讨论函数式编程的另一个方面。如果你不能修改数据结构，还能用它们编程吗？</p>
+
+        <h1 id="持久化数据结构"   >
+          <a href="#持久化数据结构" class="heading-link"><i class="fas fa-link"></i></a>持久化数据结构</h1>
+      
+<p>这一节中，我们会探讨函数式编程中如何使用数据结构。这一主题有各种名称，比如<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>函数式数据结构、不可变数据结构，不过最常见的可能还要算持久化数据结构</span>（不幸的是，这一术语和 数据库中的持久化概念有一定的冲突，数据库中它代表的是“生命周期比程序的执行周期更长的 数据”）。</p>
+<p>我们应该注意的第一件事是，函数式方法不允许修改任何全局数据结构或者任何作为参数 传入的参数。为什么呢？因为一旦对这些数据进行修改，两次相同的调用就很可能产生不同的结果——这违背了引用透明性原则，我们也就无法将方法简单地看作由参数到结果的映射。</p>
+<blockquote>
+<p>举个例子：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        A a = <span class="keyword">new</span> A(<span class="number">1</span>);</span><br><span class="line">        System.out.println(cal(a));</span><br><span class="line">        System.out.println(cal(a));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">cal</span><span class="params">(A a)</span> </span>&#123;</span><br><span class="line">        a.i += <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">return</span> a.i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">3</span></span><br></pre></td></tr></table></div></figure>
+<p>两次调用结果不一样</p>
+</blockquote>
+
+        <h2 id="破坏式更新和函数式更新的比较"   >
+          <a href="#破坏式更新和函数式更新的比较" class="heading-link"><i class="fas fa-link"></i></a>破坏式更新和函数式更新的比较</h2>
+      
+<p>让我们看看不这么做会导致怎样的结果。假设你需要使用一个可变类TrainJourney（利用一 个简单的单向链接列表实现）表示从A地到B地的火车旅行，你使用了一个整型字段对旅程的一些 细节进行建模，比如当前路途段的价格。旅途中你需要换乘火车，所以需要使用几个由onward字 段串联在一起的TrainJourney对象；<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>直达火车或者旅途最后一段对象的onward字段为null</span>：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TrainJourney</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> price;</span><br><span class="line">    <span class="keyword">public</span> TrainJourney onward;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>假设你有几个相互分隔的TrainJourney对象分别代表从X到Y和从Y到Z的旅行。你希望创 建一段新的旅行，它能将两个TrainJourney对象串接起来（即从X到Y再到Z）。</p>
+<p>一种方式是采用简单的传统命令式的方法将这些火车旅行对象链接起来，代码如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> TrainJourney <span class="title">link</span><span class="params">(TrainJourney a, TrainJourney b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a == <span class="keyword">null</span>) <span class="keyword">return</span> b;</span><br><span class="line">    TrainJourney t = a;</span><br><span class="line">    <span class="keyword">while</span> (t.onward != <span class="keyword">null</span>) &#123;</span><br><span class="line">        t = t.onward;</span><br><span class="line">    &#125;</span><br><span class="line">    t.onward = b;</span><br><span class="line">    <span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这个方法是这样工作的，它找到TrainJourney对象a的最后一站，将其由表示a列表结束的 null替换为列表b（如果a不包含任何元素，你需要进行特殊处理）。</p>
+<p>这就出现了一个问题：假设变量 firstJourney 包含了从X地到Y地的线路， 另一个变量 secondJourney包含了从Y地到Z地的线路。如果你调用link(firstJourney, secondJourney) 方 法 ， 这 段 代 码 会 破 坏 性 地 更 新 firstJourney ， 结 果 secondJourney 也 会 加 被 入 到 firstJourney，最终请求从X地到Z地的用户会如其所愿地看到整合之后的旅程，不过从X地到Y 地的旅程也被破坏性地更新了。这之后，变量firstJourney就不再代表从X到Y的旅程，而是一 个新的从X到Z的旅程了！这一改动会导致依赖原先的 firstJourney 代码失效！假设 firstJourney表示的是清晨从伦敦到布鲁塞尔的火车，这趟车上后一段的乘客本来打算要去布 鲁塞尔，可是发生这样的改动之后他们莫名地多走了一站，最终可能跑到了科隆。现在你大致了解了<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>对数据结构修改的可见性</span>会导致怎样的问题了，作为程序员，我们一直在与这种缺陷作斗争。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>函数式编程解决这一问题的方法是禁止使用带有副作用的方法。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>如果你需要使用表示计算结果的数据结果，那么请创建它的一个副本而不要直接修改现存的数据结构。这一最佳实践也适用 于标准的面向对象程序设计。</span>不过，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>对这一原则，也存在着一些异议，比较常见的是认为这样做会导致过度的对象复制，有些程序员会说“我会记住那些有副作用的方法”或者“我会将这些写 入文档”。但这些都不能解决问题，这些坑都留给了接受代码维护工作的程序员。</span>采用函数式编程方案的代码如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> TrainJourney <span class="title">append</span><span class="params">(TrainJourney a, TrainJourney b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a == <span class="keyword">null</span> ? b : <span class="keyword">new</span> TrainJourney(a.price, append(a.onward, b));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>很明显，这段代码是函数式的（它没有做任何修改，即使是本地的修改），它没有改动任何 现存的数据结构。 不过， 也请特别注意， 这段代码有一个特别的地方， 它并未创建整个新 TrainJourney对象的副本——如果a是n个元素的序列，b是m个元素的序列，那么调用这个函 数后，它返回的是一个由n+m个元素组成的序列，这个序列的前n个元素是新创建的，而后m个元 素和TrainJourney对象b是共享的。另外，也请注意，用户需要确保不对append操作的结果进 行修改，因为一旦这样做了，作为参数传入的TrainJourney对象序列b就可能被破坏。图14-2 和图14-3解释说明了破坏式append和函数式append之间的区别。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817142413.png"  alt="" />
+      </p>
+
+        <h2 id="另一个使用tree的例子"   >
+          <a href="#另一个使用tree的例子" class="heading-link"><i class="fas fa-link"></i></a>另一个使用Tree的例子</h2>
+      
+<p>转入新主题之前，让我们再看一个使用其他数据结构的例子——我们想讨论的对象是二叉查 找树，它也是HashMap类似接口实现的方式。我们的设计中Tree包含了String类型的键，以及 int类型的键值，它可能是名字或者年龄：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Tree</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String key;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> val;</span><br><span class="line">    <span class="keyword">private</span> Tree left, right;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TreeProcessor</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">lookup</span><span class="params">(String k, <span class="keyword">int</span> defaultval, Tree t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="keyword">null</span>) <span class="keyword">return</span> defaultval;</span><br><span class="line">        <span class="keyword">if</span> (k.equals(t.key)) <span class="keyword">return</span> t.val;</span><br><span class="line">        <span class="keyword">return</span> lookup(k, defaultval, k.compareTo(t.key) &lt; <span class="number">0</span> ? t.left : t.right);</span><br><span class="line">    &#125; </span><br><span class="line">   <span class="comment">// 处理Tree的其他方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>你希望通过二叉查找树找到String值对应的整型数。现在，我们想想你该如何更新与某个 键对应的值（简化起见，我们假设键已经存在于这个树中了）：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">(String k, <span class="keyword">int</span> newval, Tree t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (t == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">/* 应增加一个新的节点 */</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (k.equals(t.key)) &#123;</span><br><span class="line">        t.val = newval;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        update(k, newval, k.compareTo(t.key) &lt; <span class="number">0</span> ? t.left : t.right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>注意，这两个版本的update都会对现有的树进行修改，这意味着使用树存放映射关系的所有用户都会感知到这些修改。</p>
+
+        <h2 id="采用函数式的方法"   >
+          <a href="#采用函数式的方法" class="heading-link"><i class="fas fa-link"></i></a>采用函数式的方法</h2>
+      
+<p>那么这一问题如何通过函数式的方法解决呢？你需要为要修改的键-值对创建一个新的节点，除此之外你还需要创建从树的根节点到新节点的路径上的所有节点。通常而言，这种操作的代价并不太大，如果树的深度为d，并且保持一定的平衡性，那么这棵树的节点总数是<span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mi>d</mi></msup></mrow><annotation encoding="application/x-tex">2^d</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.849108em;vertical-align:0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.849108em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">d</span></span></span></span></span></span></span></span></span></span></span> ，这样你就只需要重新创建树的一小部分节点(最多d个节点)了。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Tree <span class="title">fupdate</span><span class="params">(String k, <span class="keyword">int</span> newval, Tree t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (t == <span class="keyword">null</span>) ?</span><br><span class="line">            <span class="keyword">new</span> Tree(k, newval, <span class="keyword">null</span>, <span class="keyword">null</span>) :</span><br><span class="line">            k.equals(t.key) ?</span><br><span class="line">                    <span class="keyword">new</span> Tree(k, newval, t.left, t.right) :</span><br><span class="line">                    k.compareTo(t.key) &lt; <span class="number">0</span> ?</span><br><span class="line">                            <span class="keyword">new</span> Tree(t.key, t.val, fupdate(k, newval, t.left), t.right) :</span><br><span class="line">                            <span class="keyword">new</span> Tree(t.key, t.val, t.left, fupdate(k, newval, t.right));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这段代码中，我们通过一行语句进行的条件判断，没有采用if-then-else这种方式，目的 是希望强调一个思想，那就是该函数体仅包含一条语句，没有任何副作用。不过你也可以按照自 己的习惯，使用if-then-else这种方式，在每一个判断结束处使用return返回。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Tree <span class="title">fupdate</span><span class="params">(String k, <span class="keyword">int</span> newval, Tree t)</span> </span>&#123;</span><br><span class="line">        Tree res;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="keyword">null</span>) &#123;</span><br><span class="line">            res = <span class="keyword">new</span> Tree(k, newval, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (k.equals(t.key)) &#123;</span><br><span class="line">            res = <span class="keyword">new</span> Tree(k, newval, t.left, t.right);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (k.compareTo(t.key) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            res = <span class="keyword">new</span> Tree(t.key, t.val, fupdate(k, newval, t.left), t.right);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            res = <span class="keyword">new</span> Tree(t.key, t.val, t.left, fupdate(k, newval, t.right));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>那么，update 和fupdate之间的区别到底是什么呢？我们注意到，前文中方法update有这样一种假设，即每一个update的用户都希望共享同一份数据结构，也希望能了解程序任何部分所做的更新。然而这样的假设是不成立的，谁也不知道后面有没有用户不希望这样的改变，因此，无论任何时候，只要你使用非函数式代码向树中添加或修改某种形式的数据结构， 请立刻创建它的一份副本，因为谁也不知道将来的某一天，某个人会突然对它进行修改，这一点 非常重要（不过也经常被忽视）。与之相反，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>fupdate是纯函数式的</span>。它会创建一个新的树，并 将其作为结果返回，通过参数的方式实现共享。图14-4对这一思想进行了阐释。你使用了一个树结构，树的每个节点包含了person对象的姓名和年龄。调用fupdate不会修改现存的树，它会在原有树的一侧创建新的节点，同时保证不损坏现有的数据结构。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817150011.png"  alt="" />
+      </p>
+<p>这种函数式数据结构通常被称为持久化的——数据结构的值始终保持一致，不受其他部分变 化的影响——这样，作为程序员的你才能确保fupdate不会对作为参数传入的数据结构进行修 改。不过要达到这一效果还有一个附加条件：这个约定的另一面是，所有使用持久化数据结构的 用户都必须遵守这一“不修改”原则。如果不这样，忽视这一原则的程序员很有可能修改fupdate 的结果（比如，修改Emily的年纪为20岁）。这会成为一个例外（也是我们不期望发生的）事件， 为所有使用该结构的方法感知，并在之后修改作为参数传递给fupdate的数据结构。</p>
+<p>通过这些介绍，我们了解到fupdate可能有更加高效的方式：基于“不对现存结构进行修改” 规则，对仅有细微差别的数据结构（比如，用户A看到的树结构与用户B看到的就相差不多），我 们可以考虑对这些通用数据结构使用共享存储。你可以凭借编译器，将Tree类的字段key、val、 left以及right声明为final执行，“禁止对现存数据结构的修改”这一规则；不过我们也需要 注意final只能应用于类的字段，无法应用于它指向的对象，如果你想要对对象进行保护，你需 要将其中的字段声明为final，以此类推。</p>
+<p>噢，你可能会说：“我希望对树结构的更新对某些用户可见（当然，这句话的潜台词是其他 人看不到这些更新）。”那么，要实现这一目标，你可以通过两种方式：第一种是典型的Java解决 方案（对对象进行更新时，你需要特别小心，慎重地考虑是否需要在改动之前保存对象的一份副 本）。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>另一种是函数式的解决方案：逻辑上，你在做任何改动之前都会创建一份新的数据结构（这 样一来就不会有任何的对象发生变更），只要确保按照用户的需求传递给他正确版本的数据结构就好了。</span>这一想法甚至还可以通过API直接强制实施。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>如果数据结构的某些用户需要进行可见性的改动，它们应该调用API，返回最新版的数据结构。</span>对于另一些客户应用，它们不希望发生任 何可见的改动（比如，需要长时间运行的统计分析程序），就直接使用它们保存的备份，因为它知道这些数据不会被其他程序修改。</p>
+<p>有些人可能会说这个过程很像更新刻录光盘上的文件，刻录光盘时，一个文件只能被激光写 入一次，该文件的各个版本分别被存储在光盘的各个位置（智能光盘编辑软件甚至会共享多个不 同版本之间的相同部分），你可以通过传递文件起始位置对应的块地址（或者名字中编码了版本 信息的文件名）选择你希望使用哪个版本的文件。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Java中，情况甚至比刻录光盘还好很多，不再使用的老旧数据结构会被Java虚拟机自动垃圾回收掉</span>。</p>
+
+        <h1 id="stream的延迟计算"   >
+          <a href="#stream的延迟计算" class="heading-link"><i class="fas fa-link"></i></a>Stream的延迟计算</h1>
+      
+<p>通过前一章的介绍，你已经了解Stream是处理数据集合的利器。不过，由于各种各样的原因， 包括实现时的效率考量，Java 8的设计者们在将Stream引入时采取了比较特殊的方式。其中一个比较显著的局限是，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>你无法声明一个递归的Stream，因为Stream仅能使用一次</span>。在接下来的一节， 我们会详细展开介绍这一局限会带来的问题。</p>
+
+        <h2 id="自定义的stream"   >
+          <a href="#自定义的stream" class="heading-link"><i class="fas fa-link"></i></a>自定义的Stream</h2>
+      
+<p>让我们一起回顾下第6章中生成质数的例子，这个例子有助于我们理解递归式Stream的思想。你大概已经看到，作为MyMathUtils类的一部分，你可以用下面这种方式计算得出由质数构成的Stream：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyMathUtils</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Integer&gt; <span class="title">primes</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Stream.iterate(<span class="number">2</span>, i -&gt; i + <span class="number">1</span>).filter(MyMathUtils::isPrime).limit(n);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrime</span><span class="params">(<span class="keyword">int</span> candidate)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> candidateRoot = (<span class="keyword">int</span>) Math.sqrt((<span class="keyword">double</span>) candidate);</span><br><span class="line">        <span class="keyword">return</span> IntStream.rangeClosed(<span class="number">2</span>, candidateRoot).noneMatch(i -&gt; candidate % i == <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>不过这一方案看起来有些笨拙：你每次都需要遍历每个数字，查看它能否被候选数字整除（实 际上，你只需要测试那些已经被判定为质数的数字）。</p>
+<p>理想情况下，Stream应该实时地筛选掉那些能被质数整除的数字。这听起来有些异想天开， 不过我们一起看看怎样才能达到这样的效果。</p>
+<p>不过这一方案看起来有些笨拙：你每次都需要遍历每个数字，查看它能否被候选数字整除（实 际上，你只需要测试那些已经被判定为质数的数字）。</p>
+<p>理想情况下，Stream应该实时地筛选掉那些能被质数整除的数字。这听起来有些异想天开， 不过我们一起看看怎样才能达到这样的效果。</p>
+<ol>
+<li>
+<p>你需要一个由数字构成的Stream，你会在其中选择质数。</p>
+</li>
+<li>
+<p>你会从该Stream中取出第一个数字（即Stream的首元素），它是一个质数（初始时，这个 值是2）。</p>
+</li>
+<li>
+<p>紧接着你会从Stream的尾部开始，筛选掉所有能被该数字整除的元素。</p>
+</li>
+<li>
+<p>最后剩下的结果就是新的Stream，你会继续用它进行质数的查找。本质上，你还会回到 第一步，继续进行后续的操作，所以这个算法是递归的。</p>
+</li>
+</ol>
+<p>注意，这个算法不是很好，原因是多方面的。不过，就说明如何使用Stream展开工作这个目的而言，它还是非常合适的，因为算法简单，容易说明。让我们试着用Stream API对这个算法进行实现。</p>
+<p><strong>第一步</strong> 构造由数字组成的Stream<br />
+你可以使用方法IntStream.iterate构造由数字组成的Stream，它由2开始，可以上达无限， 就像我们在第5章中介绍的那样，代码如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> IntStream <span class="title">numbers</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> IntStream.iterate(<span class="number">2</span>, n -&gt; n + <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p><strong>第二步</strong> 取得首元素<br />
+IntStream类提供了方法findFirst，可以返回Stream的第一个元素：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">head</span><span class="params">(IntStream numbers)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> numbers.findFirst().getAsInt();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p><strong>第三步</strong> 对尾部元素进行筛选<br />
+定义一个方法取得Stream的尾部元素：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> IntStream <span class="title">tail</span><span class="params">(IntStream numbers)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> numbers.skip(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>拿到Stream的头元素，你可以像下面这段代码那样对数字进行筛选：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">IntStream numbers = numbers();</span><br><span class="line"><span class="keyword">int</span> head = head(numbers);</span><br><span class="line">IntStream filtered = tail(numbers).filter(n -&gt; n % head != <span class="number">0</span>);</span><br></pre></td></tr></table></div></figure>
+<p><strong>第四步</strong> 递归地创建由质数组成的Stream<br />
+现在到了最复杂的部分。你可能试图将筛选返回的Stream作为参数再次传递给该方法，这样你可以接着取得它的头元素，继续筛选掉更多的数字，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> IntStream <span class="title">primes</span><span class="params">(IntStream numbers)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> head = head(numbers);</span><br><span class="line">    <span class="keyword">return</span> IntStream.concat(IntStream.of(head), primes(tail(numbers).filter(n -&gt; n % head != <span class="number">0</span>)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p><strong>坏消息</strong></p>
+<p>不幸的是，如果执行步骤四中的代码，你会遭遇如下这个错误：“java.lang.IllegalStateException: stream has already been operated upon or closed.”实际上，你正试图使用两个终端操作： findFirst和skip将Stream切分成头尾两部分。还记得我们在第4章中介绍的内容吗？一旦你对Stream执行 一次终端操作调用，它就永久地终止了！</p>
+<p><strong>延迟计算</strong></p>
+<p>除此之外，该操作还附带着一个更为严重的问题： 静态方法IntStream.concat接受两个 Stream实例作参数。但是，由于第二个参数是primes方法的直接递归调用，最终会导致出现无 限递归的状况。然而，对大多数的Java应用而言，Java 8在Stream上的这一限制，即“不允许递归 定义”是完全没有影响的，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>使用Stream后，数据库的查询更加直观了，程序还具备了并发的能力</span>。所以，Java 8的设计者们进行了很好的平衡，选择了这一皆大欢喜的方案。不过，Scala和Haskell 这样的函数式语言中Stream所具备的通用特性和模型仍然是你编程武器库中非常有益的补充。你 需要一种方法推迟primes中对concat的第二个参数计算。如果用更加工作性的程序设计术语来 描述，我们称之为<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>延迟计算、非限制式计算或者名调用</span>。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>只在你需要处理质数的那个时刻（比如， 要调用方法limit了）才对Stream进行计算。</span>Scala（我们会在下一章介绍）提供了对这种算法的 支持。在Scala中，你可以用下面的方式重写前面的代码，操作符<code>#::</code>实现了延迟连接的功能（只有在你实际需要使用Stream时才对其进行计算）：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">numbers</span> </span>(n:<span class="type">Int</span>):<span class="type">Stream</span>[<span class="type">Int</span>] = n #::numbers(n + <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">primes</span> </span>(numbers:<span class="type">Stream</span>[<span class="type">Int</span>]):<span class="type">Stream</span>[<span class="type">Int</span>] = &#123;</span><br><span class="line">        numbers.head #::primes(numbers.tail filter(n -&gt; n % numbers.head != <span class="number">0</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>看不懂这段代码？完全没关系。我们展示这段代码的目的只是希望能让你了解Java和其他的 函数式编程语言的区别。让我们一起回顾一下刚刚介绍的参数是如何计算的，这对我们后面的内 容很有裨益。在Java语言中，你执行一次方法调用时，传递的所有参数在第一时间会被立即计算 出来。但是，在Scala中，通过<code>#::</code>操作符，连接操作会立刻返回，而元素的计算会推迟到实际计 算需要的时候才开始。现在，让我们看看如何通过Java实现延迟列表的思想。</p>
+
+        <h2 id="创建你自己的延迟列表"   >
+          <a href="#创建你自己的延迟列表" class="heading-link"><i class="fas fa-link"></i></a>创建你自己的延迟列表</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Java 8的Stream以其延迟性而著称。它们被刻意设计成这样，即延迟操作，有其独特的原因： Stream就像是一个黑盒，它接收请求生成结果。当你向一个 Stream发起一系列的操作请求时，这 些请求只是被一一保存起来。只有当你向Stream发起一个终端操作时，才会实际地进行计算。这 种设计具有显著的优点，特别是你需要对Stream进行多个操作时（你有可能先要进行filter操 作，紧接着做一个map，最后进行一次终端操作reduce）；这种方式下Stream只需要遍历一次， 不需要为每个操作遍历一次所有的元素。</span></p>
+<p>这一节，我们讨论的主题是<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>延迟列表，它是一种更加通用的Stream形式（延迟列表构造了一 个跟Stream非常类似的概念）。延迟列表同时还提供了一种极好的方式去理解高阶函数；你可以 将一个函数作为值放置到某个数据结构中，大多数时候它就静静地待在那里，一旦对其进行调用 （即根据需要），它能够创建更多的数据结构。</span>图14-5解释了这一思想。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817153330.png"  alt="" />
+      </p>
+<p>我们谈论得已经很多，现在让我们一起看看它是如何工作的。你想要利用我们前面介绍的算 法，生成一个由质数构成的无限列表。</p>
+
+        <h3 id="一个基本的链接列表"   >
+          <a href="#一个基本的链接列表" class="heading-link"><i class="fas fa-link"></i></a>一个基本的链接列表</h3>
+      
+<p>还记得吗，你可以通过下面这种方式，用Java语言实现一个简单的名为MyLinkedList的链 接列表式的类（这里我们只考虑最精简的MyList接口）：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">MyList</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">T <span class="title">head</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">MyList&lt;T&gt; <span class="title">tail</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyLinkedList</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">MyList</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> T head;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> MyList&lt;T&gt; tail;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">head</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> head;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> MyList&lt;T&gt; <span class="title">tail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> tail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Empty</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">MyList</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">head</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> MyList&lt;T&gt; <span class="title">tail</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>你现在可以构造一个示例的MyLinkedList值，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MyList&lt;Integer&gt; l = <span class="keyword">new</span> MyLinkedList&lt;&gt;(<span class="number">5</span>, <span class="keyword">new</span> MyLinkedList&lt;&gt;(<span class="number">10</span>, <span class="keyword">new</span> Empty&lt;&gt;()));</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="一个基础的延迟列表"   >
+          <a href="#一个基础的延迟列表" class="heading-link"><i class="fas fa-link"></i></a>一个基础的延迟列表</h3>
+      
+<p>对这个类进行改造，使其符合延迟列表的思想，最简单的方法是避免让tail立刻出现在内 存中，而是像第3章那样，提供一个<code>Supplier&lt;T&gt;</code>方法（你也可以将其看成一个使用函数描述符 <code>void -&gt; T</code>的工厂方法），它会产生列表的下一个节点。使用这种方式的代码如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LazyList</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">MyList</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> T head;</span><br><span class="line">    <span class="keyword">final</span> Supplier&lt;MyList&lt;T&gt;&gt; tail;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">head</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> head;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> MyList&lt;T&gt; <span class="title">tail</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 注意，与前面的head不同，这里tail使用了一个Supplier方法提供了延迟性</span></span><br><span class="line">        <span class="keyword">return</span> tail.get();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isEmpty</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>现在，你可以像下面那样传递一个Supplier作为LazyList的构造器的tail参数，创建由 数字构成的无限延迟列表了，该方法会创建一系列数字中的下一个元素：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> LazyList&lt;Integer&gt; <span class="title">from</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> LazyList&lt;Integer&gt;(n, () -&gt; from(n + <span class="number">1</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>如果尝试执行下面的代码，你会发现，下面的代码执行会打印输出“2 3 4”。这些数字真真 实实都是实时计算得出的。 你可以在恰当的位置插入 System.out.println 进行查看， 如果使用 from(2) 计算从2!开始的所有数字，它会永远运行下去，这时你不需要做任何事情。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    LazyList&lt;Integer&gt; numbers = from(<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">int</span> two = numbers.head();</span><br><span class="line">    <span class="keyword">int</span> three = numbers.tail().head();</span><br><span class="line">    <span class="keyword">int</span> four = numbers.tail().tail().head();</span><br><span class="line"></span><br><span class="line">    System.out.println(two + <span class="string">" "</span> + three + <span class="string">" "</span> + four);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果 2 3 4</span></span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="回到生成质数"   >
+          <a href="#回到生成质数" class="heading-link"><i class="fas fa-link"></i></a>回到生成质数</h3>
+      
+<p>看看你能否利用我们目前已经做的去生成一个自定义的质数延迟列表（有些时候，你会遭遇 无法使用Stream API的情况）。 如果你将之前使用Stream API的代码转换成使用我们新版的 LazyList，它看起来会像下面这段代码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> MyList&lt;Integer&gt; <span class="title">primes</span><span class="params">(MyList&lt;Integer&gt; numbers)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> LazyList&lt;&gt;(numbers.head(), () -&gt; primes(numbers.tail().filter(n -&gt; n % numbers.head() != <span class="number">0</span>)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="实现一个延迟筛选器"   >
+          <a href="#实现一个延迟筛选器" class="heading-link"><i class="fas fa-link"></i></a>实现一个延迟筛选器</h3>
+      
+<p>不过，这个LazyList（更确切地说是List接口）并未定义filter方法，所以前面的这段 代码是无法编译通过的。让我们添加该方法的一个定义，修复这个问题：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> MyList&lt;T&gt; <span class="title">filter</span><span class="params">(Predicate&lt;T&gt; predicate)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> isEmpty() ?</span><br><span class="line">            <span class="comment">// 你可以返回一个新的Empty&lt;&gt;()，不过这和返回一个空对象的效果是一样的</span></span><br><span class="line">            <span class="keyword">this</span> :</span><br><span class="line">            predicate.test(head) ?</span><br><span class="line">                    <span class="keyword">new</span> LazyList&lt;&gt;(head, () -&gt; tail().filter(predicate)) :</span><br><span class="line">                    tail().filter(predicate);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>你的代码现在可以通过编译，准备使用了。通过链接对tail和head的调用，你可以计算出头三个质数：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    LazyList&lt;Integer&gt; numbers = from(<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">int</span> two = MyMathUtils.primes(numbers).head();</span><br><span class="line">    <span class="keyword">int</span> three = MyMathUtils.primes(numbers).tail().head();</span><br><span class="line">    <span class="keyword">int</span> four = MyMathUtils.primes(numbers).tail().tail().head();</span><br><span class="line"></span><br><span class="line">    System.out.println(two + <span class="string">" "</span> + three + <span class="string">" "</span> + four);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line"><span class="number">2</span> <span class="number">3</span> <span class="number">5</span></span><br></pre></td></tr></table></div></figure>
+<p>这段代码的输出是“2 3 5”，这是头三个质数的值。现在，你可以把玩这段程序了，比如， 你可以打印输出所有的质数（printAll方法会递归地打印输出列表的头尾元素，这个程序会永 久地运行下去）：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo10</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        printAll(MyMathUtils.primes(from(<span class="number">2</span>)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printAll</span><span class="params">(MyList&lt;T&gt; list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (!list.isEmpty()) &#123;</span><br><span class="line">            System.out.println(list.head());</span><br><span class="line">            list = list.tail(); <span class="comment">// 破坏式遍历，不具有引用透明性</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> LazyList&lt;Integer&gt; <span class="title">from</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> LazyList&lt;&gt;(n, () -&gt; from(n + <span class="number">1</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>本章的主题是函数式编程，我们应该在更早的时候就让你知道其实有更加简洁地方式完成这一递归操作：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printAll</span><span class="params">(MyList&lt;T&gt; list)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (list.isEmpty()) <span class="keyword">return</span>;</span><br><span class="line">    System.out.println(list.head());</span><br><span class="line">    printAll(list.tail());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>但是，这个程序不会永久地运行下去；它最终会由于栈溢出而失效，因为Java不支持尾部调 用消除（tail call elimination），这一点我们曾经在第13章介绍过。</p>
+<p>但是，这个程序不会永久地运行下去；它最终会由于栈溢出而失效，因为Java不支持<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>尾部调用消除（tail call elimination）</span>，这一点我们曾经在第13章介绍过。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">70657</span></span><br><span class="line"><span class="number">70663</span></span><br><span class="line"><span class="number">70667</span></span><br><span class="line"><span class="number">70687</span></span><br><span class="line">Exception in thread <span class="string">"main"</span> java.lang.StackOverflowError</span><br><span class="line">	at com.eh.eden.java8.demo.LazyList.tail(Demo10.java:<span class="number">73</span>)</span><br><span class="line">	at com.eh.eden.java8.demo.LazyList.lambda$filter$<span class="number">0</span>(Demo10.java:<span class="number">86</span>)</span><br><span class="line">	at com.eh.eden.java8.demo.LazyList.tail(Demo10.java:<span class="number">73</span>)</span><br><span class="line">	at com.eh.eden.java8.demo.LazyList.lambda$filter$<span class="number">0</span>(Demo10.java:<span class="number">86</span>)</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="何时使用"   >
+          <a href="#何时使用" class="heading-link"><i class="fas fa-link"></i></a>何时使用</h3>
+      
+<p>到目前为止，你已经构建了大量工作，包括延迟列表和函数，使用它们却只定义了一个包含 质数的数据结构。为什么呢？哪些实际的场景可以使用这些工作呢？好吧，你已经了解了如何<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>向数据结构中插入函数（因为Java 8允许你这么做），这些函数可以用于按需创建数据结构的一部分， 现在你不需要在创建数据结构时就一次性地定义所有的部分。</span>如果你在编写游戏程序，比如棋牌 类游戏，你可以定义一个数据结构，它在形式上涵盖了由所有可能移动构成的一个树（这些步骤 要在早期完成计算工作量太大），具体的内容可以在运行时创建。最终的结果是一个<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>延迟树</span>，而 不是一个延迟列表。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>我们本章关注延迟列表，原因是它可以和Java 8的另一个新特性Stream串接起来，我们能够针对性地讨论Stream和延迟列表各自的优缺点。</span></p>
+<p>还有一个问题就是性能。我们很容易得出结论，延迟操作的性能会比提前操作要好——仅在 程序需要时才计算值和数据结构当然比传统方式下一次性地创建所有的值（有时甚至比实际需求 更多的值）要好。不过，实际情况并非如此简单。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>完成延迟操作的开销，比如 LazyList中每个 元素之间执行额外Suppliers调用的开销，有可能超过你猜测会带来的好处，除非你仅仅只访问 整个数据结构的10%，甚至更少。</span>最后，还有一种微妙的方式会导致你的LazyList并非真正的 延迟计算。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果你遍历LazyList中的值，比如from(2)，可能直到第10个元素，这种方式下， 它会创建每个节点两次，最终创建20个节点，而不是10个。</span>这几乎不能被称为延迟计算。问题在 于每次实时访问LazyList的元素时，tail中的Supplier都会被重复调用；<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>你可以设定tail中的Supplier方法仅在第一次实时访问时才执行调用，从而修复这一问题——计算的结果会缓存起来——效果上对列表进行了增强。</span><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>要实现这一目标，你可以在LazyList的定义中添加一个私有的<code>Optional&lt;LazyList&lt;T&gt;&gt;</code>类型字段alreadyComputed，tail方法会依据情况查询及更新该字段的值。纯函数式语言Haskell就是以这种方式确保它所有的数据结构都恰当地进行了延迟。</span> 如果你对这方面的细节感兴趣，可以查看相关文章。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>我们推荐的原则是将延迟数据结构作为你编程兵器库中的强力武器。如果它们能让程序设计更简单，就尽量使用它们。如果它们会带来无法接受的性能损失，就尝试以更加传统的方式重新实现它们。</span></p>
+<p>现在，让我们转向几乎所有函数式编程语言中都提供的一个特性，不过Java语言中暂时并未 提供这一特性，它就是模式匹配。</p>
+
+        <h1 id="模式匹配"   >
+          <a href="#模式匹配" class="heading-link"><i class="fas fa-link"></i></a>模式匹配</h1>
+      
+<p>函数式编程中还有另一个重要的方面，那就是（结构式）模式匹配。不要将这个概念和正则 表达式中的模式匹配相混淆。还记得吗，第1章结束时，我们了解到数学公式可以通过下面的方 式进行定义：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">f(0) &#x3D; 1 </span><br><span class="line">f(n) &#x3D; n*f(n-1) otherwise</span><br></pre></td></tr></table></div></figure>
+<p>不过在Java语言中，你只能通过if-then-else语句或者switch语句实现。随着数据类型变 得愈加复杂，需要处理的代码（以及代码块）的数量也在迅速攀升。使用模式匹配能有效地减少 这种混乱的情况。</p>
+<p>为了说明，我们先看一个树结构，你希望能够遍历这一整棵树。我们假设使用一种简单的数学语言，它包含数字和二进制操作符：</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817162555.png"  style="zoom:67%;" />
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Expr</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Number</span> <span class="keyword">extends</span> <span class="title">Expr</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BinOp</span> <span class="keyword">extends</span> <span class="title">Expr</span> </span>&#123;</span><br><span class="line">    String opname;</span><br><span class="line">    Expr left, right;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>假设你需要编写方法简化一些表达式。比如，5 + 0可以简化为5。使用我们的域语言，new BinOp(&quot;+&quot;, new Number(5), new Number(0))可以简化为Number(5)。你可以像下面这样 遍历Expr结构：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Expr <span class="title">simplifyExpression</span><span class="params">(Expr expr)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (expr <span class="keyword">instanceof</span> BinOp</span><br><span class="line">            &amp;&amp; ((BinOp) expr).opname.equals(<span class="string">"+"</span>))</span><br><span class="line">            &amp;&amp;((BinOp) expr).right <span class="keyword">instanceof</span> Number</span><br><span class="line">            &amp;&amp; ... <span class="comment">// 变得非常笨拙</span></span><br><span class="line">            &amp;&amp; ... )&#123;</span><br><span class="line">        <span class="keyword">return</span> (Binop) expr.left;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>你可以预期这种方式下代码会迅速地变得异常丑陋，难于维护。</p>
+
+        <h2 id="访问者设计模式"   >
+          <a href="#访问者设计模式" class="heading-link"><i class="fas fa-link"></i></a>访问者设计模式</h2>
+      
+<p>Java语言中还有另一种方式可以解包数据类型，那就是使用访问者（Visitor）设计模式。本 质上，使用这种方法你需要创建一个单独的类，这个类封装了一个算法，可以“访问”某种数据 类型。</p>
+<p>它是如何工作的呢？访问者类接受某种数据类型的实例作为输入。它可以访问该实例的所有 成员。下面是一个例子，通过这个例子我们能了解这一方法是如何工作的。首先，你需要向BinOp 添加一个accept方法，它接受一个SimplifyExprVisitor作为参数，并将自身传递给它（你 还需要为Number添加一个类似的方法）：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BinOp</span> <span class="keyword">extends</span> <span class="title">Expr</span> </span>&#123; </span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Expr <span class="title">accept</span><span class="params">(SimplifyExprVisitor v)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> v.visit(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>SimplifyExprVisitor现在就可以访问BinOp对象并解包其中的内容了：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SimplifyExprVisitor</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Expr <span class="title">visit</span><span class="params">(BinOp e)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">"+"</span>.equals(e.opname) &amp;&amp; e.right <span class="keyword">instanceof</span> Number &amp;&amp; …)&#123;</span><br><span class="line">            <span class="keyword">return</span> e.left;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> e;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="用模式匹配力挽狂澜"   >
+          <a href="#用模式匹配力挽狂澜" class="heading-link"><i class="fas fa-link"></i></a>用模式匹配力挽狂澜</h2>
+      
+<p>通过一个名为模式匹配的特性，我们能以更简单的方案解决问题。这种特性目前在Java语言 中暂时还不提供，所以我们会以Scala程序设计语言的一个小例子来展示模式匹配的强大威力。通 过这些介绍你能够了解一旦Java语言支持模式匹配，我们能做哪些事情。</p>
+<p>假设数据类型Expr代表的是某种数学表达式，在Scala程序设计语言中（我们采用Scala的原 因是它的语法与Java非常接近），你可以利用下面的这段代码解析表达式：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817163508.png"  alt="" />
+      </p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>模式匹配为操纵类树型数据结构提供了一个极其详细又极富表现力的方式。构建编译器或者处理商务规则的引擎时，这一工具尤其有用。</span>注意，Scala的语法</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Expression</span> <span class="keyword">match</span> &#123; <span class="keyword">case</span> <span class="type">Pattern</span> =&gt; <span class="type">Expression</span> ... &#125;</span><br></pre></td></tr></table></div></figure>
+<p>和Java的语法非常相似：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> (Expression) &#123; <span class="keyword">case</span> Constant : Statement ... &#125;</span><br></pre></td></tr></table></div></figure>
+<p>Scala的通配符判断和Java中的default:扮演这同样的角色。这二者之间主要的语法区别在 于Scala是面向表达式的，而Java则更多地面向语句，不过，对程序员而言，它们主要的区别是Java 中模式的判断标签被限制在了某些基础类型、枚举类型、封装基础类型的类以及String类型。 <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>使用支持模式匹配的语言实践中能带来的最大的好处在于，你可以避免出现大量嵌套的switch 或者if-then-else语句和字段选择操作相互交织的情况。</span></p>
+<p>非常明显，Scala的模式匹配在表达的难易程度上比Java更胜一筹，你只能期待未来版本的 Java能支持更具表达性的switch语句。我们会在第16章给出更加详细的介绍。</p>
+<p>与此同时，让我们看看如何凭借Java 8的Lambda以另一种方式在Java中实现类模式匹配。我 们在这里介绍这一技巧的目的仅仅是想让你了解Lambda另一个有趣的应用。</p>
+
+        <h2 id="java中的伪模式匹配"   >
+          <a href="#java中的伪模式匹配" class="heading-link"><i class="fas fa-link"></i></a>Java中的伪模式匹配</h2>
+      
+<p>首先，让我们看看Scala的模式匹配特性提供的匹配表达式有多么丰富。比如下面这个例子：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">def <span class="title">simplifyExpression</span><span class="params">(expr: Expr)</span>: Expr </span>= expr match &#123; </span><br><span class="line">	<span class="function"><span class="keyword">case</span> <span class="title">BinOp</span><span class="params">(<span class="string">"+"</span>, e, Number(<span class="number">0</span>)</span>) </span>=&gt; e </span><br><span class="line">	...</span><br></pre></td></tr></table></div></figure>
+<p>它表达的意思是：“检查 expr 是否为 BinOp ， 抽取它的三个组成部分（ opname 、 left 、 right），紧接着对这些组成部分分别进行模式匹配——第一个部分匹配String+，第二个部分匹配变量e（它总是匹配），第三个部分匹配模式Number(0)。”换句话说，Scala（以及很多其他 的函数式语言）中的模式匹配是多层次的。我们使用Java 8的Lambda表达式进行的模式匹配模拟 只会提供一层的模式匹配；以前面的这个例子而言，这意味着它只能覆盖BinOp(op, l, r)或 者Number(n)这种用例，无法顾及<code>BinOp(&quot;+&quot;, e, Number(0))</code>。</p>
+<p>首先，我们稍微做一些调整。由于你选择使用Lambda，原则上你的代码里不应 该使用if-then-else。你可以使用方法调用</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myIf(condition, () -&gt; e1, () -&gt; e2);</span><br></pre></td></tr></table></div></figure>
+<p>取代<code>condition ? e1 : e2</code>这样的代码。</p>
+<p>在某些地方，比如库文件中，你可能有这样的定义（使用了通用类型T）:</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">myIf</span><span class="params">(<span class="keyword">boolean</span> b, Supplier&lt;T&gt; truecase, Supplier&lt;T&gt; falsecase)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> b ? truecase.get() : falsecase.get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>类型T扮演了条件表达式中结果类型的角色。原则上，你可以用if-then-else完成类似的 事儿。</p>
+<p>当然， 正常情况下用这种方式会增加代码的复杂度， 让它变得愈加晦涩难懂， 因为用 if-then-else就已经能非常顺畅地完成这一任务，这么做似乎有些杀鸡用牛刀的嫌疑。不过， 我们也注意到，Java的switch和if-then-else无法完全实现模式匹配的思想，而Lambda表达 式能以简单的方式实现单层的模式匹配——对照使用if-then-else链的解决方案，这种方式要 简洁得多。</p>
+<p>回来继续讨论类Expr的模式匹配值，Expr类有两个子类，分别为BinOp和Number，你可以 定义一个方法patternMatchExpr（同样，我们在这里会使用泛型T，用它表示模式匹配的结果 类型）：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;T&gt; <span class="function">T <span class="title">patternMatchExpr</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">           Expr e,</span></span></span><br><span class="line"><span class="function"><span class="params">           TriFunction&lt;String, Expr, Expr, T&gt; binopcase,</span></span></span><br><span class="line"><span class="function"><span class="params">           Function&lt;Integer, T&gt; numcase,</span></span></span><br><span class="line"><span class="function"><span class="params">           Supplier&lt;T&gt; defaultcase)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> (e <span class="keyword">instanceof</span> BinOp) ?</span><br><span class="line">               binopcase.apply(((BinOp) e).opname, ((BinOp) e).left, ((BinOp) e).right) :</span><br><span class="line">               (e <span class="keyword">instanceof</span> Number) ?</span><br><span class="line">                       numcase.apply(((Number) e).val) :</span><br><span class="line">                       defaultcase.get();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></div></figure>
+<p>最终的结果是，方法调用</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">patternMatchExpr(e,</span><br><span class="line">        (op, l, r) -&gt; &#123;<span class="keyword">return</span> binopcode;&#125;,</span><br><span class="line">        (n) -&gt; &#123;<span class="keyword">return</span> numcode;&#125;,</span><br><span class="line">        () -&gt; &#123;<span class="keyword">return</span> defaultcode;&#125;);</span><br></pre></td></tr></table></div></figure>
+<p>会判断e是否为BinOp类型（如果是，会执行binopcode方法，它能够通过标识符op、l和r访问 BinOp的字段），是否为Number类型（如果是，会执行numcode方法，它可以访问n的值）。这个 方法还可以返回defaultcode，如果有人在将来某个时刻创建了一个树节点，它既不是BinOp 类型，也不是Number类型，那就会执行这部分代码。</p>
+<p>下面这段代码通过简化的加法和乘法表达式展示了如何使用patternMatchExpr。</p>
+<p><strong>使用模式匹配简化表达式</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817165643.png"  alt="" />
+      </p>
+<p>你可以通过下面的方式调用简化的方法：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Expr e = <span class="keyword">new</span> BinOp(<span class="string">"+"</span>, <span class="keyword">new</span> Number(<span class="number">5</span>), <span class="keyword">new</span> Number(<span class="number">0</span>)); </span><br><span class="line">Expr match = simplify(e); </span><br><span class="line">System.out.println(match);</span><br></pre></td></tr></table></div></figure>
+<p>目前为止，你已经学习了很多内容，包括高阶函数、科里化、持久化数据结构、延迟列表以 及模式匹配。现在我们看一些更加微妙的工作，为了避免将前面的内容弄得过于复杂，我们刻意 地将这部分内容推迟到了后面。</p>
+
+        <h1 id="杂项"   >
+          <a href="#杂项" class="heading-link"><i class="fas fa-link"></i></a>杂项</h1>
+      
+<p>这一节里我们会一起探讨两个关于函数式和引用透明性的比较复杂的问题，一个是<strong>效率</strong>，另一个关乎<strong>返回一致的结果</strong>。这些都是非常有趣的问题，我们直到现在才讨论它们的原因是它们通常都由<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>副作用</span>引起，并非我们要介绍的核心概念。我们还会探究结合器（Combinator）的思想—— 即<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>接受两个或多个方法（函数）做参数且返回结果是另一个函数的方法；这一思想直接影响了新 增到Java 8中的许多API。</span></p>
+
+        <h2 id="缓存或记忆表"   >
+          <a href="#缓存或记忆表" class="heading-link"><i class="fas fa-link"></i></a>缓存或记忆表</h2>
+      
+<p>假设你有一个无副作用的方法omputeNumberOfNodes(Range)，它会计算一个树形网络中 给定区间内的节点数目。让我们假设，该网络不会发生变化，即该结构是不可变的，然而调用 computeNumberOfNodes方法的代价是非常昂贵的，因为该结构需要执行递归遍历。不过，你可 能需要多次地计算该结果。如果你能保证引用透明性，那么有一种聪明的方法可以避免这种冗余 的开销。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>解决这一问题的一种比较标准的解决方案是使用记忆表（memoization）——为方法添加一个封装器，在其中加入一块缓存（比如，利用一个HashMap）——封装器被调用时，首先查看缓存，看请求的“（参数，结果）对”是否已经存在于缓存，如果已经存在，那么方法直接返回缓存的结果；否则，你会执行computeNumberOfNodes调用，不过从封装器返回之前，你会将新计算出的“（参数，结果）对”保存到缓存中。</span>严格地说，这种方式并非纯粹的函数式解决方案，因 为它会修改由多个调用者共享的数据结构，不过这段代码的封装版本的确是引用透明的(在封装器中，外部访问不了)。</p>
+<p>实际操作上，这段代码的工作如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> Map&lt;Range, Integer&gt; numberOfNodes = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line"><span class="function">Integer <span class="title">computeNumberOfNodesUsingCache</span><span class="params">(Range range)</span> </span>&#123;</span><br><span class="line">    Integer result = numberOfNodes.get(range);</span><br><span class="line">    <span class="keyword">if</span> (result != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    result = computeNumberOfNodes(range);</span><br><span class="line">    numberOfNodes.put(range, result);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p>Java 8改进了 Map 接口，提供了一个名为 computeIfAbsent 的方法处理这样的情况。我们 会在附录B介绍这一方法。但是，我们在这里也提供一些参考，你可以用下面的方式调用 computeIfAbsent 方法，帮助你编写结构更加清晰的代码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Integer <span class="title">computeNumberOfNodesUsingCache</span><span class="params">(Range range)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> numberOfNodes.computeIfAbsent(range, <span class="keyword">this</span>::computeNumberOfNodes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+<p>很明显， 方法 computeNumberOfNodesUsingCache 是引用透明的（我们假设 compute- NumberOfNodes也是引用透明的）。不过，事实上，numberOfNodes处于可变共享状态，并且 HashMap也没有同步 ，这意味这该段代码不是线程安全的。如果多个核对numberOfNodes执行 并发调用， 即便不用 HashMap ， 而是用（由锁保护的） Hashtable 或者（并发无锁的） ConcurrentHashMap，可能都无法达到预期的性能，因为这中间又存在由于发现某个值不在Map 中，需要将对应的“（参数，结果）对”插回到Map而引起的条件竞争。这意味着多个核上的进 程可能算出的结果相同，又都需要将其加入到Map中。</p>
+<p>从刚才讨论的各种纠结中，我们能得到的最大收获可能是，一旦并发和可变状态的对象揉到 一起，它们引起的复杂度要远超我们的想象，而函数式编程能从根本上解决这一问题。当然，这 也有一些例外，比如出于底层性能的优化，可能会使用缓存，而这可能会有一些影响。另一方面， <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果不使用缓存这样的技巧，如果你以函数式的方式进行程序设计，那就完全不必担心你的方法 是否使用了正确的同步方式，因为你清楚地知道它没有任何共享的可变状态。</span></p>
+
+        <h2 id="返回同样的对象意味着什么"   >
+          <a href="#返回同样的对象意味着什么" class="heading-link"><i class="fas fa-link"></i></a>“返回同样的对象”意味着什么</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200817150011.png"  alt="" />
+      </p>
+<p>让我们在次回顾一下14.2.3节中二叉树的例子。图14-4中，变量t指向了一棵现存的树，依据该图，调用fupdate(fupdate(“Will”,26, t) 会生成一个新的树，这里我们假设该树会 被赋值给变量t2。通过该图，我们非常清楚地知道变量t，以及所有它涉及的数据结构都是不 会变化的。现在，假设你在新增的赋值操作中执行一次字面上和上一操作完全相同的调用，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">t3 = fupdate(<span class="string">"Will"</span>, <span class="number">26</span>, t);</span><br></pre></td></tr></table></div></figure>
+<p>这时t会指向第三个新创建的节点，该节点包含了和t3一样的数据。好，问题来了：fupdate 是否符合引用透明性原则呢？引用透明性原则意味着“使用相同的参数（即这个例子的情况）产 生同样的结果”。问题是t2和t3属于不同的对象引用，所以(t2<mark>t3)这一结论并不成立，这样 说起来你只能得出一个结论：fupdate并不符合引用透明性原则。虽然如此，使用不会改动的持久化数据结构时，t2和t3在逻辑上并没有差别。 对于这一点我们已经辩论了很长时间，不过<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>最简单的概括可能是函数式编程通常不使用</mark>（引用相等），而是使用equals对数据结构值进行比 较，由于数据没有发生变更，所以这种模式下fupdate是引用透明的。</span></p>
+
+        <h2 id="结合器"   >
+          <a href="#结合器" class="heading-link"><i class="fas fa-link"></i></a>结合器</h2>
+      
+<p>函数式编程时编写高阶函数是非常普通而且非常自然的事。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>术语结合器通常用于描述这一思想: 高阶函数接受两个或多个函数， 并返回另一个函数，实现的效果在某种程度上类似于将这些函数进行了结合。</span>Java 8中的很多API都受益于这一思想， 比如 CompletableFuture 类中的thenCombine方法。该方法接受两个CompletableFuture方法和一个BiFunction方法，返回 另一个CompletableFuture方法。</p>
+<p>虽然深入探讨函数式编程中结合器的特性已经超出了本书的范畴，了解结合器使用的一些特 例还是非常有价值的，它能让我们切身体验函数式编程中构造接受和返回函数的操作是多么普通 和自然。下面这个方法就体现了函数组合（function composition）的思想：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;A,B,C&gt; <span class="function">Function&lt;A,C&gt; <span class="title">compose</span><span class="params">(Function&lt;B,C&gt; g, Function&lt;A,B&gt; f)</span> </span>&#123; </span><br><span class="line">  	<span class="keyword">return</span> x -&gt; g.apply(f.apply(x)); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>它接受函数f和g作为参数，并返回一个函数，实现的效果是先做f，接着做g。你可以接着 用这种方式定义一个操作，通过结合器完成内部迭代的效果。让我们看这样一个例子，你希望接 受一个参数，并使用函数f连续地对它进行操作（比如n次），类似循环的效果。我们将你的操作 命名为repeat，它接受一个参数f，f代表了一次迭代中进行的操作，它返回的也是一个函数， 返回的函数会在n次迭代中执行。像下面这样一个方法调用</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">repeat(<span class="number">3</span>, (Integer x) -&gt; <span class="number">2</span>*x);</span><br></pre></td></tr></table></div></figure>
+<p>形成的效果是<code>x -&gt;(2*(2*(2*x)))或者x -&gt; 8*x</code>。 你可以通过下面这段代码进行测试：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(repeat(<span class="number">3</span>, (Integer x) -&gt; <span class="number">2</span>*x).apply(<span class="number">10</span>));</span><br></pre></td></tr></table></div></figure>
+<p>输出的结果是80。 你可以按照下面的方式编写repeat方法（请特别留意0次循环的特殊情况）：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo10</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        System.out.println(repeat(<span class="number">3</span>, (Integer x) -&gt; <span class="number">2</span> * x).apply(<span class="number">10</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &lt;A, B, C&gt; <span class="function">Function&lt;A, C&gt; <span class="title">compose</span><span class="params">(Function&lt;B, C&gt; g, Function&lt;A, B&gt; f)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> x -&gt; g.apply(f.apply(x));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &lt;A&gt; <span class="function">Function&lt;A, A&gt; <span class="title">repeat</span><span class="params">(<span class="keyword">int</span> n, Function&lt;A, A&gt; f)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n == <span class="number">0</span> ? x -&gt; x : compose(f, repeat(n - <span class="number">1</span>, f));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line"><span class="number">80</span></span><br></pre></td></tr></table></div></figure>
+<p>这个想法稍作变更可以对迭代概念进行更丰富的外延建模，甚至包括在迭代之间传递可变状态的函数式模型。。不过，由于篇幅有限，我们就不再继续展开了，本章的目标只是为大家做一 个概括的总结，让大家对Java 8的基石函数式编程有一个全局的观念。市面上还有很多优秀的书籍，对函数式编程进行了更深入的介绍，大家可以选择适合的进一步学习。</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>下面是本章中你应该掌握的重要概念。</p>
+<ul>
+<li>一等函数是可以作为参数传递，可以作为结果返回，同时还能存储在数据结构中的函数。</li>
+<li>高阶函数接受至少一个或者多个函数作为输入参数，或者返回另一个函数的函数。Java 中典型的高阶函数包括comparing、andThen和compose。</li>
+<li>科里化是一种帮助你模块化函数和重用代码的工作。</li>
+<li>持久化数据结构在其被修改之前会对自身前一个版本的内容进行备份。因此，使用该工作能<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>避免不必要的防御式复制(深复制其中的一部分，剩下的部分使用浅拷贝)</span>。</li>
+<li>Java语言中的Stream不是自定义的。</li>
+<li>延迟列表是Java语言中让Stream更具表现力的一个特性。延迟列表让你可以通过辅助方法 （<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>supplier</span>）即时地创建列表中的元素，辅助方法能帮忙创建更多的数据结构。</li>
+<li>模式匹配是一种函数式的特性，它能帮助你解包数据类型。它可以看成Java语言中switch语句的一种泛化。</li>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>遵守“引用透明性”原则的函数，其计算结构可以进行缓存</span>。</li>
+<li>结合器是一种函数式的思想，它指的是将两个或多个函数合并返回另一个函数。</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/14_%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%8A%80%E5%B7%A7/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/14_%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%8A%80%E5%B7%A7/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/java8/">java8</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/15_%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%B7%B7%E5%90%88_Java8%E5%92%8CScala%E7%9A%84%E6%AF%94%E8%BE%83/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">面向对象和函数式编程的混合_Java8和Scala的比较</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/13_%E5%87%BD%E6%95%B0%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83/"><span class="paginator-prev__text">函数式的思考</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#无处不在的函数"><span class="toc-number">1.</span> <span class="toc-text">
+          无处不在的函数</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#高阶函数"><span class="toc-number">1.1.</span> <span class="toc-text">
+          高阶函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#科里化"><span class="toc-number">1.2.</span> <span class="toc-text">
+          科里化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#持久化数据结构"><span class="toc-number">2.</span> <span class="toc-text">
+          持久化数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#破坏式更新和函数式更新的比较"><span class="toc-number">2.1.</span> <span class="toc-text">
+          破坏式更新和函数式更新的比较</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#另一个使用tree的例子"><span class="toc-number">2.2.</span> <span class="toc-text">
+          另一个使用Tree的例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#采用函数式的方法"><span class="toc-number">2.3.</span> <span class="toc-text">
+          采用函数式的方法</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#stream的延迟计算"><span class="toc-number">3.</span> <span class="toc-text">
+          Stream的延迟计算</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义的stream"><span class="toc-number">3.1.</span> <span class="toc-text">
+          自定义的Stream</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建你自己的延迟列表"><span class="toc-number">3.2.</span> <span class="toc-text">
+          创建你自己的延迟列表</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#一个基本的链接列表"><span class="toc-number">3.2.1.</span> <span class="toc-text">
+          一个基本的链接列表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一个基础的延迟列表"><span class="toc-number">3.2.2.</span> <span class="toc-text">
+          一个基础的延迟列表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#回到生成质数"><span class="toc-number">3.2.3.</span> <span class="toc-text">
+          回到生成质数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实现一个延迟筛选器"><span class="toc-number">3.2.4.</span> <span class="toc-text">
+          实现一个延迟筛选器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#何时使用"><span class="toc-number">3.2.5.</span> <span class="toc-text">
+          何时使用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#模式匹配"><span class="toc-number">4.</span> <span class="toc-text">
+          模式匹配</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#访问者设计模式"><span class="toc-number">4.1.</span> <span class="toc-text">
+          访问者设计模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用模式匹配力挽狂澜"><span class="toc-number">4.2.</span> <span class="toc-text">
+          用模式匹配力挽狂澜</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#java中的伪模式匹配"><span class="toc-number">4.3.</span> <span class="toc-text">
+          Java中的伪模式匹配</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#杂项"><span class="toc-number">5.</span> <span class="toc-text">
+          杂项</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存或记忆表"><span class="toc-number">5.1.</span> <span class="toc-text">
+          缓存或记忆表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#返回同样的对象意味着什么"><span class="toc-number">5.2.</span> <span class="toc-text">
+          “返回同样的对象”意味着什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#结合器"><span class="toc-number">5.3.</span> <span class="toc-text">
+          结合器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">6.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

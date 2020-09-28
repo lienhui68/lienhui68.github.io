@@ -1,0 +1,473 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;adamjwh&#x2F;p&#x2F;11018268.html  在现实生活中，有些集合对象中存在多种不同的元素，且每种元素也存在多种不同的访问者和处理方式。例如，公园中存在多个景点，也存在多个游客，不同的游客对同一个景点的评价可能不同；医院医生开的处方单中包含多种药元素，査看它的划价员和药房工作人员对它的处理方式也不同，划价员根据处方单上面的药品名和数量进">
+<meta property="og:type" content="article">
+<meta property="og:title" content="行为型_访问者模式">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/25_%E8%A1%8C%E4%B8%BA%E5%9E%8B_%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;adamjwh&#x2F;p&#x2F;11018268.html  在现实生活中，有些集合对象中存在多种不同的元素，且每种元素也存在多种不同的访问者和处理方式。例如，公园中存在多个景点，也存在多个游客，不同的游客对同一个景点的评价可能不同；医院医生开的处方单中包含多种药元素，査看它的划价员和药房工作人员对它的处理方式也不同，划价员根据处方单上面的药品名和数量进">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200816222958.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200826061150.png">
+<meta property="article:published_time" content="2020-08-22T02:01:25.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:24:03.931Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="设计模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200816222958.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>行为型_访问者模式 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/25_%E8%A1%8C%E4%B8%BA%E5%9E%8B_%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">行为型_访问者模式</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-08-22</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">30分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/adamjwh/p/11018268.html"  target="_blank" rel="noopener">https://www.cnblogs.com/adamjwh/p/11018268.html</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>在现实生活中，有些集合对象中存在多种不同的元素，且每种元素也存在多种不同的访问者和处理方式。例如，公园中存在多个景点，也存在多个游客，不同的游客对同一个景点的评价可能不同；医院医生开的处方单中包含多种药元素，査看它的划价员和药房工作人员对它的处理方式也不同，划价员根据处方单上面的药品名和数量进行划价，药房工作人员根据处方单的内容进行抓药。</p>
+<p>这样的例子还有很多，例如，电影或电视剧中的人物角色，不同的观众对他们的评价也不同；还有顾客在商场购物时放在“购物车”中的商品，顾客主要关心所选商品的性价比，而收银员关心的是商品的价格和数量。</p>
+<p>这些被处理的数据元素相对稳定而访问方式多种多样的数据结构，如果用“访问者模式”来处理比较方便。访问者模式能把处理方法从数据结构中分离出来，并可以根据需要增加新的处理方法，且不用修改原来的程序代码与数据结构，这提高了程序的扩展性和灵活性。</p>
+<a id="more"></a>
+<p>访问者模式的基本想法是，软件系统中拥有一个由许多对象构成的、比较稳定的对象结构，这些对象的类都拥有一个 accept 方法用来接受访问者对象的访问。访问者是一个接口，它拥有一个 visit 方法，这个方法对访问到的对象结构中不同类型的元素做出不同的处理。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在对象结构的一次访问过程中，我们遍历整个对象结构，对每一个元素都实施 accept 方法，在每一个元素的 accept 方法中会调用访问者的 visit 方法，从而使访问者得以处理对象结构的每一个元素，我们可以针对对象结构设计不同的访问者类来完成不同的操作，达到区别对待的效果。</span></p>
+
+        <h1 id="定义与特点"   >
+          <a href="#定义与特点" class="heading-link"><i class="fas fa-link"></i></a>定义与特点</h1>
+      
+<p>访问者（Visitor）模式的定义：将作用于某种数据结构中的各元素的操作分离出来封装成独立的类，使其在不改变数据结构的前提下可以添加作用于这些元素的新的操作，为数据结构中的每个元素提供多种访问方式。它将对数据的操作与数据结构进行分离，是行为类模式中最复杂的一种模式。</p>
+<p>访问者（Visitor）模式是一种对象行为型模式，其主要优点如下。</p>
+<ol>
+<li>扩展性好。能够在不修改对象结构中的元素的情况下，为对象结构中的元素添加新的功能。</li>
+<li>复用性好。可以通过访问者来定义整个对象结构通用的功能，从而提高系统的复用程度。</li>
+<li>灵活性好。访问者模式将数据结构与作用于结构上的操作解耦，使得操作集合可相对自由地演化而不影响系统的数据结构。</li>
+<li>符合单一职责原则。访问者模式把相关的行为封装在一起，构成一个访问者，使每一个访问者的功能都比较单一。</li>
+</ol>
+<p>访问者（Visitor）模式的主要缺点如下。</p>
+<ol>
+<li>增加新的元素类很困难。在访问者模式中，每增加一个新的元素类，都要在每一个具体访问者类中增加相应的具体操作，这违背了“开闭原则”。</li>
+<li>破坏封装。访问者模式中具体元素对访问者公布细节，这破坏了对象的封装性。</li>
+<li>违反了依赖倒置原则。访问者模式依赖了具体类，而没有依赖抽象类。</li>
+</ol>
+
+        <h1 id="uml图"   >
+          <a href="#uml图" class="heading-link"><i class="fas fa-link"></i></a>UML图</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200816222958.png"  alt="" />
+      </p>
+<ul>
+<li>
+<p><strong>Visitor</strong></p>
+<p>接口或者抽象类，它定义了对每一个元素（Element）访问的行为，它的参数就是可以访问的元素，它的方法数理论上来讲与元素个数是一样的，因此，访问者模式要求元素的类族要稳定，如果经常添加、移除元素类，必然会导致频繁地修改Visitor接口，如果这样则不适合使用访问者模式。</p>
+</li>
+<li>
+<p><strong>ConcreteVisitor</strong></p>
+<p>具体的访问类，它需要给出对每一个元素类访问时所产生的具体行为</p>
+</li>
+<li>
+<p><strong>Element</strong></p>
+<p>元素接口或者抽象类，它定义了一个接受访问者的方法（Accept），其意义是指每一个元素都要可以被访问者访问。</p>
+</li>
+<li>
+<p><strong>ConcreteElement</strong></p>
+<p>具体的元素类，它提供接受访问方法的具体实现，而这个具体的实现，通常情况下是使用访问者提供的访问该元素类的方法。</p>
+</li>
+<li>
+<p><strong>ObjectStructure</strong></p>
+<p>定义当中所说的对象结构，对象结构是一个抽象表述，它内部管理了元素集合，并且可以迭代这些元素供访问者访问。</p>
+</li>
+</ul>
+
+        <h1 id="简单案例"   >
+          <a href="#简单案例" class="heading-link"><i class="fas fa-link"></i></a>简单案例</h1>
+      
+<p>我们都知道财务都是有账本的，这个账本就可以作为一个对象结构，而它其中的元素有两种，收入账单和支出账单，这满足我们访问者模式的要求，即元素的个数是稳定的，因为账本中的元素只能是收入账单和支出账单。</p>
+<p>而查看账本的人可能有这样几种，比如老板，会计事务所的注会，财务主管，等等。而这些人在看账本的时候显然目的和行为是不同的。</p>
+<p>首先我们给出账单的接口，它只有一个方法accept。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 账单，相当于Element</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Bill</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">accept</span><span class="params">(AccountBookViewer viewer)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>其中的方法参数AccountBookViewer是一个账本访问者接口，接下来也就是实现类，收入账单和消费账单，或者说收入和支出类。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 收入账单，相当于ConcreteElement</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IncomeBill</span> <span class="keyword">implements</span> <span class="title">Bill</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 收入金额</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> amount;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 款项</span></span><br><span class="line">    <span class="keyword">private</span> String item;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(AccountBookViewer viewer)</span> </span>&#123;</span><br><span class="line">        viewer.view(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 支出账单，相当于ConcreteElement</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConsumeBill</span> <span class="keyword">implements</span> <span class="title">Bill</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 支出金额</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> amount;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 款项</span></span><br><span class="line">    <span class="keyword">private</span> String item;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(AccountBookViewer viewer)</span> </span>&#123;</span><br><span class="line">        viewer.view(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>上面最关键的还是里面的accept方法，它直接让访问者访问自己，这相当于一次静态分派，当然我们也可以不使用重载而直接给方法不同的名称。</p>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'><strong>双分派的精髓就是这个this对象</strong></span></p>
+</blockquote>
+<p>接下来是账本访问者接口</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 账本访问者，相当于Visitor</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">AccountBookViewer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">view</span><span class="params">(IncomeBill bill)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">view</span><span class="params">(ConsumeBill bill)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这两个方法是重载方法，就是在上面的元素类当中用到的，当然你也可以按照访问者模式类图当中的方式去做，将两个方法分别命名为viewConsumeBill和viewIncomeBill，而一般建议按照类图上来做的</p>
+<p>访问者的实现</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 老板，相当于ConcreteVisitor</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Boss</span> <span class="keyword">implements</span> <span class="title">AccountBookViewer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 总收入</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> totalIncome;</span><br><span class="line">    <span class="comment">// 总支出</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> totalConsume;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">view</span><span class="params">(IncomeBill bill)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.totalIncome += bill.getAmount();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">view</span><span class="params">(ConsumeBill bill)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.totalConsume += bill.getAmount();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getTotalIncome</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"老板查看一共收入多少，数目是："</span> + totalIncome);</span><br><span class="line">        <span class="keyword">return</span> totalIncome;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getTotalConsume</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"老板查看一共花费多少，数目是："</span> + totalConsume);</span><br><span class="line">        <span class="keyword">return</span> totalConsume;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注会，相当于ConcreteVisitor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CPA</span> <span class="keyword">implements</span> <span class="title">AccountBookViewer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//注会在看账本时，如果是支出，则如果支出款项是工资，则需要看应该交的税交了没否则什么都不做</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">view</span><span class="params">(ConsumeBill bill)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (bill.getItem().equals(<span class="string">"工资"</span>)) &#123;</span><br><span class="line">            System.out.println(<span class="string">"注会查看工资是否交个人所得税。"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//如果是收入，则所有的收入都要交税</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">view</span><span class="params">(IncomeBill bill)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"注会查看收入交税了没。"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>老板只关心收入和支出的总额，而注会只关注该交税的是否交税。接下来是账本类，它是当前访问者模式例子中的对象结构</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AccountBook</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 账单列表</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;Bill&gt; bills = Lists.newArrayList();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加单子</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addBill</span><span class="params">(Bill bill)</span> </span>&#123;</span><br><span class="line">        bills.add(bill);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 供张本的查看者查看张本</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">show</span><span class="params">(AccountBookViewer viewer)</span> </span>&#123;</span><br><span class="line">        bills.forEach(bill -&gt; bill.accept(viewer));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>账本类当中有一个列表，这个列表是元素（Bill）的集合，这便是对象结构的通常表示，它一般会是一堆元素的集合，不过这个集合不一定是列表，也可能是树，链表等等任何数据结构，甚至是若干个数据结构。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>其中的show方法，就是账本类的精髓，它会枚举每一个元素，让访问者访问。</span></p>
+<p>测试客户端</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        AccountBook accountBook = <span class="keyword">new</span> AccountBook();</span><br><span class="line">        <span class="comment">//添加两条收入</span></span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> IncomeBill(<span class="number">10000</span>, <span class="string">"卖商品"</span>));</span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> IncomeBill(<span class="number">12000</span>, <span class="string">"卖广告位"</span>));</span><br><span class="line">        <span class="comment">//添加两条支出</span></span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> ConsumeBill(<span class="number">1000</span>, <span class="string">"工资"</span>));</span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> ConsumeBill(<span class="number">2000</span>, <span class="string">"材料费"</span>));</span><br><span class="line"></span><br><span class="line">        AccountBookViewer boss = <span class="keyword">new</span> Boss();</span><br><span class="line">        AccountBookViewer cpa = <span class="keyword">new</span> CPA();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//两个访问者分别访问账本</span></span><br><span class="line">        accountBook.show(cpa);</span><br><span class="line">        accountBook.show(boss);</span><br><span class="line"></span><br><span class="line">        ((Boss) boss).getTotalConsume();</span><br><span class="line">        ((Boss) boss).getTotalIncome();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">注会查看收入交税了没。</span><br><span class="line">注会查看收入交税了没。</span><br><span class="line">注会查看工资是否交个人所得税。</span><br><span class="line">老板查看一共花费多少，数目是：<span class="number">3000.0</span></span><br><span class="line">老板查看一共收入多少，数目是：<span class="number">22000.0</span></span><br></pre></td></tr></table></div></figure>
+<p>上面的代码中，可以这么理解，账本以及账本中的元素类型是非常稳定的，这些几乎不可能改变，而最容易改变的就是访问者这部分。</p>
+<p>访问者模式最大的优点就是增加访问者非常容易，我们从代码上来看，如果要增加一个访问者，你只需要做一件事即可，那就是写一个类，实现AccountBookViewer接口，然后就可以直接调用AccountBook的show方法去访问账本了。</p>
+<p>如果没使用访问者模式，一定会增加许多if else，而且每增加一个访问者，你都需要改你的if else，代码会显得非常臃肿，而且非常难以扩展和维护。</p>
+
+        <h1 id="访问者模式中的伪动态双分派"   >
+          <a href="#访问者模式中的伪动态双分派" class="heading-link"><i class="fas fa-link"></i></a>访问者模式中的伪动态双分派</h1>
+      
+<p>访问者模式中使用的是<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>伪动态双分派</span>，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>所谓的动态双分派就是在运行时依据两个实际类型去确定一个方法的执行版本</span>，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>而访问者模式实现的手段是进行了两次动态单分派来达到这个效果。</span></p>
+<p>回到上面例子当中账本类中的accept方法</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bills.forEach(bill -&gt; bill.accept(viewer));</span><br></pre></td></tr></table></div></figure>
+<p>这里就是依据biil和viewer两个实际类型决定了view方法的执行版本。</p>
+
+        <h2 id="分析accept方法的调用过程"   >
+          <a href="#分析accept方法的调用过程" class="heading-link"><i class="fas fa-link"></i></a>分析accept方法的调用过程</h2>
+      
+<ul>
+<li>
+<p>当调用accept方法时，根据bill的实际类型决定是调用ConsumeBill还是IncomeBill的accept方法。</p>
+</li>
+<li>
+<p>这时accept方法的版本已经确定，假如是ConsumeBill，它的accept方法是调用下面这行代码。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(AccountBookViewer viewer)</span> </span>&#123;</span><br><span class="line">    viewer.view(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>此时的this是ConsumeBill类型，所以对应于AccountBookViewer接口的view(ConsumeBill bill)方法，此时需要再根据viewer的实际类型确定view方法的版本，如此一来，就完成了动态双分派的过程。</p>
+</li>
+</ul>
+<p>以上的过程就是通过两次动态双分派，第一次对accept方法进行动态分派，第二次对view（类图中的visit方法）方法进行动态分派，从而达到了<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>根据两个实际类型确定一个方法的行为的效果</span>。</p>
+<p>而原本我们的做法通常是传入一个接口，直接使用该接口的方法，此为动态单分派，就像策略模式一样。在这里，show方法传入的viewer接口并不是直接调用自己的view方法，而是通过bill的实际类型<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>先动态分派一次</span>，然后在分派后确定的方法版本里<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>再进行自己的动态分派</span>。</p>
+<p>注意：这里确定view(ConsumeBill bill)方法是静态分派决定的，所以这个并不在此次动态双分派的范畴内，而且静态分派是在编译期就完成的，所以view(ConsumeBill bill)方法的静态分派与访问者模式的动态双分派并没有任何关系。<strong>动态双分派说到底还是动态分派，是在运行时发生的，它与静态分派有着本质上的区别，不可以说一次动态分派加一次静态分派就是动态双分派，而且访问者模式的双分派本身也是另有所指</strong>。</p>
+<blockquote>
+<p>这里的this的类型不是动态确定的，你写在哪个类当中，它的静态类型就是哪个类，这是在编译期就确定的，不确定的是它的实际类型，请各位区分开这一点。</p>
+</blockquote>
+
+        <h1 id="按照层次访问"   >
+          <a href="#按照层次访问" class="heading-link"><i class="fas fa-link"></i></a>按照层次访问</h1>
+      
+<p>假设我们上面的例子当中再添加一个财务主管，而财务主管不管你是支出还是收入，都要详细的查看你的单子的项目以及金额，简单点说就是财务主管类的两个view方法的代码是一样的。</p>
+<p>这里的将两个view方法抽取的方案是，我们可以将元素提炼出层次结构，针对层次结构提供操作的方法，这样就实现了优点当中最后两点提到的针对层次定义操作以及跨越层次定义操作。</p>
+<p>元素类</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 账单，相当于Element</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Bill</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">accept</span><span class="params">(AccountBookViewer viewer)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractBill</span> <span class="keyword">implements</span> <span class="title">Bill</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 收入金额</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> amount;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 款项</span></span><br><span class="line">    <span class="keyword">private</span> String item;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 收入账单，相当于ConcreteElement</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IncomeBill</span> <span class="keyword">extends</span> <span class="title">AbstractBill</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">IncomeBill</span><span class="params">(<span class="keyword">double</span> amount, String item)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(amount, item);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(AccountBookViewer viewer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (viewer <span class="keyword">instanceof</span> AbstractViewer) &#123;</span><br><span class="line">            ((AbstractViewer) viewer).viewIncomeBill(<span class="keyword">this</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        viewer.viewAbstractBill(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 支出账单，相当于ConcreteElement</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConsumeBill</span> <span class="keyword">extends</span> <span class="title">AbstractBill</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ConsumeBill</span><span class="params">(<span class="keyword">double</span> amount, String item)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(amount, item);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(AccountBookViewer viewer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (viewer <span class="keyword">instanceof</span> AbstractViewer) &#123;</span><br><span class="line">            ((AbstractViewer) viewer).viewConsumeBill(<span class="keyword">this</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        viewer.viewAbstractBill(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这是元素类的层次结构，可以看到，我们的accept当中出现了if判断，这里的判断是在判断一个层次，这段代码是不会被更改的。</p>
+<p>访问者层次</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 账本访问者，相当于Visitor</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">AccountBookViewer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">viewAbstractBill</span><span class="params">(AbstractBill bill)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractViewer</span> <span class="keyword">implements</span> <span class="title">AccountBookViewer</span> </span>&#123;</span><br><span class="line">    <span class="comment">//查看消费的单子</span></span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">viewConsumeBill</span><span class="params">(ConsumeBill bill)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//查看收入的单子</span></span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">viewIncomeBill</span><span class="params">(IncomeBill bill)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">viewAbstractBill</span><span class="params">(AbstractBill bill)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 老板，相当于ConcreteVisitor</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Boss</span> <span class="keyword">extends</span> <span class="title">AbstractViewer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 总收入</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> totalIncome;</span><br><span class="line">    <span class="comment">// 总支出</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> totalConsume;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">viewIncomeBill</span><span class="params">(IncomeBill bill)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.totalIncome += bill.getAmount();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">viewConsumeBill</span><span class="params">(ConsumeBill bill)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.totalConsume += bill.getAmount();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getTotalIncome</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"老板查看一共收入多少，数目是："</span> + totalIncome);</span><br><span class="line">        <span class="keyword">return</span> totalIncome;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getTotalConsume</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"老板查看一共花费多少，数目是："</span> + totalConsume);</span><br><span class="line">        <span class="keyword">return</span> totalConsume;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注会，相当于ConcreteVisitor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CPA</span> <span class="keyword">extends</span> <span class="title">AbstractViewer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//注会在看账本时，如果是支出，则如果支出款项是工资，则需要看应该交的税交了没否则什么都不做</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">viewConsumeBill</span><span class="params">(ConsumeBill bill)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (bill.getItem().equals(<span class="string">"工资"</span>)) &#123;</span><br><span class="line">            System.out.println(<span class="string">"注会查看工资是否交个人所得税。"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//如果是收入，则所有的收入都要交税</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">viewIncomeBill</span><span class="params">(IncomeBill bill)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"注会查看收入交税了没。"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AccountBook</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 账单列表</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;Bill&gt; bills = Lists.newArrayList();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 添加单子</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addBill</span><span class="params">(Bill bill)</span> </span>&#123;</span><br><span class="line">        bills.add(bill);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 供张本的查看者查看张本</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">show</span><span class="params">(AccountBookViewer viewer)</span> </span>&#123;</span><br><span class="line">        bills.forEach(bill -&gt; bill.accept(viewer));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//财务主管类，查看账本的类之一，作用于高层的层次结构</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CFO</span> <span class="keyword">implements</span> <span class="title">AccountBookViewer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//财务主管对每一个单子都要核对项目和金额</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">viewAbstractBill</span><span class="params">(AbstractBill bill)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"财务主管查看账本时，每一个都核对项目和金额，金额是"</span> + bill.getAmount() + <span class="string">"，项目是"</span> + bill.getItem());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>财务主管（CFO）是针对AbstractBill这一层定义的操作，而原来的老板（Boss）和注册会计师（CPA）都是针对ConsumeBill和IncomeBill这一层定义的操作，这时已经产生了跨越层次结构的行为，老板和注册会计师都跨过了抽象单子这一层，直接针对具体的单子定义操作。</p>
+<p>账本类没有变化，最后看客户端的使用</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        AccountBook accountBook = <span class="keyword">new</span> AccountBook();</span><br><span class="line">        <span class="comment">//添加两条收入</span></span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> IncomeBill(<span class="number">10000</span>, <span class="string">"卖商品"</span>));</span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> IncomeBill(<span class="number">12000</span>, <span class="string">"卖广告位"</span>));</span><br><span class="line">        <span class="comment">//添加两条支出</span></span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> ConsumeBill(<span class="number">1000</span>, <span class="string">"工资"</span>));</span><br><span class="line">        accountBook.addBill(<span class="keyword">new</span> ConsumeBill(<span class="number">2000</span>, <span class="string">"材料费"</span>));</span><br><span class="line"></span><br><span class="line">        AccountBookViewer boss = <span class="keyword">new</span> Boss();</span><br><span class="line">        AccountBookViewer cpa = <span class="keyword">new</span> CPA();</span><br><span class="line">        AccountBookViewer cfo = <span class="keyword">new</span> CFO();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//两个访问者分别访问账本</span></span><br><span class="line">        accountBook.show(cpa);</span><br><span class="line">        accountBook.show(boss);</span><br><span class="line">        accountBook.show(cfo);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        ((Boss) boss).getTotalConsume();</span><br><span class="line">        ((Boss) boss).getTotalIncome();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 运行结果</span></span><br><span class="line">注会查看收入交税了没。</span><br><span class="line">注会查看收入交税了没。</span><br><span class="line">注会查看工资是否交个人所得税。</span><br><span class="line">财务主管查看账本时，每一个都核对项目和金额，金额是<span class="number">10000.0</span>，项目是卖商品</span><br><span class="line">财务主管查看账本时，每一个都核对项目和金额，金额是<span class="number">12000.0</span>，项目是卖广告位</span><br><span class="line">财务主管查看账本时，每一个都核对项目和金额，金额是<span class="number">1000.0</span>，项目是工资</span><br><span class="line">财务主管查看账本时，每一个都核对项目和金额，金额是<span class="number">2000.0</span>，项目是材料费</span><br><span class="line">老板查看一共花费多少，数目是：<span class="number">3000.0</span></span><br><span class="line">老板查看一共收入多少，数目是：<span class="number">22000.0</span></span><br></pre></td></tr></table></div></figure>
+<p>回想一下，要是再出现和财务主管一样对所有单子都是一样操作的人，我们就不需要复制代码了，只需要让他实现Viewer接口就可以了，而如果要像老板和注会一样区分单子的具体类型，则继承AbstractViewer就可以。</p>
+
+        <h1 id="使用场景"   >
+          <a href="#使用场景" class="heading-link"><i class="fas fa-link"></i></a>使用场景</h1>
+      
+<p>通常在以下情况可以考虑使用访问者（Visitor）模式。</p>
+<ol>
+<li>对象结构相对稳定，但其操作算法经常变化的程序。</li>
+<li>对象结构中的对象需要提供多种不同且不相关的操作，而且要避免让这些操作的变化影响对象的结构。</li>
+<li>对象结构包含很多类型的对象，希望对这些对象实施一些依赖于其具体类型的操作。</li>
+</ol>
+
+        <h1 id="模式扩展"   >
+          <a href="#模式扩展" class="heading-link"><i class="fas fa-link"></i></a>模式扩展</h1>
+      
+<p>访问者（Visitor）模式是使用频率较高的一种设计模式，它常常同以下两种设计模式联用。</p>
+<ol>
+<li>
+<p>与“迭代器模式”联用。因为访问者模式中的“对象结构”是一个包含元素角色的容器，当访问者遍历容器中的所有元素时，常常要用迭代器。如【例1】中的对象结构是用 List 实现的，它通过 List 对象的 Itemtor() 方法获取迭代器。如果对象结构中的聚合类没有提供迭代器，也可以用迭代器模式自定义一个。</p>
+</li>
+<li>
+<p>访问者（Visitor）模式同“组合模式”联用。因为访问者（Visitor）模式中的“元素对象”可能是叶子对象或者是容器对象，如果元素对象包含容器对象，就必须用到组合模式，其结构图如图 4 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200826061150.png"  alt="" />
+      </p>
+</li>
+</ol>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<p><strong>访问者模式</strong>把数据结构和作用于结构上的操作解耦合，使得操作集合可相对自由地演化。访问者模式适用于数据结构相对稳定算法又易变化的系统。因为访问者模式使得算法操作增加变得容易。若系统数据结构对象易于变化，经常有新的数据对象增加进来，则不适合使用访问者模式。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/25_%E8%A1%8C%E4%B8%BA%E5%9E%8B_%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/25_%E8%A1%8C%E4%B8%BA%E5%9E%8B_%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/26_%E8%A1%8C%E4%B8%BA%E5%9E%8B_%E5%A4%87%E5%BF%98%E5%BD%95/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">行为型_备忘录</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/24_%E8%A1%8C%E4%B8%BA%E5%9E%8B_%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/"><span class="paginator-prev__text">行为型_迭代器模式</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#定义与特点"><span class="toc-number">1.</span> <span class="toc-text">
+          定义与特点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#uml图"><span class="toc-number">2.</span> <span class="toc-text">
+          UML图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#简单案例"><span class="toc-number">3.</span> <span class="toc-text">
+          简单案例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#访问者模式中的伪动态双分派"><span class="toc-number">4.</span> <span class="toc-text">
+          访问者模式中的伪动态双分派</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#分析accept方法的调用过程"><span class="toc-number">4.1.</span> <span class="toc-text">
+          分析accept方法的调用过程</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#按照层次访问"><span class="toc-number">5.</span> <span class="toc-text">
+          按照层次访问</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#使用场景"><span class="toc-number">6.</span> <span class="toc-text">
+          使用场景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#模式扩展"><span class="toc-number">7.</span> <span class="toc-text">
+          模式扩展</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">8.</span> <span class="toc-text">
+          总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

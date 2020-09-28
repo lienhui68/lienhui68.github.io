@@ -1,0 +1,542 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="概念        操作系统（Operating System， OS）是指控制和管理整个计算机系统的硬件和软件资源，并合理地组织调度计算机的工作和资源的分配；以提供给用户和其他软件方便的接口和环境；它是计算机系统中最基本的系统软件。 换句话说就是， 操作系统是系统资源的管理者，它向上层提供方便易用的服务，是最接近硬件的一层软件。 直观的例子：打开 Windows 操作系统的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统的基本概念">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/1.%20%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="概念        操作系统（Operating System， OS）是指控制和管理整个计算机系统的硬件和软件资源，并合理地组织调度计算机的工作和资源的分配；以提供给用户和其他软件方便的接口和环境；它是计算机系统中最基本的系统软件。 换句话说就是， 操作系统是系统资源的管理者，它向上层提供方便易用的服务，是最接近硬件的一层软件。 直观的例子：打开 Windows 操作系统的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709155536.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709160910.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709161052.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709165032.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709182038.png">
+<meta property="article:published_time" content="2020-07-09T00:04:35.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:54.695Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709155536.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>操作系统的基本概念 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/1.%20%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">操作系统的基本概念</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-09</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">12分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="概念"   >
+          <a href="#概念" class="heading-link"><i class="fas fa-link"></i></a>概念</h1>
+      
+<p>操作系统（Operating System， OS）是指控制和管理整个计算机系统的硬件和软件资源，并合理地组织调度计算机的工作和资源的分配；以提供给用户和其他软件方便的接口和环境；它是计算机系统中最基本的系统软件。<br />
+换句话说就是， 操作系统是系统资源的管理者，它向上层提供方便易用的服务，是最接近硬件的一层软件。<br />
+直观的例子：打开 Windows 操作系统的“任务管理器”（快捷键：Ctrl+Alt+Del）<br />
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709155536.png"  alt="" />
+      </p>
+<a id="more"></a>
+
+        <h1 id="功能和目标"   >
+          <a href="#功能和目标" class="heading-link"><i class="fas fa-link"></i></a>功能和目标</h1>
+      
+
+        <h2 id="作为系统资源的管理者"   >
+          <a href="#作为系统资源的管理者" class="heading-link"><i class="fas fa-link"></i></a>作为系统资源的管理者</h2>
+      
+<ul>
+<li>提供的功能
+<ul>
+<li>cpu管理</li>
+<li>存储器管理</li>
+<li>文件管理</li>
+<li>设备管理</li>
+</ul>
+</li>
+<li>目标<br />
+安全、高效</li>
+</ul>
+<blockquote>
+<p>补充知识：执行一个程序前需要将该程序放到内存中，才能被CPU处理。</p>
+</blockquote>
+<p>用QQ和朋友视频聊天的过程：<br />
+Step 1：在各个文件夹中找到 QQ 安装的位置（如 D:/Tencent/QQ/Bin）</p>
+<blockquote>
+<p>文件管理</p>
+</blockquote>
+<p>Step 2：双击打开 QQ.exe</p>
+<blockquote>
+<p>需要把该程序相关数据放入内存, 存储管理</p>
+</blockquote>
+<p>Step 3：QQ 程序正常运行</p>
+<blockquote>
+<p>对应的进程被处理机（CPU）处理, cpu管理</p>
+</blockquote>
+<p>Step 4：开始和朋友视频聊天</p>
+<blockquote>
+<p>需要将摄像头设备分配给进程, 设备管理</p>
+</blockquote>
+
+        <h2 id="向上层提供方便易用的服务"   >
+          <a href="#向上层提供方便易用的服务" class="heading-link"><i class="fas fa-link"></i></a>向上层提供方便易用的服务</h2>
+      
+<p><strong>硬件只听得懂二进制指令</strong>，如： 01010111101110111010101 硬件对外暴露了“丑陋”、不友好的交互接口</p>
+<p>在硬件之上安装了操作系统，操作系统对 外暴露了“美丽”、友好的交互接口</p>
+<blockquote>
+<p>这里体现了封装思想：操作系统把一些丑陋的硬件功能封装成简单易用的服务，使用户能更方便地使用计算机，用户无需关心底层硬件的原理，只需要对操作系统发出命令即可</p>
+</blockquote>
+<p>GUI：图形化用户接口（Graphical User Interface）用户可以使用形象的图形界面进行操作，而不再需要记忆复杂的命令、参数。例子：在 Windows 操作系统中，删除一个文件只需要把文件“拖拽”到回收站即可。</p>
+
+        <h3 id="命令接口"   >
+          <a href="#命令接口" class="heading-link"><i class="fas fa-link"></i></a>命令接口</h3>
+      
+<ol>
+<li>
+<p>联机命令接口<br />
+又称<strong>交互式命令接口</strong>，特点是用户说一句，系统跟着做一句，比如在终端输入time回车，系统显示当前时间并让输入新时间。</p>
+</li>
+<li>
+<p>脱机命令接口<br />
+又称<strong>批处理接口</strong>，特点是用户说一堆，系统跟着做一堆。<br />
+例如windows系统中的批处理文件(.bat)<br />
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709160910.png"  alt="" />
+      </p>
+</li>
+</ol>
+
+        <h3 id="程序接口"   >
+          <a href="#程序接口" class="heading-link"><i class="fas fa-link"></i></a>程序接口</h3>
+      
+<p>可以在程序中进行系统调用来使用<strong>程序接口</strong>。普通用户不能直接使用程序接口，只能通过<strong>程序代码间接使用</strong>。<br />
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709161052.png"  alt="" />
+      </p>
+
+        <h3 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h3>
+      
+<ul>
+<li>直接给用户使用的
+<ul>
+<li>GUI</li>
+<li>命令接口
+<ul>
+<li>联机命令接口</li>
+<li>脱机命令接口</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>给软件/程序员使用的
+<ul>
+<li>程序接口 即系统调用，用户通过程序间接使用</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>程序接口和命令接口统称为用户接口</p>
+</blockquote>
+
+        <h2 id="作为最接近硬件的层次"   >
+          <a href="#作为最接近硬件的层次" class="heading-link"><i class="fas fa-link"></i></a>作为最接近硬件的层次</h2>
+      
+<p>需要实现<strong>对硬件机器的拓展</strong><br />
+没有任何软件支持的计算机成为裸机。在裸机上安装的操作系统，可以提供资源管理功能和方便用户的服务功能，将裸机改造成功能更强、使用更方便的机器。<br />
+通常把覆盖了软件的机器成为扩充机器，又称之为虚拟机。</p>
+<blockquote>
+<p>类比汽车： 发动机——只会转；轮胎——只会滚； 在原始的硬件机器上覆盖一层传动系统——让发动机带着轮子转——使原始的硬件机器得到拓展。<br />
+操作系统对硬件机器的拓展：将CPU、内存、磁盘、显示器、键盘等硬件合理地组织起来，让各种硬件 能够相互协调配合，实现更多更复杂的功能 普通用户无需关心这些硬件在底层是怎么组织起来工作的，只需直接使用操作系统提供的接口即可。</p>
+</blockquote>
+
+        <h1 id="操作系统的4个特征"   >
+          <a href="#操作系统的4个特征" class="heading-link"><i class="fas fa-link"></i></a>操作系统的4个特征</h1>
+      
+
+        <h2 id="并发"   >
+          <a href="#并发" class="heading-link"><i class="fas fa-link"></i></a>并发</h2>
+      
+<p>指两个或多个事件在同一时间间隔内发生。这些事件<strong>宏观上是同时发生的，但微观上是交替发生的</strong>。常考易混概念——并行：指两个或多个事件在同一时刻同时发生。</p>
+<p><strong>并发 VS 并行</strong><br />
+eg：假设小渣和老渣每人有两个女朋友。任务1：和一号约会；任务2：和二号约会…<br />
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709165032.png"  alt="" />
+      </p>
+<p><strong>操作系统的并发性</strong>指计算机系统中“同时”运行着多个程序，这些程序宏观上看是同时运行着的，而微观上看是交替运行的。操作系统就是伴随着“多道程序工作”而出现的。因此，<strong>操作系统和程序并发是一起诞生的</strong>。</p>
+<p><strong>注意</strong><br />
+<strong>单核CPU</strong>同一时刻只能执行<strong>一个程序</strong>，各个程序只能<strong>并发</strong>地执行<br />
+<strong>多核CPU</strong>同一时刻可以同时执行<strong>多个程序</strong>，多个程序可以<strong>并行</strong>地执行</p>
+<blockquote>
+<p>比如Intel 的第八代 i3 处理器就是 4 核CPU，意味着可以并行地执行4个程序。 即使是对于4核CPU来说，只要有4个以上的程序需要“同时”运行，那么并发性依然是必不可少的，因此并发性是操作系统一个最基本的特性。</p>
+</blockquote>
+
+        <h2 id="共享"   >
+          <a href="#共享" class="heading-link"><i class="fas fa-link"></i></a>共享</h2>
+      
+<p>共享即资源共享，是指系统中的资源可供内存中多个并发执行的进程共同使用。<br />
+共享有两种方式</p>
+<ul>
+<li>互斥共享<br />
+系统中的某些资源，虽然可以提供给多个进程使用，但<strong>一个时间段内只允许一个进程访问该资源</strong></li>
+<li>“同时”共享<br />
+系统中的某些资源，允许一个时间段内由多个进程“同时”对它们进行访问</li>
+</ul>
+<blockquote>
+<p>所谓的“同时”往往是宏观上的，而在微观上，这些进程可能是交替地对该资源进行访问的（即分时共享）<br />
+生活实例：<br />
+互斥共享方式：使用QQ和微信视频。同一时间段内摄像头只能分配给其中一个进程。<br />
+同时共享方式：使用QQ发送文件A，同时使用微信发送文件B。宏观上看，两边都在同时读取并发送文件，说明两个进程都在访问硬盘资源，从中读取数据。微观上看，两个进程是交替着访问硬盘的。<br />
+也有同时共享但不互斥的例子，比如扬声器同时播放游戏和音乐声音。</p>
+</blockquote>
+<p><strong>并发和共享的关系</strong><br />
+并发性指计算机系统中同时存在着多个运行着的程序。 共享性是指系统中的资源可供内存中多个并发执行的进程共同使用。<br />
+并发和共享<strong>互为存在条件</strong>。<br />
+通过上述例子来看并发与共享的关系： 使用QQ发送文件A，同时使用微信发送文件B。</p>
+<ol>
+<li>两个进程正在并发执行（并发性）</li>
+</ol>
+<blockquote>
+<p>如果失去并发性，则系统中只有一个 程序正在运行，则共享性失去存在的 意义</p>
+</blockquote>
+<ol start="2">
+<li>需要共享地访问硬盘资源（共享性）</li>
+</ol>
+<blockquote>
+<p>如果失去共享性，则QQ和微信不能同时访问硬盘资源，就无法实现同时发送文件，也就无法并发。</p>
+</blockquote>
+
+        <h2 id="虚拟"   >
+          <a href="#虚拟" class="heading-link"><i class="fas fa-link"></i></a>虚拟</h2>
+      
+<p><strong>虚拟</strong>是指把一个物理上的实体变为若干个逻辑上的对应物。物理实体（前者）是实际存在的，而逻辑上 对应物（后者）是用户感受到的。</p>
+<p>用一个例子来理解虚拟工作中的“空分复用工作”</p>
+<blockquote>
+<p>背景知识：一个程序<strong>需要放入内存</strong>并给它<strong>分配CPU</strong>才能执行</p>
+<p>GTA5需要4GB的运行内存，QQ 需要256MB的内存，迅雷需要256MB的内 存，网易云音乐需要256MB的内存……</p>
+<p>我的电脑：4GB内存</p>
+<p>问题：这些程序同时运行需要的内存远大<strong>于4GB</strong>，那么为什么它们还可以 在我的电脑上同时运行呢？</p>
+<p>答：这是虚拟存储器工作。实际只有4GB的内存，在用户看来似乎远远大于4GB。</p>
+</blockquote>
+<p>再用一个例子来理解虚拟工作中的“时分复用工作”：微观上处理机在 各个微小的时间段内交替 着为各个进程服务。</p>
+<blockquote>
+<p>某单核CPU的计算机中，用户打开QQ、浏览器、微信、迅雷</p>
+<p>问题：既然一个程序需要被分配CPU才能正常执行，那么为什么单核CPU 的电脑中能同时运行这么多个程序呢？</p>
+<p>答：这是虚拟处理器工作。实际上只有一个单核CPU，在用户看来似乎有 6个CPU在同时为自己服务</p>
+</blockquote>
+<p><strong>虚拟工作</strong></p>
+<ul>
+<li>空分复用工作(如虚拟存储器工作)</li>
+<li>时分复用工作(如虚拟处理器)</li>
+</ul>
+<blockquote>
+<p>显然，如果失去了并发性，则一个时间段 内系统中只需运行一道程序，那么就失去 了实现虚拟性的意义了。<strong>因此，没有并发性，就谈不上虚拟性</strong></p>
+</blockquote>
+
+        <h2 id="异步"   >
+          <a href="#异步" class="heading-link"><i class="fas fa-link"></i></a>异步</h2>
+      
+<p><strong>异步</strong>是指，在多道程序环境下，允许多个程序并发执行，但由于资源有限，进程的执行不是一贯到底的， 而是走走停停，以不可预知的速度向前推进，这就是进程的异步性。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709182038.png"  alt="" />
+      </p>
+<p><strong>没有并发和共享，就谈不上虚拟和异步，因此并发和共享是操作系统的两个最基本的特征</strong></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/1.%20%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/1.%20%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E4%B8%AD%E6%96%AD/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">中断</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/20_%E9%99%84%E5%BD%95D_Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%92%8CJVM%E5%AD%97%E8%8A%82%E7%A0%81/"><span class="paginator-prev__text">附录D_Lambda表达式和JVM字节码</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概念"><span class="toc-number">1.</span> <span class="toc-text">
+          概念</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#功能和目标"><span class="toc-number">2.</span> <span class="toc-text">
+          功能和目标</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#作为系统资源的管理者"><span class="toc-number">2.1.</span> <span class="toc-text">
+          作为系统资源的管理者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#向上层提供方便易用的服务"><span class="toc-number">2.2.</span> <span class="toc-text">
+          向上层提供方便易用的服务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#命令接口"><span class="toc-number">2.2.1.</span> <span class="toc-text">
+          命令接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#程序接口"><span class="toc-number">2.2.2.</span> <span class="toc-text">
+          程序接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">2.2.3.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#作为最接近硬件的层次"><span class="toc-number">2.3.</span> <span class="toc-text">
+          作为最接近硬件的层次</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#操作系统的4个特征"><span class="toc-number">3.</span> <span class="toc-text">
+          操作系统的4个特征</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#并发"><span class="toc-number">3.1.</span> <span class="toc-text">
+          并发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#共享"><span class="toc-number">3.2.</span> <span class="toc-text">
+          共享</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#虚拟"><span class="toc-number">3.3.</span> <span class="toc-text">
+          虚拟</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异步"><span class="toc-number">3.4.</span> <span class="toc-text">
+          异步</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

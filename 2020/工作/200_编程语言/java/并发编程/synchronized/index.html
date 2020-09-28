@@ -1,0 +1,556 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="简介        JVM会自动通过使用monitor来加锁和解锁，保证了同时只有一个线程可以执行指定代码，从而保证了线程安全，同时具有可重入和不可中断的性质。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="synchronized">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/synchronized/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="简介        JVM会自动通过使用monitor来加锁和解锁，保证了同时只有一个线程可以执行指定代码，从而保证了线程安全，同时具有可重入和不可中断的性质。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200728094112.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200728094357737.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200807191359.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.177Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.180Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="并发编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200728094112.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>synchronized | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/synchronized/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">synchronized</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.1k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">20分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="简介"   >
+          <a href="#简介" class="heading-link"><i class="fas fa-link"></i></a>简介</h1>
+      
+<p>JVM会自动通过使用monitor来加锁和解锁，保证了同时只有一个线程可以执行指定代码，从而保证了线程安全，同时具有可重入和不可中断的性质。</p>
+<a id="more"></a>
+
+        <h1 id="用法"   >
+          <a href="#用法" class="heading-link"><i class="fas fa-link"></i></a>用法</h1>
+      
+
+        <h2 id="对象锁"   >
+          <a href="#对象锁" class="heading-link"><i class="fas fa-link"></i></a>对象锁</h2>
+      
+<ul>
+<li>
+<p>方法锁</p>
+</li>
+<li>
+<p>同步的代码块锁</p>
+</li>
+</ul>
+
+        <h2 id="类锁"   >
+          <a href="#类锁" class="heading-link"><i class="fas fa-link"></i></a>类锁</h2>
+      
+<ul>
+<li>静态的方法</li>
+<li>指定锁为class对象</li>
+</ul>
+
+        <h1 id="性质"   >
+          <a href="#性质" class="heading-link"><i class="fas fa-link"></i></a>性质</h1>
+      
+<p>可重入</p>
+<p>不可中断</p>
+
+        <h1 id="原理"   >
+          <a href="#原理" class="heading-link"><i class="fas fa-link"></i></a>原理</h1>
+      
+
+        <h2 id="源码"   >
+          <a href="#源码" class="heading-link"><i class="fas fa-link"></i></a>源码</h2>
+      
+<p><strong>字节码</strong>：monitorenter moniterexit</p>
+<p><strong>jvm层级(hotspot实现)</strong></p>
+<p>InterpreterRuntime:: monitorenter方法</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">IRT_ENTRY_NO_ASYNC(<span class="keyword">void</span>, InterpreterRuntime::monitorenter(JavaThread* thread, BasicObjectLock* elem))</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> ASSERT</span></span><br><span class="line">  thread-&gt;last_frame().interpreter_frame_verify_monitor(elem);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">  <span class="keyword">if</span> (PrintBiasedLockingStatistics) &#123;</span><br><span class="line">    Atomic::inc(BiasedLocking::slow_path_entry_count_addr());</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function">Handle <span class="title">h_obj</span><span class="params">(thread, elem-&gt;obj())</span></span>;</span><br><span class="line">  assert(Universe::heap()-&gt;is_in_reserved_or_null(h_obj()),</span><br><span class="line">         <span class="string">"must be NULL or an object"</span>);</span><br><span class="line">  <span class="keyword">if</span> (UseBiasedLocking) &#123;</span><br><span class="line">    <span class="comment">// Retry fast entry if bias is revoked to avoid unnecessary inflation</span></span><br><span class="line">    ObjectSynchronizer::fast_enter(h_obj, elem-&gt;lock(), <span class="literal">true</span>, CHECK);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    ObjectSynchronizer::slow_enter(h_obj, elem-&gt;lock(), CHECK);</span><br><span class="line">  &#125;</span><br><span class="line">  assert(Universe::heap()-&gt;is_in_reserved_or_null(elem-&gt;obj()),</span><br><span class="line">         <span class="string">"must be NULL or an object"</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> ASSERT</span></span><br><span class="line">  thread-&gt;last_frame().interpreter_frame_verify_monitor(elem);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">IRT_END</span><br></pre></td></tr></table></div></figure>
+<p>synchronizer.cpp</p>
+<p>revoke_and_rebias</p>
+<figure class="highlight c++"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ObjectSynchronizer::fast_enter</span><span class="params">(Handle obj, BasicLock* lock, <span class="keyword">bool</span> attempt_rebias, TRAPS)</span> </span>&#123;</span><br><span class="line"> <span class="keyword">if</span> (UseBiasedLocking) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!SafepointSynchronize::is_at_safepoint()) &#123;</span><br><span class="line">      BiasedLocking::Condition cond = BiasedLocking::revoke_and_rebias(obj, attempt_rebias, THREAD);</span><br><span class="line">      <span class="keyword">if</span> (cond == BiasedLocking::BIAS_REVOKED_AND_REBIASED) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      assert(!attempt_rebias, <span class="string">"can not rebias toward VM thread"</span>);</span><br><span class="line">      BiasedLocking::revoke_at_safepoint(obj);</span><br><span class="line">    &#125;</span><br><span class="line">    assert(!obj-&gt;mark()-&gt;has_bias_pattern(), <span class="string">"biases should be revoked by now"</span>);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> slow_enter (obj, lock, THREAD) ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight c++"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ObjectSynchronizer::slow_enter</span><span class="params">(Handle obj, BasicLock* lock, TRAPS)</span> </span>&#123;</span><br><span class="line">  markOop mark = obj-&gt;mark();</span><br><span class="line">  assert(!mark-&gt;has_bias_pattern(), <span class="string">"should not see bias pattern here"</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (mark-&gt;is_neutral()) &#123;</span><br><span class="line">    <span class="comment">// Anticipate successful CAS -- the ST of the displaced mark must</span></span><br><span class="line">    <span class="comment">// be visible &lt;= the ST performed by the CAS.</span></span><br><span class="line">    lock-&gt;set_displaced_header(mark);</span><br><span class="line">    <span class="keyword">if</span> (mark == (markOop) Atomic::cmpxchg_ptr(lock, obj()-&gt;mark_addr(), mark)) &#123;</span><br><span class="line">      TEVENT (slow_enter: <span class="built_in">release</span> stacklock) ;</span><br><span class="line">      <span class="keyword">return</span> ;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Fall through to inflate() ...</span></span><br><span class="line">  &#125; <span class="keyword">else</span></span><br><span class="line">  <span class="keyword">if</span> (mark-&gt;has_locker() &amp;&amp; THREAD-&gt;is_lock_owned((address)mark-&gt;locker())) &#123;</span><br><span class="line">    assert(lock != mark-&gt;locker(), <span class="string">"must not re-lock the same lock"</span>);</span><br><span class="line">    assert(lock != (BasicLock*)obj-&gt;mark(), <span class="string">"don't relock with same BasicLock"</span>);</span><br><span class="line">    lock-&gt;set_displaced_header(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">  <span class="comment">// The following optimization isn't particularly useful.</span></span><br><span class="line">  <span class="keyword">if</span> (mark-&gt;has_monitor() &amp;&amp; mark-&gt;monitor()-&gt;is_entered(THREAD)) &#123;</span><br><span class="line">    lock-&gt;set_displaced_header (<span class="literal">NULL</span>) ;</span><br><span class="line">    <span class="keyword">return</span> ;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// The object header will never be displaced to this lock,</span></span><br><span class="line">  <span class="comment">// so it does not matter what the value is, except that it</span></span><br><span class="line">  <span class="comment">// must be non-zero to avoid looking like a re-entrant lock,</span></span><br><span class="line">  <span class="comment">// and must not look locked either.</span></span><br><span class="line">  lock-&gt;set_displaced_header(markOopDesc::unused_mark());</span><br><span class="line">  ObjectSynchronizer::inflate(THREAD, obj())-&gt;enter(THREAD);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>inflate方法：膨胀为重量级锁</p>
+
+        <h2 id="synchronized最底层实现"   >
+          <a href="#synchronized最底层实现" class="heading-link"><i class="fas fa-link"></i></a>synchronized最底层实现</h2>
+      
+<p>查看汇编码(由于jvm在热点代码才使用jit，所以需要构造热点代码再执行，需要使用工具hsdis)</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">T</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">n</span><span class="params">()</span> </span>&#123; i++; &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">m</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function">publics <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">0</span>; j&lt;<span class="number">1000_000</span>; j++) &#123;</span><br><span class="line">            m();</span><br><span class="line">            n();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>运行 <code>java -XX:+UnlockDiagonositicVMOptions -XX:+PrintAssembly T</code></p>
+<p>C1 Compile Level 1 (一级优化)</p>
+<p>C2 Compile Level 2 (二级优化)</p>
+<p>找到m() n()方法的汇编码，会看到<code>lock comxchg .....</code>指令</p>
+<p>lock addl 0 往某个寄存器上加个0 想当于没任何操作 空操作 这个实现的是内存屏障</p>
+
+        <h2 id="对象头"   >
+          <a href="#对象头" class="heading-link"><i class="fas fa-link"></i></a>对象头</h2>
+      
+<p>synchronized优化的过程和markword息息相关，用markword中最低的三位代表锁状态，其中1位是偏向锁位，两位是普通锁位。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200728094112.png"  alt="" />
+      </p>
+<blockquote>
+<p>锁标志11 表示对象需要被回收</p>
+<p>低位01区分不开，增加1位区分无锁和偏向锁</p>
+<p>可以使用jol工具类查看，注意打印出来的内存布局采用的是大端存储</p>
+</blockquote>
+
+        <h2 id="锁升级"   >
+          <a href="#锁升级" class="heading-link"><i class="fas fa-link"></i></a>锁升级</h2>
+      
+<p>无锁 - 偏向锁 - 轻量级锁 （自旋锁，自适应自旋）- 重量级锁</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200728094357737.png"  alt="" />
+      </p>
+<ol>
+<li>
+<p>Object o = new Object()<br />
+锁 = 0 01 无锁态</p>
+</li>
+<li>
+<p>默认情况在jvm启动时偏向锁也已启动，只不过偏向锁有个时延，默认是4秒</p>
+<blockquote>
+<p>why?</p>
+<p>因为JVM虚拟机自己有一些默认启动的线程，里面有好多sync代码，这些sync代码启动时就知道肯定会有竞争，如果使用偏向锁，就会造成偏向锁不断的进行锁撤销和锁升级的操作，效率较低。</p>
+<p>可以通过设置<code>-XX:BiasedLockingStartupDelay=0</code>来消除延迟</p>
+</blockquote>
+</li>
+<li>
+<p>如果设定<code>-XX:BiasedLockingStartupDelay=0</code></p>
+<p>new Object () - &gt; 101 偏向锁 -&gt;线程ID为0 -&gt; Anonymous BiasedLock<br />
+打开偏向锁，new出来的对象，默认就是一个可偏向匿名对象101</p>
+</li>
+<li>
+<p>如果有线程上锁<br />
+上偏向锁，指的就是，把markword的线程ID改为自己线程ID的过程<br />
+偏向锁不可重偏向 批量偏向 批量撤销</p>
+<blockquote>
+<p>如果偏向锁上来就重度竞争，耗时特别长，或者有wait操作，直接升级到重量级锁</p>
+</blockquote>
+</li>
+<li>
+<p>如果有线程竞争</p>
+</li>
+<li>
+<p>撤销偏向锁，升级轻量级锁</p>
+<p>轻度竞争，当有了偏向锁后，又来了线程进行竞争，后面的线程使用cas的方式进行竞争，竞争成功后 将指向线程栈中的Lock Record 贴到指定空间</p>
+<p>线程在自己的线程栈生成LockRecord ，用CAS操作将markword设置为指向自己这个线程的LR的指针，设置成功者得到锁</p>
+<blockquote>
+<p>每个线程有自己的LockRecord在自己的线程栈上，用CAS去争用markword的LR的指针，指针指向哪个线程的LR，哪个线程就拥有锁</p>
+</blockquote>
+</li>
+<li>
+<p>如果竞争加剧<br />
+竞争加剧：有线程超过10次自旋， -XX:PreBlockSpin， 或者自旋线程数超过CPU核数的一半， 1.6之后，加入自适应自旋 Adapative Self Spinning ， JVM自己控制</p>
+<blockquote>
+<p>自适应自旋锁意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间。如果对于某个锁，自旋很少成功获得过，那在以后尝试获取这个锁时将可能省略掉自旋过程，直接阻塞线程，避免浪费处理器资源。</p>
+</blockquote>
+<p>升级重量级锁：-&gt; 向操作系统申请资源，linux mutex , CPU从3级-0级系统调用，线程挂起，进入等待队列，等待操作系统的调度，然后再映射回用户空间</p>
+</li>
+</ol>
+
+        <h3 id="偏向锁"   >
+          <a href="#偏向锁" class="heading-link"><i class="fas fa-link"></i></a>偏向锁</h3>
+      
+<p>偏向锁 - markword 上记录当前线程指针，下次同一个线程加锁的时候，不需要争用，只需要判断线程指针是否同一个，所以，偏向锁是偏向加锁的第一个线程 。线程销毁，锁降级为无锁。</p>
+<p>偏向锁由于有锁撤销的过程revoke，会消耗系统资源，所以，在锁争用特别激烈的时候，用偏向锁未必效率高。还不如直接使用轻量级锁。</p>
+
+        <h3 id="自旋锁"   >
+          <a href="#自旋锁" class="heading-link"><i class="fas fa-link"></i></a>自旋锁</h3>
+      
+<p>自旋锁在 JDK1.4.2 中引入，使用 -XX:+UseSpinning 来开启。JDK 6 中变为默认开启，并且引入了自适应的自旋锁（适应性自旋锁）。</p>
+<p>自适应自旋锁意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间。如果对于某个锁，自旋很少成功获得过，那在以后尝试获取这个锁时将可能省略掉自旋过程，直接阻塞线程，避免浪费处理器资源。</p>
+
+        <h3 id="重量级锁"   >
+          <a href="#重量级锁" class="heading-link"><i class="fas fa-link"></i></a>重量级锁</h3>
+      
+<p>重量级锁依赖于操作系统的互斥量（mutex） 实现的，而操作系统中线程间状态的转换需要相对比较长的时间，所以重量级锁效率很低，但被阻塞的线程不会消耗CPU。</p>
+<p>前面说到，每一个对象都可以当做一个锁，当多个线程同时请求某个对象锁时，对象锁会设置几种状态用来区分请求的线程：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Contention List：所有请求锁的线程将被首先放置到该竞争队列</span><br><span class="line">Entry List：Contention List中那些有资格成为候选人的线程被移到Entry List</span><br><span class="line">Wait Set：那些调用wait方法被阻塞的线程被放置到Wait Set</span><br><span class="line">OnDeck：任何时刻最多只能有一个线程正在竞争锁，该线程称为OnDeck</span><br><span class="line">Owner：获得锁的线程称为Owner</span><br><span class="line">!Owner：释放锁的线程</span><br></pre></td></tr></table></div></figure>
+<p>当一个线程尝试获得锁时，如果该锁已经被占用，则会将该线程封装成一个<code>ObjectWaiter</code>对象插入到Contention List的队列的队首，然后调用<code>park</code>函数挂起当前线程。</p>
+<p>当线程释放锁时，会从Contention List或EntryList中挑选一个线程唤醒，被选中的线程叫做<code>Heir presumptive</code>即假定继承人，假定继承人被唤醒后会尝试获得锁，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>但<code>synchronized</code>是非公平的，所以假定继承人不一定能获得锁。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这是因为对于重量级锁，线程先自旋尝试获得锁，这样做的目的是为了减少执行操作系统同步操作带来的开销。</span>如果自旋不成功再进入等待队列。这对那些已经在等待队列中的线程来说，稍微显得不公平，还有一个不公平的地方是自旋线程可能会抢占了Ready线程的锁。</span></p>
+<p>如果线程获得锁后调用<code>Object.wait</code>方法，则会将线程加入到WaitSet中，当被<code>Object.notify</code>唤醒后，会将线程从WaitSet移动到Contention List或EntryList中去。需要注意的是，当调用一个锁对象的<code>wait</code>或<code>notify</code>方法时，<strong>如当前锁的状态是偏向锁或轻量级锁则会先膨胀成重量级锁</strong>。</p>
+
+        <h3 id="各种锁的优缺点对比"   >
+          <a href="#各种锁的优缺点对比" class="heading-link"><i class="fas fa-link"></i></a>各种锁的优缺点对比</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200807191359.png"  alt="" />
+      </p>
+
+        <h3 id="用户空间锁-vs-重量级锁"   >
+          <a href="#用户空间锁-vs-重量级锁" class="heading-link"><i class="fas fa-link"></i></a>用户空间锁 vs 重量级锁</h3>
+      
+<ul>
+<li>偏向锁、自旋锁都是用户空间完成的</li>
+<li>重量级锁需要向内核申请</li>
+</ul>
+
+        <h3 id="为何会有偏向锁"   >
+          <a href="#为何会有偏向锁" class="heading-link"><i class="fas fa-link"></i></a>为何会有偏向锁</h3>
+      
+<p>synchronized方法，在多数情况下只有一个线程在运行。</p>
+
+        <h3 id="为什么有自旋锁还需要重量级锁"   >
+          <a href="#为什么有自旋锁还需要重量级锁" class="heading-link"><i class="fas fa-link"></i></a>为什么有自旋锁还需要重量级锁</h3>
+      
+<p>自旋锁适合临界区执行时间比较短的情况，转圈次数比较少就能获得或者竞争的线程比较少。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>自旋是消耗cpu资源的，如果锁的时间过长，或者自旋线程很多，cpu资源会被大量消耗。重量级锁有等待队列，所有拿不到锁的进入等待队列，不需要消耗资源。</span></p>
+
+        <h2 id="锁降级"   >
+          <a href="#锁降级" class="heading-link"><i class="fas fa-link"></i></a>锁降级</h2>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/63859501"  target="_blank" rel="noopener">https://www.zhihu.com/question/63859501</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>其实，只被VMThread访问，降级也就没啥意义了。所以可以简单认为锁降级不存在！</p>
+<p>降级只会在某些特定情况下发生比如gc，但是gc表明对象要被回收，此时降级没什么意义。</p>
+
+        <h2 id="锁消除-lock-eliminate"   >
+          <a href="#锁消除-lock-eliminate" class="heading-link"><i class="fas fa-link"></i></a>锁消除 lock eliminate</h2>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(String str1,String str2)</span></span>&#123;</span><br><span class="line">         StringBuffer sb = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">         sb.append(str1).append(str2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>我们都知道 StringBuffer 是线程安全的，因为它的关键方法都是被 synchronized 修饰过的，但我们看上面这段代码，我们会发现，sb 这个引用只会在 add 方法中使用，不可能被其它线程引用（因为是局部变量，栈私有），因此 sb 是不可能共享的资源，JVM 会自动消除 StringBuffer 对象内部的锁。</p>
+
+        <h2 id="锁粗化-lock-coarsening"   >
+          <a href="#锁粗化-lock-coarsening" class="heading-link"><i class="fas fa-link"></i></a>锁粗化 lock coarsening</h2>
+      
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">(String str)</span></span>&#123;</span><br><span class="line">       </span><br><span class="line">       <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">       StringBuffer sb = <span class="keyword">new</span> StringBuffer():</span><br><span class="line">       <span class="keyword">while</span>(i &lt; <span class="number">100</span>)&#123;</span><br><span class="line">           sb.append(str);</span><br><span class="line">           i++;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> sb.toString():</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>JVM 会检测到这样一连串的操作都对同一个对象加锁（while 循环内 100 次执行 append，没有锁粗化的就要进行 100  次加锁/解锁），此时 JVM 就会将加锁的范围粗化到这一连串的操作的外部（比如 while 循环体外），使得这一连串操作只需要加一次锁即可。</p>
+
+        <h1 id="缺陷"   >
+          <a href="#缺陷" class="heading-link"><i class="fas fa-link"></i></a>缺陷</h1>
+      
+<p><strong>不够灵活</strong></p>
+<p>试图获得锁时不能设定超时</p>
+<p>不能中断一个正在试图获得锁的线程</p>
+<p>加锁和释放的时机单一</p>
+<p>每个锁仅有单一的条件（某个对象）</p>
+<p>无法知道是否成功获取到锁</p>
+<blockquote>
+<p>针对这些缺陷，lock锁能够有效解决：</p>
+<p>1、 lock();//获取锁</p>
+<p>2、 unlock();//释放锁</p>
+<p>3、 tryLock();//判断锁是否可用。返回值为：boolean;</p>
+<p>4、tryLock(time,TimeUnit);//在规定的时间内，如果未获得锁，则就放弃。第一项表示规定的时间；第二项表示设置时间的单位</p>
+</blockquote>
+
+        <h1 id="synchronized-vs-lockcas"   >
+          <a href="#synchronized-vs-lockcas" class="heading-link"><i class="fas fa-link"></i></a>synchronized vs Lock(CAS)</h1>
+      
+<p>在高争用 高耗时的环境下synchronized效率更高<br />
+在低争用 低耗时的环境下CAS效率更高<br />
+synchronized到重量级之后是等待队列（不消耗CPU）<br />
+CAS（等待期间消耗CPU）</p>
+<p>一切以实测为准</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/synchronized/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/synchronized/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/unsafe/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">unsafe</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E9%80%9A%E4%BF%A1/"><span class="paginator-prev__text">线程间的通信</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#简介"><span class="toc-number">1.</span> <span class="toc-text">
+          简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#用法"><span class="toc-number">2.</span> <span class="toc-text">
+          用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#对象锁"><span class="toc-number">2.1.</span> <span class="toc-text">
+          对象锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#类锁"><span class="toc-number">2.2.</span> <span class="toc-text">
+          类锁</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性质"><span class="toc-number">3.</span> <span class="toc-text">
+          性质</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#原理"><span class="toc-number">4.</span> <span class="toc-text">
+          原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#源码"><span class="toc-number">4.1.</span> <span class="toc-text">
+          源码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#synchronized最底层实现"><span class="toc-number">4.2.</span> <span class="toc-text">
+          synchronized最底层实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#对象头"><span class="toc-number">4.3.</span> <span class="toc-text">
+          对象头</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁升级"><span class="toc-number">4.4.</span> <span class="toc-text">
+          锁升级</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#偏向锁"><span class="toc-number">4.4.1.</span> <span class="toc-text">
+          偏向锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自旋锁"><span class="toc-number">4.4.2.</span> <span class="toc-text">
+          自旋锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重量级锁"><span class="toc-number">4.4.3.</span> <span class="toc-text">
+          重量级锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#各种锁的优缺点对比"><span class="toc-number">4.4.4.</span> <span class="toc-text">
+          各种锁的优缺点对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用户空间锁-vs-重量级锁"><span class="toc-number">4.4.5.</span> <span class="toc-text">
+          用户空间锁 vs 重量级锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为何会有偏向锁"><span class="toc-number">4.4.6.</span> <span class="toc-text">
+          为何会有偏向锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么有自旋锁还需要重量级锁"><span class="toc-number">4.4.7.</span> <span class="toc-text">
+          为什么有自旋锁还需要重量级锁</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁降级"><span class="toc-number">4.5.</span> <span class="toc-text">
+          锁降级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁消除-lock-eliminate"><span class="toc-number">4.6.</span> <span class="toc-text">
+          锁消除 lock eliminate</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#锁粗化-lock-coarsening"><span class="toc-number">4.7.</span> <span class="toc-text">
+          锁粗化 lock coarsening</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#缺陷"><span class="toc-number">5.</span> <span class="toc-text">
+          缺陷</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#synchronized-vs-lockcas"><span class="toc-number">6.</span> <span class="toc-text">
+          synchronized vs Lock(CAS)</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

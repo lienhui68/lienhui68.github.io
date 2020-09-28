@@ -1,0 +1,946 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="同步、互斥问题                            什么是进程同步        知识点回顾：进程具有异步性的特征。异步性是指，各并发执行的进程以独立的、不可预知的速度向前推进。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程同步">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/6.%20%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="同步、互斥问题                            什么是进程同步        知识点回顾：进程具有异步性的特征。异步性是指，各并发执行的进程以独立的、不可预知的速度向前推进。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710231916.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232048.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232136.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232337.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232841.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710235608.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711000054.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711000414.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711000844.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001009.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001111.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001213.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001430.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002529.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002552.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002609.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002632.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015547.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015718.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015806.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015902.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200711015927276.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021702.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021734.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021822.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021856.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021959.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024414.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024741.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024821.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024857.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711025027.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711025212.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711025348.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711031654.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032005.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032315.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032434.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032628.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711033216.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034342.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034458.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034526.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034601.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034835.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040822.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040841.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040906.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040951.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711041021.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711042845.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711042924.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043042.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043158.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043559.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043623.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043705.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043943.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711044017.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051258.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051338.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051507.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051533.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051553.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051619.png">
+<meta property="article:published_time" content="2020-09-16T16:21:54.740Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:54.747Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710231916.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>进程同步 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/6.%20%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">进程同步</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.2k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">11分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="同步-互斥问题"   >
+          <a href="#同步-互斥问题" class="heading-link"><i class="fas fa-link"></i></a>同步、互斥问题</h1>
+      
+
+        <h2 id="什么是进程同步"   >
+          <a href="#什么是进程同步" class="heading-link"><i class="fas fa-link"></i></a>什么是进程同步</h2>
+      
+<p>知识点回顾：进程具有异步性的特征。<strong>异步性</strong>是指，各并发执行的进程以独立的、不可预知的速度向前推进。</p>
+<a id="more"></a>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710231916.png"  alt="" />
+      </p>
+<p>再来看一个例子：进程通信——管道通信</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232048.png"  alt="" />
+      </p>
+
+        <h2 id="什么是进程互斥"   >
+          <a href="#什么是进程互斥" class="heading-link"><i class="fas fa-link"></i></a>什么是进程互斥</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232136.png"  alt="" />
+      </p>
+<p>对临界资源的互斥访问，可以在逻辑上分为如下四个部分：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232337.png"  alt="" />
+      </p>
+<p>为了实现对<strong>临界资源</strong>的<strong>互斥访问</strong>，同时<strong>保证系统整体性能</strong>，需要遵循以下原则：</p>
+<ol>
+<li>
+<p><strong>空闲让进</strong> 临界区空闲时，可以允许一个请求进入临界区的进程立即进入临界区。</p>
+</li>
+<li>
+<p><strong>忙则等待</strong> 当已有进程进入临界区时，其他试图进入临界区的进程必须等待。</p>
+</li>
+<li>
+<p><strong>有限等待</strong> 对请求访问的进程，应保证能在有限时间内进入临界区(保证不会饥饿)。</p>
+</li>
+<li>
+<p><strong>让权等待</strong> 当进程不能进入临界区，应立即释放处理机，防止进程忙等待。</p>
+</li>
+</ol>
+
+        <h2 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710232841.png"  alt="" />
+      </p>
+<blockquote>
+<p><strong>进程同步又可称作进程之间的直接制约关系，也就是说这些进程之间有合作关系。</strong></p>
+<p><strong>进程互斥又可称作进程之间的间接制约关系， 因为进程之间没有合作，只是想互斥使用临界资源才会产生这种制约关系。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>同步和互斥有什么联系和区别</strong></p>
+<p><strong>同步是一种更为复杂的互斥，而互斥是一种特殊的同步。</strong><br />
+也就是说互斥是两个线程之间不可以同时运行，他们会相互排斥，必须等待一个线程运行完毕，另一个才能运行，而同步也是不能同时运行，但他是必须要安照某种次序来运行相应的线程（也是一种互斥）！</p>
+<p>互斥：是指某一资源同时只允许一个访问者对其进行访问，具有唯一性和排它性。但互斥无法限制访问者对资源的访问顺序，即访问是无序的。<br />
+同步：是指在互斥的基础上（大多数情况），通过其它机制实现访问者对资源的有序访问。在大多数情况下，同步已经实现了互斥，特别是所有写入资源的情况必定是互斥的。少数情况是指可以允许多个访问者同时访问资源。</p>
+</blockquote>
+
+        <h1 id="进程互斥的软件实现方法"   >
+          <a href="#进程互斥的软件实现方法" class="heading-link"><i class="fas fa-link"></i></a>进程互斥的软件实现方法</h1>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710235608.png"  alt="" />
+      </p>
+
+        <h2 id="单标志法"   >
+          <a href="#单标志法" class="heading-link"><i class="fas fa-link"></i></a>单标志法</h2>
+      
+<p>算法思想：两个进程在<strong>访问完临界区后</strong>会把使用临界区的权限转交给另一个进程。也就是说<strong>每个进程进入临界区的权限只能被另一个进程赋予</strong>。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711000054.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711000414.png"  alt="" />
+      </p>
+
+        <h2 id="双标志先检查法"   >
+          <a href="#双标志先检查法" class="heading-link"><i class="fas fa-link"></i></a>双标志先检查法</h2>
+      
+<p>算法思想：设置一个布尔型数组flag[]，数组中各个元素用来<strong>标记各进程想进入临界区的意愿</strong>，比如<strong>flag[0]=true</strong>意味着0号进程P0现在想进入临界区。每个进程在进入临界区之前先检查当前有没有别的进程想进入临界区，如果没有，则把自身对应的标志flag[i]设为true，之后开始访问临界区。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711000844.png"  alt="" />
+      </p>
+
+        <h2 id="双标志后检查法"   >
+          <a href="#双标志后检查法" class="heading-link"><i class="fas fa-link"></i></a>双标志后检查法</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001009.png"  alt="" />
+      </p>
+
+        <h2 id="peterson算法"   >
+          <a href="#peterson算法" class="heading-link"><i class="fas fa-link"></i></a>Peterson算法</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001111.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001213.png"  alt="" />
+      </p>
+<p>Peterson算法用软件方法解决了进程互斥问题，<strong>遵循了空闲让进、忙则等待、有限等待三个原则</strong>，但是依然<strong>未遵循让权等待</strong>的原则。</p>
+<p>Peterson算法相较于前三种软件解决方案来说是最好的，但依然不够好。</p>
+
+        <h2 id="小结-2"   >
+          <a href="#小结-2" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711001430.png"  alt="" />
+      </p>
+
+        <h1 id="进程互斥的硬件实现方法"   >
+          <a href="#进程互斥的硬件实现方法" class="heading-link"><i class="fas fa-link"></i></a>进程互斥的硬件实现方法</h1>
+      
+
+        <h2 id="中断屏蔽方法"   >
+          <a href="#中断屏蔽方法" class="heading-link"><i class="fas fa-link"></i></a>中断屏蔽方法</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002529.png"  alt="" />
+      </p>
+
+        <h2 id="testandsetts指令tsl指令"   >
+          <a href="#testandsetts指令tsl指令" class="heading-link"><i class="fas fa-link"></i></a>TestAndSet(TS指令/TSL指令)</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002552.png"  alt="" />
+      </p>
+
+        <h2 id="swap指令xchg指令"   >
+          <a href="#swap指令xchg指令" class="heading-link"><i class="fas fa-link"></i></a>Swap指令(XCHG指令)</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002609.png"  alt="" />
+      </p>
+
+        <h2 id="小结-3"   >
+          <a href="#小结-3" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711002632.png"  alt="" />
+      </p>
+
+        <h1 id="信号量机制"   >
+          <a href="#信号量机制" class="heading-link"><i class="fas fa-link"></i></a>信号量机制</h1>
+      
+<p>复习回顾+思考：之前学习的这些进程互斥的解决方案分别存在哪些问题？</p>
+<p>进程互斥的四种软件实现方式（单标志法、双标志先检查、双标志后检查、Peterson算法）</p>
+<p>进程互斥的三种硬件实现方式（中断屏蔽方法、TS/TSL指令、Swap/XCHG指令）</p>
+<ol>
+<li>在双标志先检查法中，<strong>进入区的“检查”、“上锁” 操作无法一气呵成</strong>，从而导致了两个进程有可能同时进入临界区的问题；</li>
+<li>所有的解决方案都<strong>无法实现“让权等待”</strong></li>
+</ol>
+<p>1965年，荷兰学者<strong>Dijkstra</strong>提出了一种卓有成效的实现进程互斥、同步的方法——<strong>信号量机制</strong></p>
+<p>用户进程可以通过使用操作系统提供的<strong>一对原语</strong>来对<strong>信号量</strong>进行操作，从而很方便的实现了进程互斥、进程同步。</p>
+<p><strong>信号量</strong>其实就是一个变量 （<strong>可以是一个整数，也可以是更复杂的记录型变量</strong>） ，可以用一个信号量来<strong>表示系统中某种资源的数量</strong>，比如：系统中只有一台打印机，就可以设置一个初值为 1 的信号量。</p>
+<p><strong>原语</strong>是一种特殊的程序段，其执<strong>行只能一气呵成，不可被中断</strong>。原语是由<strong>关中断/开中断</strong>指令实现的。软件解决方案的主要问题是由“进入区的各种操作无法一气呵成”，因此如果能把进入区、退出区的操作都用“原语”实现，使这些操作能“一气呵成”就能避免问题。</p>
+<p><strong>一对原语</strong>：<strong>wait(S)</strong> 原语和 <strong>signal(S)</strong> 原语，可以把原语理解为我们自己写的函数，函数名分别为 wait 和 signal，括号里的<strong>信号量 S</strong> 其实就是函数调用时传入的一个参数。</p>
+<p>wait、signal 原语常<strong>简称为 P、V操作</strong>（来自荷兰语 proberen 和 verhogen）。因此，做题的时候常把 wait(S)、signal(S) 两个操作分别写为 <strong>P(S)、V(S)</strong></p>
+
+        <h2 id="整型信号量"   >
+          <a href="#整型信号量" class="heading-link"><i class="fas fa-link"></i></a>整型信号量</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015547.png"  alt="" />
+      </p>
+
+        <h2 id="记录型信号量"   >
+          <a href="#记录型信号量" class="heading-link"><i class="fas fa-link"></i></a>记录型信号量</h2>
+      
+<p>整型信号量的缺陷是存在“忙等”问题，因此人们又提出了“记录型信号量”，即用<strong>记录型数据结构</strong>表示的信号量。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015718.png"  alt="" />
+      </p>
+<p><strong>举例</strong>：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015806.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711015902.png"  alt="" />
+      </p>
+
+        <h2 id="小结-4"   >
+          <a href="#小结-4" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200711015927276.png"  alt="" />
+      </p>
+
+        <h1 id="信号量机制的用处"   >
+          <a href="#信号量机制的用处" class="heading-link"><i class="fas fa-link"></i></a>信号量机制的用处</h1>
+      
+<p>Tips：不要一头钻到代码里，要注意理解信号量背后的含义，<strong>一个信号量对应一种资源</strong></p>
+<p>信号量的值 = 这种资源的剩余数量（信号量的值如果小于0，说明此时有进程在等待这种资源）</p>
+<p>P( S ) —— 申请一个资源S，如果<strong>资源不够就阻塞等待</strong></p>
+<p>V( S ) —— 释放一个资源S，如果有进程在等待该资源，则<strong>唤醒一个进程</strong></p>
+
+        <h2 id="实现进程互斥"   >
+          <a href="#实现进程互斥" class="heading-link"><i class="fas fa-link"></i></a>实现进程互斥</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021702.png"  alt="" />
+      </p>
+
+        <h2 id="实现进程同步"   >
+          <a href="#实现进程同步" class="heading-link"><i class="fas fa-link"></i></a>实现进程同步</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021734.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021822.png"  alt="" />
+      </p>
+
+        <h2 id="实现进程的前驱关系"   >
+          <a href="#实现进程的前驱关系" class="heading-link"><i class="fas fa-link"></i></a>实现进程的前驱关系</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021856.png"  alt="" />
+      </p>
+
+        <h2 id="小结-5"   >
+          <a href="#小结-5" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711021959.png"  alt="" />
+      </p>
+
+        <h1 id="生产者消费者问题"   >
+          <a href="#生产者消费者问题" class="heading-link"><i class="fas fa-link"></i></a>生产者消费者问题</h1>
+      
+<p><strong>问题描述</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024414.png"  alt="" />
+      </p>
+<p><strong>问题分析</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024741.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024821.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711024857.png"  alt="" />
+      </p>
+<p><strong>如何实现</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711025027.png"  alt="" />
+      </p>
+<p><strong>思考：能否改变相邻P、V操作的顺序</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711025212.png"  alt="" />
+      </p>
+
+        <h2 id="小结-6"   >
+          <a href="#小结-6" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711025348.png"  alt="" />
+      </p>
+
+        <h1 id="多类生产者多类消费者问题"   >
+          <a href="#多类生产者多类消费者问题" class="heading-link"><i class="fas fa-link"></i></a>多类生产者多类消费者问题</h1>
+      
+<p><strong>问题描述</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711031654.png"  alt="" />
+      </p>
+<p><strong>问题分析</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032005.png"  alt="" />
+      </p>
+<p><strong>如何实现</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032315.png"  alt="" />
+      </p>
+<p><strong>问题：可不可以不用互斥信号量</strong>？</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032434.png"  alt="" />
+      </p>
+<blockquote>
+<p>原因在于：本题中的缓冲区大小为1，在任何时刻，apple、orange、plate 三个同步信号量中最多只有一个是1。因此在任何时刻，最多只有一个进程的P操作不会被阻塞，并顺利地进入临界区…</p>
+</blockquote>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711032628.png"  alt="" />
+      </p>
+
+        <h2 id="小结-7"   >
+          <a href="#小结-7" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>总结：在生产者-消费者问题中，如果缓冲区大小为1，那么有可能不需要设置互斥信号量就可以实现互斥访问缓冲区的功能。当然，这不是绝对的，要具体问题具体分析。</p>
+<p>建议：在考试中如果来不及仔细分析，可以加上互斥信号量，保证各进程一定会互斥地访问缓冲区。 但需要注意的是，实现互斥的P操作一定要在实现同步的P操作之后，否则可能引起“死锁”。</p>
+<p>PV 操作题目的解题思路：</p>
+<ol>
+<li>
+<p>关系分析。找出题目中描述的各个进程，分析它们之间的同步、互斥关系。</p>
+</li>
+<li>
+<p>整理思路。根据各进程的操作流程确定P、V操作的大致顺序。</p>
+</li>
+<li>
+<p>设置信号量。设置需要的信号量，并根据题目条件确定信号量初值。（互斥信号量初值一般为1，同步信号量的初始值要看对应资源的初始值是多少）</p>
+</li>
+</ol>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711033216.png"  alt="" />
+      </p>
+
+        <h1 id="吸烟者问题"   >
+          <a href="#吸烟者问题" class="heading-link"><i class="fas fa-link"></i></a>吸烟者问题</h1>
+      
+<p><strong>问题描述</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034342.png"  alt="" />
+      </p>
+<p><strong>问题分析</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034458.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034526.png"  alt="" />
+      </p>
+<p><strong>如何实现</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034601.png"  alt="" />
+      </p>
+
+        <h2 id="小结-8"   >
+          <a href="#小结-8" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711034835.png"  alt="" />
+      </p>
+
+        <h1 id="读者写者问题"   >
+          <a href="#读者写者问题" class="heading-link"><i class="fas fa-link"></i></a>读者写者问题</h1>
+      
+
+        <h2 id="问题描述"   >
+          <a href="#问题描述" class="heading-link"><i class="fas fa-link"></i></a>问题描述</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040822.png"  alt="" />
+      </p>
+
+        <h2 id="分析问题"   >
+          <a href="#分析问题" class="heading-link"><i class="fas fa-link"></i></a>分析问题</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040841.png"  alt="" />
+      </p>
+
+        <h2 id="如何实现"   >
+          <a href="#如何实现" class="heading-link"><i class="fas fa-link"></i></a>如何实现</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040906.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711040951.png"  alt="" />
+      </p>
+
+        <h2 id="小结-9"   >
+          <a href="#小结-9" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711041021.png"  alt="" />
+      </p>
+
+        <h1 id="哲学家进餐问题"   >
+          <a href="#哲学家进餐问题" class="heading-link"><i class="fas fa-link"></i></a>哲学家进餐问题</h1>
+      
+
+        <h2 id="问题描述-2"   >
+          <a href="#问题描述-2" class="heading-link"><i class="fas fa-link"></i></a>问题描述</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711042845.png"  alt="" />
+      </p>
+
+        <h2 id="问题分析"   >
+          <a href="#问题分析" class="heading-link"><i class="fas fa-link"></i></a>问题分析</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711042924.png"  alt="" />
+      </p>
+
+        <h2 id="如何实现-2"   >
+          <a href="#如何实现-2" class="heading-link"><i class="fas fa-link"></i></a>如何实现</h2>
+      
+<p><strong>方式一</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043042.png"  alt="" />
+      </p>
+<blockquote>
+<p>设置一个初始值为4的同步信号量</p>
+</blockquote>
+<p><strong>方式二</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043158.png"  alt="" />
+      </p>
+<p><strong>方式三</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043559.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043623.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043705.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711043943.png"  alt="" />
+      </p>
+
+        <h2 id="小结-10"   >
+          <a href="#小结-10" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711044017.png"  alt="" />
+      </p>
+
+        <h1 id="管程"   >
+          <a href="#管程" class="heading-link"><i class="fas fa-link"></i></a>管程</h1>
+      
+
+        <h2 id="为什么要引入管程"   >
+          <a href="#为什么要引入管程" class="heading-link"><i class="fas fa-link"></i></a>为什么要引入管程</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051258.png"  alt="" />
+      </p>
+
+        <h2 id="管程的定义和基本特征"   >
+          <a href="#管程的定义和基本特征" class="heading-link"><i class="fas fa-link"></i></a>管程的定义和基本特征</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051338.png"  alt="" />
+      </p>
+
+        <h2 id="拓展1用管程解决生产者消费者问题"   >
+          <a href="#拓展1用管程解决生产者消费者问题" class="heading-link"><i class="fas fa-link"></i></a>拓展1：用管程解决生产者消费者问题</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051507.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051533.png"  alt="" />
+      </p>
+
+        <h2 id="拓展2java中类似于管程的机制"   >
+          <a href="#拓展2java中类似于管程的机制" class="heading-link"><i class="fas fa-link"></i></a>拓展2：Java中类似于管程的机制</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051553.png"  alt="" />
+      </p>
+
+        <h2 id="小结-11"   >
+          <a href="#小结-11" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200711051619.png"  alt="" />
+      </p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/6.%20%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/6.%20%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/11.%20%E7%A3%81%E7%9B%98%E7%BB%84%E7%BB%87%E4%B8%8E%E7%AE%A1%E7%90%86/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">磁盘组织与管理</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/8.%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><span class="paginator-prev__text">内存管理</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#同步-互斥问题"><span class="toc-number">1.</span> <span class="toc-text">
+          同步、互斥问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是进程同步"><span class="toc-number">1.1.</span> <span class="toc-text">
+          什么是进程同步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是进程互斥"><span class="toc-number">1.2.</span> <span class="toc-text">
+          什么是进程互斥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.3.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进程互斥的软件实现方法"><span class="toc-number">2.</span> <span class="toc-text">
+          进程互斥的软件实现方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#单标志法"><span class="toc-number">2.1.</span> <span class="toc-text">
+          单标志法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#双标志先检查法"><span class="toc-number">2.2.</span> <span class="toc-text">
+          双标志先检查法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#双标志后检查法"><span class="toc-number">2.3.</span> <span class="toc-text">
+          双标志后检查法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#peterson算法"><span class="toc-number">2.4.</span> <span class="toc-text">
+          Peterson算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-2"><span class="toc-number">2.5.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进程互斥的硬件实现方法"><span class="toc-number">3.</span> <span class="toc-text">
+          进程互斥的硬件实现方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#中断屏蔽方法"><span class="toc-number">3.1.</span> <span class="toc-text">
+          中断屏蔽方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#testandsetts指令tsl指令"><span class="toc-number">3.2.</span> <span class="toc-text">
+          TestAndSet(TS指令&#x2F;TSL指令)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#swap指令xchg指令"><span class="toc-number">3.3.</span> <span class="toc-text">
+          Swap指令(XCHG指令)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-3"><span class="toc-number">3.4.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#信号量机制"><span class="toc-number">4.</span> <span class="toc-text">
+          信号量机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#整型信号量"><span class="toc-number">4.1.</span> <span class="toc-text">
+          整型信号量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#记录型信号量"><span class="toc-number">4.2.</span> <span class="toc-text">
+          记录型信号量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-4"><span class="toc-number">4.3.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#信号量机制的用处"><span class="toc-number">5.</span> <span class="toc-text">
+          信号量机制的用处</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#实现进程互斥"><span class="toc-number">5.1.</span> <span class="toc-text">
+          实现进程互斥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实现进程同步"><span class="toc-number">5.2.</span> <span class="toc-text">
+          实现进程同步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实现进程的前驱关系"><span class="toc-number">5.3.</span> <span class="toc-text">
+          实现进程的前驱关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-5"><span class="toc-number">5.4.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#生产者消费者问题"><span class="toc-number">6.</span> <span class="toc-text">
+          生产者消费者问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-6"><span class="toc-number">6.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#多类生产者多类消费者问题"><span class="toc-number">7.</span> <span class="toc-text">
+          多类生产者多类消费者问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-7"><span class="toc-number">7.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#吸烟者问题"><span class="toc-number">8.</span> <span class="toc-text">
+          吸烟者问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-8"><span class="toc-number">8.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#读者写者问题"><span class="toc-number">9.</span> <span class="toc-text">
+          读者写者问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#问题描述"><span class="toc-number">9.1.</span> <span class="toc-text">
+          问题描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析问题"><span class="toc-number">9.2.</span> <span class="toc-text">
+          分析问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何实现"><span class="toc-number">9.3.</span> <span class="toc-text">
+          如何实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-9"><span class="toc-number">9.4.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#哲学家进餐问题"><span class="toc-number">10.</span> <span class="toc-text">
+          哲学家进餐问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#问题描述-2"><span class="toc-number">10.1.</span> <span class="toc-text">
+          问题描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#问题分析"><span class="toc-number">10.2.</span> <span class="toc-text">
+          问题分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何实现-2"><span class="toc-number">10.3.</span> <span class="toc-text">
+          如何实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-10"><span class="toc-number">10.4.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#管程"><span class="toc-number">11.</span> <span class="toc-text">
+          管程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么要引入管程"><span class="toc-number">11.1.</span> <span class="toc-text">
+          为什么要引入管程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#管程的定义和基本特征"><span class="toc-number">11.2.</span> <span class="toc-text">
+          管程的定义和基本特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#拓展1用管程解决生产者消费者问题"><span class="toc-number">11.3.</span> <span class="toc-text">
+          拓展1：用管程解决生产者消费者问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#拓展2java中类似于管程的机制"><span class="toc-number">11.4.</span> <span class="toc-text">
+          拓展2：Java中类似于管程的机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-11"><span class="toc-number">11.5.</span> <span class="toc-text">
+          小结</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

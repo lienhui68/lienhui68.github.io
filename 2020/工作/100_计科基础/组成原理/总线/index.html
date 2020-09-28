@@ -1,0 +1,656 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;blog.csdn.net&#x2F;wuyongpeng0912&#x2F;article&#x2F;details&#x2F;46634931  数字计算机是由若干系统功能部件构成的，这些系统功能部件只有连接在一起协调工作才能形成一个完整的计算机硬件系统．这个起到连接和信息传输的功能部件就是总线．各个功能部件只有通过总线进行有效连接后，才可能实现彼此之间的相互通信和资源共享．">
+<meta property="og:type" content="article">
+<meta property="og:title" content="总线">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%80%BB%E7%BA%BF/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;blog.csdn.net&#x2F;wuyongpeng0912&#x2F;article&#x2F;details&#x2F;46634931  数字计算机是由若干系统功能部件构成的，这些系统功能部件只有连接在一起协调工作才能形成一个完整的计算机硬件系统．这个起到连接和信息传输的功能部件就是总线．各个功能部件只有通过总线进行有效连接后，才可能实现彼此之间的相互通信和资源共享．">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831112922.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831112956.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831113003.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831113020.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831113028.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831111038.png">
+<meta property="article:published_time" content="2020-09-16T16:21:54.902Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:54.905Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="组成原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831112922.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>总线 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%80%BB%E7%BA%BF/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">总线</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">20分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/wuyongpeng0912/article/details/46634931"  target="_blank" rel="noopener">https://blog.csdn.net/wuyongpeng0912/article/details/46634931</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>数字计算机是由若干系统功能部件构成的，这些系统功能部件只有连接在一起协调工作才能形成一个完整的计算机硬件系统．这个起到<strong>连接和信息传输的功能部件</strong>就是总线．各个功能部件只有通过总线进行有效连接后，才可能实现彼此之间的相互通信和资源共享．</p>
+<a id="more"></a>
+
+        <h1 id="总线的概念和结构形态"   >
+          <a href="#总线的概念和结构形态" class="heading-link"><i class="fas fa-link"></i></a>总线的概念和结构形态</h1>
+      
+
+        <h2 id="基本概念"   >
+          <a href="#基本概念" class="heading-link"><i class="fas fa-link"></i></a>基本概念</h2>
+      
+
+        <h3 id="总线的特点"   >
+          <a href="#总线的特点" class="heading-link"><i class="fas fa-link"></i></a>总线的特点</h3>
+      
+<ol>
+<li>
+<p>共享性</p>
+<p>总线是供所有部件通信共享的，任何两个部件之间的数据传输都是通过共享的公共总线进行的．</p>
+</li>
+<li>
+<p>独占性</p>
+<p>一旦有一个部件占用总线与另一个部件进行数据通信，其他部件就不能再占用总线，也就是说一个部件对总线的使用是独占的．</p>
+</li>
+</ol>
+
+        <h3 id="总线的分类"   >
+          <a href="#总线的分类" class="heading-link"><i class="fas fa-link"></i></a>总线的分类</h3>
+      
+<p>按照总线上传输信号的不同划分</p>
+<ol>
+<li>
+<p>地址总线（Adress Bus,AB）</p>
+<p>地址总线上传送的是从CPU等主设备发往从设备的地址信号．当CPU对存储器或I/O端口进行读/写时，必须首先经地址线送出所要访问的存储单元或I/O对口的地址，并在整个读写周期一直保持有效．</p>
+</li>
+<li>
+<p>控制总线（Control Bus，CB）</p>
+<p>控制总线上传送的是一个部件对另一个部件的控制或状态信息，如CPU对存储器的读、写控制信号，外部设备向CPU发出的中断请求信号等．</p>
+</li>
+<li>
+<p>数据总线（Data Bus, DB）</p>
+<p>数据总线上传送的是各部件之间交换的数据信息．数据总线通常是双向的，即数据可以由从设备发往主设备（称为读或输入），也可以由主设备发往从设备（称为写或输出）</p>
+</li>
+</ol>
+
+        <h3 id="总线的特性"   >
+          <a href="#总线的特性" class="heading-link"><i class="fas fa-link"></i></a>总线的特性</h3>
+      
+<ol>
+<li>物理特性：总线的物理连接方式</li>
+<li>功能特性：总线中每根传输线的功能</li>
+<li>电气特性：每一根线上信号的传递方向及有效电平范围</li>
+<li>时间特性：定义每根线在什么时间有效</li>
+</ol>
+
+        <h3 id="总线的标准化"   >
+          <a href="#总线的标准化" class="heading-link"><i class="fas fa-link"></i></a>总线的标准化</h3>
+      
+
+        <h2 id="总线的连接方式"   >
+          <a href="#总线的连接方式" class="heading-link"><i class="fas fa-link"></i></a>总线的连接方式</h2>
+      
+
+        <h3 id="单总线结构"   >
+          <a href="#单总线结构" class="heading-link"><i class="fas fa-link"></i></a>单总线结构</h3>
+      
+<p>许多单处理器的计算机中，使用单一的系统总线来连接CPU、主存和I/O设备，叫做单总线结构</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831112922.png"  alt="" />
+      </p>
+
+        <h3 id="多总线结构"   >
+          <a href="#多总线结构" class="heading-link"><i class="fas fa-link"></i></a>多总线结构</h3>
+      
+<p>CPU和cache之间采用高速的CPU总线，主存连在系统总线上．通过桥，CPU总线、系统总线和高速总线彼此相连．桥实质上是一种具有缓冲、转换、控制功能的逻辑电路．</p>
+<p>双总线</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831112956.png"  alt="" />
+      </p>
+<p>三总线（1）</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831113003.png"  alt="" />
+      </p>
+<p>三总线（2）</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831113020.png"  alt="" />
+      </p>
+<p>四总线</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831113028.png"  alt="" />
+      </p>
+
+        <h2 id="总线的内部结构"   >
+          <a href="#总线的内部结构" class="heading-link"><i class="fas fa-link"></i></a>总线的内部结构</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831111038.png"  alt="" />
+      </p>
+<ol>
+<li>数据传送总线：由地址线、数据线、控制线组成．为了减少布线，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>数据线常常和地址线采用多路复用方式</span>．</li>
+<li>仲裁总线：包括总线请求线和总线授权线．</li>
+<li>中断和同步总线：用于处理带优先级的中断操作，包括中断请求线和中断认可线．</li>
+<li>公用线：包括时钟信号线、电源线、地线、系统复位线以及加电或断电的时序信号线等．</li>
+</ol>
+
+        <h2 id="总线结构实例"   >
+          <a href="#总线结构实例" class="heading-link"><i class="fas fa-link"></i></a>总线结构实例</h2>
+      
+
+        <h3 id="cpu总线"   >
+          <a href="#cpu总线" class="heading-link"><i class="fas fa-link"></i></a>CPU总线</h3>
+      
+<p>也称CPU-存储器总线，它是一个64位数据线和32位地址线的同步总线．总线时钟频率为66.6MHz（或60MHz）, CPU内部时钟是此时钟频率的倍频．此总线可连接主存．主存扩充容量是以内存条形式插入主板有关插座来实现的．CPU总线还接有L2级cache．主存控制器和cache控制器芯片用来管理CPU对主存和cache的存取操作． CPU是这条总线的主控者，但必要时可放弃总线控制权．从传统的观点看，可以把CPU总线看成是CPU引脚信号的延伸．</p>
+
+        <h3 id="pci总线"   >
+          <a href="#pci总线" class="heading-link"><i class="fas fa-link"></i></a>PCI总线</h3>
+      
+<p>用于连接高速的I/O设备模块，如图形显示器适配器、网络接口控制器、硬盘控制器等．通过“桥”芯片，上面与更高速的CPU总线相连，下面与低速的ISA总线相接． PCI总线是一个32位（或64位）的同步总线，32位（或64位）数据/地址线是同一组线，分时复用．总线时钟频率为33.3MHz，总线带宽是132MB/s.PCI总线采用集中式仲裁方式，有专用的PCI总线仲裁器．主板上一般有3个PCI总线扩充槽．</p>
+
+        <h3 id="ias总线"   >
+          <a href="#ias总线" class="heading-link"><i class="fas fa-link"></i></a>IAS总线</h3>
+      
+<p>Pentium机使用该总线与低速I/O设备连接．主板上一般留有3～4个ISA总线扩充槽，以便使用各种16位/8位适配器卡．该总线支持7个DMA通道和15级可屏蔽硬件中断．另外，ISA总线控制逻辑还通过主板上的片级总线与实时时钟/日历、ROM、键盘和鼠标控制器（8042微处理器）等芯片相连接．</p>
+<p>们看到，CPU总线、PCI总线、ISA总线通过两个“桥”芯片连成整体．桥芯片在此起到了信号速度缓冲、电平转换和控制协议的转换作用．有的资料将CPU总线-PCI总线的桥称为北桥，将PCI总线-ISA总线的桥称为南桥．其中，北桥芯片（north bridge）是主板芯片组最重要的组成部分，它负责与CPU联系并控制内存、AGP等数据在北桥内的传输，它与CPU的联系更紧密，所以空间位置距离CPU也最近，以便缩短通信距离，提高传输效率．南桥芯片负责I/O总线之间的通信，如PCI总线、USB、LAN、ATA、SATA、音频控制器、键盘控制器、实时时钟控制器、高级电源管理等．通过桥将两类不同的总线“粘合”在一起的工作特别适合于系统的升级换代．这样，每当CPU芯片升级时只需改变CPU总线和北桥芯片，全部原有的外围设备可自动继续工作．</p>
+<p>Pentium机总线系统中有一个核心逻辑芯片组，简称PCI芯片组，它包括主存控制器和cache控制器芯片、北桥芯片和南桥芯片．这个芯片组叫Intel 430系列、440系列，它们在系统中起着至关重要的作用．</p>
+
+        <h1 id="总线接口"   >
+          <a href="#总线接口" class="heading-link"><i class="fas fa-link"></i></a>总线接口</h1>
+      
+
+        <h2 id="信息传送方式"   >
+          <a href="#信息传送方式" class="heading-link"><i class="fas fa-link"></i></a>信息传送方式</h2>
+      
+
+        <h3 id="串行传送"   >
+          <a href="#串行传送" class="heading-link"><i class="fas fa-link"></i></a>串行传送</h3>
+      
+<p>当信息以串行方式传送时，只有一条传输线，且采用脉冲传送．在串行传送时，按顺序来传送表示一个数码的所有二进制位（bit）的脉冲信号，每次一位，通常以第一个脉冲信号表示数码的最低有效位，最后一个脉冲信号表示数码的最高有效位．</p>
+
+        <h3 id="并行传送"   >
+          <a href="#并行传送" class="heading-link"><i class="fas fa-link"></i></a>并行传送</h3>
+      
+<p>用并行方式传送二进制信息时，对每个数据位都需要单独一条传输线．信息有多少二进制位组成，就需要多少条传输线，从而使得二进制数“0”或“1”在不同的线上同时进行传送．</p>
+
+        <h3 id="分时传送"   >
+          <a href="#分时传送" class="heading-link"><i class="fas fa-link"></i></a>分时传送</h3>
+      
+<p>分时传送有两种概念．一是采用总线复用方式，某个传输线上既传送地址信息，又传送数据信息．为此必须划分时间片，以便在不同的时间间隔中完成传送地址和传送数据的任务．分时传送的另一种概念是共享总线的部件分时使用总线．</p>
+
+        <h2 id="总线接口的基本概念"   >
+          <a href="#总线接口的基本概念" class="heading-link"><i class="fas fa-link"></i></a>总线接口的基本概念</h2>
+      
+<p>I/O功能模块通常简称为I/O接口(DMA就是一个接口模块)，也叫适配器．广义地讲，I/O接口是指CPU、主存和外围设备之间通过系统总线进行连接的标准化逻辑部件．I/O接口在它动态连接的两个部件之间起着“转换器”的作用，以便实现彼此之间的信息传送．<br />
+功能有</p>
+<ol>
+<li>
+<p>控制</p>
+<p>接口模块靠指令信息来控制外围设备的动作，如启动、关闭设备等．</p>
+</li>
+<li>
+<p>缓冲</p>
+<p>接口模块在外围设备和计算机系统其他部件之间用作为一个缓冲器，以补偿各种设备在速度上的差异．</p>
+</li>
+<li>
+<p>状态</p>
+<p>接口模块监视外围设备的工作状态并保存状态信息．状态信息包括数据“准备就绪”、“忙”、“错误”等等，供CPU询问外围设备时进行分析之用．</p>
+</li>
+<li>
+<p>转换</p>
+<p>接口模块可以完成任何要求的数据转换，例如并一串转换或串一并转换，因此数据能在外围设备和CPU之间正确地进行传送．</p>
+</li>
+<li>
+<p>整理</p>
+<p>接口模块可以完成一些特别的功能，例如在需要时可以修改字计数器或当前内存地址寄存器．</p>
+</li>
+<li>
+<p>程序中断</p>
+<p>如果外设与CPU以中断控制的方式进行通信时，每当外围设备向CPU请求某种动作时，接口模块即发生一个中断请求信号到CPU．</p>
+</li>
+</ol>
+
+        <h1 id="总线的仲裁"   >
+          <a href="#总线的仲裁" class="heading-link"><i class="fas fa-link"></i></a>总线的仲裁</h1>
+      
+<p>主模块可以启动一个总线周期，而从模块只能响应主模块的请求．每次总线操作，只能有一个主模块占用总线控制权，但同一时间里可以有一个或多个从模块．</p>
+<p>除CPU模块外，其他主模块也可提出总线请求．为了解决多个主模块同时竞争总线控制权的问题，必须具有总线仲裁部件，以某种方式选择其中一个模块作为总线的下一次主模块．一般采用优先级或公平策略进行仲裁．</p>
+
+        <h2 id="集中式"   >
+          <a href="#集中式" class="heading-link"><i class="fas fa-link"></i></a>集中式</h2>
+      
+<p>集中式仲裁中每个功能模块有两条线连到总线控制器：一条是送往仲裁器的总线请求信号线BR，一条是仲裁器送出的总线授权信号线BG．</p>
+
+        <h3 id="链式查询方式"   >
+          <a href="#链式查询方式" class="heading-link"><i class="fas fa-link"></i></a>链式查询方式</h3>
+      
+<p>总线授权信号BG串行地从一个I/O接口传送到下一个I/O接口．假如BG到达的接口无总线请求，则继续往下传送有效信号；假如BG到达的接口有总线请求，BG信号便不再往下传送有效信号．这意味着该I/O接口就获得了总线控制权．</p>
+
+        <h3 id="计时器定时查询方式"   >
+          <a href="#计时器定时查询方式" class="heading-link"><i class="fas fa-link"></i></a>计时器定时查询方式</h3>
+      
+<p>总线上的任一设备要求使用总线时，通过BR线发出总线请求．总线仲裁器接到请求信号以后，在BS线为“0”的情况下让计数器开始计数，计数值通过一组地址线发向各设备．每个设备接口都有一个设备地址判别电路，当地址线上的计数值与请求总线的设备地址相一致时，该设备把BS线置“1”，同时获得了总线使用权，此时中止计数查询．</p>
+
+        <h3 id="独立请求方式"   >
+          <a href="#独立请求方式" class="heading-link"><i class="fas fa-link"></i></a>独立请求方式</h3>
+      
+<p>独立请求方式中，每一个共享总线的设备均有一对总线请求线BRi和总线授权线BGi．当设备要求使用总线时，便发出该设备的请求信号．总线仲裁器中有一个排队电路，它根据一定的优先次序决定首先响应哪个设备的请求，给设备以授权信号BGi.</p>
+
+        <h2 id="分布式总裁"   >
+          <a href="#分布式总裁" class="heading-link"><i class="fas fa-link"></i></a>分布式总裁</h2>
+      
+<p>分布式仲裁不需要集中的总线仲裁器，每个潜在的主功能模块都有自己的仲裁号和仲裁器．当它们有总线请求时，把它们唯一的仲裁号发送到共享的仲裁总线上，每个仲裁器将仲裁总线上得到的号与自己的号进行比较．如果仲裁总线上的号大，则它的总线请求不予响应，并撤消它的仲裁号．最后，获胜者的仲裁号保留在仲裁总线上．显然，分布式仲裁是以优先级仲裁策略为基础．</p>
+
+        <h1 id="总线的信号控制和数据传送"   >
+          <a href="#总线的信号控制和数据传送" class="heading-link"><i class="fas fa-link"></i></a>总线的信号控制和数据传送</h1>
+      
+
+        <h2 id="总线通信控制"   >
+          <a href="#总线通信控制" class="heading-link"><i class="fas fa-link"></i></a>总线通信控制</h2>
+      
+<p>通常完成一次总线操作的时间称为总线周期，可分为4个阶段．</p>
+<ol>
+<li>
+<p>申请分配阶段</p>
+<p>由需要使用总线的主模块（或主设备）提出申请，经总线仲裁机构决定下一传输周期的总线使用权授予某一申请者．</p>
+</li>
+<li>
+<p>寻址阶段</p>
+<p>取得了总线使用权的主模块通过总线发出本次要访问的从模块（或从设备）的地址及有关命令，启动参与本次传输的从模块．</p>
+</li>
+<li>
+<p>传数阶段</p>
+<p>主模块和从模块进行数据交换，数据由源模块发出，经数据总线流入目的模块．</p>
+</li>
+<li>
+<p>结束阶段</p>
+<p>主模块的有关信息均从系统总线上撤除，让出总线使用权．</p>
+</li>
+</ol>
+<p>通信方式</p>
+<ul>
+<li>
+<p>同步通信</p>
+<p>通信双方由统一时标控制数据的传送称为同步通信．时标通常由CPU的总线控制部件发出，送到总线上的所有部件；也可以由每个部件各自的时序发生器发出，但必须由总线控制部件发出的时钟信号对它们进行同步．</p>
+</li>
+<li>
+<p>异步通信</p>
+<p>当主模块发出“请求”信号时，一直等待从模块反馈回来“响应”信号后，才开始通信．当然，这就要求主、从模块之间增加两条应答线（握手交互信号线）.</p>
+<ul>
+<li>
+<p>不互锁方式</p>
+<p>主模块发出请求信号后，不必等待接到从模块的回答信号，而是经过一段时间，确认从模块已收到请求信号后，便撤销其请求信号。</p>
+</li>
+<li>
+<p>半互锁方式</p>
+<p>主模块发出请求信号后，必须等接收到从模块发来的应答信号后才能撤销其请求信号，有互锁关系；而从模块在接收到请求信号后会发出回答信号，但不必等待获知主模块的请求信号已经撤销，而是隔一段时间后自动撤销其回答信号，而无互锁关系．由于一方存在互锁关系，一方不存在互锁关系，故称半互锁方式．</p>
+</li>
+<li>
+<p>全互锁方式</p>
+<p>主模块发出请求信号后，必须等接收到从模块发来的回答信号后才能撤销其请求信号；从模块发出回答信号后，也必须等获知主模块请求信号已撤销后，再撤销其回答信号．双方存在互锁关系，故称为全互锁方式．</p>
+</li>
+</ul>
+</li>
+<li>
+<p>半同步通信</p>
+<p>半同步通信既保留了同步通信的基本特点，如所有的地址、命令、数据信号的发出时间，都严格参照系统时钟的某个前沿开始，而接收方都采用系统时钟后沿时刻来进行识别判断；同时又像异步通信那样，允许不同速度的模块和谐地工作。</p>
+</li>
+<li>
+<p>分离式通信</p>
+</li>
+</ul>
+
+        <h2 id="总线的数据传送模式"   >
+          <a href="#总线的数据传送模式" class="heading-link"><i class="fas fa-link"></i></a>总线的数据传送模式</h2>
+      
+<ol>
+<li>读、写操作</li>
+<li>块传送操作</li>
+<li>写后读、读后写操作</li>
+<li>广播、广集操作</li>
+</ol>
+
+        <h1 id="总线标准"   >
+          <a href="#总线标准" class="heading-link"><i class="fas fa-link"></i></a>总线标准</h1>
+      
+<p>总线标准，可视为系统与各模块、模块与模块之间的一个互连的标准界面．这个界面对它两端的模块都是透明的，即界面的任一方只需根据总线标准的要求完成自身一方接口的功能要求，而无需了解对方接口与总线的连接要求．</p>
+
+        <h2 id="pc机的局部总线"   >
+          <a href="#pc机的局部总线" class="heading-link"><i class="fas fa-link"></i></a>PC机的局部总线</h2>
+      
+<ol>
+<li>局部总线ISA</li>
+<li>局部总线EISA</li>
+<li>局部总线VESA</li>
+<li>局部总线PCI</li>
+</ol>
+
+        <h2 id="外部总线"   >
+          <a href="#外部总线" class="heading-link"><i class="fas fa-link"></i></a>外部总线</h2>
+      
+<ol>
+<li>外部总线IDE和EIDE</li>
+<li>外部总线SCSI</li>
+<li>外部总线RS-232-C</li>
+<li>串行总线IEEE1394</li>
+<li>通用串行总线USB</li>
+</ol>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%80%BB%E7%BA%BF/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%80%BB%E7%BA%BF/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/">组成原理</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/1_%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">计算机发展历程</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/3_%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%80%A7%E8%83%BD%E6%8C%87%E6%A0%87/"><span class="paginator-prev__text">计算机性能指标</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#总线的概念和结构形态"><span class="toc-number">1.</span> <span class="toc-text">
+          总线的概念和结构形态</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念"><span class="toc-number">1.1.</span> <span class="toc-text">
+          基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#总线的特点"><span class="toc-number">1.1.1.</span> <span class="toc-text">
+          总线的特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总线的分类"><span class="toc-number">1.1.2.</span> <span class="toc-text">
+          总线的分类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总线的特性"><span class="toc-number">1.1.3.</span> <span class="toc-text">
+          总线的特性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总线的标准化"><span class="toc-number">1.1.4.</span> <span class="toc-text">
+          总线的标准化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总线的连接方式"><span class="toc-number">1.2.</span> <span class="toc-text">
+          总线的连接方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#单总线结构"><span class="toc-number">1.2.1.</span> <span class="toc-text">
+          单总线结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多总线结构"><span class="toc-number">1.2.2.</span> <span class="toc-text">
+          多总线结构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总线的内部结构"><span class="toc-number">1.3.</span> <span class="toc-text">
+          总线的内部结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总线结构实例"><span class="toc-number">1.4.</span> <span class="toc-text">
+          总线结构实例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cpu总线"><span class="toc-number">1.4.1.</span> <span class="toc-text">
+          CPU总线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pci总线"><span class="toc-number">1.4.2.</span> <span class="toc-text">
+          PCI总线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ias总线"><span class="toc-number">1.4.3.</span> <span class="toc-text">
+          IAS总线</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总线接口"><span class="toc-number">2.</span> <span class="toc-text">
+          总线接口</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#信息传送方式"><span class="toc-number">2.1.</span> <span class="toc-text">
+          信息传送方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#串行传送"><span class="toc-number">2.1.1.</span> <span class="toc-text">
+          串行传送</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#并行传送"><span class="toc-number">2.1.2.</span> <span class="toc-text">
+          并行传送</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分时传送"><span class="toc-number">2.1.3.</span> <span class="toc-text">
+          分时传送</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总线接口的基本概念"><span class="toc-number">2.2.</span> <span class="toc-text">
+          总线接口的基本概念</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总线的仲裁"><span class="toc-number">3.</span> <span class="toc-text">
+          总线的仲裁</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#集中式"><span class="toc-number">3.1.</span> <span class="toc-text">
+          集中式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#链式查询方式"><span class="toc-number">3.1.1.</span> <span class="toc-text">
+          链式查询方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#计时器定时查询方式"><span class="toc-number">3.1.2.</span> <span class="toc-text">
+          计时器定时查询方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#独立请求方式"><span class="toc-number">3.1.3.</span> <span class="toc-text">
+          独立请求方式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分布式总裁"><span class="toc-number">3.2.</span> <span class="toc-text">
+          分布式总裁</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总线的信号控制和数据传送"><span class="toc-number">4.</span> <span class="toc-text">
+          总线的信号控制和数据传送</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#总线通信控制"><span class="toc-number">4.1.</span> <span class="toc-text">
+          总线通信控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总线的数据传送模式"><span class="toc-number">4.2.</span> <span class="toc-text">
+          总线的数据传送模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总线标准"><span class="toc-number">5.</span> <span class="toc-text">
+          总线标准</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#pc机的局部总线"><span class="toc-number">5.1.</span> <span class="toc-text">
+          PC机的局部总线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#外部总线"><span class="toc-number">5.2.</span> <span class="toc-text">
+          外部总线</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

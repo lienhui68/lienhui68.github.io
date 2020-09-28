@@ -1,0 +1,490 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章主要内容  线程模型概述 事件循环的概念和实现 任务调度 实现细节">
+<meta property="og:type" content="article">
+<meta property="og:title" content="EventLoop和线程模型">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/7_EventLoop%E5%92%8C%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章主要内容  线程模型概述 事件循环的概念和实现 任务调度 实现细节">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200907063646.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200907063941.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200908072200.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200908072835.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200908073301.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200908073452.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200908074339.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200908074543.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200908074913.png">
+<meta property="article:published_time" content="2020-08-01T01:04:07.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.488Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="netty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200907063646.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>EventLoop和线程模型 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/7_EventLoop%E5%92%8C%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">EventLoop和线程模型</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-08-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">24分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章主要内容</strong></p>
+<ul>
+<li>线程模型概述</li>
+<li>事件循环的概念和实现</li>
+<li>任务调度</li>
+<li>实现细节</li>
+</ul>
+<a id="more"></a>
+<p>简单地说，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>线程模型指定了操作系统、编程语言、框架或者应用程序的上下文中的线程管理 的关键方面。</span>显而易见地，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>如何以及何时创建线程将对应用程序代码的执行产生显著的影响，因此开发人员需要理解与不同模型相关的权衡。无论是他们自己选择模型，还是通过采用某种编程 语言或者框架隐式地获得它，这都是真实的。</span></p>
+<p>在本章中，我们将详细地探讨 Netty 的线程模型。它强大但又易用，并且和 <span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>Netty 的一贯宗 旨一样，旨在简化你的应用程序代码，同时最大限度地提高性能和可维护性</span>。我们还将讨论致使 选择当前线程模型的经验。</p>
+<p>如果你对 Java 的并发 API（ java.util.concurrent ）有比较好的理解，那么你应该会发 现在本章中的讨论都是直截了当的。如果这些概念对你来说还比较陌生，或者你需要更新自己的 相关知识，那么由 Brian Goetz 等编写的《Java 并发编程实战》 （Addison-Wesley Professional， 2006）这本书将是极好的资源。</p>
+
+        <h1 id="线程模型概述"   >
+          <a href="#线程模型概述" class="heading-link"><i class="fas fa-link"></i></a>线程模型概述</h1>
+      
+<p>在这一节中，我们将介绍常见的线程模型，随后将继续讨论 Netty 过去以及当前的线程模型， 并评审它们各自的优点以及局限性。</p>
+<p>正如我们在本章开头所指出的，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>线程模型确定了代码的执行方式。由于我们总是必须规避并发执行可能会带来的副作用，所以理解所采用的并发模型（也有单线程的线程模型）的影响很重要</span>。 忽略这些问题，仅寄希望于最好的情况（不会引发并发问题）无疑是赌博——赔率必然会击败你。</p>
+<p>因为具有多核心或多个 CPU 的计算机现在已经司空见惯，大多数的现代应用程序都利用了 复杂的多线程处理工作以有效地利用系统资源。相比之下，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在早期的 Java 语言中，我们使用多 线程处理的主要方式无非是按需创建和启动新的 Thread 来执行并发的任务单元——一种在高 负载下工作得很差的原始方式。Java 5 随后引入了 Executor API，其线程池通过缓存和重用 Thread 极大地提高了性能。</span></p>
+<p>基本的线程池化模式可以描述为：</p>
+<ul>
+<li>从池的空闲线程列表中选择一个 Thread，并且指派它去运行一个已提交的任务（一个Runnable 的实现）；</li>
+<li>当任务完成时，将该 Thread返回给该列表，使其可被重用。</li>
+</ul>
+<p>图 7-1 说明了这个模式。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200907063646.png"  alt="" />
+      </p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>虽然池化和重用线程相对于简单地为每个任务都创建和销毁线程是一种进步，但是它并不能消除由上下文切换所带来的开销，其将随着线程数量的增加很快变得明显，并且在高负载下愈演愈烈。</span>此外，仅仅由于应用程序的整体复杂性或者并发需求，在项目的生命周期内也可能会出现 其他和线程相关的问题。</p>
+<p>简而言之，多线程处理是很复杂的。在接下来的章节中，我们将会看到 Netty 是如何帮助<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>简化</span>它的。</p>
+
+        <h1 id="eventloop接口"   >
+          <a href="#eventloop接口" class="heading-link"><i class="fas fa-link"></i></a>EventLoop接口</h1>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>运行任务来处理在连接的生命周期内发生的事件是任何网络框架的基本功能。与之相应的编 程上的构造通常被称为事件循环</span>—一个 Netty 使用了 interface io.netty.channel. EventLoop 来适配的术语。</p>
+<p>代码清单 7-1 中说明了事件循环的基本思想，其中每个任务都是一个 Runnable 的实例（如 图 7-1 所示）。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200907063941.png"  alt="" />
+      </p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Netty 的 EventLoop 是协同设计的一部分，它采用了两个基本的 API：并发和网络编程。 </span>首先， <strong>io.netty.util.concurrent</strong> 包构建在 JDK 的 java.util.concurrent 包上，用 来<strong>提供线程执行器</strong>。其次， <strong>io.netty.channel</strong> 包中的类，<strong>为了与 Channel 的事件进行交互， 扩展了这些接口/类</strong>。图 7-2 展示了生成的类层次结构。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在这个模型中，一个 EventLoop 将由一个永远都不会改变的 Thread 驱动， 同时任务 （ Runnable 或者 Callable ）可以直接提交给 EventLoop 实现，以<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>立即执行或者调度执行</span>。 根据配置和可用核心的不同，可能会创建多个 EventLoop 实例用以优化资源的使用，并且单个 EventLoop 可能会被指派用于服务多个 Channel 。</span></p>
+<p>需要注意的是，Netty的 EventLoop 在继承了 ScheduledExecutorService 的同时，只定 义了一个方法， parent() 。这个方法，如下面的代码片断所示，用于返回到当前 EventLoop 实 现的实例所属的 EventLoopGroup 的引用。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">EventLoop</span> <span class="keyword">extends</span> <span class="title">EventExecutor</span>, <span class="title">EventLoopGroup</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function">EventLoopGroup <span class="title">parent</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p>这个方法重写了 EventExecutor 的 <code>EventExecutorGroup parent()</code>方法。</p>
+</blockquote>
+<p><strong>事件/任务的执行顺序</strong></p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>事件和任务是以先进先出（FIFO）的顺序执行的。这样可以通过保证字 节内容总是按正确的顺序被处理，消除潜在的数据损坏的可能性。</span></p>
+
+        <h2 id="netty4中的io和事件处理"   >
+          <a href="#netty4中的io和事件处理" class="heading-link"><i class="fas fa-link"></i></a>Netty4中的I/O和事件处理</h2>
+      
+<p>正如我们在第 6 章中所详细描述的，由 I/O 操作触发的事件将流经安装了一个或者多个 ChannelHandler 的 ChannelPipeline 。传播这些事件的方法调用可以随后被 Channel- Handler 所拦截，并且可以按需地处理事件。</p>
+<p>事件的性质通常决定了它将被如何处理；它可能将数据从网络栈中传递到你的应用程序中， 或者进行逆向操作，或者 执行一些截然不同的操作。但是事件的处理逻辑必须足够的通用和灵活， 以处理所有可能的用例。 因此， 在Netty 4 中， 所有的I/O操作和事件都由已经被分配给了 EventLoop 的那个 Thread 来处理 。</p>
+<p>这不同于 Netty 3 中所使用的模型。在下一节中，我们将讨论这个早期的模型以及它被替换 的原因。</p>
+
+        <h2 id="netty3中的io和事件处理"   >
+          <a href="#netty3中的io和事件处理" class="heading-link"><i class="fas fa-link"></i></a>Netty3中的I/O和事件处理</h2>
+      
+<p>在以前的版本中所使用的线程模型只保证了入站（之前称为上游）事件会在所谓的 I/O 线程 （对应于 Netty 4 中的 EventLoop ）中执行。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>所有的出站（下游）事件都由调用线程处理，其可 能是 I/O 线程也可能是别的线程。</span>开始看起来这似乎是个好主意，但是已经被发现是有问题的， 因为需要在 ChannelHandler 中对出站事件进行仔细的同步。简而言之，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>不可能保证多个线程 不会在同一时刻尝试访问出站事件。例如，如果你通过在不同的线程中调用 Channel.write()方法，针对同一个 Channel 同时触发出站的事件，就有可能会出现同步问题。</span></p>
+<p>当出站事件触发了入站事件时，将会导致另一个负面影响。当 Channel.write() 方法导致异常时，需要生成并触发一个 exceptionCaught 事件。但是在 Netty 3 的模型中，由于这是一个出站引起的入站事件，需要在调用线程中执行代码，然后将事件移交给 I/O 线程去执行，然而这将带来额外的上下文切换。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>Netty 4 中所采用的线程模型，通过在同一个线程中处理某个给定的EventLoop 中所产生的 所有事件， 解决了这个问题。 这提供了一个更加简单的执行体系架构， 并且消除了在多个 ChannelHandler 中进行同步的需要（除了任何可能需要在多个 Channel 中共享的）。</span></p>
+<p>现在，已经理解了 EventLoop 的角色，让我们来看看任务是如何被调度执行的吧。</p>
+
+        <h1 id="任务调度"   >
+          <a href="#任务调度" class="heading-link"><i class="fas fa-link"></i></a>任务调度</h1>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>偶尔，你将需要调度一个任务以便稍后（延迟）执行或者周期性地执行。例如，你可能想要 注册一个在客户端已经连接了 5 分钟之后触发的任务。一个常见的用例是，发送心跳消息到远程节点，以检查连接是否仍然还活着。如果没有响应，你便知道可以关闭该 Channel 了。</span></p>
+<p>在接下来的几节中，我们将展示如何使用核心的 Java API 和 Netty 的 务。然后，我们将研究 Netty 的内部实现，并讨论它的优点和局限性。</p>
+
+        <h2 id="jdk的任务调度"   >
+          <a href="#jdk的任务调度" class="heading-link"><i class="fas fa-link"></i></a>JDK的任务调度</h2>
+      
+<p>在 Java 5 之前，任务调度是建立在 java.util.Timer 类之上的，其使用了一个后台 Thread ， 并且具有与标准线程相同的限制。随后，JDK 提供了 java.util.concurrent 包， 它定义了 interface ScheduledExecutorService 。表 7-1 展示了 java.util.concurrent.Executors 的相关工厂方法。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200908072200.png"  alt="" />
+      </p>
+<blockquote>
+<p>由JDK提供的这个接口的唯一具体实现是java.util.concurrent.ScheduledThreadPoolExecutor。</p>
+</blockquote>
+<p>虽然选择不是很多 ，但是这些预置的实现已经足以应对大多数的用例。代码清单 7-2 展示 了如何使用 ScheduledExecutorService 来在 60 秒的延迟之后执行一个任务。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200908072835.png"  alt="" />
+      </p>
+<p>虽然 ScheduledExecutorService API 是直截了当的，但是在高负载下它将带来性能上 的负担。在下一节中，我们将看到 Netty 是如何以更高的效率提供相同的功能的。</p>
+
+        <h2 id="使用eventloop调度任务"   >
+          <a href="#使用eventloop调度任务" class="heading-link"><i class="fas fa-link"></i></a>使用EventLoop调度任务</h2>
+      
+<p>ScheduledExecutorService 的实现具有局限性，例如，事实上作为线程池管理的一部 分，将会有额外的线程创建。如果有大量任务被紧凑地调度，那么这将成为一个瓶颈。Netty 通 过 Channel 的 EventLoop 实现任务调度解决了这一问题，如代码清单 7-3 所示。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Channel ch = ...;</span><br><span class="line">ScheduledFuture&lt;?&gt; future = ch.eventLoop().schedule(</span><br><span class="line">        <span class="comment">// // 创建一个 Runnable 以供调度稍后执行</span></span><br><span class="line">        <span class="comment">// 要执行 的代码</span></span><br><span class="line">        () -&gt; System.out.println(<span class="string">"60s later"</span>),</span><br><span class="line">        <span class="number">60</span>, <span class="comment">// 调度任务在从现在开始 的 60 秒之后执行</span></span><br><span class="line">        TimeUnit.SECONDS</span><br><span class="line">);</span><br></pre></td></tr></table></div></figure>
+<p>经过 60 秒之后， Runnable 实例将由分配给 Channel 的 EventLoop 执行。如果要调度任 务以每隔 60 秒执行一次，请使用 scheduleAtFixedRate() 方法，如代码清单 7-4 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200908073301.png"  alt="" />
+      </p>
+<p>如我们前面所提到的，Netty的 EventLoop 扩展了 ScheduledExecutorService （见图 7-2），所以它提供了使用JDK实现可用的所有方法，包括在前面的示例中使用到的 schedule() 和 scheduleAtFixedRate() 方法。所有操作的完整列表可以在 ScheduledExecutorService 的 Javadoc中找到 。</p>
+<p>要想取消或者检查（被调度任务的）执行状态，可以使用每个异步操作所返回的 Scheduled- Future 。代码清单 7-5 展示了一个简单的取消操作。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200908073452.png"  alt="" />
+      </p>
+<p>这些例子说明，可以利用 Netty 的任务调度功能来获得性能上的提升。反过来，这些也依赖于底层的线程模型，我们接下来将对其进行研究。</p>
+
+        <h1 id="实现细节"   >
+          <a href="#实现细节" class="heading-link"><i class="fas fa-link"></i></a>实现细节</h1>
+      
+<p>这一节将更加详细地探讨 Netty 的线程模型和任务调度实现的主要内容。我们也将会提到需 要注意的局限性，以及正在不断发展中的领域。</p>
+
+        <h2 id="线程管理"   >
+          <a href="#线程管理" class="heading-link"><i class="fas fa-link"></i></a>线程管理</h2>
+      
+<p>Netty线程模型的卓越性能取决于对于当前执行的 Thread 的身份的确定 ，也就是说，确定 它是否是分配给当前 Channel 以及它的 EventLoop 的那一个线程。（回想一下 EventLoop 将负责处理一个 Channel 的整个生命周期内的所有事件。）</p>
+<blockquote>
+<p>身份确定是通过调用 EventLoop 的 <code>boolean inEventLoop(Thread thread);</code>方法实现。</p>
+</blockquote>
+<p>如果（当前）调用线程正是支撑 EventLoop 的线程，那么所提交的代码块将会被（直接） 执行。否则， EventLoop 将调度该任务以便稍后执行，并将它放入到内部队列中。当 EventLoop 下次处理它的事件时，它会执行队列中的那些任务/事件。这也就解释了任何的 Thread 是如何 与 Channel 直接交互而无需在 ChannelHandler 中进行额外同步的。</p>
+<p>注意，每个 EventLoop 都有它自已的任务队列，独立于任何其他的 EventLoop。图 7-3展示了 EventLoop 用于调度任务的执行逻辑。这是 Netty 线程模型的关键组成部分。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200908074339.png"  alt="" />
+      </p>
+<p>我们之前已经阐明了不要阻塞当前 I/O 线程的重要性。我们再以另一种方式重申一次：“永 远不要将一个长时间运行的任务放入到执行队列中，因为它将阻塞需要在同一线程上执行的任何 其他任务。”如果必须要进行阻塞调用或者执行长时间运行的任务，我们建议使用一个专门的 EventExecutor 。（见 6.2.1 节的“ ChannelHandler 的执行和阻塞”）。</p>
+<p>除了这种受限的场景，如同传输所采用的不同的事件处理实现一样，所使用的线程模型也可 以强烈地影响到排队的任务对整体系统性能的影响。（如同我们在第 4 章中所看到的，使用 Netty 可以轻松地切换到不同的传输实现，而不需要修改你的代码库。）</p>
+
+        <h2 id="eventloop线程的分配"   >
+          <a href="#eventloop线程的分配" class="heading-link"><i class="fas fa-link"></i></a>EventLoop/线程的分配</h2>
+      
+<p>服务于 Channel 的 I/O 和事件的 EventLoop 包含在 EventLoopGroup 中。根据不同的 传输实现， EventLoop 的创建和分配方式也不同。</p>
+
+        <h3 id="异步传输"   >
+          <a href="#异步传输" class="heading-link"><i class="fas fa-link"></i></a>异步传输</h3>
+      
+<p>异步传输实现只使用了少量的 EventLoop （以及和它们相关联的 Thread ），而且在当前的 线程模型中，它们可能会被多个 Channel 所共享。这使得可以通过尽可能少量的 Thread 来支撑大量的 Channel ，而不是每个 Channel 分配一个 Thread 。</p>
+<p>图 7-4 显示了一个 EventLoopGroup ，它具有 3 个固定大小的 EventLoop EventLoop （每个 都由一个 Thread 支撑）。在创建 EventLoopGroup 时就直接分配了 EventLoop （以及支撑它们 的 Thread ），以确保在需要时它们是可用的。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200908074543.png"  alt="" />
+      </p>
+<p>EventLoopGroup 负责为每个新创建的 Channel 分配一个 EventLoop 。在当前实现中， 使用顺序循环（round-robin）的方式进行分配以获取一个均衡的分布，并且相同的 EventLoop 可能会被分配给多个 Channel 。（这一点在将来的版本中可能会改变。）</p>
+<p>一旦一个 Channel 被分配给一个 EventLoop ，它将在它的整个生命周期中都使用这个 EventLoop （以及相关联的 Thread ）。请牢记这一点，因为它可以使你从担忧你的 Channel- Handler 实现中的线程安全和同步问题中解脱出来。</p>
+<p>另外，需要注意的是， EventLoop 的分配方式对 ThreadLocal 的使用的影响。因为一个 EventLoop 通常会被用于支撑多个 Channel ， 所以对于所有相关联的 Channel 来说， ThreadLocal 都将是一样的。这使得它对于实现状态追踪等功能来说是个糟糕的选择。然而， 在一些无状态的上下文中，它仍然可以被用于在多个 Channel 之间共享一些重度的或者代价昂贵的对象，甚至是事件。</p>
+
+        <h3 id="阻塞传输"   >
+          <a href="#阻塞传输" class="heading-link"><i class="fas fa-link"></i></a>阻塞传输</h3>
+      
+<p>用于像 OIO（旧的阻塞 I/O）这样的其他传输的设计略有不同，如图 7-5 所示。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200908074913.png"  alt="" />
+      </p>
+<p>这里每一个Channel 都将被分配给一个 EventLoop （以及它的 Thread）。如果你开发的 应用程序使用过 <span class="exturl"><a class="exturl__link"   href="http://java.io"  target="_blank" rel="noopener">java.io</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 包中的阻塞 I/O 实现，你可能就遇到过这种模型。</p>
+<p>但是，正如同之前一样，得到的保证是每个 Channel 的 I/O 事件都将只会被一个 Thread （用于支撑该 Channel 的 EventLoop 的那个 Thread ）处理。这也是另一个 Netty 设计一致性 的例子，它（这种设计上的一致性）对 Netty 的可靠性和易用性做出了巨大贡献。</p>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>在本章中，你了解了通常的线程模型，并且特别深入地学习了 Netty 所采用的线程模型，我 们详细探讨了其性能以及一致性。</p>
+<p>你看到了如何在 EventLoop （I/O Thread ）中执行自己的任务，就如同 Netty 框架自身一 样。你学习了如何调度任务以便推迟执行，并且我们还探讨了高负载下的伸缩性问题。你也看到 了如何验证一个任务是否已被执行以及如何取消它。</p>
+<p>通过我们对 Netty 框架的实现细节的研究所获得的这些信息，将帮助你在简化你的应用程序 代码库的同时最大限度地提高它的性能。关于更多一般意义上的有关线程池和并发编程的详细信 息，我们建议阅读由 Brian Goetz 编写的《Java 并发编程实战》。他的书将会带你更加深入地理解 多线程处理甚至是最复杂的多线程处理用例。</p>
+<p>我们已经到达了一个令人兴奋的时刻——在下一章中我们将讨论引导，这是一个配置以及连 接所有的 Netty 组件使你的应用程序运行起来的过程。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/7_EventLoop%E5%92%8C%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/7_EventLoop%E5%92%8C%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/netty/">netty</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/8_%E5%BC%95%E5%AF%BC/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">引导</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Netty%E5%AE%9E%E6%88%98/6_ChannelHandler%E5%92%8CChannelPipeline/"><span class="paginator-prev__text">ChannelHandler和ChannelPipeline</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#线程模型概述"><span class="toc-number">1.</span> <span class="toc-text">
+          线程模型概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#eventloop接口"><span class="toc-number">2.</span> <span class="toc-text">
+          EventLoop接口</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#netty4中的io和事件处理"><span class="toc-number">2.1.</span> <span class="toc-text">
+          Netty4中的I&#x2F;O和事件处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#netty3中的io和事件处理"><span class="toc-number">2.2.</span> <span class="toc-text">
+          Netty3中的I&#x2F;O和事件处理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#任务调度"><span class="toc-number">3.</span> <span class="toc-text">
+          任务调度</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#jdk的任务调度"><span class="toc-number">3.1.</span> <span class="toc-text">
+          JDK的任务调度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用eventloop调度任务"><span class="toc-number">3.2.</span> <span class="toc-text">
+          使用EventLoop调度任务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实现细节"><span class="toc-number">4.</span> <span class="toc-text">
+          实现细节</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#线程管理"><span class="toc-number">4.1.</span> <span class="toc-text">
+          线程管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#eventloop线程的分配"><span class="toc-number">4.2.</span> <span class="toc-text">
+          EventLoop&#x2F;线程的分配</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#异步传输"><span class="toc-number">4.2.1.</span> <span class="toc-text">
+          异步传输</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#阻塞传输"><span class="toc-number">4.2.2.</span> <span class="toc-text">
+          阻塞传输</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;Jenaral&#x2F;p&#x2F;5666390.html                      概述        Firebase是一个把后端作为服务的云平台（BaaS），和wordpress&#x2F;drupal这样的传统CMS不是一类产品。虽然各自有优缺，但单纯讨论开发效率，wordpress&#x2F;drupal无法和Firebase相比。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Firebase">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/Firebase/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;www.cnblogs.com&#x2F;Jenaral&#x2F;p&#x2F;5666390.html                      概述        Firebase是一个把后端作为服务的云平台（BaaS），和wordpress&#x2F;drupal这样的传统CMS不是一类产品。虽然各自有优缺，但单纯讨论开发效率，wordpress&#x2F;drupal无法和Firebase相比。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/530549-555e35fe45160d8d.jpg">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164328.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164520.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164546.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164830.png">
+<meta property="article:published_time" content="2020-09-16T16:25:27.016Z">
+<meta property="article:modified_time" content="2020-09-16T16:25:27.041Z">
+<meta property="article:author" content="lienhui68">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/530549-555e35fe45160d8d.jpg"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Firebase | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/Firebase/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Firebase</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.3k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">13分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/Jenaral/p/5666390.html"  target="_blank" rel="noopener">https://www.cnblogs.com/Jenaral/p/5666390.html</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h1 id="概述"   >
+          <a href="#概述" class="heading-link"><i class="fas fa-link"></i></a>概述</h1>
+      
+<p>Firebase是一个把后端作为服务的云平台（BaaS），和wordpress/drupal这样的传统CMS不是一类产品。虽然各自有优缺，但单纯讨论开发效率，wordpress/drupal无法和Firebase相比。</p>
+<a id="more"></a>
+<p>Firebase专为开发者设计，将后端分离，部署在云端，帮你解决所有后端构架面临的问题，比如稳定性、安全性、扩张性等。同时提供统一的API和SDK，让你可以使用多种框架和语言部署应用程序，覆盖Web、iOS、Android等平台。最重要的是，Firebase提供实时后端数据推送的功能，被许多知名厂商用于开发具有实时特性的功能并整合到自己的平台中。使用Firebase开发应用，可以极大的降低成本，缩短产品发布时间（我用firebase开发过6、7个应用或Demo，开发时间大概几天到几周不等。比如这个<span class="exturl"><a class="exturl__link"   href="https://link.zhihu.com/?target=https%3A//github.com/crabcanon/angularfire-ionic-chat" >crabcanon/angularfire-ionic-chat · GitHub</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>，设计开发4天，使用AngularFire和Ionic，托管在Firebase Host）。</p>
+<p>现在是跨平台的时代，Firebase这类产品作为开发的中间件，是wordpress/drupal等无法媲美的。Wordpress最大的好处是给非工作人员提供一个友好的GUI方便内容管理和维护，但正因这个原因，不仅需要开发应用本身，还需要定制CMS的GUI，相当于给开发人员分配了双倍的任务。而且由于工作受限，基本是PHP/MySQL/jQuery的组合，无形中提高了开发成本。更重要的，安全性是wordpress面临的最大问题，庞大的第三方插件和主题，官方都强调，无法避免插件漏洞被恶意代码攻击，只能小心再小心。</p>
+<p>目前，国际上的BaaS厂商很多，但最火的应该就是Firebase（Google旗下产品）和<span class="exturl"><a class="exturl__link"   href="https://link.zhihu.com/?target=https%3A//www.parse.com/" >Parse</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>（Facebook旗下产品）。</p>
+
+        <h1 id="firebase相关"   >
+          <a href="#firebase相关" class="heading-link"><i class="fas fa-link"></i></a>Firebase相关</h1>
+      
+<p>谷歌在 <span class="exturl"><a class="exturl__link"   href="https://events.google.com/io2016/"  target="_blank" rel="noopener">2016年 I/O 大会</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>上推出了 Firebase 的新版本。Firebase 平台提供了为移动端（iOS和Android）和 Web 端创建后端架构的完整解决方案。</p>
+<p>从一开始的移动后端即服务（Mobile-Back-end-as-a-Service，简称 MBaas），<span class="exturl"><a class="exturl__link"   href="https://firebase.google.com/"  target="_blank" rel="noopener">Firebase</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span> 已经被谷歌改造成了针对移动开发和 Web 开发的一个完整后端解决方案。Firebase 提供了一个 SDK 和 一个控制台，用于创建和管理 Android、iOS和 Web 等多个平台的应用。Firebase 拥有以下特性：</p>
+<ul>
+<li>AdMob —— 集成了谷歌 AdMob</li>
+<li>AdWords —— 集成了谷歌 AdWords</li>
+<li>统计分析（Analytics） —— 用于监控用户行为、人群特征细分、活动效果分析</li>
+<li>崩溃报告（Crash Reporting） —— 监控各类设备上应用的错误。与统计分析特性集成，评估应用崩溃时的用户行为</li>
+<li>数据库 —— 用于存储 JSON 数据的 NoSQL 数据库</li>
+<li>动态链接（Dynamic Links） —— 将用户带至应用内预期页面的深度链接（deep links）</li>
+<li>托管（Hosting） —— 针对 Web 应用的全球 CDN</li>
+<li>索引（Indexing） —— 对应用进行索引，用于谷歌搜索</li>
+<li>邀请（Invites） —— 支持用户与其他用户分享有关应用的信息</li>
+<li>消息（Messaging） —— 即此前的 Google Cloud Messaging，后来被重新命名为 Firebase Cloud Messaging</li>
+<li>通知（Notifications） —— 管理发给用户的通知</li>
+<li>离线（Offline） —— 支持应用在本地缓存中存储数据，这样可以在离线时保持运行</li>
+<li>实时（Real Time） —— 数据实时保存至云数据库</li>
+<li>远程配置（Remote Config） —— 支持开发者在不要求用户下载新版本 app 的情况下，修改应用的行为和外观。该特性用于修改应用的视觉主题，满足不同用户群组的需求，运行 A/B 测试等。</li>
+<li>存储（Storage） —— 存储用户的语音、图片和视频</li>
+<li>同步（Synchronization） —— 当设备上的数据变动时，将会推送至 Firebase，然后再推回到所有相关联的设备。另外，离线后重新在线使用时，设备将自动更新至最近的快照</li>
+<li>测试实验室（Test Lab） —— 在真实设备上测试应用</li>
+</ul>
+<p>以上所有特性在进行 Android 和 iOS 开发时均可使用，除了测试实验室不支持 iOS 设备。部分特性尚不支持 Web 应用。</p>
+<p>Firebase SDK 支持以 C++、Java、JavaScript、JavaScript/Node.js、Objective-C 和 Swift 等语言进行编程。对 Angular、Backbone、Ember 和 React 的支持通过对数据库的绑定实现。谷歌提供了一些辅助开发库：Firebase UI、Geofire、Firebase Queue、FirebaseJobDispatcher。这些库的名称说明了各自的用途。Firebase 还支持导入大规模 JSON 数据集，可与 ElasticSearch 集成。</p>
+<p>Firebase 由谷歌维护，托管在其云数据中心。对于想体验的用户，FIrebase 提供了<span class="exturl"><a class="exturl__link"   href="https://firebase.google.com/pricing/"  target="_blank" rel="noopener">免费的计划</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>。同时提供了一个按需付费计划，提供与谷歌云平台的全面集成。</p>
+<p>如果你想深入了解 Firebase 的运作，我们建议观看谷歌 2016 I/O 大会上的这些视频：<span class="exturl"><a class="exturl__link"   href="https://www.youtube.com/watch?v=tb2GZ3Bh4p8"  target="_blank" rel="noopener">Firebase 概览</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>、<span class="exturl"><a class="exturl__link"   href="https://www.youtube.com/watch?v=RWM9J6Mvu-4"  target="_blank" rel="noopener">迁移至 Firebase</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>、<span class="exturl"><a class="exturl__link"   href="https://www.youtube.com/watch?v=yi23CLNeGaw"  target="_blank" rel="noopener">使用 Firebase Analytics开发优秀APP</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>、<span class="exturl"><a class="exturl__link"   href="https://www.youtube.com/watch?v=8sGY55yxicA"  target="_blank" rel="noopener">Firebase 验证入门</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>、<span class="exturl"><a class="exturl__link"   href="https://www.youtube.com/watch?v=cYinms8LurA"  target="_blank" rel="noopener">深入解析实时数据库</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span>。</p>
+<blockquote>
+<p>查看英文原文：<span class="exturl"><a class="exturl__link"   href="https://www.infoq.com/news/2016/05/google-firebase"  target="_blank" rel="noopener">https://www.infoq.com/news/2016/05/google-firebase</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h1 id="前情"   >
+          <a href="#前情" class="heading-link"><i class="fas fa-link"></i></a>前情</h1>
+      
+<p>几天前翻译了一个有关Firebase的介绍IO的视频，在此写篇文章来总结一下</p>
+<p>主讲人是James Tamplin，Firebase的联合创始人，本人很喜欢他的口音(捂脸XD)</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/530549-555e35fe45160d8d.jpg"  alt="" />
+      </p>
+<p>James Tamplin</p>
+
+        <h1 id="热场"   >
+          <a href="#热场" class="heading-link"><i class="fas fa-link"></i></a>热场</h1>
+      
+<p>首先，他是讲述了10年前笨重的软件开发过程，于是引出了Firebase的目的和他们的关注点</p>
+<p>接着，他引出的Firebase很重要的三个关注点 <code>用户</code> 、<code>数据</code> 和 <code>任务</code></p>
+<p>那么谷歌是如何做的呢？</p>
+<p>首先要从 <code>谷歌云服务平台(Google Cloud Platform)</code> 开始</p>
+<ul>
+<li>它的最底层是基础设施层，也就是 <code>谷歌计算引擎(Google Compute Engine GCE)</code>，它使物理机器呈现出虚拟形态</li>
+<li>接下来是容器层，也就是 <code>谷歌容器引擎(Google Container Engine GKE)</code>，它使你可以运行软件而不用考虑底层的硬件</li>
+<li>再上一层就是平台层，也就是 <code>谷歌应用引擎(Google App Engine GAE)</code>，有了它你就可以不用考虑内存、CPU和系统更新，你只需要给它后端代码，它就可以接收、部署、运行并处理，这让一切变得更高效</li>
+</ul>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164328.png"  style="zoom:80%;" />
+      
+<p>层级展示</p>
+
+        <h1 id="主题"   >
+          <a href="#主题" class="heading-link"><i class="fas fa-link"></i></a>主题</h1>
+      
+<p>那么如果你是个移动端或者Web开发者呢？</p>
+<p>那就该Firebase出场了</p>
+<p>那么到底什么是Firebase？</p>
+<p>简而言之它就是一个帮助你快速开发高效的移动和Web应用的平台</p>
+<p>而我认为它是结合了后端和数据库，使原来的三层结构变成了两层结构，也就是一体化后端框架，使开发变得更加快捷</p>
+<p><strong>三层结构</strong></p>
+<p>Device–&gt;Application Server–&gt;Database</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164520.png"  style="zoom:67%;" />
+      
+<p><strong>两层结构</strong></p>
+<p>Device–&gt;Firebase(Hook Server or Third part API)</p>
+<p>它有三大功能：<code>用户认证</code>、<code>实时数据库</code> 和 <code>托管服务</code></p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164546.png"  style="zoom:67%;" />
+      
+<ul>
+<li>
+<p>用户认证</p>
+<p>如果你构建一个APP，那么你要做一个用户认证系统，而Firebase允许你用Email和密码连接到第三方，例如Facebook，Twitter等等。你所要做的就是使用一个服务端的库来生成JSON Web标记和另一个开放标准，这样你就可以告诉Firebase谁是你的用户了</p>
+</li>
+<li>
+<p>实时数据库</p>
+<p>Firebase用的是一个实时的NoSQL的JSON数据库，所有的数据都以JSON的形式存在于数据库里面，并且它们还为每个键值做映射(mapping)，它可以实现毫秒级的数据推送。还有一点就是客户端可以不和服务器交流直接去访问数据库</p>
+</li>
+<li>
+<p>托管服务</p>
+<p>很典型的例子就是英国大选的时候，Sky News利用Firebase来同步大选的数据，这个应用每天都有几百万的访问量，而Firebase就得托管这些数据并同步给几百万的用户，更激动人心的是这个应用在数周之内就被开发出来并投入使用</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200913164830.png"  style="zoom:67%;" />
+      
+<p>实时数据同步</p>
+</li>
+</ul>
+
+        <h1 id="新功能"   >
+          <a href="#新功能" class="heading-link"><i class="fas fa-link"></i></a>新功能</h1>
+      
+<ul>
+<li>
+<p>手机离线支持(Mobile Offine Support)</p>
+<p>所有数据都会存在于你的磁盘上，而不仅仅是内存</p>
+<p>当你离线时，你的所有数据都会尽量保持最新</p>
+<p>当网络重新连接时，应用会马上进行重新同步，使你的数据保持最新</p>
+<p>当你重新开启应用时所有东西都会还原</p>
+</li>
+<li>
+<p>支持React Native(React Native Support)</p>
+<p>React Native是Facebook的一个开源库，并且Facebook有团队正在使用它</p>
+<p>而Firebase则是驱动React Native的后端，并可以完美协作</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>React会在你的数据模型发生改变时更改你的UI，而Firebase则负责实时更新</span></p>
+</li>
+</ul>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<p>Firebase给我最深的印象就是整合了后端框架，这大大改变了原有了软件过程</p>
+<p>以往软件开发是先要设计一个数据库，然后再搭一个服务器，最后在应用端进行开发</p>
+<p>现在是你启动一个Firebase项目，挂上服务器，有必要还可以挂上第三方API，然后就可以进行开发了</p>
+<p>你只需要向Firebase抛后端代码，它就可以自动处理并返回你想要的数据</p>
+<p>James Tamplin讲述了很多快速开发的例子，在此我就不一一举例了。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/Firebase/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/Firebase/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/700_%E4%BA%91%E8%AE%A1%E7%AE%97/%E4%BA%91%E8%AE%A1%E7%AE%97/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">云计算</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/600_%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/%E6%9E%B6%E6%9E%84%E5%B8%88%E5%BA%94%E8%AF%A5%E5%AD%A6%E4%B9%A0%E7%9A%84%E7%9F%A5%E8%AF%86/"><span class="paginator-prev__text">架构师应该学习的知识</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">
+          概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#firebase相关"><span class="toc-number">2.</span> <span class="toc-text">
+          Firebase相关</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#前情"><span class="toc-number">3.</span> <span class="toc-text">
+          前情</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#热场"><span class="toc-number">4.</span> <span class="toc-text">
+          热场</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#主题"><span class="toc-number">5.</span> <span class="toc-text">
+          主题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#新功能"><span class="toc-number">6.</span> <span class="toc-text">
+          新功能</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">7.</span> <span class="toc-text">
+          总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

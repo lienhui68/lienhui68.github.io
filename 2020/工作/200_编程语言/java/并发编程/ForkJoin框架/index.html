@@ -1,0 +1,458 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="转载自：Fork&#x2F;Join框架                     什么是Fork&#x2F;Join        Fork&#x2F;Join框架是一个实现了ExecutorService接口的多线程处理器，它专为那些可以通过递归分解成更细小的任务而设计，最大化的利用多核处理器来提高应用程序的性能。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fork&#x2F;Join框架">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/ForkJoin%E6%A1%86%E6%9E%B6/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="转载自：Fork&#x2F;Join框架                     什么是Fork&#x2F;Join        Fork&#x2F;Join框架是一个实现了ExecutorService接口的多线程处理器，它专为那些可以通过递归分解成更细小的任务而设计，最大化的利用多核处理器来提高应用程序的性能。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200810215929.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200808202115.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200808202206.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200808202305.png">
+<meta property="article:published_time" content="2020-09-16T16:22:28.369Z">
+<meta property="article:modified_time" content="2020-09-16T16:22:28.374Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="并发编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200810215929.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>Fork/Join框架 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/ForkJoin%E6%A1%86%E6%9E%B6/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Fork/Join框架</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.1k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">20分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>转载自：<span class="exturl"><a class="exturl__link"   href="http://concurrent.redspider.group/article/03/18.html"  target="_blank" rel="noopener">Fork/Join框架</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+
+        <h1 id="什么是forkjoin"   >
+          <a href="#什么是forkjoin" class="heading-link"><i class="fas fa-link"></i></a>什么是Fork/Join</h1>
+      
+<p>Fork/Join框架是一个实现了ExecutorService接口的多线程处理器，它专为那些可以通过递归分解成更细小的任务而设计，最大化的利用多核处理器来提高应用程序的性能。</p>
+<a id="more"></a>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200810215929.png"  alt="" />
+      </p>
+<p>与其他ExecutorService相关的实现相同的是，Fork/Join框架会将任务分配给线程池中的线程。而与之不同的是，Fork/Join框架在执行任务时使用了<strong>工作窃取算法</strong>。</p>
+<p><strong>fork</strong>在英文里有分叉的意思，<strong>join</strong>在英文里连接、结合的意思。顾名思义，fork就是要使一个大任务分解成若干个小任务，而join就是最后将各个小任务的结果结合起来得到大任务的结果。</p>
+<p>Fork/Join的运行流程大致如下所示：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200808202115.png"  alt="" />
+      </p>
+<p>需要注意的是，图里的次级子任务可以一直分下去，一直分到子任务足够小为止。用伪代码来表示如下：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">solve(任务):</span><br><span class="line">    if(任务已经划分到足够小):</span><br><span class="line">        顺序执行任务</span><br><span class="line">    else:</span><br><span class="line">        for(划分任务得到子任务)</span><br><span class="line">            solve(子任务)</span><br><span class="line">        结合所有子任务的结果到上一层循环</span><br><span class="line">        return 最终结合的结果</span><br></pre></td></tr></table></div></figure>
+<p>通过上面伪代码可以看出，我们通过递归嵌套的计算得到最终结果，这里有体现<strong>分而治之(divide and conquer)</strong> 的算法思想。</p>
+
+        <h1 id="工作窃取算法"   >
+          <a href="#工作窃取算法" class="heading-link"><i class="fas fa-link"></i></a>工作窃取算法</h1>
+      
+<p>工作窃取算法指的是在多线程执行不同任务队列的过程中，某个线程执行完自己队列的任务后从其他线程的任务队列里窃取任务来执行。</p>
+<p>工作窃取流程如下图所示：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200808202206.png"  alt="" />
+      </p>
+<p>值得注意的是，当一个线程窃取另一个线程的时候，为了减少两个任务线程之间的竞争，我们通常使用<strong>双端队列</strong>来存储任务。被窃取的任务线程都从双端队列的<strong>头部</strong>拿任务执行，而窃取其他任务的线程从双端队列的<strong>尾部</strong>执行任务。</p>
+<p>另外，当一个线程在窃取任务时要是没有其他可用的任务了，这个线程会进入<strong>阻塞状态</strong>以等待再次“工作”。</p>
+
+        <h1 id="forkjoin的具体实现"   >
+          <a href="#forkjoin的具体实现" class="heading-link"><i class="fas fa-link"></i></a>Fork/Join的具体实现</h1>
+      
+<p>前面我们说Fork/Join框架简单来讲就是对任务的分割与子任务的合并，所以要实现这个框架，先得有<strong>任务</strong>。在Fork/Join框架里提供了抽象类<code>ForkJoinTask</code>来实现任务。</p>
+
+        <h2 id="forkjointask"   >
+          <a href="#forkjointask" class="heading-link"><i class="fas fa-link"></i></a>ForkJoinTask</h2>
+      
+<p>ForkJoinWorkerThread是一个类似普通线程的实体，但是比普通线程轻量得多。</p>
+<p><strong>fork()方法</strong>:使用线程池中的空闲线程异步提交任务</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 本文所有代码都引自Java 8</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> ForkJoinTask&lt;V&gt; <span class="title">fork</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Thread t;</span><br><span class="line">    <span class="comment">// ForkJoinWorkerThread是执行ForkJoinTask的专有线程，由ForkJoinPool管理</span></span><br><span class="line">    <span class="comment">// 先判断当前线程是否是ForkJoin专有线程，如果是，则将任务push到当前线程所负责的队列里去</span></span><br><span class="line">    <span class="keyword">if</span> ((t = Thread.currentThread()) <span class="keyword">instanceof</span> ForkJoinWorkerThread)</span><br><span class="line">        ((ForkJoinWorkerThread)t).workQueue.push(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">         <span class="comment">// 如果不是则将线程加入队列</span></span><br><span class="line">        <span class="comment">// 没有显式创建ForkJoinPool的时候走这里，提交任务到默认的common线程池中</span></span><br><span class="line">        ForkJoinPool.common.externalPush(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>其实fork()只做了一件事，那就是<strong>把任务推入当前工作线程的工作队列里</strong>。</p>
+<p><strong>join()方法</strong>：等待处理任务的线程处理完毕，获得返回值。</p>
+<p>来看下join()的源码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> V <span class="title">join</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> s;</span><br><span class="line">    <span class="comment">// doJoin()方法来获取当前任务的执行状态</span></span><br><span class="line">    <span class="keyword">if</span> ((s = doJoin() &amp; DONE_MASK) != NORMAL)</span><br><span class="line">        <span class="comment">// 任务异常，抛出异常</span></span><br><span class="line">        reportException(s);</span><br><span class="line">    <span class="comment">// 任务正常完成，获取返回值</span></span><br><span class="line">    <span class="keyword">return</span> getRawResult();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * doJoin()方法用来返回当前任务的执行状态</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">doJoin</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> s; Thread t; ForkJoinWorkerThread wt; ForkJoinPool.WorkQueue w;</span><br><span class="line">    <span class="comment">// 先判断任务是否执行完毕，执行完毕直接返回结果（执行状态）</span></span><br><span class="line">    <span class="keyword">return</span> (s = status) &lt; <span class="number">0</span> ? s :</span><br><span class="line">    <span class="comment">// 如果没有执行完毕，先判断是否是ForkJoinWorkThread线程</span></span><br><span class="line">    ((t = Thread.currentThread()) <span class="keyword">instanceof</span> ForkJoinWorkerThread) ?</span><br><span class="line">        <span class="comment">// 如果是，先判断任务是否处于工作队列顶端（意味着下一个就执行它）</span></span><br><span class="line">        <span class="comment">// tryUnpush()方法判断任务是否处于当前工作队列顶端，是返回true</span></span><br><span class="line">        <span class="comment">// doExec()方法执行任务</span></span><br><span class="line">        (w = (wt = (ForkJoinWorkerThread)t).workQueue).</span><br><span class="line">        <span class="comment">// 如果是处于顶端并且任务执行完毕，返回结果</span></span><br><span class="line">        tryUnpush(<span class="keyword">this</span>) &amp;&amp; (s = doExec()) &lt; <span class="number">0</span> ? s :</span><br><span class="line">        <span class="comment">// 如果不在顶端或者在顶端却没未执行完毕，那就调用awitJoin()执行任务</span></span><br><span class="line">        <span class="comment">// awaitJoin()：使用自旋使任务执行完成，返回结果</span></span><br><span class="line">        wt.pool.awaitJoin(w, <span class="keyword">this</span>, <span class="number">0L</span>) :</span><br><span class="line">    <span class="comment">// 如果不是ForkJoinWorkThread线程，执行externalAwaitDone()返回任务结果</span></span><br><span class="line">    externalAwaitDone();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>我们在之前介绍过说Thread.join()会使线程阻塞，而ForkJoinPool.join()会使线程免于阻塞，下面是ForkJoinPool.join()的流程图：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200808202305.png"  alt="" />
+      </p>
+<p><strong>RecursiveAction和RecursiveTask</strong></p>
+<p>通常情况下，在创建任务的时候我们一般不直接继承ForkJoinTask，而是继承它的子类<strong>RecursiveAction</strong>和<strong>RecursiveTask</strong>。</p>
+<p>两个都是ForkJoinTask的子类，<strong>RecursiveAction可以看做是无返回值的ForkJoinTask，RecursiveTask是有返回值的ForkJoinTask</strong>。</p>
+<p>此外，两个子类都有执行主要计算的方法compute()，当然，RecursiveAction的compute()返回void，RecursiveTask的compute()有具体的返回值。</p>
+<p>ForkJoinPool是用于执行ForkJoinTask任务的执行（线程）池。</p>
+<p>ForkJoinPool管理着执行池中的线程和任务队列，此外，执行池是否还接受任务，显示线程的运行状态也是在这里处理。</p>
+<p>我们来大致看下ForkJoinPool的源码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@sun</span>.misc.Contended</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ForkJoinPool</span> <span class="keyword">extends</span> <span class="title">AbstractExecutorService</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 任务队列</span></span><br><span class="line">    <span class="keyword">volatile</span> WorkQueue[] workQueues;   </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 线程的运行状态</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">int</span> runState;  </span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建ForkJoinWorkerThread的默认工厂，可以通过构造函数重写</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> ForkJoinWorkerThreadFactory defaultForkJoinWorkerThreadFactory;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 公用的线程池，其运行状态不受shutdown()和shutdownNow()的影响</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> ForkJoinPool common;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 私有构造方法，没有任何安全检查和参数校验，由makeCommonPool直接调用</span></span><br><span class="line">    <span class="comment">// 其他构造方法都是源自于此方法</span></span><br><span class="line">    <span class="comment">// parallelism: 并行度，</span></span><br><span class="line">    <span class="comment">// 默认调用java.lang.Runtime.availableProcessors() 方法返回可用处理器的数量</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">ForkJoinPool</span><span class="params">(<span class="keyword">int</span> parallelism,</span></span></span><br><span class="line"><span class="function"><span class="params">                         ForkJoinWorkerThreadFactory factory, // 工作线程工厂</span></span></span><br><span class="line"><span class="function"><span class="params">                         UncaughtExceptionHandler handler, // 拒绝任务的handler</span></span></span><br><span class="line"><span class="function"><span class="params">                         <span class="keyword">int</span> mode, // 同步模式</span></span></span><br><span class="line"><span class="function"><span class="params">                         String workerNamePrefix)</span> </span>&#123; <span class="comment">// 线程名prefix</span></span><br><span class="line">        <span class="keyword">this</span>.workerNamePrefix = workerNamePrefix;</span><br><span class="line">        <span class="keyword">this</span>.factory = factory;</span><br><span class="line">        <span class="keyword">this</span>.ueh = handler;</span><br><span class="line">        <span class="keyword">this</span>.config = (parallelism &amp; SMASK) | mode;</span><br><span class="line">        <span class="keyword">long</span> np = (<span class="keyword">long</span>)(-parallelism); <span class="comment">// offset ctl counts</span></span><br><span class="line">        <span class="keyword">this</span>.ctl = ((np &lt;&lt; AC_SHIFT) &amp; AC_MASK) | ((np &lt;&lt; TC_SHIFT) &amp; TC_MASK);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="workqueue"   >
+          <a href="#workqueue" class="heading-link"><i class="fas fa-link"></i></a>WorkQueue</h3>
+      
+<p>双端队列，ForkJoinTask存放在这里。</p>
+<p>当工作线程在处理自己的工作队列时，会从队列首取任务来执行（FIFO）；如果是窃取其他队列的任务时，窃取的任务位于所属任务队列的队尾（LIFO）。</p>
+<p>ForkJoinPool与传统线程池最显著的区别就是它维护了一个<strong>工作队列数组</strong>（volatile WorkQueue[] workQueues，ForkJoinPool中的<strong>每个工作线程都维护着一个工作队列</strong>）。</p>
+
+        <h3 id="runstate"   >
+          <a href="#runstate" class="heading-link"><i class="fas fa-link"></i></a>runState</h3>
+      
+<p>ForkJoinPool的运行状态。<strong>SHUTDOWN</strong>状态用负数表示，其他用2的幂次表示。</p>
+
+        <h1 id="forkjoin的使用"   >
+          <a href="#forkjoin的使用" class="heading-link"><i class="fas fa-link"></i></a>Fork/Join的使用</h1>
+      
+<p>上面我们说ForkJoinPool负责管理线程和任务，ForkJoinTask实现fork和join操作，所以要使用Fork/Join框架就离不开这两个类了，只是在实际开发中我们常用ForkJoinTask的子类RecursiveTask 和RecursiveAction来替代ForkJoinTask。</p>
+<p>下面我们用一个计算斐波那契数列第n项的例子来看一下Fork/Join的使用：</p>
+<blockquote>
+<p>斐波那契数列数列是一个线性递推数列，从第三项开始，每一项的值都等于前两项之和：</p>
+<p>1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89······</p>
+<p>如果设f(n）为该数列的第n项（n∈N*），那么有：f(n) = f(n-1) + f(n-2)。</p>
+</blockquote>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FibonacciTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Fibonacci</span> <span class="keyword">extends</span> <span class="title">RecursiveTask</span>&lt;<span class="title">Integer</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> n;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Fibonacci</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.n = n;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 主要的实现逻辑都在compute()里</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> Integer <span class="title">compute</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="comment">// 这里先假设 n &gt;= 0， n&lt;=1表示任务足够小可以计算了。</span></span><br><span class="line">            <span class="keyword">if</span> (n &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> n;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// f(n-1)</span></span><br><span class="line">                Fibonacci f1 = <span class="keyword">new</span> Fibonacci(n - <span class="number">1</span>);</span><br><span class="line">                f1.fork();</span><br><span class="line">                <span class="comment">// f(n-2)</span></span><br><span class="line">                Fibonacci f2 = <span class="keyword">new</span> Fibonacci(n - <span class="number">2</span>);</span><br><span class="line">                f2.fork();</span><br><span class="line">                <span class="comment">// f(n) = f(n-1) + f(n-2)</span></span><br><span class="line">                <span class="keyword">return</span> f1.join() + f2.join();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testFib</span><span class="params">()</span> <span class="keyword">throws</span> ExecutionException, InterruptedException </span>&#123;</span><br><span class="line">        ForkJoinPool forkJoinPool = <span class="keyword">new</span> ForkJoinPool();</span><br><span class="line">        System.out.println(<span class="string">"CPU核数："</span> + Runtime.getRuntime().availableProcessors());</span><br><span class="line">        <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">        Fibonacci fibonacci = <span class="keyword">new</span> Fibonacci(<span class="number">40</span>);</span><br><span class="line">        Future&lt;Integer&gt; future = forkJoinPool.submit(fibonacci);</span><br><span class="line">        System.out.println(future.get());</span><br><span class="line">        <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line">        System.out.println(String.format(<span class="string">"耗时：%d millis"</span>, end - start));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>上面例子在本机的输出：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CPU核数：4</span><br><span class="line">计算结果：102334155</span><br><span class="line">耗时：9490 millis</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p>通过这个例子，我们进一步了解ForkJoinTask，ForkJoinTask与一般任务的主要区别在于它需要实现compute方法，在这个方法里，首先需要判断任务是否足够小，如果足够小就直接执行任务。如果不足够小，就必须分割成两个子任务，每个子任务在调用fork方法时，又会进入compute方法，看看当前子任务是否需要继续分割成子任务，如果不需要继续分割，则执行当前子任务并返回结果。使用join方法会等待子任务执行完并得到其结果。</p>
+</blockquote>
+<p>需要注意的是，上述计算时间复杂度为<code>O(2^n)</code>，随着n的增长计算效率会越来越低，这也是上面的例子中n不敢取太大的原因。</p>
+<p>此外，也并不是所有的任务都适合Fork/Join框架，比如上面的例子任务划分过于细小反而体现不出效率，下面我们试试用普通的递归来求f(n)的值，看看是不是要比使用Fork/Join快：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 普通递归，复杂度为O(2^n)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">plainRecursion</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (n == <span class="number">1</span> || n == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> plainRecursion(n -<span class="number">1</span>) + plainRecursion(n - <span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testPlain</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">    <span class="keyword">int</span> result = plainRecursion(<span class="number">40</span>);</span><br><span class="line">    <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line">    System.out.println(<span class="string">"计算结果:"</span> + result);</span><br><span class="line">    System.out.println(String.format(<span class="string">"耗时：%d millis"</span>,  end -start));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>普通递归的例子输出：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">计算结果:102334155</span><br><span class="line">耗时：436 millis</span><br></pre></td></tr></table></div></figure>
+<p>通过输出可以很明显的看出来，使用普通递归的效率都要比使用Fork/Join框架要高很多。</p>
+<p>这里我们再用另一种思路来计算：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过循环来计算，复杂度为O(n)</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">computeFibonacci</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 假设n &gt;= 0</span></span><br><span class="line">    <span class="keyword">if</span> (n &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> n;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> first = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> second = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> third = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">3</span>; i &lt;= n; i ++) &#123;</span><br><span class="line">            <span class="comment">// 第三个数是前两个数之和</span></span><br><span class="line">            third = first + second;</span><br><span class="line">            <span class="comment">// 前两个数右移</span></span><br><span class="line">            first = second;</span><br><span class="line">            second = third;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> third;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testComputeFibonacci</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> start = System.currentTimeMillis();</span><br><span class="line">    <span class="keyword">int</span> result = computeFibonacci(<span class="number">40</span>);</span><br><span class="line">    <span class="keyword">long</span> end = System.currentTimeMillis();</span><br><span class="line">    System.out.println(<span class="string">"计算结果:"</span> + result);</span><br><span class="line">    System.out.println(String.format(<span class="string">"耗时：%d millis"</span>,  end -start));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>上面例子在笔者所用电脑的输出为：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">计算结果:102334155</span><br><span class="line">耗时：0 millis</span><br></pre></td></tr></table></div></figure>
+<p>这里耗时为0不代表没有耗时，是表明这里计算的耗时几乎可以忽略不计，大家可以在自己的电脑试试，即使是n取大很多量级的数据（注意int溢出的问题）耗时也是很短的，或者可以用System.nanoTime()统计纳秒的时间。</p>
+<p>为什么在这里普通的递归或循环效率更快呢？因为Fork/Join是使用多个线程协作来计算的，所以会有线程通信和线程切换的开销。</p>
+<p>如果要计算的任务比较简单（比如我们案例中的斐波那契数列），那当然是直接使用单线程会更快一些。但如果要计算的东西比较复杂，计算机又是多核的情况下，就可以充分利用多核CPU来提高计算速度。</p>
+<p>另外，Java 8 Stream的并行操作底层就是用到了Fork/Join框架，下一章我们将从源码及案例两方面介绍Java 8 Stream的并行操作。</p>
+
+        <h1 id="forkjoin和线程池对比"   >
+          <a href="#forkjoin和线程池对比" class="heading-link"><i class="fas fa-link"></i></a>Fork/Join和线程池对比</h1>
+      
+<p><strong>应用场景</strong></p>
+<ol>
+<li>
+<p>线程池</p>
+<p>常用于线程并发，阻塞时延较长的任务。这种任务一般要求的线程个数较多；</p>
+</li>
+<li>
+<p>fork/join</p>
+<p>用于大任务可分解成小任务，一般是非阻塞的、可以快速处理的任务；或者阻塞时延较小的任务。</p>
+</li>
+</ol>
+<p><strong>基本功能原理</strong></p>
+<ol>
+<li>
+<p>线程池</p>
+<p>线程复用、控制并发数、对线程统一管理</p>
+</li>
+<li>
+<p>fork/join</p>
+<p>类似于MapReduce任务分解聚合模式， ForkJoinPool采用先将大任务fork成多个小任务，然后再将每个小任务的结果join在一起，进而得出大任务的结果。</p>
+</li>
+</ol>
+<p><strong>阻塞队列</strong></p>
+<ol>
+<li>
+<p>线程池</p>
+<p>一个阻塞队列</p>
+</li>
+<li>
+<p>fork/join</p>
+<p>每个线程都有一个队列。如果一个线程的队列执行完成，可以从其他线程队列的末尾拿出一个任务执行</p>
+</li>
+</ol>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/ForkJoin%E6%A1%86%E6%9E%B6/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/ForkJoin%E6%A1%86%E6%9E%B6/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E8%81%8A%E8%81%8A%E4%BD%A0%E7%9F%A5%E9%81%93%E7%9A%84%E9%94%81/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">聊聊你知道的锁</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C/"><span class="paginator-prev__text">内存屏障</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是forkjoin"><span class="toc-number">1.</span> <span class="toc-text">
+          什么是Fork&#x2F;Join</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#工作窃取算法"><span class="toc-number">2.</span> <span class="toc-text">
+          工作窃取算法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#forkjoin的具体实现"><span class="toc-number">3.</span> <span class="toc-text">
+          Fork&#x2F;Join的具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#forkjointask"><span class="toc-number">3.1.</span> <span class="toc-text">
+          ForkJoinTask</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#workqueue"><span class="toc-number">3.1.1.</span> <span class="toc-text">
+          WorkQueue</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#runstate"><span class="toc-number">3.1.2.</span> <span class="toc-text">
+          runState</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#forkjoin的使用"><span class="toc-number">4.</span> <span class="toc-text">
+          Fork&#x2F;Join的使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#forkjoin和线程池对比"><span class="toc-number">5.</span> <span class="toc-text">
+          Fork&#x2F;Join和线程池对比</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

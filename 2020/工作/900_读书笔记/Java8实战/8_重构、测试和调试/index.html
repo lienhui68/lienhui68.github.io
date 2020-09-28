@@ -1,0 +1,631 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="本章内容  如何使用Lambda表达式重构代码 Lambda表达式对面向对象的设计模式的影响 Lambda表达式的测试 如何调试使用Lambda表达式和Stream API的代码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重构、测试和调试">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/8_%E9%87%8D%E6%9E%84%E3%80%81%E6%B5%8B%E8%AF%95%E5%92%8C%E8%B0%83%E8%AF%95/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="本章内容  如何使用Lambda表达式重构代码 Lambda表达式对面向对象的设计模式的影响 Lambda表达式的测试 如何调试使用Lambda表达式和Stream API的代码">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200812211506.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200812212145.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200812213318.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200812220158.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200812224138.png">
+<meta property="article:published_time" content="2020-07-01T01:04:08.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:26:16.901Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="java8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200812211506.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>重构、测试和调试 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/8_%E9%87%8D%E6%9E%84%E3%80%81%E6%B5%8B%E8%AF%95%E5%92%8C%E8%B0%83%E8%AF%95/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">重构、测试和调试</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">8.6k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">57分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p><strong>本章内容</strong></p>
+<ul>
+<li>如何使用Lambda表达式重构代码</li>
+<li>Lambda表达式对面向对象的设计模式的影响</li>
+<li>Lambda表达式的测试</li>
+<li>如何调试使用Lambda表达式和Stream API的代码</li>
+</ul>
+<a id="more"></a>
+
+        <h1 id="为改善可读性和灵活性重构代码"   >
+          <a href="#为改善可读性和灵活性重构代码" class="heading-link"><i class="fas fa-link"></i></a>为改善可读性和灵活性重构代码</h1>
+      
+<p>从本书的开篇我们就一直在强调，利用Lambda表达式，你可以写出更简洁、更灵活的代码。 <span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>用“更简洁”来描述Lambda表达式是因为相较于匿名类，Lambda表达式可以帮助我们用更紧凑 的方式描述程序的行为。</span>第3章中我们也提到，如果你希望将一个既有的方法作为参数传递给另 一个方法，那么方法引用无疑是我们推荐的方法，利用这种方式我们能写出非常简洁的代码。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>采用Lambda表达式之后，你的代码会变得更加灵活，因为Lambda表达式鼓励大家使用行为参数化的方式。在这种方式下，应对需求的变化时，你的代码可以依据传入的 参数动态选择和执行相应的行为。</span></p>
+
+        <h2 id="改善代码的可读性"   >
+          <a href="#改善代码的可读性" class="heading-link"><i class="fas fa-link"></i></a>改善代码的可读性</h2>
+      
+<p>改善代码的可读性到底意味着什么？我们很难定义什么是好的可读性，因为这可能非常主 观。通常的理解是，“别人理解这段代码的难易程度”。改善可读性意味着你要确保你的代码能非 常容易地被包括自己在内的所有人理解和维护。为了确保你的代码能被其他人理解，有几个步骤 可以尝试，比如确保你的代码附有良好的文档，并严格遵守编程规范。</p>
+<p>跟之前的版本相比较，Java 8的新特性也可以帮助提升代码的可读性：</p>
+<ul>
+<li>使用Java 8，你可以减少冗长的代码，让代码更易于理解</li>
+<li>通过方法引用和Stream API，你的代码会变得更直观</li>
+</ul>
+<p>这里我们会介绍三种简单的重构，利用Lambda表达式、方法引用以及Stream改善程序代码的 可读性</p>
+<ul>
+<li>重构代码，用Lambda表达式取代匿名类</li>
+<li>用方法引用重构Lambda表达式</li>
+<li>用Stream API重构命令式的数据处理</li>
+</ul>
+
+        <h2 id="从匿名类到lambda表达式的转换"   >
+          <a href="#从匿名类到lambda表达式的转换" class="heading-link"><i class="fas fa-link"></i></a>从匿名类到Lambda表达式的转换</h2>
+      
+<p>你值得尝试的第一种重构，也是简单的方式，是将实现单一抽象方法的匿名类转换为Lambda 表达式。为什么呢？前面几章的介绍应该足以说服你，因为匿名类是极其繁琐且容易出错的。采 用Lambda表达式之后， 你的代码会更简洁， 可读性更好。</p>
+<p>但是某些情况下，将匿名类转换为Lambda表达式可能是一个比较复杂的过程。</p>
+<p>首先，匿名 类和Lambda表达式中的this和super的含义是不同的。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>在匿名类中，this代表的是类自身，但是在Lambda中，它代表的是包含类</span>。其次，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>匿名类可以屏蔽包含类的变量，而Lambda表达式不 能（它们会导致编译错误）</span>，譬如下面这段代码：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test11</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">        Runnable r1 = () -&gt; &#123;</span><br><span class="line"><span class="comment">//            int a = 2;  // 编译错误</span></span><br><span class="line">            System.out.println(a);</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        Runnable r2 = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">int</span> a = <span class="number">2</span>; <span class="comment">// 编译正常</span></span><br><span class="line">                System.out.println(a);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>最后，在涉及重载的上下文里，将匿名类转换为Lambda表达式可能导致最终的代码更加晦 涩。实际上，匿名类的类型是在初始化时确定的，而Lambda的类型取决于它的上下文。</span></p>
+<p>通过下 面这个例子，我们可以了解问题是如何发生的。我们假设你用与Runnable同样的签名声明了一 个函数接口，我们称之为Task:</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200812211506.png"  style="zoom: 50%;" />
+      
+<p>可以对Task尝试使用显式的类型转换来解决这种模棱两可的情况：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">doSomething((Task) () -&gt; System.out.println(<span class="string">"Danger"</span>));</span><br></pre></td></tr></table></div></figure>
+<p>但是不要因此而放弃对Lambda的尝试。好消息是，目前大多数的集成开发环境，比如NetBeans 和IntelliJ都支持这种重构，它们能自动地帮你检查，避免发生这些问题。</p>
+
+        <h2 id="从lambda表达式到方法引用的转换"   >
+          <a href="#从lambda表达式到方法引用的转换" class="heading-link"><i class="fas fa-link"></i></a>从Lambda表达式到方法引用的转换</h2>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Lambda表达式非常适用于需要传递代码片段的场景。不过，为了改善代码的可读性，也请 尽量使用方法引用。因为方法名往往能更直观地表达代码的意图。</span>比如，第6章中我们曾经展示 过下面这段代码，它的功能是按照食物的热量级别对菜肴进行分类：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;CaloricLevel, List&lt;Dish&gt;&gt; dishesByCaloricLevel = menu.stream()</span><br><span class="line">                .collect(groupingBy(t -&gt; &#123;</span><br><span class="line">                    <span class="keyword">if</span> (t.getCalories() &lt; <span class="number">400</span>) &#123;</span><br><span class="line">                        <span class="keyword">return</span> CaloricLevel.DIET;</span><br><span class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (t.getCalories() &gt;= <span class="number">400</span> &amp;&amp; t.getCalories() &lt; <span class="number">700</span>) &#123;</span><br><span class="line">                        <span class="keyword">return</span> CaloricLevel.NORMAL;</span><br><span class="line">                    &#125; <span class="keyword">else</span></span><br><span class="line">                        <span class="keyword">return</span> CaloricLevel.FAT;</span><br><span class="line">                &#125;));</span><br><span class="line">        System.out.println();</span><br></pre></td></tr></table></div></figure>
+<p>你可以将Lambda表达式的内容抽取到一个单独的方法中，将其作为参数传递给groupingBy 方法。变换之后，代码变得更加简洁，程序的意图也更加清晰了：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Dish.Type, Set&lt;CaloricLevel&gt;&gt; caloricLevelsByType = menu.stream()</span><br><span class="line">                .collect(groupingBy(Dish::getType,</span><br><span class="line">                        mapping(Dish::getCaloricLevel, toCollection(HashSet::<span class="keyword">new</span>))</span><br><span class="line">                ));</span><br></pre></td></tr></table></div></figure>
+<p>为了实现这个方案，还需要在Dish类中添加getCaloricLevel方法</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dish</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> MenuDemo.<span class="function">CaloricLevel <span class="title">getCaloricLevel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.getCalories() &lt;= <span class="number">400</span>) <span class="keyword">return</span> MenuDemo.CaloricLevel.DIET;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.getCalories() &lt;= <span class="number">700</span>) <span class="keyword">return</span> MenuDemo.CaloricLevel.NORMAL;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">return</span> MenuDemo.CaloricLevel.FAT;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>除此之外，我们还应该尽量考虑使用静态辅助方法，比如comparing、maxBy。这些方法设 计之初就考虑了会结合方法引用一起使用。通过示例，我们看到相对于第3章中的对应代码，优 化过的代码更清晰地表达了它的设计意图：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200812212145.png"  alt="" />
+      </p>
+<p>此外，很多通用的归约操作，比如sum、maximum，都有内建的辅助方法可以和方法引用结 合使用。比如，在我们的示例代码中，使用Collectors接口可以轻松得到和或者最大值，与采 用Lambada表达式和底层的归约操作比起来，这种方式要直观得多。与其编写：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> totalCalories = menu.stream().map(Dish::getCalories) .reduce(<span class="number">0</span>, (c1, c2) -&gt; c1 + c2);</span><br></pre></td></tr></table></div></figure>
+<p>不如尝试使用内置的集合类，它能更清晰地表达问题陈述是什么。下面的代码中，我们使用了集 合类summingInt（方法的名词很直观地解释了它的功能）：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> totalCalories = menu.stream().collect(summingInt(Dish::getCalories));</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="从命令式的数据处理切换到stream"   >
+          <a href="#从命令式的数据处理切换到stream" class="heading-link"><i class="fas fa-link"></i></a>从命令式的数据处理切换到Stream</h2>
+      
+<p>我们建议你将所有使用迭代器这种数据处理模式处理集合的代码都转换成Stream API的方 式。为什么呢？<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>Stream API能更清晰地表达数据处理管道的意图。除此之外，通过短路和延迟载 入以及利用第7章介绍的现代计算机的多核架构，我们可以对Stream进行优化。</span></p>
+
+        <h2 id="增加代码的灵活性"   >
+          <a href="#增加代码的灵活性" class="heading-link"><i class="fas fa-link"></i></a>增加代码的灵活性</h2>
+      
+<p>我们曾经介绍过Lambda表达式有利于行为参数化。 你可以使用不同的 Lambda表示不同的行为，并将它们作为参数传递给函数去处理执行。这种方式可以帮助我们淡 定从容地面对需求的变化。比如，我们可以用多种方式为Predicate创建筛选条件，或者使用 Comparator对多种对象进行比较。现在，我们来看看哪些模式可以马上应用到你的代码中，让 你享受Lambda表达式带来的便利。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'><strong>采用函数接口</strong></span></p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>首先，你必须意识到，没有函数接口，你就无法使用Lambda表达式。</span>因此，你需要在代码 中引入函数接口。听起来很合理，但是在什么情况下使用它们呢？这里我们介绍两种通用的模式， 你可以依照这两种模式重构代码，利用Lambda表达式带来的灵活性，它们分别是：有条件的延迟执行和环绕执行。除此之外，在下一节，我们还将介绍一些基于面向对象的设计模式，比如策 略模式或者模板方法，这些在使用Lambda表达式重写后会更简洁。</p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'><strong>有条件的延迟执行</strong></span></p>
+<p>举个例子：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test10</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Logger logger = Logger.getGlobal();</span><br><span class="line">        logger.setLevel(Level.SEVERE);</span><br><span class="line"><span class="comment">//        logger.info("log test: " + generateDiagnostic());</span></span><br><span class="line">        logger.info(() -&gt; <span class="string">"log test: "</span> + generateDiagnostic());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">generateDiagnostic</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"working..."</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"world"</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>运行结果：</p>
+<p>注释掉的那一行会打印出working… 因为该方法会先被计算传递给info方法，然后再确定是否真的要执行。</p>
+<p>然而我们已经将日志级别设置成SERVER了，无需执行generateDiagnostic()方法。</p>
+<p>从这个故事里我们学到了什么呢？如果你发现你需要频繁地从客户端代码去查询一个对象 的状态（比如前文例子中的日志器的状态），只是为了传递参数、调用该对象的一个方法（比如 输出一条日志），那么可以考虑实现一个新的方法，以Lambda或者方法表达式作为参数，新方法 在检查完该对象的状态之后才调用原来的方法。你的代码会因此而变得更易读（结构更清晰）， 封装性更好（对象的状态也不会暴露给客户端代码了）。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200812213318.png"  alt="" />
+      </p>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'><strong>环绕执行</strong></span></p>
+<p>第3章中，我们介绍过另一种值得考虑的模式，那就是环绕执行。如果你发现虽然你的业务 代码千差万别，但是它们拥有同样的准备和清理阶段，这时，你完全可以将这部分代码用Lambda 实现。这种方式的好处是可以重用准备和清理阶段的逻辑，减少重复冗余的代码。</p>
+
+        <h1 id="使用lambda重构面向对象的设计模式"   >
+          <a href="#使用lambda重构面向对象的设计模式" class="heading-link"><i class="fas fa-link"></i></a>使用Lambda重构面向对象的设计模式</h1>
+      
+<p>Lambda表达式为程序员的工具箱又新添了一件利器。它们为解决传统设计模式所面对的问 题提供了新的解决方案，不但如此，采用这些方案往往更高效、更简单。使用Lambda表达式后， 很多现存的略显臃肿的面向对象设计模式能够用更精简的方式实现了。这一节中，我们会针对五 个设计模式展开讨论，它们分别是：</p>
+<ul>
+<li>策略模式</li>
+<li>模板方法</li>
+<li>观察者模式</li>
+<li>责任链模式</li>
+<li>工厂模式</li>
+</ul>
+<p>我们会展示Lambda表达式是如何另辟蹊径解决设计模式原来试图解决的问题的。</p>
+
+        <h2 id="策略模式"   >
+          <a href="#策略模式" class="heading-link"><i class="fas fa-link"></i></a>策略模式</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>策略模式代表了解决一类算法的通用解决方案，你可以在运行时选择使用哪种方案。</span></p>
+<p>我们假设你希望验证输入的内容是否根据标准进行了恰当的格式化（比如只包含小写字母或 数字）。你可以从定义一个验证文本（以String的形式表示）的接口入手：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">ValidationStrategy</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">execute</span><span class="params">(String s)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>其次，你定义了该接口的一个或多个具体实现：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IsAllLowerCase</span> <span class="keyword">implements</span> <span class="title">ValidationStrategy</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">execute</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> s.matches(<span class="string">"[a-z]+"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IsNumeric</span> <span class="keyword">implements</span> <span class="title">ValidationStrategy</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">execute</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> s.matches(<span class="string">"\\d+"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>之后，你就可以在你的程序中使用这些略有差异的验证策略了：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Validator</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ValidationStrategy strategy;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Validator</span><span class="params">(ValidationStrategy v)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.strategy = v;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">validate</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> strategy.execute(s);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Validator numericValidator = <span class="keyword">new</span> Validator(<span class="keyword">new</span> IsNumeric());</span><br><span class="line">    <span class="keyword">boolean</span> b1 = numericValidator.validate(<span class="string">"aaaa"</span>);</span><br><span class="line">    Validator lowerCaseValidator = <span class="keyword">new</span> Validator(<span class="keyword">new</span> IsAllLowerCase());</span><br><span class="line">    <span class="keyword">boolean</span> b2 = lowerCaseValidator.validate(<span class="string">"bbbb"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p><strong>使用Lambda表达式</strong></p>
+<p>到现在为止，你应该已经意识到ValidationStrategy是一个函数接口了（除此之外，它 还与<code>Predicate&lt;String&gt;</code>具有同样的函数描述）。这意味着我们不需要声明新的类来实现不同 的策略，通过直接传递Lambda表达式就能达到同样的目的，并且还更简洁：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Validator numericValidator = <span class="keyword">new</span> Validator(s -&gt; s.matches(<span class="string">"\\d+"</span>));</span><br><span class="line">    <span class="keyword">boolean</span> b1 = numericValidator.validate(<span class="string">"aaaa"</span>);</span><br><span class="line">    Validator lowerCaseValidator = <span class="keyword">new</span> Validator(s -&gt; s.matches(<span class="string">"[a-z]+"</span>));</span><br><span class="line">    <span class="keyword">boolean</span> b2 = lowerCaseValidator.validate(<span class="string">"bbbb"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>正如你看到的，Lambda表达式避免了采用策略设计模式时僵化的模板代码。如果你仔细分 析一下个中缘由，可能会发现，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>Lambda表达式实际已经对部分代码（或策略）进行了封装，而 这就是创建策略设计模式的初衷。</span>因此，我们强烈建议对类似的问题，你应该尽量使用Lambda 表达式来解决。</p>
+
+        <h2 id="模板方法"   >
+          <a href="#模板方法" class="heading-link"><i class="fas fa-link"></i></a>模板方法</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果你需要采用某个算法的框架，同时又希望有一定的灵活度，能对它的某些部分进行改进， 那么采用模板方法设计模式是比较通用的方案。</span></p>
+<p>让我们从一个例子着手，看看这个模式是如何工作的。</p>
+<p>假设你需要编写一个简单的在线银行应用。通常，用户需要输入一个用户账户，之后应用才能从银行的数据库中得到用户的详细信息， 最终完成一些让用户满意的操作。不同分行的在线银行应用让客户满意的方式可能还略有不同， 比如给客户的账户发放红利，或者仅仅是少发送一些推广文件。你可能通过下面的抽象类方式来实现在线银行应用：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">OnlineBanking</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processCustomer</span><span class="params">(<span class="keyword">int</span> id)</span> </span>&#123;</span><br><span class="line">        Customer c = Database.getCustomerWithId(id);</span><br><span class="line">        makeCustomerHappy(c);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">makeCustomerHappy</span><span class="params">(Customer c)</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>processCustomer方法搭建了在线银行算法的框架：获取客户提供的ID，然后提供服务让 用户满意。不同的支行可以通过继承OnlineBanking类，对该方法提供差异化的实现。</p>
+<p><strong>使用Lambda表达式</strong></p>
+<p>你想要插入的不同算法组件可以通过Lambda表达式或者方法引用的方式实现。 这里我们向processCustomer方法引入了第二个参数，它是一个<code>Consumer&lt;Customer&gt;</code>类 型的参数，与前文定义的makeCustomerHappy的特征保持一致：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processCustomer</span><span class="params">(<span class="keyword">int</span> id, Consumer&lt;Customer&gt; makeCustomerHappy)</span> </span>&#123;</span><br><span class="line">        Customer c = Database.getCustomerWithId(id);</span><br><span class="line">        makeCustomerHappy.accept(c);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>现在， 你可以很方便地通过传递Lambda表达式， 直接插入不同的行为， 不再需要继承 OnlineBanking类了：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> OnlineBankingLambda().processCustomer(<span class="number">1337</span>, (Customer c) -&gt; System.out.println(<span class="string">"Hello "</span> + c.getName());</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="观察者模式"   >
+          <a href="#观察者模式" class="heading-link"><i class="fas fa-link"></i></a>观察者模式</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>观察者模式是一种比较常见的方案，某些事件发生时（比如状态转变），如果一个对象（通 常我们称之为主题）需要自动地通知其他多个对象（称为观察者），就会采用该方案。</span></p>
+<p>让我们写点儿代码来看看观察者模式在实际中多么有用。</p>
+<p>你需要为Twitter这样的应用设计并 实现一个定制化的通知系统。想法很简单：好几家报纸机构，比如《纽约时报》《卫报》以及《世 界报》都订阅了新闻，他们希望当接收的新闻中包含他们感兴趣的关键字时，能得到特别通知。</p>
+<p>首先，你需要一个观察者接口，它将不同的观察者聚合在一起。它仅有一个名为notify的 方法，一旦接收到一条新的新闻，该方法就会被调用：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Observer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">notify</span><span class="params">(String tweet)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>现在，你可以声明不同的观察者（比如，这里是三家不同的报纸机构），依据新闻中不同的 关键字分别定义不同的行为：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NYTimes</span> <span class="keyword">implements</span> <span class="title">Observer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">notify</span><span class="params">(String tweet)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (tweet != <span class="keyword">null</span> &amp;&amp; tweet.contains(<span class="string">"money"</span>)) &#123;</span><br><span class="line">            System.out.println(<span class="string">"Breaking news in NY! "</span> + tweet);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Guardian</span> <span class="keyword">implements</span> <span class="title">Observer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">notify</span><span class="params">(String tweet)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (tweet != <span class="keyword">null</span> &amp;&amp; tweet.contains(<span class="string">"queen"</span>)) &#123;</span><br><span class="line">            System.out.println(<span class="string">"Yet another news in London... "</span> + tweet);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LeMonde</span> <span class="keyword">implements</span> <span class="title">Observer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">notify</span><span class="params">(String tweet)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (tweet != <span class="keyword">null</span> &amp;&amp; tweet.contains(<span class="string">"wine"</span>)) &#123;</span><br><span class="line">            System.out.println(<span class="string">"Today cheese, wine and news! "</span> + tweet);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>你还遗漏了最重要的部分：Subject！让我们为它定义一个接口：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">registerObserver</span><span class="params">(Observer o)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">notifyObservers</span><span class="params">(String tweet)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>Subject使用registerObserver方法可以注册一个新的观察者，使用notifyObservers 方法通知它的观察者一个新闻的到来。让我们更进一步，实现Feed类：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Feed</span> <span class="keyword">implements</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> List&lt;Observer&gt; observers = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">registerObserver</span><span class="params">(Observer o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.observers.add(o);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">notifyObservers</span><span class="params">(String tweet)</span> </span>&#123;</span><br><span class="line">        observers.forEach(o -&gt; o.notify(tweet));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这是一个非常直观的实现：Feed类在内部维护了一个观察者列表，一条新闻到达时，它就 进行通知。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Feed f = <span class="keyword">new</span> Feed();</span><br><span class="line">        f.registerObserver(<span class="keyword">new</span> NYTimes());</span><br><span class="line">        f.registerObserver(<span class="keyword">new</span> Guardian());</span><br><span class="line">        f.registerObserver(<span class="keyword">new</span> LeMonde());</span><br><span class="line">        f.notifyObservers(<span class="string">"The queen said her favourite book is Java 8 in Action!"</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>毫不意外，《卫报》会特别关注这条新闻！</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Yet another news in London... The queen said her favourite book is Java 8 in Action!</span><br></pre></td></tr></table></div></figure>
+<p>使用Lambda表达式后， 你无需显式地实例化三个观察者对象，直接传递Lambda表达式表示需要执行的行为即可：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Feed f = <span class="keyword">new</span> Feed();</span><br><span class="line">        f.registerObserver(tweet -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (tweet != <span class="keyword">null</span> &amp;&amp; tweet.contains(<span class="string">"money"</span>)) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Breaking news in NY! "</span> + tweet);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        f.registerObserver(tweet -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (tweet != <span class="keyword">null</span> &amp;&amp; tweet.contains(<span class="string">"queen"</span>)) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Yet another news in London... "</span> + tweet);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        f.registerObserver(tweet -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (tweet != <span class="keyword">null</span> &amp;&amp; tweet.contains(<span class="string">"wine"</span>)) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Today cheese, wine and news! "</span> + tweet);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        f.notifyObservers(<span class="string">"The queen said her favourite book is Java 8 in Action!"</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>那么，是否我们随时随地都可以使用Lambda表达式呢？答案是否定的！我们前文介绍的例 子中，Lambda适配得很好，那是因为需要执行的动作都很简单，因此才能很方便地消除僵化代 码。但是，观察者的逻辑有可能十分复杂，它们可能还持有状态，抑或定义了多个方法，诸如此 类。在这些情形下，你还是应该继续使用类的方式。</span></p>
+
+        <h2 id="责任链模式"   >
+          <a href="#责任链模式" class="heading-link"><i class="fas fa-link"></i></a>责任链模式</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>责任链模式是一种创建处理对象序列（比如操作序列）的通用方案。一个处理对象可能需要 在完成一些工作之后，将结果传递给另一个对象，这个对象接着做一些工作，再转交给下一个处 理对象，以此类推。</span></p>
+<p>通常，这种模式是通过定义一个代表处理对象的抽象类来实现的，在抽象类中会定义一个字 段来记录后续对象。一旦对象完成它的工作，处理对象就会将它的工作转交给它的后继。代码中， 这段逻辑看起来是下面这样：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">ProcessingObject</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> ProcessingObject&lt;T&gt; successor;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSuccessor</span><span class="params">(ProcessingObject&lt;T&gt; successor)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.successor = successor;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">handle</span><span class="params">(T input)</span> </span>&#123;</span><br><span class="line">        T r = handleWork(input);</span><br><span class="line">        <span class="keyword">if</span> (successor != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> successor.handle(r);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> r;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> <span class="keyword">protected</span> T <span class="title">handleWork</span><span class="params">(T input)</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>图8-3以UML的方式阐释了责任链模式。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200812220158.png"  alt="" />
+      </p>
+<p>可能你已经注意到，这就是8.2.2节介绍的模板方法设计模式。handle方法提供了如何进行 工作处理的框架。不同的处理对象可以通过继承ProcessingObject类，提供handleWork方法 来进行创建。</p>
+<p>下面让我们看看如何使用该设计模式。你可以创建两个处理对象，它们的功能是进行一些文 本处理工作。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HeaderTextProcessing</span> <span class="keyword">extends</span> <span class="title">ProcessingObject</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">handleWork</span><span class="params">(String text)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"From Raoul, Mario and Alan: "</span> + text;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpellCheckerProcessing</span> <span class="keyword">extends</span> <span class="title">ProcessingObject</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">handleWork</span><span class="params">(String text)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> text.replaceAll(<span class="string">"labda"</span>, <span class="string">"lambda"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>现在你就可以将这两个处理对象结合起来，构造一个操作序列！</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        ProcessingObject&lt;String&gt; p1 = <span class="keyword">new</span> HeaderTextProcessing();</span><br><span class="line">        ProcessingObject&lt;String&gt; p2 = <span class="keyword">new</span> SpellCheckerProcessing();</span><br><span class="line">        p1.setSuccessor(p2);</span><br><span class="line"></span><br><span class="line">        String result = p1.handle(<span class="string">"Aren't labdas really sexy?!!"</span>);</span><br><span class="line">        System.out.println(result);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p><strong>使用Lambda表达式</strong></p>
+<p>稍等！这个模式看起来像是在链接（也即是构造）函数。第3章中我们探讨过如何构造Lambda 表达式。 你可以将处理对象作为函数的一个实例， 或者更确切地说作为 <code>UnaryOperator- &lt;String&gt;</code>的一个实例。为了链接这些函数，你需要使用andThen方法对其进行构造。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Demo8</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        UnaryOperator&lt;String&gt; headerProcessing = text -&gt; <span class="string">"From Raoul, Mario and Alan: "</span> + text;</span><br><span class="line">        UnaryOperator&lt;String&gt; spellCheckerProcessing = text -&gt; text.replaceAll(<span class="string">"labda"</span>, <span class="string">"lambda"</span>);</span><br><span class="line"></span><br><span class="line">        Function&lt;String, String&gt; pipeline = headerProcessing.andThen(spellCheckerProcessing);</span><br><span class="line">        String result = pipeline.apply(<span class="string">"Aren't labdas really sexy?!!"</span>);</span><br><span class="line">        System.out.println(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="工厂模式"   >
+          <a href="#工厂模式" class="heading-link"><i class="fas fa-link"></i></a>工厂模式</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>使用工厂模式，你无需向客户暴露实例化的逻辑就能完成对象的创建。</span></p>
+<p>比如，我们假定你为 一家银行工作，他们需要一种方式创建不同的金融产品：贷款、期权、股票，等等。 通常，你会创建一个工厂类，它包含一个负责实现不同对象的方法，如下所示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ProductFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Product <span class="title">createProduct</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> (name) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">"loan"</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Loan();</span><br><span class="line">            <span class="keyword">case</span> <span class="string">"stock"</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Stock();</span><br><span class="line">            <span class="keyword">case</span> <span class="string">"bond"</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Bond();</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No such product "</span> + name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这里贷款（ Loan ）、股票（ Stock ）和债券（ Bond ）都是产品（ Product ）的子类。 createProduct 方法可以通过附加的逻辑来设置每个创建的产品。 但是带来的好处也显而易 见，你在创建对象时不用再担心会将构造函数或者配置暴露给客户，这使得客户创建产品时更 加简单：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Product p = ProductFactory.createProduct(<span class="string">"loan"</span>);</span><br></pre></td></tr></table></div></figure>
+<p><strong>使用Lambda表达式</strong></p>
+<p>第3章中，我们已经知道可以像引用方法一样引用构造函数。比如，下面就是一个引用贷款 （Loan）构造函数的示例：</p>
+<p><code>Supplier&lt;Product&gt; loanSupplier = Loan::new; Loan loan = loanSupplier.get();</code></p>
+<p>通过这种方式，你可以重构之前的代码，创建一个Map，将产品名映射到对应的构造函数：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">static</span> Map&lt;String, Supplier&lt;Product&gt;&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;(); </span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">  map.put(<span class="string">"loan"</span>, Loan::<span class="keyword">new</span>);</span><br><span class="line"></span><br><span class="line">  map.put(<span class="string">"stock"</span>, Stock::<span class="keyword">new</span>);</span><br><span class="line"></span><br><span class="line">  map.put(<span class="string">"bond"</span>, Bond::<span class="keyword">new</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>现在，你可以像之前使用工厂设计模式那样，利用这个Map来实例化不同的产品。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Product <span class="title">createProduct</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">    Supplier&lt;Product&gt; p = map.get(name);</span><br><span class="line">    <span class="keyword">if</span> (p != <span class="keyword">null</span>) <span class="keyword">return</span> p.get();</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"No such product "</span> + name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这是个全新的尝试，它使用Java 8中的新特性达到了传统工厂模式同样的效果。但是，如果 工厂方法createProduct需要接收多个传递给产品构造方法的参数，这种方式的扩展性不是很 好。你不得不提供不同的函数接口，无法采用之前统一使用一个简单接口的方式。</p>
+<p>比如，我们假设你希望保存具有三个参数（两个参数为Integer类型，一个参数为String 类型）的构造函数；为了完成这个任务，你需要创建一个特殊的函数接口TriFunction。最终 的结果是Map变得更加复杂。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">TriFunction</span>&lt;<span class="title">T</span>, <span class="title">U</span>, <span class="title">V</span>, <span class="title">R</span>&gt;</span>&#123; </span><br><span class="line">  <span class="function">R <span class="title">apply</span><span class="params">(T t, U u, V v)</span></span>; </span><br><span class="line">&#125; </span><br><span class="line">Map&lt;String, TriFunction&lt;Integer, Integer, String, Product&gt;&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br></pre></td></tr></table></div></figure>
+<p>你已经了解了如何使用Lambda表达式编写和重构代码。接下来，我们会介绍如何确保新编 写代码的正确性。</p>
+
+        <h1 id="测试-lambda-表达式"   >
+          <a href="#测试-lambda-表达式" class="heading-link"><i class="fas fa-link"></i></a>测试 Lambda 表达式</h1>
+      
+<p>现在你的代码中已经充溢着Lambda表达式，看起来不错，也很简洁。但是，大多数时候， 我们受雇进行的程序开发工作的要求并不是编写优美的代码，而是编写正确的代码。</p>
+<p>通常而言，好的软件工程实践一定少不了单元测试，借此保证程序的行为与预期一致。你编 写测试用例，通过这些测试用例确保你代码中的每个组成部分都实现预期的结果。比如，图形应 用的一个简单的Point类，可以定义如下：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> x;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> y;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Point</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.x = x;</span><br><span class="line">        <span class="keyword">this</span>.y = y;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Point <span class="title">moveRightBy</span><span class="params">(<span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Point(<span class="keyword">this</span>.x + x, <span class="keyword">this</span>.y);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>下面的单元测试会检查moveRightBy方法的行为是否与预期一致：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testMoveRightBy</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        Point p1 = <span class="keyword">new</span> Point(<span class="number">5</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">        Point p2 = p1.moveRightBy(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">        Assert.assertEquals(<span class="number">15</span>, p2.getX());</span><br><span class="line">        Assert.assertEquals(<span class="number">5</span>, p2.getY());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="测试可见lambda函数的行为"   >
+          <a href="#测试可见lambda函数的行为" class="heading-link"><i class="fas fa-link"></i></a>测试可见Lambda函数的行为</h2>
+      
+<p>由于moveRightBy方法声明为public，测试工作变得相对容易。你可以在用例内部完成测试。 但是Lambda并无函数名（毕竟它们都是匿名函数），因此要对你代码中的Lambda函数进行测试实 际上比较困难，因为你无法通过函数名的方式调用它们。</p>
+<p>有些时候，你可以借助某个字段访问Lambda函数，这种情况，你可以利用这些字段，通过 它们对封装在Lambda函数内的逻辑进行测试。比如，我们假设你在Point类中添加了静态字段 compareByXAndThenY，通过该字段，使用方法引用你可以访问Comparator对象：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Point</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> Comparator&lt;Point&gt; compareByXAndThenY = comparing(Point::getX).thenComparing(Point::getY);</span><br><span class="line">        …</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>还记得吗，Lambda表达式会生成函数接口的一个实例。由此，你可以测试该实例的行为。 这个例子中，我们可以使用不同的参数，对Comparator对象类型实例compareByXAndThenY 的compare方法进行调用，验证它们的行为是否符合预期：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testComparingTwoPoints</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123; </span><br><span class="line">  	Point p1 = <span class="keyword">new</span> Point(<span class="number">10</span>, <span class="number">15</span>); </span><br><span class="line">  	Point p2 = <span class="keyword">new</span> Point(<span class="number">10</span>, <span class="number">20</span>); </span><br><span class="line">  	<span class="keyword">int</span> result = Point.compareByXAndThenY.compare(p1 , p2); </span><br><span class="line">  	assertEquals(-<span class="number">1</span>, result); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="测试使用lambda的方法和行为"   >
+          <a href="#测试使用lambda的方法和行为" class="heading-link"><i class="fas fa-link"></i></a>测试使用Lambda的方法和行为</h2>
+      
+<p>但是Lambda的初衷是将一部分逻辑封装起来给另一个方法使用。从这个角度出发，你不应 该将Lambda表达式声明为public，它们仅是具体的实现细节。相反，我们需要对使用Lambda表达式的方法进行测试。比如下面这个方法moveAllPointsRightBy：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;Point&gt; <span class="title">moveAllPointsRightBy</span><span class="params">(List&lt;Point&gt; points, <span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> points.stream().map(p -&gt; <span class="keyword">new</span> Point(p.getX() + x, p.getY())).collect(toList());</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>我们没必要对Lambda表达式p -&gt; new Point(p.getX() + x,p.getY())进行测试，它 只是 moveAllPointsRightBy 内部的实现细节。 我们更应该关注的是方法 moveAllPoints- RightBy的行为：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testMoveAllPointsRightBy</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    List&lt;Point&gt; points = Arrays.asList(<span class="keyword">new</span> Point(<span class="number">5</span>, <span class="number">5</span>), <span class="keyword">new</span> Point(<span class="number">10</span>, <span class="number">5</span>));</span><br><span class="line">    List&lt;Point&gt; expectedPoints = Arrays.asList(<span class="keyword">new</span> Point(<span class="number">15</span>, <span class="number">5</span>), <span class="keyword">new</span> Point(<span class="number">20</span>, <span class="number">5</span>));</span><br><span class="line"></span><br><span class="line">    List&lt;Point&gt; newPoints = Point.moveAllPointsRightBy(points, <span class="number">10</span>);</span><br><span class="line">    assertEquals(expectedPoints, newPoints);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>注意，上面的单元测试中，Point类恰当地实现equals方法非常重要，否则该测试的结果 就取决于Object类的默认实现。</p>
+
+        <h2 id="将复杂的lambda表达式分到不同的方法"   >
+          <a href="#将复杂的lambda表达式分到不同的方法" class="heading-link"><i class="fas fa-link"></i></a>将复杂的Lambda表达式分到不同的方法</h2>
+      
+<p>可能你会碰到非常复杂的Lambda表达式，包含大量的业务逻辑，比如需要处理复杂情况的 定价算法。 你无法在测试程序中引用Lambda表达式， 这种情况该如何处理呢？一种策略是将 Lambda表达式转换为方法引用（这时你往往需要声明一个新的常规方法），我们在8.1.3节详细讨 论过这种情况。这之后，你可以用常规的方式对新的方法进行测试。</p>
+
+        <h2 id="高阶函数的测试"   >
+          <a href="#高阶函数的测试" class="heading-link"><i class="fas fa-link"></i></a>高阶函数的测试</h2>
+      
+<p>接受函数作为参数的方法或者返回一个函数的方法（所谓的“高阶函数”， higher-order function，我们在第14章会深入展开介绍）更难测试。如果一个方法接受Lambda表达式作为参数， 你可以采用的一个方案是使用不同的Lambda表达式对它进行测试。比如，你可以使用不同的谓 词对第2章中创建的filter方法进行测试。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testFilter</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>&#123; </span><br><span class="line">  	List&lt;Integer&gt; numbers = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>); </span><br><span class="line">  	List&lt;Integer&gt; even = filter(numbers, i -&gt; i % <span class="number">2</span> == <span class="number">0</span>); </span><br><span class="line">  	List&lt;Integer&gt; smallerThanThree = filter(numbers, i -&gt; i &lt; <span class="number">3</span>); </span><br><span class="line">  	assertEquals(Arrays.asList(<span class="number">2</span>, <span class="number">4</span>), even); </span><br><span class="line">  	assertEquals(Arrays.asList(<span class="number">1</span>, <span class="number">2</span>), smallerThanThree); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>如果被测试方法的返回值是另一个方法， 该如何处理呢？你可以仿照我们之前处理 Comparator的方法，把它当成一个函数接口，对它的功能进行测试。</p>
+<p>然而，事情可能不会一帆风顺，你的测试可能会返回错误，报告说你使用Lambda表达式的 方式不对。因此，我们现在进入调试的环节。</p>
+
+        <h1 id="调试"   >
+          <a href="#调试" class="heading-link"><i class="fas fa-link"></i></a>调试</h1>
+      
+<p>调试有问题的代码时，程序员的兵器库里有两大老式武器，分别是：</p>
+<ul>
+<li>
+<p>查看栈跟踪</p>
+</li>
+<li>
+<p>输出日志</p>
+</li>
+</ul>
+
+        <h2 id="查看栈跟踪"   >
+          <a href="#查看栈跟踪" class="heading-link"><i class="fas fa-link"></i></a>查看栈跟踪</h2>
+      
+<p>你的程序突然停止运行（比如突然抛出一个异常），这时你首先要调查程序在什么地方发生 了异常以及为什么会发生该异常。这时栈帧就非常有用。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>程序的每次方法调用都会产生相应的调 用信息，包括程序中方法调用的位置、该方法调用使用的参数、被调用方法的本地变量。这些信 息被保存在栈帧上。</span></p>
+<p>程序失败时，你会得到它的栈跟踪，通过一个又一个栈帧，你可以了解程序失败时的概略信 息。换句话说，通过这些你能得到程序失败时的方法调用列表。这些方法调用列表最终会帮助你 发现问题出现的原因。</p>
+
+        <h3 id="lambda表达式和栈跟踪"   >
+          <a href="#lambda表达式和栈跟踪" class="heading-link"><i class="fas fa-link"></i></a>Lambda表达式和栈跟踪</h3>
+      
+<p>不幸的是，由于Lambda表达式没有名字，它的栈跟踪可能很难分析。在下面这段简单的代 码中，我们刻意地引入了一些错误：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Point&gt; points = Arrays.asList(<span class="keyword">new</span> Point(<span class="number">12</span>, <span class="number">2</span>), <span class="keyword">null</span>);</span><br><span class="line">        points.stream().map(p -&gt; p.getX()).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>运行这段代码会产生下面的栈跟踪：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">12</span></span><br><span class="line">Exception in thread <span class="string">"main"</span> java.lang.NullPointerException</span><br><span class="line">	at com.eh.eden.java8.demo.Debugging.lambda$main$<span class="number">0</span>(Debugging.java:<span class="number">17</span>)</span><br><span class="line">	at java.util.stream.ReferencePipeline$<span class="number">3</span>$<span class="number">1</span>.accept(ReferencePipeline.java:<span class="number">193</span>)</span><br><span class="line">	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:<span class="number">948</span>)</span><br><span class="line">	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:<span class="number">481</span>)</span><br><span class="line">	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:<span class="number">471</span>)</span><br><span class="line">	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:<span class="number">151</span>)</span><br><span class="line">	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:<span class="number">174</span>)</span><br><span class="line">	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:<span class="number">234</span>)</span><br><span class="line">	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:<span class="number">418</span>)</span><br><span class="line">	at com.eh.eden.java8.demo.Debugging.main(Debugging.java:<span class="number">17</span>)</span><br></pre></td></tr></table></div></figure>
+<p>这些表示错误发生在Lambda表达式内部。由于Lambda表达式没有名字，所以编译器只能为 它们指定一个名字。这个例子中，它的名字是lambda$main$0，看起来非常不直观。如果你使 用了大量的类，其中又包含多个Lambda表达式，这就成了一个非常头痛的问题。</p>
+<p>即使你使用了方法引用， 还是有可能出现栈无法显示你使用的方法名的情况。 将之前的 Lambda表达式p-&gt; p.getX()替换为方法引用reference Point::getX也会产生难于分析的跟踪。</p>
+<p>注意，如果方法引用指向的是同一个类中声明的方法，那么它的名称是可以在栈跟踪中显示 的。比如，下面这个例子：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Debugging</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; numbers = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">        numbers.stream().map(Debugging::divideByZero).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">divideByZero</span><span class="params">(<span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n / <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>方法divideByZero在栈跟踪中就正确地显示了：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Exception in thread <span class="string">"main"</span> java.lang.ArithmeticException: / by zero</span><br><span class="line">	at com.eh.eden.java8.demo.Debugging.divideByZero(Debugging.java:<span class="number">21</span>)</span><br><span class="line">	at java.util.stream.ReferencePipeline$<span class="number">3</span>$<span class="number">1</span>.accept(ReferencePipeline.java:<span class="number">193</span>)</span><br><span class="line">	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:<span class="number">948</span>)</span><br><span class="line">	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:<span class="number">481</span>)</span><br><span class="line">	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:<span class="number">471</span>)</span><br><span class="line">	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:<span class="number">151</span>)</span><br><span class="line">	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:<span class="number">174</span>)</span><br><span class="line">	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:<span class="number">234</span>)</span><br><span class="line">	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:<span class="number">418</span>)</span><br><span class="line">	at com.eh.eden.java8.demo.Debugging.main(Debugging.java:<span class="number">17</span>)</span><br></pre></td></tr></table></div></figure>
+<p>总的来说，我们需要特别注意，涉及Lambda表达式的栈跟踪可能非常难理解。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这是Java编译器未来版本可以改进的一个方面。</span></p>
+
+        <h2 id="使用日志调试"   >
+          <a href="#使用日志调试" class="heading-link"><i class="fas fa-link"></i></a>使用日志调试</h2>
+      
+<p>假设你试图对流操作中的流水线进行调试，该从何入手呢？你可以像下面的例子那样，使用 forEach将流操作的结果日志输出到屏幕上或者记录到日志文件中：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; numbers = Arrays.asList(<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">        numbers.stream()</span><br><span class="line">                .map(x -&gt; x + <span class="number">17</span>).</span><br><span class="line">                filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>)</span><br><span class="line">                .limit(<span class="number">3</span>)</span><br><span class="line">                .forEach(System.out::println);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+<p>不幸的是，一旦调用forEach，整个流就会恢复运行。到底哪种方式能更有效地帮助我们理 解Stream流水线中的每个操作（比如map、filter、limit）产生的输出？</p>
+<p>这就是流操作方法peek大显身手的时候。peek的设计初衷就是在流的每个元素恢复运行之 前，插入执行一个动作。但是它不像forEach那样恢复整个流的运行，而是在一个元素上完成操 作之后，它只会将操作顺承到流水线中的下一个操作。图8-4解释了peek的操作流程。下面的这 段代码中，我们使用peek输出了Stream流水线操作之前和操作之后的中间值：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200812224138.png"  alt="" />
+      </p>
+<p>通过peek操作我们能清楚地了解流水线操作中每一步的输出结果：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">from stream: 2</span><br><span class="line">after map: 19</span><br><span class="line">from stream: 3</span><br><span class="line">after map: 20</span><br><span class="line">after filter: 20</span><br><span class="line">after limit: 20</span><br><span class="line">20</span><br><span class="line">from stream: 4</span><br><span class="line">after map: 21</span><br><span class="line">from stream: 5</span><br><span class="line">after map: 22</span><br><span class="line">after filter: 22</span><br><span class="line">after limit: 22</span><br><span class="line">22</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h1>
+      
+<p>下面回顾一下这一章的主要内容。</p>
+<ul>
+<li>Lambda表达式能提升代码的可读性和灵活性。</li>
+<li>如果你的代码中使用了匿名类，尽量用Lambda表达式替换它们，但是要注意二者间语义的微妙差别，比如关键字this，以及变量隐藏。</li>
+<li>跟Lambda表达式比起来，方法引用的可读性更好 。</li>
+<li>尽量使用Stream API替换迭代式的集合处理。</li>
+<li>Lambda表达式有助于避免使用面向对象设计模式时容易出现的僵化的模板代码，典型的比如策略模式、模板方法、观察者模式、责任链模式，以及工厂模式。</li>
+<li>即使采用了Lambda表达式， 也同样可以进行单元测试， 但是通常你应该关注使用了Lambda表达式的方法的行为。</li>
+<li>尽量将复杂的Lambda表达式抽象到普通方法中。</li>
+<li>Lambda表达式会让栈跟踪的分析变得更为复杂。</li>
+<li>流提供的peek方法在分析Stream流水线时，能将中间变量的值输出到日志中，是非常有用的工具。</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/8_%E9%87%8D%E6%9E%84%E3%80%81%E6%B5%8B%E8%AF%95%E5%92%8C%E8%B0%83%E8%AF%95/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/8_%E9%87%8D%E6%9E%84%E3%80%81%E6%B5%8B%E8%AF%95%E5%92%8C%E8%B0%83%E8%AF%95/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/java8/">java8</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/9_%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">默认方法</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/900_%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Java8%E5%AE%9E%E6%88%98/7_%E5%B9%B6%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%80%A7%E8%83%BD/"><span class="paginator-prev__text">并行数据处理与性能</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#为改善可读性和灵活性重构代码"><span class="toc-number">1.</span> <span class="toc-text">
+          为改善可读性和灵活性重构代码</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#改善代码的可读性"><span class="toc-number">1.1.</span> <span class="toc-text">
+          改善代码的可读性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从匿名类到lambda表达式的转换"><span class="toc-number">1.2.</span> <span class="toc-text">
+          从匿名类到Lambda表达式的转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从lambda表达式到方法引用的转换"><span class="toc-number">1.3.</span> <span class="toc-text">
+          从Lambda表达式到方法引用的转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#从命令式的数据处理切换到stream"><span class="toc-number">1.4.</span> <span class="toc-text">
+          从命令式的数据处理切换到Stream</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增加代码的灵活性"><span class="toc-number">1.5.</span> <span class="toc-text">
+          增加代码的灵活性</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#使用lambda重构面向对象的设计模式"><span class="toc-number">2.</span> <span class="toc-text">
+          使用Lambda重构面向对象的设计模式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#策略模式"><span class="toc-number">2.1.</span> <span class="toc-text">
+          策略模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#模板方法"><span class="toc-number">2.2.</span> <span class="toc-text">
+          模板方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#观察者模式"><span class="toc-number">2.3.</span> <span class="toc-text">
+          观察者模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#责任链模式"><span class="toc-number">2.4.</span> <span class="toc-text">
+          责任链模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#工厂模式"><span class="toc-number">2.5.</span> <span class="toc-text">
+          工厂模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#测试-lambda-表达式"><span class="toc-number">3.</span> <span class="toc-text">
+          测试 Lambda 表达式</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#测试可见lambda函数的行为"><span class="toc-number">3.1.</span> <span class="toc-text">
+          测试可见Lambda函数的行为</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试使用lambda的方法和行为"><span class="toc-number">3.2.</span> <span class="toc-text">
+          测试使用Lambda的方法和行为</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#将复杂的lambda表达式分到不同的方法"><span class="toc-number">3.3.</span> <span class="toc-text">
+          将复杂的Lambda表达式分到不同的方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高阶函数的测试"><span class="toc-number">3.4.</span> <span class="toc-text">
+          高阶函数的测试</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#调试"><span class="toc-number">4.</span> <span class="toc-text">
+          调试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#查看栈跟踪"><span class="toc-number">4.1.</span> <span class="toc-text">
+          查看栈跟踪</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#lambda表达式和栈跟踪"><span class="toc-number">4.1.1.</span> <span class="toc-text">
+          Lambda表达式和栈跟踪</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用日志调试"><span class="toc-number">4.2.</span> <span class="toc-text">
+          使用日志调试</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">
+          小结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

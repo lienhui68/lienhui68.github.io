@@ -1,0 +1,652 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="什么是一致性        在分布式系统中，计算、存储分布在各个节点上，节点可能分布在各个区域甚至是国家。 一致性就是数据保持一致，在分布式系统中，可以理解为多个节点中数据的值是一致的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式一致性详解">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="什么是一致性        在分布式系统中，计算、存储分布在各个节点上，节点可能分布在各个区域甚至是国家。 一致性就是数据保持一致，在分布式系统中，可以理解为多个节点中数据的值是一致的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20-20200927102650250.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927103133231.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927104539063.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927105102253.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927111018849.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927112303777.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927113151879.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927113449326.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927131015913.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927132207343.png">
+<meta property="article:published_time" content="2020-09-27T02:00:50.579Z">
+<meta property="article:modified_time" content="2020-09-27T06:56:04.438Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="分布式一致性 - Paxos - Raft - ZAB">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20-20200927102650250.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>分布式一致性详解 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E8%AF%A6%E8%A7%A3/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">分布式一致性详解</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.6k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">14分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="什么是一致性"   >
+          <a href="#什么是一致性" class="heading-link"><i class="fas fa-link"></i></a>什么是一致性</h1>
+      
+<p>在分布式系统中，计算、存储分布在各个节点上，节点可能分布在各个区域甚至是国家。</p>
+<p>一致性就是数据保持一致，在分布式系统中，可以理解为多个节点中数据的值是一致的。</p>
+<a id="more"></a>
+
+        <h2 id="cap-theorem"   >
+          <a href="#cap-theorem" class="heading-link"><i class="fas fa-link"></i></a>CAP theorem</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20-20200927102650250.png"  alt="img" />
+      </p>
+<p>站内引用： </p>
+<p><strong>分区容忍性</strong>：</p>
+<p>举个简单的例子，一个服务共有5个节点分别部署在中国和美国，其中中国2个节点，美国3个节点。现在中美海底电缆断了，这两个分区无法互相访问，但是可以独立提供服务给外部。</p>
+<p>此时保证一致性可以将某一个分区关闭服务，也可以保证可用性但此时数据可能会不一致，用户本来访问中国节点，出现分区之后只能访问美国节点，此时数据有可能不一致。</p>
+
+        <h2 id="一致性模型"   >
+          <a href="#一致性模型" class="heading-link"><i class="fas fa-link"></i></a>一致性模型</h2>
+      
+
+        <h3 id="弱一致性"   >
+          <a href="#弱一致性" class="heading-link"><i class="fas fa-link"></i></a>弱一致性</h3>
+      
+
+        <h4 id="最终一致性"   >
+          <a href="#最终一致性" class="heading-link"><i class="fas fa-link"></i></a>最终一致性</h4>
+      
+<p>典型应用场景</p>
+<ul>
+<li>DNS(Domain Name System)</li>
+</ul>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927103133231.png"  alt="image-20200927103133231" />
+      </p>
+<ul>
+<li>Gossip(Cassandra的通信协议)</li>
+</ul>
+
+        <h3 id="强一致性"   >
+          <a href="#强一致性" class="heading-link"><i class="fas fa-link"></i></a>强一致性</h3>
+      
+<ul>
+<li>
+<p>同步</p>
+</li>
+<li>
+<p>Paxos</p>
+</li>
+<li>
+<p>Raft</p>
+</li>
+<li>
+<p>ZAB</p>
+</li>
+</ul>
+
+        <h1 id="强一致性算法"   >
+          <a href="#强一致性算法" class="heading-link"><i class="fas fa-link"></i></a>强一致性算法</h1>
+      
+<p>首先，要明确问题</p>
+<p>数据要保证是安全的容错的，就不能存在单点上。</p>
+<p>分布式系统对fault tolorence的一般解决方案是state machine replication。</p>
+<blockquote>
+<p>state machine 可以简单里理解为一个函数或者方程，本身有初始状态，比如0，有input或者log将这个值增加5，这个值最终状态就是5。分布式系统希望通过log的形式往节点上写操作日志，分布式系统的设计是把这一些log复制到其他各个节点上，保证这些log不存在单点上。类似mysql的undo/redo log。</p>
+</blockquote>
+<p>其实本篇要讨论的准确的说，应该是state machine replication的共识(consensus)算法。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>paxos其实是一个共识算法。系统的最终一致性，不仅需要达成共识，还会取决于client的行为。</span></p>
+
+        <h2 id="主从同步"   >
+          <a href="#主从同步" class="heading-link"><i class="fas fa-link"></i></a>主从同步</h2>
+      
+<p>主从同步复制</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927104539063.png"  alt="image-20200927104539063" />
+      </p>
+<ol>
+<li>master接受写请求</li>
+<li>master复制日志到slave</li>
+<li>master等待，直到所有从库返回</li>
+</ol>
+<p>问题：</p>
+<p>一个节点失败，master阻塞，导致整个集群不可用，保证了一致性，可用性却大大降低。</p>
+
+        <h2 id="多数派"   >
+          <a href="#多数派" class="heading-link"><i class="fas fa-link"></i></a>多数派</h2>
+      
+<p>基本想法：</p>
+<p>多数派！</p>
+<p>每次写都保证写入大于 N/2 个节点，每次读保证从大于 N/2 个节点中读。</p>
+<p>问题：</p>
+<p>在并发环境下，无法保证系统正确性，顺序非常重要</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927105102253.png"  alt="image-20200927105102253" />
+      </p>
+
+        <h2 id="paxos"   >
+          <a href="#paxos" class="heading-link"><i class="fas fa-link"></i></a>Paxos</h2>
+      
+<p>Paxos算法是Lamport宗师提出的一种基于消息传递的分布式一致性算法，使其获得2013年图灵奖。</p>
+<p>Paxos由Lamport于1998年在《The Part-Time Parliament》论文中首次公开，最初的描述使用希腊的一个小岛Paxos作为比喻，描述了Paxos小岛中通过决议的流程，并以此命名这个算法，但是这个描述理解起来比较有挑战性。后来在2001年，Lamport觉得同行不能理解他的幽默感，于是重新发表了朴实的算法描述版本《Paxos Made Simple》。</p>
+<blockquote>
+<p>为描述Paxos算法，Lamport虚拟了一个叫做Paxos的希腊城邦，这个岛按照议会民主制的政治模式制定法律，但是没有人愿意将自己的全部时间和精力放在这种事。所以无论是议员，议长或者传递纸条的服务员都不能承诺别人需要时一定会出现，也无法承诺批准决议或者传递消息的时间。</p>
+</blockquote>
+<p>自Paxos问世以来就持续垄断了分布式一致性算法，Paxos这个名词几乎等同于分布式一致性。Google的很多大型分布式系统都采用了Paxos算法来解决分布式一致性问题，如Chubby、Megastore以及Spanner等。开源的ZooKeeper，以及MySQL 5.7推出的用来取代传统的主从复制的MySQL Group Replication等纷纷采用Paxos算法解决分布式一致性问题。</p>
+<p>然而，Paxos的最大特点就是难，不仅难以理解，更难以实现。</p>
+<p>分类：</p>
+<ul>
+<li>Basic Paxos</li>
+<li>Multi Paxos</li>
+<li>Fast Paxos</li>
+</ul>
+
+        <h3 id="basic-paxos"   >
+          <a href="#basic-paxos" class="heading-link"><i class="fas fa-link"></i></a>Basic Paxos</h3>
+      
+<p><strong>角色介绍</strong></p>
+<ul>
+<li>
+<p>Client 客户端 产生议题者(群众)</p>
+<p>系统外部角色，请求发起者，像民众。</p>
+</li>
+<li>
+<p>Proposer 提案者</p>
+<p>接受Client请求，向集群提出提议(propose)。并在冲突发生时，起到冲突调节的作用。像议员，替民众提出议案。</p>
+<blockquote>
+<p>acceptor只是起到投票的作用，返回通过或者不通过，由proposer决定是否符合多数派，要不要进行到下一个阶段</p>
+<p>谁改变了数据谁就是proposer，proposer可以理解成业务机器，acceptor是数据集群中的节点，代表分布式存储的独立存储节点</p>
+<p>多数派用在两个场景，第一次是决定proposer，第二次是将日志写入learner后决定是否commit</p>
+</blockquote>
+</li>
+<li>
+<p>Acceptor(Voter) 决策者</p>
+<p>提议投票和接受者，只有在形成法定人数(Quorum，一般即为majority 多数派)时，提议才会最终被接受。像国会。</p>
+</li>
+<li>
+<p>Learner 最终决策学习者（群众），和Client类似，不参与一致性的解决，只负责记录。</p>
+<p>提议接受者，backup备份，对集群一致性没什么影响。像记录员。</p>
+</li>
+</ul>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>在多副本状态机中，每个副本同时具有Proposer、Acceptor、Learner三种角色。</span></p>
+<p>client 客户端</p>
+<p>proposer 业务处理节点</p>
+<p>acceptor 数据节点，参与投票，是达成共识最重要的数据节点</p>
+<p>learner 也是数据备份节点，不参与投票，类似slave，提供读服务提高并发</p>
+<p>各角色均是节点，每个节点也可能同时扮演多个角色</p>
+<p>提案通过，proposer会将日志写入acceptor数据节点，acceptor再将日志写入learner数据备份节点，注意此时数据内容还没有被commit，只有当acceptor确认多数learner已经写入日志才会commit</p>
+</blockquote>
+<p><strong>基本流程</strong></p>
+<p>步骤、阶段(phases)：</p>
+<ol>
+<li>
+<p>Phase 1a: Prepare</p>
+<p>proposer提出一个提案，编号为N，此N大于这个proposer之前提出的提案编号。请求acceptors的quorum接受。</p>
+</li>
+<li>
+<p>Phase 1b: Promise</p>
+<p>如果N大于此acceptor之前接受的任何提案编号则接受，否则拒绝。</p>
+</li>
+<li>
+<p>Phase 2a: Accept</p>
+<p>如果达到了多数派，proposer会发出accept请求，此请求包含提案编号N，以及提案内容。</p>
+</li>
+<li>
+<p>Phase 2b: Accepted</p>
+<p>如果此acceptor在此期间没有收到任何编号大于N的提案，则接受此提案内容，否则忽略。</p>
+</li>
+</ol>
+<blockquote>
+<p>两个阶段分别对应两次rpc调用，第一次是提案，第二次是提案内容</p>
+</blockquote>
+<p>看来来理解</p>
+<ul>
+<li>
+<p>正常流程</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927111018849.png"  alt="image-20200927111018849" />
+      </p>
+</li>
+</ul>
+<blockquote>
+<p>跟现实中区别是，acceptor只关系提案是否冲突而不关心提案的内容。</p>
+</blockquote>
+<ul>
+<li>
+<p>部分节点失败，但达到了Quorum</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927112303777.png"  alt="image-20200927112303777" />
+      </p>
+</li>
+<li>
+<p>Proposer失败</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927113151879.png"  alt="image-20200927113151879" />
+      </p>
+<blockquote>
+<p>比如redis里的哨兵leader死了一个需要重新换一个</p>
+</blockquote>
+</li>
+</ul>
+<p>Basic潜在问题，活锁(liveness)或dueling</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927113449326.png"  alt="image-20200927113449326" />
+      </p>
+<p>站内引用：<a href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E6%B4%BB%E9%94%81/" title="活锁">活锁</a></p>
+
+        <h3 id="multi-paxos"   >
+          <a href="#multi-paxos" class="heading-link"><i class="fas fa-link"></i></a>Multi Paxos</h3>
+      
+<p>Basic Paxos的问题：</p>
+<ul>
+<li>难实现 角色很多</li>
+<li>效率低 2轮RPC</li>
+<li>活锁</li>
+</ul>
+<p>Multi Paxos</p>
+<p>新概念 Leader:唯一的proposer，所有请求都需经过此Leader，有点像主从架构，中心节点，zk里的master节点</p>
+<p>第一轮RPC干的事就是决定使用哪个proposer的提案，现在不需要了（竞选总统阶段除外），而且避免了活锁</p>
+<p><strong>基本流程</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927131015913.png"  alt="image-20200927131015913" />
+      </p>
+<blockquote>
+<p>只有这一个proposer也就是leader，不会有人跟他抢着去提案</p>
+<p>Accept!(N, I, Vm) N任总统，提案编号I， 提案内容Vm</p>
+<p>竞选完总统后接下来的请求就不用再竞选了，原来的两轮rpc现在只需要一轮rpc就可以完成了，关键点在于只有唯一一个proposer。</p>
+</blockquote>
+<p>现在更像现实中的分布式系统了，主从节点，下面是一个Leader和两个Slavor</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200927132207343.png"  alt="image-20200927132207343" />
+      </p>
+
+        <h2 id="raft"   >
+          <a href="#raft" class="heading-link"><i class="fas fa-link"></i></a>Raft</h2>
+      
+<p>Raft是一个实现分布式一致性的协议</p>
+<p>Paxos很难理解也很难实现，Raft应运而生。</p>
+<p>raft可以简单理解成简化版本的Multi Paxos，也是为了解决多副本状态机复制的问题。它把状态机复制日志这个问题划分成了3个子问题，只要解决这3个子问题就能达成共识。</p>
+
+        <h3 id="划分成三个子问题"   >
+          <a href="#划分成三个子问题" class="heading-link"><i class="fas fa-link"></i></a>划分成三个子问题</h3>
+      
+<ul>
+<li>Leader Election 选主</li>
+<li>Log Replication 日志复制 log同步到其他节点上，两个阶段 写入日志 commit</li>
+<li>Safety 怎么保证所有的操作在集群中一直是一致的，leader失败了是怎样的，发生分区了是怎样的。</li>
+</ul>
+
+        <h3 id="重定义角色"   >
+          <a href="#重定义角色" class="heading-link"><i class="fas fa-link"></i></a>重定义角色</h3>
+      
+<ul>
+<li>Leader</li>
+<li>Follower</li>
+<li>Candidate 临时的橘色，只有在Leader宕机了，Follower要竞选Leader时才会起作用，这时某个Follower想要竞选，可以临时充当Candidate角色，期待成为下一个Leader</li>
+</ul>
+
+        <h3 id="原理动画解释"   >
+          <a href="#原理动画解释" class="heading-link"><i class="fas fa-link"></i></a>原理动画解释</h3>
+      
+<p><span class="exturl"><a class="exturl__link"   href="http://thesecretlivesofdata.com/raft/"  target="_blank" rel="noopener">Raft动画演示</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>split vote 选举时，两个follower的timeout同时到期，会再举行一轮选举，这两个节点采用随机的timeout</p>
+
+        <h3 id="场景测试"   >
+          <a href="#场景测试" class="heading-link"><i class="fas fa-link"></i></a>场景测试</h3>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://raft.github.io/"  target="_blank" rel="noopener">raft场景测试</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><strong>注意</strong>：一致性并不一定代表完全正确性</p>
+<p>三个可能结果：成功，失败，unknown</p>
+<p>Raft 5 nodes example:</p>
+<p>Client写请求，Leader向followers同步日志，此时集群中有3个节点失败，2个节点存活，结果是？</p>
+<p>unkown，开始是两个节点的log处于未提交状态，当3个节点复活后，log会继续提交。</p>
+<p>Client写请求，Leader向followers同步日志，此时集群中有2个节点失败，3个节点存活，结果是？</p>
+<p>unkown，开始是两个节点的log处于未提交状态，3个节点提交，另两个节点复活后悔将未提交的抛弃，使用其他3个节点已同步的数据复制。</p>
+<p>所以需要client决定如何处理。</p>
+
+        <h2 id="zab"   >
+          <a href="#zab" class="heading-link"><i class="fas fa-link"></i></a>ZAB</h2>
+      
+<p>基本与raft相同，是zk的共识算法</p>
+<p>在一些名词的叫法上有些区别：如ZAB将某一个leader的周期称为epoch，而raft则称之为term。</p>
+<p>实现上也有些许不同：如raft保证日志连续性，心跳方向为leader至follower。ZAB则相反。</p>
+
+        <h1 id="项目实践"   >
+          <a href="#项目实践" class="heading-link"><i class="fas fa-link"></i></a>项目实践</h1>
+      
+<p>在性能测试上etcd已经超过了ZK，最主要的应该是一致性算法的优势，zk基于从paxos改进而来的zab，而etcd基于raft，k8s现在都用etcd管理各种状态</p>
+
+        <h2 id="zookeeper集群搭建和命令行操作"   >
+          <a href="#zookeeper集群搭建和命令行操作" class="heading-link"><i class="fas fa-link"></i></a>Zookeeper集群搭建和命令行操作</h2>
+      
+
+        <h2 id="etcd集群搭建和restful-api"   >
+          <a href="#etcd集群搭建和restful-api" class="heading-link"><i class="fas fa-link"></i></a>Etcd集群搭建和restful api</h2>
+      
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://zhuanlan.zhihu.com/p/31727291"  target="_blank" rel="noopener">Paxos、Raft分布式一致性算法应用场景</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://zhuanlan.zhihu.com/p/31780743"  target="_blank" rel="noopener">Paxos算法详解</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/xybaby/p/10124083.html"  target="_blank" rel="noopener">一文搞懂Raft算法</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p><span class="exturl"><a class="exturl__link"   href="https://www.bilibili.com/video/BV1TW411M7Fx?from=search&amp;seid=6202210591875235413"  target="_blank" rel="noopener">一致性算法</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E8%AF%A6%E8%A7%A3/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E8%AF%A6%E8%A7%A3/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7-Paxos-Raft-ZAB/">分布式一致性 - Paxos - Raft - ZAB</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/200_%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/java/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/%E6%B4%BB%E9%94%81/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">活锁</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/RESP%E5%8D%8F%E8%AE%AE/"><span class="paginator-prev__text">RESP协议</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是一致性"><span class="toc-number">1.</span> <span class="toc-text">
+          什么是一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#cap-theorem"><span class="toc-number">1.1.</span> <span class="toc-text">
+          CAP theorem</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一致性模型"><span class="toc-number">1.2.</span> <span class="toc-text">
+          一致性模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#弱一致性"><span class="toc-number">1.2.1.</span> <span class="toc-text">
+          弱一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#最终一致性"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">
+          最终一致性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#强一致性"><span class="toc-number">1.2.2.</span> <span class="toc-text">
+          强一致性</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#强一致性算法"><span class="toc-number">2.</span> <span class="toc-text">
+          强一致性算法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#主从同步"><span class="toc-number">2.1.</span> <span class="toc-text">
+          主从同步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多数派"><span class="toc-number">2.2.</span> <span class="toc-text">
+          多数派</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#paxos"><span class="toc-number">2.3.</span> <span class="toc-text">
+          Paxos</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#basic-paxos"><span class="toc-number">2.3.1.</span> <span class="toc-text">
+          Basic Paxos</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#multi-paxos"><span class="toc-number">2.3.2.</span> <span class="toc-text">
+          Multi Paxos</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#raft"><span class="toc-number">2.4.</span> <span class="toc-text">
+          Raft</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#划分成三个子问题"><span class="toc-number">2.4.1.</span> <span class="toc-text">
+          划分成三个子问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重定义角色"><span class="toc-number">2.4.2.</span> <span class="toc-text">
+          重定义角色</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#原理动画解释"><span class="toc-number">2.4.3.</span> <span class="toc-text">
+          原理动画解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#场景测试"><span class="toc-number">2.4.4.</span> <span class="toc-text">
+          场景测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zab"><span class="toc-number">2.5.</span> <span class="toc-text">
+          ZAB</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#项目实践"><span class="toc-number">3.</span> <span class="toc-text">
+          项目实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#zookeeper集群搭建和命令行操作"><span class="toc-number">3.1.</span> <span class="toc-text">
+          Zookeeper集群搭建和命令行操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#etcd集群搭建和restful-api"><span class="toc-number">3.2.</span> <span class="toc-text">
+          Etcd集群搭建和restful api</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

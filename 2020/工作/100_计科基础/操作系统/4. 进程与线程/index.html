@@ -1,0 +1,855 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="进程的定义、组成、组织方式、特征                            定义        程序：是静态的，就是个存放在磁盘里的可执行文件，就是一系列的指令集合。 进程（Process）：是动态的，是程序的一次执行过程，同一个程序多次执行会对应多个进程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程与线程">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/4.%20%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="进程的定义、组成、组织方式、特征                            定义        程序：是静态的，就是个存放在磁盘里的可执行文件，就是一系列的指令集合。 进程（Process）：是动态的，是程序的一次执行过程，同一个程序多次执行会对应多个进程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709215944.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709220253.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709220352.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709220705.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221009.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221323.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221427.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221615.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221717.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162107.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162234.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162416.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162521.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710163925.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710164011.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710164436.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710164714.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710165235.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200710165333330.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710165513.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710165835.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200710165938290.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171111.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171358.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171500.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171757.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171829.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710184917.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710185248.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200727062610.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710185551.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200727063434.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200727082653.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710185733.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200727063900.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190016.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200727064153.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190307.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190626.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190734.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190842.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200710191513.png">
+<meta property="article:published_time" content="2020-07-10T10:04:35.000Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:54.734Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="操作系统">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200709215944.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>进程与线程 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/4.%20%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">进程与线程</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-07-10</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4.3k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">23分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="进程的定义-组成-组织方式-特征"   >
+          <a href="#进程的定义-组成-组织方式-特征" class="heading-link"><i class="fas fa-link"></i></a>进程的定义、组成、组织方式、特征</h1>
+      
+
+        <h2 id="定义"   >
+          <a href="#定义" class="heading-link"><i class="fas fa-link"></i></a>定义</h2>
+      
+<p>程序：是<strong>静态</strong>的，就是个存放在磁盘里的可执行文件，就是一系列的指令集合。</p>
+<p>进程（Process）：是<strong>动态</strong>的，是程序的一次执行过程，同一个程序多次执行会对应多个进程。</p>
+<a id="more"></a>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709215944.png"  alt="" />
+      </p>
+
+        <h2 id="组成"   >
+          <a href="#组成" class="heading-link"><i class="fas fa-link"></i></a>组成</h2>
+      
+
+        <h3 id="pcb"   >
+          <a href="#pcb" class="heading-link"><i class="fas fa-link"></i></a>PCB</h3>
+      
+<p>PCB是进程存在的唯一标志，当进程被创建时，操作系统为其创建PCB，当进程结束时，会回收其PCB。操作系统对进程进行管理工作所需的信息都存在PCB中。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709220253.png"  alt="" />
+      </p>
+
+        <h3 id="程序段-数据段"   >
+          <a href="#程序段-数据段" class="heading-link"><i class="fas fa-link"></i></a>程序段、数据段</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709220352.png"  alt="" />
+      </p>
+<p><strong>PCB</strong> 是<strong>给操作系统用</strong>的。<strong>程序段</strong>、<strong>数据段</strong>是<strong>给进程自己用</strong>的。</p>
+<p>一个进<strong>程实体（进程映像）<strong>由</strong>PCB</strong>、<strong>程序段</strong>、<strong>数据段</strong>组成。 <strong>进程是动态的，进程实体（进程映像）是静态的</strong>。 <strong>进程实体反应了进程在某一时刻的状态</strong>（如：x++后，x=2）。</p>
+<p><strong>程序时如何运行的</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709220705.png"  alt="" />
+      </p>
+<p>程序段、数据段、PCB三部分组成了进程实体（进程映像）。 引入进程实体的概念后，可把进程定义为： <strong>进程是进程实体的运行过程，是系统进行资源分配和调度的一个独立单位</strong>。</p>
+<p>注意：<strong>PCB是进程存在的唯一标志</strong>！</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221009.png"  alt="" />
+      </p>
+
+        <h2 id="组织方式"   >
+          <a href="#组织方式" class="heading-link"><i class="fas fa-link"></i></a>组织方式</h2>
+      
+<p>在一个系统中，通常有数十、数百乃至数千个PCB。为了能对他们加以有效的管理，应该用适当的方式把这些PCB组织起来。</p>
+<p>注：进程的<strong>组成</strong>讨论的是一个<strong>进程内部</strong>由哪些部分构成的问题，而进程的<strong>组织</strong>讨论的是<strong>多个进程之间</strong>的组织方式问题。</p>
+<ol>
+<li>
+<p>链接方式</p>
+<p>按照进程状态将PCB分为多个队列，操作系统持有指向各个队列的指针</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221323.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>索引方式</p>
+<p>根据进程状态的不同，建立几张索引表，操作系统持有指向各个索引表的指针</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221427.png"  alt="" />
+      </p>
+</li>
+</ol>
+
+        <h2 id="特征"   >
+          <a href="#特征" class="heading-link"><i class="fas fa-link"></i></a>特征</h2>
+      
+<p>程序是静态的，进程是动态的，相比于程序，进程拥有以下特征：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221615.png"  alt="" />
+      </p>
+
+        <h2 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200709221717.png"  alt="" />
+      </p>
+
+        <h1 id="进程的状态与转换"   >
+          <a href="#进程的状态与转换" class="heading-link"><i class="fas fa-link"></i></a>进程的状态与转换</h1>
+      
+
+        <h2 id="状态"   >
+          <a href="#状态" class="heading-link"><i class="fas fa-link"></i></a>状态</h2>
+      
+<p>进程是程序的一次执行。在这个执行过程中，有的进程正在被cpu处理，有时又需要等待cpu服务，可见，进程的状态是会有变化的。为了方便对各个进程的管理，操作系统需要将进程合理地划分为几种状态。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162107.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162234.png"  alt="" />
+      </p>
+
+        <h2 id="进程状态间的转换"   >
+          <a href="#进程状态间的转换" class="heading-link"><i class="fas fa-link"></i></a>进程状态间的转换</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162416.png"  alt="" />
+      </p>
+
+        <h2 id="小结-2"   >
+          <a href="#小结-2" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710162521.png"  alt="" />
+      </p>
+
+        <h1 id="进程控制"   >
+          <a href="#进程控制" class="heading-link"><i class="fas fa-link"></i></a>进程控制</h1>
+      
+
+        <h2 id="基本概念"   >
+          <a href="#基本概念" class="heading-link"><i class="fas fa-link"></i></a>基本概念</h2>
+      
+
+        <h3 id="什么是进程控制"   >
+          <a href="#什么是进程控制" class="heading-link"><i class="fas fa-link"></i></a>什么是进程控制</h3>
+      
+<p>进程控制的主要功能是对系统中的所有进程实施有效的管理，它具有创建新进程、撤销已有进程、实现进程状态转换等功能。</p>
+<p>简化理解：反正进程控制就是要实现进程状态转换</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710163925.png"  alt="" />
+      </p>
+
+        <h3 id="如何实现进程控制"   >
+          <a href="#如何实现进程控制" class="heading-link"><i class="fas fa-link"></i></a>如何实现进程控制</h3>
+      
+<p>用原语实现</p>
+<p><strong>之前提到过的进程组织问题</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710164011.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710164436.png"  alt="" />
+      </p>
+<p>原语的执行具有原子性，即执行过程只能一气呵成，期间不允许被中断，这种不可被中断的操作即原子操作。 可以用 “关中断指令”和“开中断指令”这两个特权指令实现原子性。</p>
+<blockquote>
+<p>正常情况：CPU每执行完一条指令都会例行检查是否有中断信号需要处理，如果有， 则暂停运行当前这段程序，转而执行相应的中断处理程序。</p>
+</blockquote>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710164714.png"  alt="" />
+      </p>
+
+        <h2 id="进程控制相关的原语"   >
+          <a href="#进程控制相关的原语" class="heading-link"><i class="fas fa-link"></i></a>进程控制相关的原语</h2>
+      
+<p>学习技巧：进程控制会导致进程状态的转换。无论哪个原语，要做的无非三类事情：</p>
+<ol>
+<li>更新pcb中的信息
+<ol>
+<li>修改进程状态标志</li>
+<li>将运行环境保存到pcb</li>
+<li>从pcb恢复运行环境</li>
+</ol>
+</li>
+<li>将pcb插入合适的队列</li>
+<li>分配/回收资源</li>
+</ol>
+
+        <h3 id="创建"   >
+          <a href="#创建" class="heading-link"><i class="fas fa-link"></i></a>创建</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710165235.png"  alt="" />
+      </p>
+
+        <h3 id="终止"   >
+          <a href="#终止" class="heading-link"><i class="fas fa-link"></i></a>终止</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200710165333330.png"  alt="" />
+      </p>
+
+        <h3 id="阻塞-唤醒"   >
+          <a href="#阻塞-唤醒" class="heading-link"><i class="fas fa-link"></i></a>阻塞、唤醒</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710165513.png"  alt="" />
+      </p>
+
+        <h3 id="切换"   >
+          <a href="#切换" class="heading-link"><i class="fas fa-link"></i></a>切换</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710165835.png"  alt="" />
+      </p>
+
+        <h2 id="小结-3"   >
+          <a href="#小结-3" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200710165938290.png"  alt="" />
+      </p>
+
+        <h1 id="进程通信"   >
+          <a href="#进程通信" class="heading-link"><i class="fas fa-link"></i></a>进程通信</h1>
+      
+<p>顾名思义，进程通信就是指进程之间的信息交换。进程是分配系统资源的单位（包括内存地址空间），因此各进程拥有的<strong>内存地址空间相互独立</strong>。为了保证安全，<strong>一个进程不能直接访问另 一个进程的地址空间</strong>。 但是进程之间的信息交换又是必须实现的。 为了保证进程间的安全通信，操作系统提供了一些方法。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171111.png"  alt="" />
+      </p>
+
+        <h2 id="共享存储"   >
+          <a href="#共享存储" class="heading-link"><i class="fas fa-link"></i></a>共享存储</h2>
+      
+
+        <h3 id="基于数据结构的共享"   >
+          <a href="#基于数据结构的共享" class="heading-link"><i class="fas fa-link"></i></a>基于数据结构的共享</h3>
+      
+<p>比如共享空间里只能放一个长度为10的数组。这种共享方式速度慢、 限制多，是一种<strong>低级通信</strong>方式。</p>
+
+        <h3 id="基于存储区的共享"   >
+          <a href="#基于存储区的共享" class="heading-link"><i class="fas fa-link"></i></a>基于存储区的共享</h3>
+      
+<p>基于存储区的共享：在内存中画出一块共享存储区，数据的形式、存放位置都由进程控制， 而不是操作系统。相比之下，这种共享方式速度更快，是一种<strong>高级通信</strong>方式。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171358.png"  alt="" />
+      </p>
+
+        <h2 id="管道通信"   >
+          <a href="#管道通信" class="heading-link"><i class="fas fa-link"></i></a>管道通信</h2>
+      
+<p>“管道”是指用于连接读写进 、程的一个共享文件，又名pipe 文件。其实就是在内存中开辟一个大小固定的缓冲区。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171500.png"  alt="" />
+      </p>
+<ol>
+<li>
+<p>管道只能采用<strong>半双工通信</strong>，某一时间段内只能实现单向的传输。如果要实现<strong>双向同时通信</strong>，则<strong>需要设置两个管道</strong>。</p>
+</li>
+<li>
+<p>各进程要<strong>互斥</strong>地访问管道。</p>
+</li>
+<li>
+<p>数据以字符流的形式写入管道，当<strong>管道写满</strong>时，<strong>写进程</strong>的write()系统调用将被<strong>阻塞</strong>，等待读进程将数据取走。当读进程将数据全部取走后，<strong>管道变空</strong>，此时<strong>读进程</strong>的read()系统调用将被<strong>阻塞</strong>。</p>
+</li>
+<li>
+<p><strong>如果没写满，就不允许读。如果没读空，就不允许写。</strong></p>
+</li>
+<li>
+<p>数据一旦被读出，就从管道中被抛弃，这就意味着<strong>读进程最多只能有一个</strong>，否则可能会有读错数据的情 况。</p>
+</li>
+</ol>
+
+        <h2 id="消息传递"   >
+          <a href="#消息传递" class="heading-link"><i class="fas fa-link"></i></a>消息传递</h2>
+      
+<p>进程间的数据交换以<strong>格式化的消息</strong>（Message）为单位。进程通过操作系统提供的“发送消息/接收消息”两个<strong>原语</strong>进行数据交换。</p>
+<p>直接通信方式</p>
+<p>间接通信方式</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171757.png"  alt="" />
+      </p>
+
+        <h2 id="小结-4"   >
+          <a href="#小结-4" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710171829.png"  alt="" />
+      </p>
+
+        <h1 id="线程的概念和多线程模型"   >
+          <a href="#线程的概念和多线程模型" class="heading-link"><i class="fas fa-link"></i></a>线程的概念和多线程模型</h1>
+      
+
+        <h2 id="什么是线程为什么要引入线程"   >
+          <a href="#什么是线程为什么要引入线程" class="heading-link"><i class="fas fa-link"></i></a>什么是线程，为什么要引入线程？</h2>
+      
+<p>有的进程可能需要“同时”做很多事，而传统的进程只能串行地执行一系列程序。为此，引入了“线程”，来增加并发度。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710184917.png"  alt="" />
+      </p>
+<p>可以把线程理解为“轻量级进程”。</p>
+<p><strong>线程</strong>是一个<strong>基本的CPU执行单元</strong>， 也是<strong>程序执行流的最小单位</strong>。 引入线程之后，不仅是进程之间可以并发，进程内的各线程之间也可以并发，从而进一步<strong>提升了系统的并发度</strong>，使得一个进程内也可以并发处理各种任务（如QQ 视频、文字聊天、传文件）</p>
+<p>引入线程后，<strong>进程只作为除CPU之外的系统资源的分配单元</strong>（如打 印机、内存地址空间等都是分配给进程的）。 <strong>线程则作为处理机调度的分配单元</strong>。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;'>线程 = 进程 - 资源</span></p>
+
+        <h2 id="引入线程机制后有什么变化"   >
+          <a href="#引入线程机制后有什么变化" class="heading-link"><i class="fas fa-link"></i></a>引入线程机制后，有什么变化</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710185248.png"  alt="" />
+      </p>
+<blockquote>
+<p>类比： 切换进程运行环境：有一个不认识的人要用桌子，你需要你的书收走，他把自己的书放到桌上</p>
+<p>同一进程内的线程切换=你的舍友要用这张书桌，可以不把桌子上的书收走。</p>
+</blockquote>
+<p>在同一个进程中，线程的切换不会引起进程的切换，只有当一个进程中的线程切换到另一个进程中的线程时才会引起进程的切换。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200727062610.png"  alt="" />
+      </p>
+
+        <h2 id="线程有哪些重要的属性"   >
+          <a href="#线程有哪些重要的属性" class="heading-link"><i class="fas fa-link"></i></a>线程有哪些重要的属性</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710185551.png"  alt="" />
+      </p>
+
+        <h3 id="tcb"   >
+          <a href="#tcb" class="heading-link"><i class="fas fa-link"></i></a>TCB</h3>
+      
+<p>线程有自己的<strong>TCB</strong>(thread control block， 和PCB很像), 只负责这条流程的信息。包括PC程序计数器的值，SP(栈指针)，State状态，和寄存器的值。有不同的控制流，需要不同的寄存器来表示控制流的执行状态，每个线程有独立的这些信息，但共享一个资源。</p>
+<p>多线程，在进程空间内有多个控制流且执行流程不一样，有各自独立的寄存器和堆栈，但共享代码段，数据段，资源。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200727063434.png"  alt="" />
+      </p>
+
+        <h2 id="线程的栈基于linuxthreads-201"   >
+          <a href="#线程的栈基于linuxthreads-201" class="heading-link"><i class="fas fa-link"></i></a>线程的栈(基于linuxthreads-2.0.1)</h2>
+      
+<p>线程本质上是进程中的一个执行流，我们知道，进程有代码段，线程其实就是进程代码段中的其中一段代码。线程的一种实现是作为进程来实现的。通过调用clone，新建一个进程，然后执行父进程代码段里的一个代码片段。文件、内存等信息都是共享的。因为内存是共享的，所以线程不能共享栈，否则访问栈的地址的时候，会映射到相同的物理地址，那样就会互相影响，所以每个线程会有自己独立的栈。在调用clone函数的时候会设置栈的范围。下面通过linuxthreads的代码看看线程的栈。linuxthreads里有一个__pthread_initialize函数，该函数会在main函数执行前执行。在该函数中会设置主线程的栈范围。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CURRENT_STACK_FRAME 即sp寄存器。按STACK_SIZE大小对齐 </span></span><br><span class="line">__pthread_initial_thread_bos = (<span class="keyword">char</span> *)(((<span class="keyword">long</span>)CURRENT_STACK_FRAME - <span class="number">2</span> * STACK_SIZE) &amp; ~(STACK_SIZE - <span class="number">1</span>));</span><br></pre></td></tr></table></div></figure>
+<p>__pthread_initial_thread_bos 保存主线程的栈顶位置。</p>
+<p>然后当我们第一次调用pthread_create创建线程的时候，会调用pthread_initialize_manager函数初始化manager线程。manager线程是管理其他的线程的线程。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在堆上分配一块内存用于manager线程的栈，栈顶</span></span><br><span class="line">  __pthread_manager_thread_bos = <span class="built_in">malloc</span>(THREAD_MANAGER_STACK_SIZE);</span><br><span class="line"> <span class="comment">// 高地址是栈底</span></span><br><span class="line">  __pthread_manager_thread_tos = __pthread_manager_thread_bos + THREAD_MANAGER_STACK_SIZE;</span><br></pre></td></tr></table></div></figure>
+<p>然后调用clone函数设置manager线程的栈。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__clone(__pthread_manager,__pthread_manager_thread_tos, CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND, (<span class="keyword">void</span> *)(<span class="keyword">long</span>)manager_pipe[<span class="number">0</span>]);</span><br></pre></td></tr></table></div></figure>
+<p>最后在函数pthread_handle_create中设置创建的线程的栈，pthread_handle_create函数是调用pthread_create函数的时候被调用的函数。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// THREAD_STACK_START_ADDRESS 即__pthread_initial_thread_bos，即主线程的栈顶</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> THREAD_STACK_START_ADDRESS</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> THREAD_STACK_START_ADDRESS  __pthread_initial_thread_bos</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> THREAD_SEG(seg) ((pthread_t)(THREAD_STACK_START_ADDRESS - (seg) * STACK_SIZE) - 1)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SEG_THREAD(thr) (((size_t)THREAD_STACK_START_ADDRESS - (size_t)(thr+1)) / STACK_SIZE) </span></span><br><span class="line"><span class="keyword">pthread_t</span> new_thread = THREAD_SEG(sseg);</span><br><span class="line">mmap((<span class="keyword">caddr_t</span>)((<span class="keyword">char</span> *)(new_thread+<span class="number">1</span>) - INITIAL_STACK_SIZE),INITIAL_STACK_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC,MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED | MAP_GROWSDOWN, <span class="number">-1</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></div></figure>
+<p>从上面代码可知，新建的线程的栈在主线程的栈顶下面（即地址小于主线程的栈顶），创建线程的时候，首先计算新线程的栈地址，然后调用mmap划出这块地址。否则访问的时候会segmentfault。最后调用clone创建进程（线程）并设置栈的栈顶和栈底位置。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__clone(pthread_start_thread, new_thread,(CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND| PTHREAD_SIG_RESTART),new_thread);</span><br></pre></td></tr></table></div></figure>
+<p>内存布局如下。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200727082653.png"  alt="" />
+      </p>
+<p>从上面的栈分布我们还可以知道一个信息，即当前执行的代码属于哪个线程。</p>
+<figure class="highlight cpp"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">pthread_t</span> <span class="title">thread_self</span> <span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> THREAD_SELF</span></span><br><span class="line">  THREAD_SELF</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  <span class="keyword">char</span> *sp = CURRENT_STACK_FRAME;</span><br><span class="line">  <span class="comment">// 大于初始化栈则是主线程</span></span><br><span class="line">  <span class="keyword">if</span> (sp &gt;= __pthread_initial_thread_bos)</span><br><span class="line">    <span class="keyword">return</span> &amp;__pthread_initial_thread;</span><br><span class="line">  <span class="comment">// 这是manager线程自己申请的空间</span></span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (sp &gt;= __pthread_manager_thread_bos</span><br><span class="line">	   &amp;&amp; sp &lt; __pthread_manager_thread_tos)</span><br><span class="line">    <span class="keyword">return</span> &amp;__pthread_manager_thread;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="comment">// sp肯定落在某个线程的栈范围内，STACK_SIZE-1使得低n位全1， 或sp再加1即往高地址，按STACK_SIZE对齐，减去一个pthread_t得到tcb</span></span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">pthread_t</span>) (((<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">int</span>) sp | (STACK_SIZE - <span class="number">1</span>)) + <span class="number">1</span>) - <span class="number">1</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>这就是linux threads获取当前线程的是方法。</p>
+
+        <h2 id="线程的实现方式"   >
+          <a href="#线程的实现方式" class="heading-link"><i class="fas fa-link"></i></a>线程的实现方式</h2>
+      
+<p>主流的操作系统都提供了线程实现，java语言则提供了在不同硬件和操作系统平台下对线程操作的统一处理。每个已经执行start()且还未结束的java.lang.Thread类的实例就代表了一个线程。java中Thread类与大部分的JavaAPI有显著的差别，它的所有关键方法都是声明为一个Native的。在java的API中Native方法往往意味着这个方法没有使用或者无法使用平台无关的手段来实现。</p>
+<p>线程实现主要有3种方式：使用内核线程实现、使用用户线程实现和使用用户线程加轻量级进程混合实现。</p>
+
+        <h3 id="用户级线程"   >
+          <a href="#用户级线程" class="heading-link"><i class="fas fa-link"></i></a>用户级线程</h3>
+      
+<p>用户级线程（User-Level Thread, ULT）</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710185733.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200727063900.png"  alt="" />
+      </p>
+<p>用户级线程由应用程序通过<strong>线程库</strong>实现。 所有的<strong>线程管理工作</strong>都由<strong>应用程序负责</strong>（包括线程切换）</p>
+<p>用户级线程中，<strong>线程切换</strong>可以在<strong>用户态下</strong>即可完成，无需操作系统干预。 在用户看来，是有多个线程。但是在操作系统内核看来，并意识不到线程的存在。（用 户级线程对用户透明，对操作系统不透明）</p>
+<p>可以这样理解，“<strong>用户级线程</strong>”就是“<strong>从用户视角看能看到的线程</strong>”</p>
+
+        <h3 id="内核级线程"   >
+          <a href="#内核级线程" class="heading-link"><i class="fas fa-link"></i></a>内核级线程</h3>
+      
+<p>内核级线程（Kernel-Level Thread, KLT, 又称“内核支持的线程”）</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190016.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200727064153.png"  alt="" />
+      </p>
+<p>内核级<strong>线程的管理工作</strong>由<strong>操作系统内核</strong>完成。 线程调度、切换等工作都由内核负责，因此<strong>内核级线程的切换</strong>必然需要在<strong>核心态</strong>下才能完成。</p>
+<p>可以这样理解，“<strong>内核级线程</strong>”就是“<strong>从操作系统内核视角看能看到的线程</strong>”</p>
+<p>在同时支持用户级线程和内核级线程的系统中，可采用二者组合的方式：将n个用户级线程映射到m个内核级线程上（ n &gt;= m）</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190307.png"  alt="" />
+      </p>
+<p><strong>重点</strong>：操作系统只“看得见”内核级线程，因此只有<strong>内核级线程才是处理机分配的单位</strong>。</p>
+<p>例如：上边这个模型中，<strong>三个用户级线程映射成两个内核级线程</strong>，在用户看来，这个进程中有三个线程。但即使该进程在一个4核处理机的计算机上运行，也最多只能被分配到两个核，最多只能有两个用户线程并行执行。</p>
+
+        <h2 id="多线程模型"   >
+          <a href="#多线程模型" class="heading-link"><i class="fas fa-link"></i></a>多线程模型</h2>
+      
+<p>在同时支持用户级线程和内核级线程的系统中，由几个用户级线程映射到几个内核级线程的问题引出了“多线程模型”问题。</p>
+
+        <h3 id="多对一模型"   >
+          <a href="#多对一模型" class="heading-link"><i class="fas fa-link"></i></a>多对一模型</h3>
+      
+<p>多对一模型：多个用户级线程映射到一个内核级线程。每个用户进程只对应一个内核级线程。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190626.png"  alt="" />
+      </p>
+<p>优点：用户级线程的切换在用户空间即可完成，不需要切换到核心态，线程管理的系统开销小，效率高</p>
+<p>缺点：当一个用户级线程被阻塞后，整个进程都会被阻塞，并发度不高。多个线程不可在多核处理机上并行运行</p>
+
+        <h3 id="一对一模型"   >
+          <a href="#一对一模型" class="heading-link"><i class="fas fa-link"></i></a>一对一模型</h3>
+      
+<p>一对一模型：一个用户级线程映射到一个内核级线程。每个用户进程有与用户级线程同数量的内核级线程。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190734.png"  alt="" />
+      </p>
+<p>优点：当一个线程被阻塞后，别的线程还可以继续执行，并发能力强。多线程可在多核处理机上并行执行。</p>
+<p>缺点：一个用户进程会占用多个内核级线程， 线程切换由操作系统内核完成，需要切换到核心态，因此线程管理的成本高，开销大。</p>
+
+        <h3 id="多对多模型"   >
+          <a href="#多对多模型" class="heading-link"><i class="fas fa-link"></i></a>多对多模型</h3>
+      
+<p>多对多模型：n个用户级线程映射到 m 个内核级线程（n &gt;= m）。每个用户进程对应 m 个内核级线程。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710190842.png"  alt="" />
+      </p>
+<p>克服了多对一模型并发度不高的缺点，又克服了一对一模型中一个用户进程占用太多内核级线程，开销太大的缺点。</p>
+<blockquote>
+<p><strong>Java线程的实现</strong></p>
+<p>JDK1.2之前，绿色线程——用户线程。JDK1.2——基于操作系统原生线程模型来实现。Sun JDK,它的Windows版本和Linux版本都使用一对一的线程模型实现，一条Java线程就映射到一条轻量级进程之中。</p>
+<p>Solaris同时支持一对一和多对多。</p>
+<p><strong>Java线程调度</strong></p>
+<p>线程调度是指系统为线程分配处理器使用权的过程，主要调度方式分两种，分别是协同式线程调度和抢占式线程调度。</p>
+<p>协同式线程调度，线程执行时间由线程本身来控制，线程把自己的工作执行完之后，要主动通知系统切换到另外一个线程上。最大好处是实现简单，且切换操作对线程自己是可知的，没啥线程同步问题。坏处是线程执行时间不可控制，如果一个线程有问题，可能一直阻塞在那里。</p>
+<p>抢占式调度，每个线程将由系统来分配执行时间，线程的切换不由线程本身来决定（Java中，Thread.yield()可以让出执行时间，但无法获取执行时间）。线程执行时间系统可控，也不会有一个线程导致整个进程阻塞。</p>
+<p>Java线程调度就是抢占式调度。</p>
+<p>希望系统能给某些线程多分配一些时间，给一些线程少分配一些时间，可以通过设置线程优先级来完成。Java语言一共10个级别的线程优先级（Thread.MIN_PRIORITY至Thread.MAX_PRIORITY），在两线程同时处于ready状态时，优先级越高的线程越容易被系统选择执行。但优先级并不是很靠谱，因为Java线程是通过映射到系统的原生线程上来实现的，所以线程调度最终还是取决于操作系统。</p>
+</blockquote>
+
+        <h2 id="小结-5"   >
+          <a href="#小结-5" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200710191513.png"  alt="" />
+      </p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/4.%20%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/4.%20%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/5.%20%E5%A4%84%E7%90%86%E6%9C%BA%E8%B0%83%E5%BA%A6/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">处理机调度</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/3.%20%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%BF%90%E8%A1%8C%E6%9C%BA%E5%88%B6%E4%B8%8E%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/"><span class="paginator-prev__text">操作系统的运行机制与体系结构</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#进程的定义-组成-组织方式-特征"><span class="toc-number">1.</span> <span class="toc-text">
+          进程的定义、组成、组织方式、特征</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#定义"><span class="toc-number">1.1.</span> <span class="toc-text">
+          定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#组成"><span class="toc-number">1.2.</span> <span class="toc-text">
+          组成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pcb"><span class="toc-number">1.2.1.</span> <span class="toc-text">
+          PCB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#程序段-数据段"><span class="toc-number">1.2.2.</span> <span class="toc-text">
+          程序段、数据段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#组织方式"><span class="toc-number">1.3.</span> <span class="toc-text">
+          组织方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#特征"><span class="toc-number">1.4.</span> <span class="toc-text">
+          特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">1.5.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进程的状态与转换"><span class="toc-number">2.</span> <span class="toc-text">
+          进程的状态与转换</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#状态"><span class="toc-number">2.1.</span> <span class="toc-text">
+          状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程状态间的转换"><span class="toc-number">2.2.</span> <span class="toc-text">
+          进程状态间的转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-2"><span class="toc-number">2.3.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进程控制"><span class="toc-number">3.</span> <span class="toc-text">
+          进程控制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念"><span class="toc-number">3.1.</span> <span class="toc-text">
+          基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是进程控制"><span class="toc-number">3.1.1.</span> <span class="toc-text">
+          什么是进程控制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#如何实现进程控制"><span class="toc-number">3.1.2.</span> <span class="toc-text">
+          如何实现进程控制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程控制相关的原语"><span class="toc-number">3.2.</span> <span class="toc-text">
+          进程控制相关的原语</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建"><span class="toc-number">3.2.1.</span> <span class="toc-text">
+          创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#终止"><span class="toc-number">3.2.2.</span> <span class="toc-text">
+          终止</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#阻塞-唤醒"><span class="toc-number">3.2.3.</span> <span class="toc-text">
+          阻塞、唤醒</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#切换"><span class="toc-number">3.2.4.</span> <span class="toc-text">
+          切换</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-3"><span class="toc-number">3.3.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进程通信"><span class="toc-number">4.</span> <span class="toc-text">
+          进程通信</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#共享存储"><span class="toc-number">4.1.</span> <span class="toc-text">
+          共享存储</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基于数据结构的共享"><span class="toc-number">4.1.1.</span> <span class="toc-text">
+          基于数据结构的共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基于存储区的共享"><span class="toc-number">4.1.2.</span> <span class="toc-text">
+          基于存储区的共享</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#管道通信"><span class="toc-number">4.2.</span> <span class="toc-text">
+          管道通信</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息传递"><span class="toc-number">4.3.</span> <span class="toc-text">
+          消息传递</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-4"><span class="toc-number">4.4.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#线程的概念和多线程模型"><span class="toc-number">5.</span> <span class="toc-text">
+          线程的概念和多线程模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是线程为什么要引入线程"><span class="toc-number">5.1.</span> <span class="toc-text">
+          什么是线程，为什么要引入线程？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引入线程机制后有什么变化"><span class="toc-number">5.2.</span> <span class="toc-text">
+          引入线程机制后，有什么变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#线程有哪些重要的属性"><span class="toc-number">5.3.</span> <span class="toc-text">
+          线程有哪些重要的属性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#tcb"><span class="toc-number">5.3.1.</span> <span class="toc-text">
+          TCB</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#线程的栈基于linuxthreads-201"><span class="toc-number">5.4.</span> <span class="toc-text">
+          线程的栈(基于linuxthreads-2.0.1)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#线程的实现方式"><span class="toc-number">5.5.</span> <span class="toc-text">
+          线程的实现方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#用户级线程"><span class="toc-number">5.5.1.</span> <span class="toc-text">
+          用户级线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内核级线程"><span class="toc-number">5.5.2.</span> <span class="toc-text">
+          内核级线程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多线程模型"><span class="toc-number">5.6.</span> <span class="toc-text">
+          多线程模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#多对一模型"><span class="toc-number">5.6.1.</span> <span class="toc-text">
+          多对一模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一对一模型"><span class="toc-number">5.6.2.</span> <span class="toc-text">
+          一对一模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多对多模型"><span class="toc-number">5.6.3.</span> <span class="toc-text">
+          多对多模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结-5"><span class="toc-number">5.7.</span> <span class="toc-text">
+          小结</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

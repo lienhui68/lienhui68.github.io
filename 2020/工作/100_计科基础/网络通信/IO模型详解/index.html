@@ -1,0 +1,847 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="演示         注意：&#x2F;dev&#x2F;tcp&#x2F;host&#x2F;port 其实是一个 bash 的 feature，由于是 bash的 feature，因此在别的 shell下就不能生效，所以需要注意使用shell类型。 123456# 查看所有可用的shellcat &#x2F;etc&#x2F;shells# 切换shellchsh -s &#x2F;bin&#x2F;bash# 查看当前使用的shellecho $s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IO模型详解">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/IO%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="演示         注意：&#x2F;dev&#x2F;tcp&#x2F;host&#x2F;port 其实是一个 bash 的 feature，由于是 bash的 feature，因此在别的 shell下就不能生效，所以需要注意使用shell类型。 123456# 查看所有可用的shellcat &#x2F;etc&#x2F;shells# 切换shellchsh -s &#x2F;bin&#x2F;bash# 查看当前使用的shellecho $s">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830000009.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829231905.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200829231259.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830204104.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830204210.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830211126.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830211441.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830211745.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830212126.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830213024.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830213121.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830214320.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830214813.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830215430.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200828171537646.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830221239.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830221113.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830222105.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830222117.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830234439.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831000041.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831001632.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831001923.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831002702.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831003304.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831004156.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831010312.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200901085247.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015516.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831022030.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015553.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015634.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020209.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015709.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015826.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020016.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020446.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831021646.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831021323.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020934.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831032211.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200831032318.png">
+<meta property="article:published_time" content="2020-09-16T16:21:55.305Z">
+<meta property="article:modified_time" content="2020-09-28T06:53:44.096Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络通信">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200830000009.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>IO模型详解 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/IO%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">IO模型详解</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-28</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">7.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">52分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="演示"   >
+          <a href="#演示" class="heading-link"><i class="fas fa-link"></i></a>演示</h1>
+      
+<blockquote>
+<p>注意：<code>/dev/tcp/host/port</code> 其实是一个 bash 的 feature，由于是 bash的 feature，因此在别的 shell下就不能生效，所以需要注意使用shell类型。</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看所有可用的shell</span></span><br><span class="line">cat /etc/shells</span><br><span class="line"><span class="meta">#</span><span class="bash"> 切换shell</span></span><br><span class="line">chsh -s /bin/bash</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看当前使用的shell</span></span><br><span class="line">echo $shell</span><br></pre></td></tr></table></div></figure>
+<p><span class="exturl"><a class="exturl__link"   href="https://blog.csdn.net/michaelwoshi/article/details/101107042"  target="_blank" rel="noopener">参考</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>跟百度建立连接</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">exec</span> 8&lt;&gt; /dev/tcp/www.baidu.com/80</span></span><br></pre></td></tr></table></div></figure>
+<p>向百度发出一个GET请求</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">echo</span> -e <span class="string">"GET / HTTP/1.0\n"</span> 1&gt;&amp; 8</span></span><br></pre></td></tr></table></div></figure>
+<p>向百度发出一个数据读取请求</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> cat 0&lt;&amp; 8</span></span><br></pre></td></tr></table></div></figure>
+<a id="more"></a>
+
+        <h2 id="说明"   >
+          <a href="#说明" class="heading-link"><i class="fas fa-link"></i></a>说明</h2>
+      
+<ol>
+<li>
+<p><code>exec 8&lt;&gt; /dev/tcp/www.baidu.com/80</code></p>
+<p>exec</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830000009.png"  alt="" />
+      </p>
+<p>exec是一个外壳程序，相当于一个while循环，如果后面跟一个命令程序(会有exit)则替换成命令程序，比如 <code>exec ls</code> 执行完这个命令程序 进程也就结束了。</p>
+<p>命令程序是可选项，如果没有给命令程序，就不替换</p>
+<p><code>8&lt;&gt; /dev/tcp/www.baidu.com/80</code></p>
+<p>创建一个文件描述符8，8的标准输入和输出都重定向到 <code>/dev/tcp/www.baidu.com/80</code> 这个目标地址</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829231905.png"  alt="" />
+      </p>
+<p><code>$$</code> 表示 当前这个解释程序，可以使用<code>echo $$</code> 输出当前解释程序进程号</p>
+<p>文件描述符可以理解成java变量引用、指针， 文件描述符 8 表示目标地址是百度的那个socket</p>
+</li>
+<li>
+<p><code>echo -e &quot;GET / HTTP/1.0\n&quot; 1&gt; &amp;8</code></p>
+<p><code>-e</code> 识别换行符</p>
+<p>echo也是一个程序，有标准输出1，重定向到文件描述符8所指向的文件，也就是目标地址是百度的socket</p>
+<p>根据应用层Http协议 和百度通信</p>
+</li>
+<li>
+<p><code>cat 0&lt; &amp;8</code></p>
+<p>cat 输入冲向到 <code>&amp;8</code> 这个文件，也就是目标地址是百度的socket，因为8是文件描述符，所以需要加<code>&amp;</code></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200829231259.png"  alt="" />
+      </p>
+<blockquote>
+<p>注意建立连接后要在一定时间内发起请求，否则会超时</p>
+</blockquote>
+</li>
+</ol>
+<p>以上，除了创建socket的文件描述符是在内核空间做的，echo和cat与百度通信都是在用户空间完成的</p>
+<p>用户空间负责应用层交互</p>
+<p>内核空间负责应用层以下的交互</p>
+<p>同样可以使用nc进行演示</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -l 8080 # 服务器</span><br><span class="line">nc localhost 8080 # 客户端</span><br></pre></td></tr></table></div></figure>
+
+        <h1 id="网络通信io的演变"   >
+          <a href="#网络通信io的演变" class="heading-link"><i class="fas fa-link"></i></a>网络通信IO的演变</h1>
+      
+
+        <h2 id="同步异步阻塞非阻塞"   >
+          <a href="#同步异步阻塞非阻塞" class="heading-link"><i class="fas fa-link"></i></a>同步/异步/阻塞/非阻塞</h2>
+      
+<p>“阻塞”与&quot;非阻塞&quot;与&quot;同步&quot;与“异步&quot;不能简单的从字面理解，提供一个从分布式系统角度的回答。</p>
+<ol>
+<li>
+<p>同步和异步</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>同步和异步关注的是<strong>消息通信机制</strong> (synchronous communication/ asynchronous communication)</span><br />
+所谓同步，就是在发出一个 <em>调用</em> 时，在没有得到结果之前，该 <em>调用</em> 就不返回。但是一旦调用返回，就得到返回值了。<br />
+换句话说，就是由<em>调用者</em> 主动等待这个<em>调用</em>的结果。</p>
+<p>而异步则是相反，<strong>调用在发出之后，这个调用就直接返回了，所以没有返回结果</strong>。换句话说，当一个异步过程调用发出后，调用者不会立刻得到结果。而是在<em>调用</em>发出后，<em>被调用者</em>通过状态、通知来通知调用者，或通过回调函数处理这个调用。</p>
+<p>典型的异步编程模型比如Node.js</p>
+<p>举个通俗的例子：<br />
+你打电话问书店老板有没有《分布式系统》这本书，如果是同步通信机制，书店老板会说，你稍等，”我查一下&quot;，然后开始查啊查，等查好了（可能是5秒，也可能是一天）告诉你结果（返回结果）。<br />
+而异步通信机制，书店老板直接告诉你我查一下啊，查好了打电话给你，然后直接挂电话了（不返回结果）。然后查好了，他会主动打电话给你。在这里老板通过“回电”这种方式来回调。</p>
+</li>
+<li>
+<p>阻塞和非阻塞</p>
+<p>阻塞和非阻塞关注的是<strong>程序在等待调用结果（消息，返回值）时的状态.</strong></p>
+<p>阻塞调用是指调用结果返回之前，当前线程会被挂起。调用线程只有在得到结果之后才会被唤醒。<br />
+非阻塞调用指在不能立刻得到结果之前，该调用不会阻塞当前线程。</p>
+<p>还是上面的例子，<br />
+你打电话问书店老板有没有《分布式系统》这本书，你如果是阻塞式调用，你会一直把自己“挂起”，直到得到这本书有没有的结果，如果是非阻塞式调用，你不管老板有没有告诉你，你自己先一边去玩了， 当然你也要偶尔过几分钟check一下老板有没有返回结果。<br />
+在这里<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>阻塞与非阻塞与是否同步异步无关。跟老板通过什么方式回答你结果无关。</span></p>
+</li>
+</ol>
+<p>IO模型的演变过程：bio-&gt;nio-&gt;select/poll-&gt;epoll</p>
+
+        <h2 id="一个demo"   >
+          <a href="#一个demo" class="heading-link"><i class="fas fa-link"></i></a>一个Demo</h2>
+      
+<blockquote>
+<p>使用strace跟踪java程序： 追踪一个java程序有多少个线程；每一个线程对内核有哪些系统调用，产生了哪些损耗</p>
+<p>模拟服务端：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.net.ServerSocket;</span><br><span class="line"><span class="keyword">import</span> java.net.Socket;</span><br><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ExecutorService;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Executors;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SocketServerM</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> port = <span class="number">7000</span>;</span><br><span class="line">        <span class="keyword">int</span> clientNo = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        ServerSocket serverSocket = <span class="keyword">new</span> ServerSocket(port);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建线程池</span></span><br><span class="line">        ExecutorService exec = Executors.newCachedThreadPool();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                Socket socket = serverSocket.accept();</span><br><span class="line">                System.out.println(String.format(<span class="string">"客户端IP:%s, 端口号:%d"</span>, socket.getInetAddress(), socket.getPort()));</span><br><span class="line">		exec.execute(<span class="keyword">new</span> SingleServer(socket, clientNo));</span><br><span class="line">                clientNo++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            serverSocket.close();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SingleServer</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Socket socket;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> clientNo;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SingleServer</span><span class="params">(Socket socket, <span class="keyword">int</span> clientNo)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.socket = socket;</span><br><span class="line">        <span class="keyword">this</span>.clientNo = clientNo;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            DataInputStream dis = <span class="keyword">new</span> DataInputStream(</span><br><span class="line">                    <span class="keyword">new</span> BufferedInputStream(socket.getInputStream()));</span><br><span class="line">            DataOutputStream dos = <span class="keyword">new</span> DataOutputStream(</span><br><span class="line">                    <span class="keyword">new</span> BufferedOutputStream(socket.getOutputStream()));</span><br><span class="line">            <span class="keyword">do</span> &#123;</span><br><span class="line">                <span class="keyword">double</span> length = dis.readDouble();</span><br><span class="line">                System.out.println(<span class="string">"从客户端"</span> + clientNo + <span class="string">"接收到的边长数据为："</span> + length);</span><br><span class="line">                <span class="keyword">double</span> result = length * length;</span><br><span class="line">                dos.writeDouble(result);</span><br><span class="line">                dos.flush();</span><br><span class="line">            &#125; <span class="keyword">while</span> (dis.readInt() != <span class="number">0</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">"与客户端"</span> + clientNo + <span class="string">"通信结束"</span>);</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                socket.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>模拟客户端</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.net.Socket;</span><br><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SocketClient</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> port = <span class="number">7000</span>;</span><br><span class="line">        String host = <span class="string">"localhost"</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建一个套接字并将其连接到服务器端指定端口号</span></span><br><span class="line">        Socket socket = <span class="keyword">new</span> Socket(host, port);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 从socket获取输入流</span></span><br><span class="line">        DataInputStream dis = <span class="keyword">new</span> DataInputStream(</span><br><span class="line">                <span class="keyword">new</span> BufferedInputStream(socket.getInputStream()));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 从socket获取输出流</span></span><br><span class="line">        DataOutputStream dos = <span class="keyword">new</span> DataOutputStream(</span><br><span class="line">                <span class="keyword">new</span> BufferedOutputStream(socket.getOutputStream()));</span><br><span class="line"></span><br><span class="line">        Scanner sc = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        <span class="keyword">boolean</span> flag = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">while</span> (!flag) &#123;</span><br><span class="line">            System.out.println(<span class="string">"请输入正方形的边长:"</span>);</span><br><span class="line">            <span class="keyword">double</span> length = sc.nextDouble();</span><br><span class="line"></span><br><span class="line">            dos.writeDouble(length);</span><br><span class="line">            dos.flush();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">double</span> area = dis.readDouble();</span><br><span class="line">            System.out.println(<span class="string">"服务器返回的计算面积为:"</span> + area);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">"继续计算？(Y/N)"</span>);</span><br><span class="line">                String str = sc.next();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (str.equalsIgnoreCase(<span class="string">"N"</span>)) &#123;</span><br><span class="line">                    dos.writeInt(<span class="number">0</span>);</span><br><span class="line">                    dos.flush();</span><br><span class="line">                    flag = <span class="keyword">true</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (str.equalsIgnoreCase(<span class="string">"Y"</span>)) &#123;</span><br><span class="line">                    dos.writeInt(<span class="number">1</span>);</span><br><span class="line">                    dos.flush();</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        socket.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+<ol>
+<li>
+<p>第一步 服务端以跟踪方式启动</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> strace -ff -o out java SocketServerM</span></span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830204104.png"  alt="" />
+      </p>
+<p>服务端阻塞</p>
+</li>
+<li>
+<p>第二步 查看out跟踪文件</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830204210.png"  alt="" />
+      </p>
+<p>第二个out是主线程跟踪文件，进行查看</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> vim out.1220</span></span><br></pre></td></tr></table></div></figure>
+<p>先拉到最后</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830211126.png"  alt="" />
+      </p>
+<p>使用tail指令可知一直hang在这个地方，阻塞等待</p>
+<p>可以使用查找命令依次找到对应的bind listen socket方法</p>
+<p>服务端建立一个连接(开始是处于监听状态 socket建立fd， bind绑定端口号 listen 监听端口)</p>
+<blockquote>
+<p>系统调用指令 都属于2类指令，可以使用man 2 poll进行查看</p>
+<p>bio 可以使用man 2 bind， bind帮助文档里 有bio的example</p>
+</blockquote>
+</li>
+<li>
+<p>第三步 客户端连接</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> java SocketClient</span></span><br></pre></td></tr></table></div></figure>
+<p>查看跟踪文件变化</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830211441.png"  alt="" />
+      </p>
+<p>此时poll接着往后执行，accept得以执行，返回客户端连接的文件描述符6</p>
+<p>我们也可以进入到这个进程的fd里验证</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830211745.png"  alt="" />
+      </p>
+<p>4不用管，是生成的ip6 文件描述符，后面已经close</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830212126.png"  alt="" />
+      </p>
+<p>使用netstat命令查看，也能看出连接是双向的，服务端永远保持一个处于listen的socket，还有一个已经建立连接的socket</p>
+<p>客户端只有一个已经建立连接的socket</p>
+<p>继续查看out文件，程序是开辟线程接受accept请求，并且主线程循环等待新的连接请求</p>
+<p>开辟新线程：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830213024.png"  alt="" />
+      </p>
+<p>这也是为什么多出来out.1509的原因</p>
+<blockquote>
+<p>通过系统调用clone创建一个轻量级进程1509，也就是java里说的线程，为什么netstat显示 建立连接的 pid还是1209，这涉及到线程组的概念，还是用父线程的pid表示。</p>
+</blockquote>
+<p>主线程循环等待新的连接请求</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830213121.png"  alt="" />
+      </p>
+<p>继续阻塞等待新的accept请求。</p>
+</li>
+<li>
+<p>第四步 根据程序定义，此时跟客户端的连接应该阻塞在读取事件，查看out.1509</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830214320.png"  alt="" />
+      </p>
+<p>可以看到新的线程正在读取刚与客户端建立连接创建的文件描述符6</p>
+</li>
+<li>
+<p>同理再来客户端连接</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830214813.png"  alt="" />
+      </p>
+<p>服务端会起一个线程建立一个新的连接，阻塞IO 每个连接对应一个线程。</p>
+<blockquote>
+<p>计算机收了一个数据包，目标地址是本机的任何地址且端口是7000，源地址是任何地址任何端口都ok，就可以交给379这个java程序， 就可以和这个java程序建立连接</p>
+</blockquote>
+</li>
+<li>
+<p>客户端传输数据</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tail -20f out.1509</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830215430.png"  alt="" />
+      </p>
+<p>从out.1509文件 可以看到有数据 返回</p>
+</li>
+</ol>
+
+        <h2 id="bio"   >
+          <a href="#bio" class="heading-link"><i class="fas fa-link"></i></a>BIO</h2>
+      
+<p>从上面的demo 可以知道 服务端java程序是如何执行起来的，执行了哪些系统调用</p>
+<p>服务端要监听某端口，必然会先执行3个系统调用socket/bind/listen</p>
+<blockquote>
+<p>注意：无论是ngix、redis、还是其他服务端，无论是bio、nio、多路复用、aio都会先执行这三步系统调用。</p>
+</blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>accept会阻塞</span> 由于服务端要接受多个客户端连接，所以每来一个连接(accept有返回)就得起一个新的线程去接受然后做连接后的工作(读写等)， 所以得接受accept的操作放到while循环中</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>receive</span> 也会阻塞</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200828171537646.png"  alt="" />
+      </p>
+<p>内存 线性地址空间 分成内核空间 用户空间，用户空间通过系统调用 软终端， 切换到内核态</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830221239.png"  alt="" />
+      </p>
+
+        <h3 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830221113.png"  alt="" />
+      </p>
+<p>BIO的问题是由于创建多线程导致的，而创建多线程是为了解决阻塞的问题，所以BIO的缺陷根源就是BLOCKING</p>
+
+        <h2 id="nio"   >
+          <a href="#nio" class="heading-link"><i class="fas fa-link"></i></a>NIO</h2>
+      
+<p>NIO有两层语义：</p>
+<p>java：New IO</p>
+<p>操作系统：NonBlocking</p>
+<p>是否阻塞受制于内核，当内核提供非阻塞的方法，BIO的缺陷也就解决了。</p>
+<p>使用man 2 socket命令查看这个方法是否提供非阻塞类型。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830222105.png"  alt="" />
+      </p>
+<p>查看type类型列表，可知操作系统提供了对创建非阻塞socket的支持。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830222117.png"  alt="" />
+      </p>
+<p>写一个非阻塞的服务端程序演示：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.google.common.collect.Lists;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.ServerSocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.time.LocalTime;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SocketNIO</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * socket 开启一个管道(可读可写)，区分之前单独的读写流</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        ServerSocketChannel channel = ServerSocketChannel.open();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 可选参数</span></span><br><span class="line"><span class="comment">//        channel.setOption(StandardSocketOptions.TCP_NODELAY, false);</span></span><br><span class="line"><span class="comment">//        StandardSocketOptions.TCP_NODELAY</span></span><br><span class="line"><span class="comment">//        StandardSocketOptions.SO_KEEPALIVE</span></span><br><span class="line"><span class="comment">//        StandardSocketOptions.SO_LINGER</span></span><br><span class="line"><span class="comment">//        StandardSocketOptions.SO_RCVBUF</span></span><br><span class="line"><span class="comment">//        StandardSocketOptions.SO_SNDBUF</span></span><br><span class="line"><span class="comment">//        StandardSocketOptions.SO_REUSEADDR</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * bind</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        channel.bind(<span class="keyword">new</span> InetSocketAddress(<span class="number">8000</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 设置非阻塞，OS层面</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        channel.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;SocketChannel&gt; clients = Lists.newArrayList();</span><br><span class="line">        <span class="comment">// 接受客户端的连接</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="comment">// 防止打印过于频繁，生产环境不用这行</span></span><br><span class="line">            Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">            <span class="comment">//不会阻塞，没有连接请求就返回null，操作系统返回-1</span></span><br><span class="line">            SocketChannel client = channel.accept();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//accept  调用内核了：1，没有客户端连接进来，返回值？在BIO 的时候一直卡着，但是在NIO ，不卡着，返回-1，NULL</span></span><br><span class="line">            <span class="comment">//如果来客户端的连接，accept 返回的是这个客户端的fd  5，client  object</span></span><br><span class="line">            <span class="comment">//NONBLOCKING 就是代码能往下走了，只不过有不同的情况</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (client == <span class="keyword">null</span>) &#123;</span><br><span class="line">                System.out.println(LocalTime.now() + <span class="string">" 暂时没有连接请求"</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// //重点  socket（服务端的listen socket</span></span><br><span class="line">                <span class="comment">// 连接请求三次握手后，往我这里扔，我去通过accept 得到连接的socket，供连接后数据读写使用</span></span><br><span class="line">                client.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">                System.out.println(String.format(<span class="string">"客户端:%s"</span>, client.getRemoteAddress()));</span><br><span class="line">                clients.add(client);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ByteBuffer buffer = ByteBuffer.allocateDirect(<span class="number">4096</span>); <span class="comment">//分配直接内存(堆外)，也可以放在堆里</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//遍历已经链接进来的客户端能不能读写数据</span></span><br><span class="line">            <span class="keyword">for</span> (SocketChannel c : clients) &#123;   <span class="comment">//串行化！！！！  多线程！！</span></span><br><span class="line">                <span class="keyword">int</span> num = c.read(buffer);  <span class="comment">// &gt;0  -1  0   //不会阻塞</span></span><br><span class="line">                <span class="keyword">if</span> (num != -<span class="number">1</span>) &#123;</span><br><span class="line">                    buffer.flip();</span><br><span class="line">                    <span class="keyword">byte</span>[] aaa = <span class="keyword">new</span> <span class="keyword">byte</span>[buffer.limit()];</span><br><span class="line">                    buffer.get(aaa);</span><br><span class="line"></span><br><span class="line">                    String b = <span class="keyword">new</span> String(aaa);</span><br><span class="line">                    System.out.println(c.getRemoteAddress() + <span class="string">"传入数据 : "</span> + b);</span><br><span class="line">                    buffer.clear();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>启动服务</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200830234439.png"  alt="" />
+      </p>
+<p>查看主线程跟踪文件</p>
+<p>nio同样要建立服务端文件描述符，绑定端口，监听端口</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">18672 socket(AF_INET6, SOCK_STREAM, IPPROTO_IP) = 7</span><br><span class="line">20479 bind(7, &#123;sa_family=AF_INET, sin_port=htons(8000), sin_addr=inet_addr("0.0.0.0")&#125;, 16) = 0</span><br><span class="line">20480 listen(7, 50)                           = 0</span><br></pre></td></tr></table></div></figure>
+<p>accept</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831000041.png"  alt="" />
+      </p>
+<p>可以看到此时accept不会引起阻塞，os直接返回-1</p>
+<p>客户端连接</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc localhost 8000</span><br></pre></td></tr></table></div></figure>
+<p>可以看到accept返回了一个文件描述符8</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831001632.png"  alt="" />
+      </p>
+
+        <h3 id="小结-2"   >
+          <a href="#小结-2" class="heading-link"><i class="fas fa-link"></i></a>小结</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831001923.png"  alt="" />
+      </p>
+
+        <h2 id="多路复用器"   >
+          <a href="#多路复用器" class="heading-link"><i class="fas fa-link"></i></a>多路复用器</h2>
+      
+<p>多路复用是当前线程把所有得到的socket连接 全部交给内核处理，然后内核把有状态变化的连接集合(分成可读、可写、异常的)返回给当前线程。</p>
+<p>多路复用， 复用的是一次系统调用</p>
+
+        <h3 id="selectpoll"   >
+          <a href="#selectpoll" class="heading-link"><i class="fas fa-link"></i></a>select/poll</h3>
+      
+<p>定义</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select()  and  pselect()  allow a program to monitor multiple file descriptors, waiting until one or more of the file descriptors become "ready" for some class of I/O</span><br><span class="line">       operation (e.g., input possible).  A file descriptor is considered ready if it is possible to perform a corresponding I/O operation (e.g., read(2)  without  blocking,</span><br><span class="line">       or a sufficiently small write(2)).</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">man 2 select</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831002702.png"  alt="" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831003304.png"  alt="" />
+      </p>
+<p>多路复用， 循环放在内核里 ， 不用切换内核态到用户态；select返回准备好的fds， 有几个用户进程就调几个就好了</p>
+<blockquote>
+<p>select 和poll</p>
+<p>select 1024个fd限制 减少了系统调用的次数，你也可以自己编译linux内核程序</p>
+<p>poll 操作系统 fd限制数</p>
+</blockquote>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831004156.png"  alt="" />
+      </p>
+
+        <h3 id="epoll"   >
+          <a href="#epoll" class="heading-link"><i class="fas fa-link"></i></a>epoll</h3>
+      
+<p>epoll 基于事件机制，不进行遍历。</p>
+<p>select/poll 弊端</p>
+<ol>
+<li>重复传递fd， 解决：增量式传递，内核开辟空间(红黑树结构)保留fd</li>
+<li>每次select、poll 都要重新遍历全量的fd  解决：中断，callback，增强</li>
+</ol>
+<p>解决方案：中断之前将数据存放在buffer里，中断来了之后将红黑树上的fd标识一下，仅此而已。</p>
+<blockquote>
+<p>同步和异步</p>
+<p>同步IO模型：BIO、NIO、多路复用器  多路复用器只能给你状态，最终还是线程自己读写，所以都是同步模型。</p>
+<p>异步IO模型：windows:IOCP 内核有线程负责将数据拷贝到程序的内存空间。</p>
+</blockquote>
+<p>cpu01负责处理终端以及将有变动的文件描述符放入返回的地址空间，cpu02可以继续执行程序其他部分逻辑。</p>
+<p>cpu01进行内核态操作，cpu02进行用户态操作；所以这个程序可以并行处理，充分利用多核cpu。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831010312.png"  alt="" />
+      </p>
+<hr />
+<p>epoll能够高效支持百万级别的句柄监听。</p>
+<p>epoll高效，是因为内部用了一个红黑树记录添加的socket，用了一个双向链表接收内核触发的事件。是系统级别的支持的：</p>
+<p>当某一进程调用epoll_create方法时，Linux内核会创建一个eventpoll结构体，这个结构体中有两个成员与epoll的使用方式密切相关。</p>
+<p>eventpoll结构体如下所示：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">eventpoll</span>&#123;</span></span><br><span class="line">    ....</span><br><span class="line">    <span class="comment">/*红黑树的根节点，这颗树中存储着所有添加到epoll中的需要监控的事件*/</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rb_root</span>  <span class="title">rbr</span>;</span></span><br><span class="line">    <span class="comment">/*双链表中则存放着将要通过epoll_wait返回给用户的满足条件的事件*/</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">rdlist</span>;</span></span><br><span class="line">    ....</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></div></figure>
+<p>每一个epoll对象都有一个独立的eventpoll结构体，用于存放通过epoll_ctl方法向epoll对象中添加进来的事件。</p>
+<p>这些事件都会挂载在红黑树中，如此，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>重复添加的事件就可以通过红黑树而高效的识别出来</span>(红黑树的插入时间效率是lgn，其中n为树的高度)。</p>
+<p>而所有添加到epoll中的事件都会与设备(网卡)驱动程序建立回调关系，也就是说，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>当相应的事件发生时会调用这个回调方法。这个回调方法在内核中叫ep_poll_callback,它会将发生的事件添加到rdlist双链表中</span>。</p>
+<p>在epoll中，对于每一个事件，都会建立一个epitem结构体，如下所示：</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">epitem</span>&#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rb_node</span>  <span class="title">rbn</span>;</span><span class="comment">//红黑树节点</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span>    <span class="title">rdllink</span>;</span><span class="comment">//双向链表节点</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">epoll_filefd</span>  <span class="title">ffd</span>;</span>  <span class="comment">//事件句柄信息</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">eventpoll</span> *<span class="title">ep</span>;</span>    <span class="comment">//指向其所属的eventpoll对象</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span> <span class="title">event</span>;</span> <span class="comment">//期待发生的事件类型</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>下面图的左上角文字写错了，应该是双向链表的每个节点都是基于epitem结构中的rdllink成员。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200901085247.png"  alt="" />
+      </p>
+<p>上面这一句更具体的解释是（为什么能支持百万句柄）：</p>
+<ol>
+<li>
+<p>不用重复传递。我们调用epoll_wait时就相当于以往调用select/poll，但是这时却不用传递socket句柄给内核，因为内核已经在epoll_ctl中拿到了要监控的句柄列表。</p>
+</li>
+<li>
+<p>在内核里，一切皆文件。所以，epoll向内核注册了一个文件系统，用于存储上述的被监控socket。当你调用epoll_create时，就会在这个虚拟的epoll文件系统里创建一个file结点。当然这个file不是普通文件，它只服务于epoll。</p>
+<p>epoll在被内核初始化时（操作系统启动），同时会开辟出epoll自己的内核高速cache区，用于安置每一个我们想监控的socket，这些socket会以红黑树的形式保存在内核cache里，以支持快速的查找、插入、删除。这个内核高速cache区，就是建立连续的物理内存页，然后在之上建立slab层，简单的说，就是物理上分配好你想要的size的内存对象，每次使用时都是使用空闲的已分配好的对象。</p>
+</li>
+<li>
+<p>极其高效的原因：</p>
+<p>这是由于我们在调用epoll_create时，内核除了帮我们在epoll文件系统里建了个file结点，在内核cache里建了个红黑树用于存储以后epoll_ctl传来的socket外，还会再建立一个list链表，用于存储准备就绪的事件，当epoll_wait调用时，仅仅观察这个list链表里有没有数据即可。有数据就返回，没有数据就sleep，等到timeout时间到后即使链表没数据也返回。所以，epoll_wait非常高效。</p>
+<p>这个准备就绪list链表是怎么维护的呢？当我们执行epoll_ctl时，除了把socket放到epoll文件系统里file对象对应的红黑树上之外，还会给内核中断处理程序注册一个回调函数，告诉内核，如果这个句柄的中断到了，就把它放到准备就绪list链表里。所以，当一个socket上有数据到了，内核在把网卡上的数据copy到内核中后就来把socket插入到准备就绪链表里了。（注：好好理解这句话！）</p>
+<p>从上面这句可以看出，epoll的基础就是回调！</p>
+</li>
+</ol>
+<p>如此，一颗红黑树，一张准备就绪句柄链表，少量的内核cache，就帮我们解决了大并发下的socket处理问题。执行epoll_create时，创建了红黑树和就绪链表，执行epoll_ctl时，如果增加socket句柄，则检查在红黑树中是否存在，存在立即返回，不存在则添加到树干上，然后向内核注册回调函数，用于当中断事件来临时向准备就绪链表中插入数据。执行epoll_wait时立刻返回准备就绪链表里的数据即可。</p>
+<p>最后看看epoll独有的两种模式LT和ET。无论是LT和ET模式，都适用于以上所说的流程。区别是，LT模式下，只要一个句柄上的事件一次没有处理完，会在以后调用epoll_wait时次次返回这个句柄，而ET模式仅在第一次返回。</p>
+<p>关于LT，ET，有一端描述，LT和ET都是电子里面的术语，ET是边缘触发，LT是水平触发，一个表示只有在变化的边际触发，一个表示在每个阶段都会触发。</p>
+<p>参考了这篇文章：<span class="exturl"><a class="exturl__link"   href="https://zhuanlan.zhihu.com/p/20315482"  target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/20315482</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>LT, ET这件事怎么做到的呢？当一个socket句柄上有事件时，内核会把该句柄插入上面所说的准备就绪list链表，这时我们<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>调用epoll_wait，会把准备就绪的socket拷贝到用户态内存，然后清空准备就绪list链表</span>，最后，epoll_wait干了件事，就是检查这些socket，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>如果不是ET模式（就是LT模式的句柄了），并且这些socket上确实有未处理的事件时，又把该句柄放回到刚刚清空的准备就绪链表了。所以，非ET的句柄，只要它上面还有事件，epoll_wait每次都会返回这个句柄。（从上面这段，可以看出，LT还有个回放的过程，低效了）</span></p>
+<hr />
+<p><strong>epoll_create</strong></p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_create</span><span class="params">(<span class="keyword">int</span> <span class="built_in">size</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_create1</span><span class="params">(<span class="keyword">int</span> flags)</span></span>;</span><br></pre></td></tr></table></div></figure>
+<p><strong>epoll_ctl</strong></p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="keyword">int</span> epfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, struct epoll_event *event)</span></span>;</span><br></pre></td></tr></table></div></figure>
+<p><strong>epoll_wait</strong></p>
+<p>epoll_wait 是阻塞的， 尽量设置超时时间</p>
+<figure class="highlight c"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_wait</span><span class="params">(<span class="keyword">int</span> epfd, struct epoll_event *events,</span></span></span><br><span class="line"><span class="function"><span class="params">                      <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_pwait</span><span class="params">(<span class="keyword">int</span> epfd, struct epoll_event *events,</span></span></span><br><span class="line"><span class="function"><span class="params">                <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout,</span></span></span><br><span class="line"><span class="function"><span class="params">                <span class="keyword">const</span> <span class="keyword">sigset_t</span> *sigmask)</span></span>;</span><br></pre></td></tr></table></div></figure>
+<p>单线程完成对多客户端的连接和接受工作</p>
+<p>非阻塞，一个线程就解决了 线程内存浪费和消耗时间片的问题。</p>
+<p><strong>演示</strong></p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SelectionKey;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.Selector;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.ServerSocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 单线程多路复用器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SocketMultiplexingSingleThreadv1</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ServerSocketChannel server;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//linux 多路复用器（select poll    epoll kqueue） nginx  event&#123;&#125;</span></span><br><span class="line">    <span class="keyword">private</span> Selector selector;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">9000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            server = ServerSocketChannel.open();</span><br><span class="line">            server.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">            server.bind(<span class="keyword">new</span> InetSocketAddress(PORT));</span><br><span class="line"></span><br><span class="line">            <span class="comment">//如果在epoll模型下，open--》  epoll_create -&gt; fd3</span></span><br><span class="line">            selector = Selector.open();  <span class="comment">//  select  poll  *epoll  优先选择：epoll  但是可以 -D修正</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">//server 约等于 listen状态的 fd4</span></span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">        register</span></span><br><span class="line"><span class="comment">        如果：</span></span><br><span class="line"><span class="comment">        select，poll：jvm里开辟一个数组 fd4 放进去</span></span><br><span class="line"><span class="comment">        epoll：  epoll_ctl(fd3,ADD,fd4,EPOLLIN</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line"></span><br><span class="line">            server.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        initServer();</span><br><span class="line">        System.out.println(<span class="string">"服务器启动了。。。。。"</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123; <span class="comment">// 死循环，一直处于监听中</span></span><br><span class="line">                <span class="comment">// selector管理的所有fd</span></span><br><span class="line">                Set&lt;SelectionKey&gt; keys = selector.keys();</span><br><span class="line">                System.out.println(<span class="string">"内核空间中文件描述符的个数: "</span> + keys.size());</span><br><span class="line"></span><br><span class="line">                <span class="comment">//1,调用多路复用器(select,poll  or  epoll  (epoll_wait))</span></span><br><span class="line">                <span class="comment">/*</span></span><br><span class="line"><span class="comment">                select()是啥意思：</span></span><br><span class="line"><span class="comment">                1，select，poll  其实  内核的select（fd4）  poll(fd4)</span></span><br><span class="line"><span class="comment">                2，epoll：  其实 内核的 epoll_wait()</span></span><br><span class="line"><span class="comment">                *, 参数可以带时间：没有时间，0  ：  阻塞，有时间设置一个超时</span></span><br><span class="line"><span class="comment">                selector.wakeup()  结果返回0</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">while</span> (selector.select(<span class="number">3000</span>) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    Set&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys();  <span class="comment">//返回的有状态的fd集合</span></span><br><span class="line">                    Iterator&lt;SelectionKey&gt; iter = selectionKeys.iterator();</span><br><span class="line">                    <span class="comment">//so，管你啥多路复用器，你呀只能给我状态，我还得一个一个的去处理他们的R/W。同步好辛苦！！！！！！！！</span></span><br><span class="line">                    <span class="comment">//  NIO  自己对着每一个fd调用系统调用，浪费资源，那么你看，这里是不是调用了一次select方法，知道具体的那些可以R/W了？</span></span><br><span class="line">                    <span class="comment">//幕兰，是不是很省力？</span></span><br><span class="line">                    <span class="comment">//我前边可以强调过，socket：  listen   通信 R/W</span></span><br><span class="line">                    <span class="keyword">while</span> (iter.hasNext()) &#123;</span><br><span class="line">                        SelectionKey key = iter.next();</span><br><span class="line">                        iter.remove(); <span class="comment">//set  不移除会重复循环处理</span></span><br><span class="line">                        <span class="keyword">if</span> (key.isAcceptable()) &#123;</span><br><span class="line">                            <span class="comment">//看代码的时候，这里是重点，如果要去接受一个新的连接</span></span><br><span class="line">                            <span class="comment">//语义上，accept接受连接且返回新连接的FD对吧？</span></span><br><span class="line">                            <span class="comment">//那新的FD怎么办？</span></span><br><span class="line">                            <span class="comment">//select，poll，因为他们内核没有空间，那么在jvm中保存和前边的fd4那个listen的一起</span></span><br><span class="line">                            <span class="comment">//epoll： 我们希望通过epoll_ctl把新的客户端fd注册到内核空间</span></span><br><span class="line">                            acceptHandler(key);</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123;</span><br><span class="line">                            readHandler(key);</span><br><span class="line">                            <span class="comment">//在当前线程，这个方法可能会阻塞  ，如果阻塞了十年，其他的IO早就没电了。。。</span></span><br><span class="line">                            <span class="comment">//所以，为什么提出了 IO THREADS</span></span><br><span class="line">                            <span class="comment">//redis  是不是用了epoll，redis是不是有个io threads的概念 ，redis是不是单线程的</span></span><br><span class="line">                            <span class="comment">//tomcat 8,9  异步的处理方式  IO  和   处理上  解耦</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acceptHandler</span><span class="params">(SelectionKey key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ServerSocketChannel ssc = (ServerSocketChannel) key.channel();</span><br><span class="line">            SocketChannel client = ssc.accept(); <span class="comment">//来啦，目的是调用accept接受客户端  fd7</span></span><br><span class="line">            client.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">            ByteBuffer buffer = ByteBuffer.allocate(<span class="number">8192</span>);  <span class="comment">//前边讲过了</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 0.0  我类个去</span></span><br><span class="line">            <span class="comment">//你看，调用了register</span></span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">            select，poll：jvm里开辟一个数组 fd7 放进去</span></span><br><span class="line"><span class="comment">            epoll：  epoll_ctl(fd3,ADD,fd7,EPOLLIN</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            client.register(selector, SelectionKey.OP_READ, buffer);</span><br><span class="line">            System.out.println(<span class="string">"-------------------------------------------"</span>);</span><br><span class="line">            System.out.println(<span class="string">"新客户端："</span> + client.getRemoteAddress());</span><br><span class="line">            System.out.println(<span class="string">"-------------------------------------------"</span>);</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readHandler</span><span class="params">(SelectionKey key)</span> </span>&#123;</span><br><span class="line">        SocketChannel client = (SocketChannel) key.channel();</span><br><span class="line">        ByteBuffer buffer = (ByteBuffer) key.attachment();</span><br><span class="line">        buffer.clear();</span><br><span class="line">        <span class="keyword">int</span> read = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                read = client.read(buffer);</span><br><span class="line">                <span class="keyword">if</span> (read &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    buffer.flip();</span><br><span class="line">                    <span class="keyword">while</span> (buffer.hasRemaining()) &#123;</span><br><span class="line">                        client.write(buffer);</span><br><span class="line">                    &#125;</span><br><span class="line">                    buffer.clear();</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (read == <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    client.close();</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SocketMultiplexingSingleThreadv1 service = <span class="keyword">new</span> SocketMultiplexingSingleThreadv1();</span><br><span class="line">        service.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+<p>照样使用strace，查看主线程跟踪文件</p>
+<p>照样是三步曲</p>
+<p><strong>socket</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015516.png"  alt="" />
+      </p>
+<p>得到服务端文件描述符7</p>
+<p><strong>fcntl</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831022030.png"  alt="" />
+      </p>
+<p>和程序中            server.configureBlocking(false); 是对应的。</p>
+<p><strong>bind</strong></p>
+<p><strong>listen</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015553.png"  alt="" />
+      </p>
+<p>绑定端口并监听</p>
+<p><strong>epoll_create</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015634.png"  alt="" />
+      </p>
+<p>首先创建一个代表内核空间(数据结构是红黑树)的的文件描述符(selector = Selector.open())</p>
+<p><strong>epoll_ctl</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020209.png"  alt="" />
+      </p>
+<p>将服务端文件描述符7放入内核空间10</p>
+<p>追踪还发现往内核空间加入了一个8</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015709.png"  alt="" />
+      </p>
+<blockquote>
+<p>注意，这里是由于线程间通信建立管道，所以使用新建的文件描述符8，可以通过如下方式查看</p>
+<p>获取进程号 jps</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831015826.png"  alt="" />
+      </p>
+<p>列出打开的文件 lsof</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020016.png"  alt="" />
+      </p>
+<p>可以看到fd8是个pipe</p>
+</blockquote>
+<p><strong>epoll_wait</strong></p>
+<p>轮询监听结果</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020446.png"  alt="" />
+      </p>
+<p>因为只有服务端一个fd，所以结果都是0</p>
+<p>注意最后一行 阻塞，因为我们设置了等待5s， 5s之后会继续执行。</p>
+<p>使用<code>tail -f out.5572</code></p>
+<p>增加一个客户端连接，内核收到中断就会将11添加到fd10中</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831021646.png"  alt="" />
+      </p>
+<p>在这之前内核肯定会先accept这个连接创建11这个文件描述符</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831021323.png"  alt="" />
+      </p>
+<p>调用wait方法时就会返回1表示有一个变动的fd</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831020934.png"  alt="" />
+      </p>
+<p>{u32=11}是内核的返回结果</p>
+<p>ngix、redis…的底层都是使用epoll</p>
+<p>以redis为例</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> strace -ff -o redisout redis-server /usr/<span class="built_in">local</span>/redis/bin/redis.conf</span></span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831032211.png"  alt="" />
+      </p>
+<p>使用tail命令查看</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200831032318.png"  alt="" />
+      </p>
+<p>可知redis设置了超时</p>
+<p>redis单线程，在一个线程里还需要做持久化、lru等其他事情。</p>
+
+        <h1 id="多线程多路复用"   >
+          <a href="#多线程多路复用" class="heading-link"><i class="fas fa-link"></i></a>多线程多路复用</h1>
+      
+<p>以上是单线程多路复用，一个线程同时负责了连接的建立以及连接之后的读取计算。这样会有一个问题</p>
+<p>当wait返回的结果里连接数越来越多，连接之后的读取计算耗时也就越来越长，建立连接的响应也就越来越慢。</p>
+<p>可以将连接之后的读取计算放在新的线程里去做，不要影响连接的建立。</p>
+<blockquote>
+<p>思路：分boss和worker</p>
+<p>监听几个端口(server端)对应几个boss线程，负责建立连接</p>
+<p>几个cpu(每个cpu负责处理一部分客户端fd)对应几个worker线程，分别负责对一部分fd的读写计算。</p>
+</blockquote>
+<p>演示程序：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SelectionKey;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.Selector;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.ServerSocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.nio.channels.SocketChannel;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.LinkedBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.atomic.AtomicInteger;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 单线程多路复用器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SocketMultiplexingMultiThread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ServerSocketChannel server;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Selector selector1;</span><br><span class="line">    <span class="keyword">private</span> Selector selector2;</span><br><span class="line">    <span class="keyword">private</span> Selector selector3;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">9000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            server = ServerSocketChannel.open();</span><br><span class="line">            server.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line">            server.bind(<span class="keyword">new</span> InetSocketAddress(PORT));</span><br><span class="line"></span><br><span class="line">            selector1 = Selector.open();</span><br><span class="line">            selector2 = Selector.open();</span><br><span class="line">            selector3 = Selector.open();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// server这个fd注册到其中的一个select上</span></span><br><span class="line">            server.register(selector1, SelectionKey.OP_ACCEPT);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SocketMultiplexingMultiThread service = <span class="keyword">new</span> SocketMultiplexingMultiThread();</span><br><span class="line">        service.initServer();</span><br><span class="line"></span><br><span class="line">        NioThread t1 = <span class="keyword">new</span> NioThread(service.selector1, <span class="number">2</span>); <span class="comment">// 得到客户端连接</span></span><br><span class="line">        <span class="comment">// t1得到客户端连接后 将fd按照轮询方式注册到下面这两个selector</span></span><br><span class="line">        NioThread t2 = <span class="keyword">new</span> NioThread(service.selector2);</span><br><span class="line">        NioThread t3 = <span class="keyword">new</span> NioThread(service.selector3);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        t2.start();</span><br><span class="line">        t3.start();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"服务器启动了。。。。。"</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NioThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    Selector selector;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> selectors = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> id = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">static</span> BlockingQueue&lt;SocketChannel&gt;[] queues;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> AtomicInteger idx = <span class="keyword">new</span> AtomicInteger();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">NioThread</span><span class="params">(Selector selector, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.selector = selector;</span><br><span class="line">        <span class="keyword">this</span>.selectors = n;</span><br><span class="line"></span><br><span class="line">        queues = <span class="keyword">new</span> LinkedBlockingQueue[selectors];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            queues[i] = <span class="keyword">new</span> LinkedBlockingQueue&lt;&gt;();</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"Boss 启动"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">NioThread</span><span class="params">(Selector selector)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.selector = selector;</span><br><span class="line">        id = idx.getAndIncrement() % selectors;</span><br><span class="line">        System.out.println(<span class="string">"worker: "</span> + id + <span class="string">"启动"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">while</span> (selector.select(<span class="number">3000</span>) &gt; <span class="number">0</span>) &#123;</span><br><span class="line"></span><br><span class="line">                    Set&lt;SelectionKey&gt; selectionKeys = selector.selectedKeys();</span><br><span class="line">                    Iterator&lt;SelectionKey&gt; iter = selectionKeys.iterator();</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">while</span> (iter.hasNext()) &#123;</span><br><span class="line">                        SelectionKey key = iter.next();</span><br><span class="line">                        iter.remove();</span><br><span class="line">                        <span class="comment">// 只有第一个线程的selector可能会有连接的fd，第一个selector是基于服务端fd创建的，注册了listen</span></span><br><span class="line">                        <span class="keyword">if</span> (key.isAcceptable()) &#123;</span><br><span class="line">                            acceptHandler(key);</span><br><span class="line">                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123; <span class="comment">// 其他两个线程里的selector 只会 可能有读写的fd</span></span><br><span class="line">                            readHandler(key);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (!queues[id].isEmpty()) &#123;</span><br><span class="line">                    ByteBuffer buffer = ByteBuffer.allocate(<span class="number">8192</span>);  <span class="comment">//前边讲过了</span></span><br><span class="line">                    SocketChannel client = queues[id].take();</span><br><span class="line">                    <span class="comment">// 将client注册到当前线程的select上</span></span><br><span class="line">                    client.register(selector, SelectionKey.OP_READ, buffer);</span><br><span class="line">                    System.out.println(<span class="string">"-------------------------------------------"</span>);</span><br><span class="line">                    System.out.println(<span class="string">"新客户端："</span> + client.getRemoteAddress() + <span class="string">"分配到："</span> + (id));</span><br><span class="line">                    System.out.println(<span class="string">"-------------------------------------------"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">acceptHandler</span><span class="params">(SelectionKey key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ServerSocketChannel ssc = (ServerSocketChannel) key.channel();</span><br><span class="line">            SocketChannel client = ssc.accept(); <span class="comment">//来啦，目的是调用accept接受客户端  fd7</span></span><br><span class="line">            client.configureBlocking(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> num = idx.getAndIncrement() % selectors;</span><br><span class="line"></span><br><span class="line">            queues[num].add(client);</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readHandler</span><span class="params">(SelectionKey key)</span> </span>&#123;</span><br><span class="line">        SocketChannel client = (SocketChannel) key.channel();</span><br><span class="line">        ByteBuffer buffer = (ByteBuffer) key.attachment();</span><br><span class="line">        buffer.clear();</span><br><span class="line">        <span class="keyword">int</span> read;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                read = client.read(buffer);</span><br><span class="line">                <span class="keyword">if</span> (read &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    buffer.flip();</span><br><span class="line">                    <span class="keyword">while</span> (buffer.hasRemaining()) &#123;</span><br><span class="line">                        client.write(buffer);</span><br><span class="line">                    &#125;</span><br><span class="line">                    buffer.clear();</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (read == <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    client.close();</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/IO%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/IO%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">网络通信</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cookie%E3%80%81session%E3%80%81token%E3%80%81jwt/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">cookie、session、token、jwt</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/%E7%BD%91%E5%85%B3%E3%80%81%E8%B7%AF%E7%94%B1%E5%99%A8%E3%80%81%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA/"><span class="paginator-prev__text">网关、路由器、三层交换机</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#演示"><span class="toc-number">1.</span> <span class="toc-text">
+          演示</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#说明"><span class="toc-number">1.1.</span> <span class="toc-text">
+          说明</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#网络通信io的演变"><span class="toc-number">2.</span> <span class="toc-text">
+          网络通信IO的演变</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#同步异步阻塞非阻塞"><span class="toc-number">2.1.</span> <span class="toc-text">
+          同步&#x2F;异步&#x2F;阻塞&#x2F;非阻塞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一个demo"><span class="toc-number">2.2.</span> <span class="toc-text">
+          一个Demo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bio"><span class="toc-number">2.3.</span> <span class="toc-text">
+          BIO</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#小结"><span class="toc-number">2.3.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nio"><span class="toc-number">2.4.</span> <span class="toc-text">
+          NIO</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#小结-2"><span class="toc-number">2.4.1.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多路复用器"><span class="toc-number">2.5.</span> <span class="toc-text">
+          多路复用器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#selectpoll"><span class="toc-number">2.5.1.</span> <span class="toc-text">
+          select&#x2F;poll</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#epoll"><span class="toc-number">2.5.2.</span> <span class="toc-text">
+          epoll</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#多线程多路复用"><span class="toc-number">3.</span> <span class="toc-text">
+          多线程多路复用</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

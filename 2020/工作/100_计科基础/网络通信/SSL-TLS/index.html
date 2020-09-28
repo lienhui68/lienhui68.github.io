@@ -1,0 +1,491 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="原文：https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;36981565  为了保证网络通信的安全性，需要对网络上传递的数据进行加密。现在主流的加密方法就是SSL (Secure Socket Layer)，TLS (Transport Layer Security)。后者比前者要新一些，不过在很多场合还是用SSL指代SSL和TLS。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSL-TLS">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/SSL-TLS/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="原文：https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;36981565  为了保证网络通信的安全性，需要对网络上传递的数据进行加密。现在主流的加密方法就是SSL (Secure Socket Layer)，TLS (Transport Layer Security)。后者比前者要新一些，不过在很多场合还是用SSL指代SSL和TLS。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828002428.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828002522.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828003411.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828003834.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828004311.png">
+<meta property="article:published_time" content="2020-09-16T16:21:55.341Z">
+<meta property="article:modified_time" content="2020-09-16T16:21:55.348Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="网络通信">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200828002428.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>SSL-TLS | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/SSL-TLS/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">SSL-TLS</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">26分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><blockquote>
+<p>原文：<span class="exturl"><a class="exturl__link"   href="https://zhuanlan.zhihu.com/p/36981565"  target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/36981565</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>为了保证网络通信的安全性，需要对网络上传递的数据进行加密。</span>现在主流的加密方法就是SSL (Secure Socket Layer)，TLS (Transport Layer Security)。后者比前者要新一些，不过在很多场合还是用SSL指代SSL和TLS。</p>
+<a id="more"></a>
+<p>先来回顾一下网络通信加密的发展过程，假设A和B之间要网络通信。</p>
+
+        <h1 id="远古时代"   >
+          <a href="#远古时代" class="heading-link"><i class="fas fa-link"></i></a>远古时代</h1>
+      
+<p>远古时代自然是民风淳朴，路不拾遗，夜不闭户。A要发数据给B，根本不用担心窃听和篡改，直接发就好了。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828002428.png"  alt="" />
+      </p>
+
+        <h1 id="上古时代"   >
+          <a href="#上古时代" class="heading-link"><i class="fas fa-link"></i></a>上古时代</h1>
+      
+
+        <h2 id="对称加密"   >
+          <a href="#对称加密" class="heading-link"><i class="fas fa-link"></i></a>对称加密</h2>
+      
+<p>随着时代的发展，渐渐的有了一类人—C。C不仅会监听A和B之间的网络数据，还会拦截A和B之间的数据，伪造之后再发给A或者B，进而欺骗A和B。C就是中间人攻击（Man In The Middle Attack）。</p>
+<p>为了应对C的攻击，A和B开始对自己的数据进行加密。A和B会使用一个共享的密钥，A在发送数据之前，用这个密钥对数据加密。B在收到数据之后，用这个密钥对数据解密。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>因为加密解密用的是同一个密钥，所以这里的加密算法称为<strong>对称加密算法</strong>。</span></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828002522.png"  alt="" />
+      </p>
+<p>在1981年，DES（Data Encryption Standard）被提出，这是一种对称加密算法。DES使用一个56bit的密钥，来完成数据的加解密。尽管56bit看起来有点短，但时间毕竟是在上古时代，56bit已经够用了。就这样，网络数据的加密开始了。</p>
+<p>因为采用了DES，A和B现在不用担心数据被C拦截了。因为就算C拦截了，也只能获取加密之后的数据， 没有密钥就没有办法获取原始数据。</p>
+<p>但是A和B之间又有了一个新的问题，他们需要一个共享的56bit密钥，并且这个密钥一定要保持私密，否则被C拿到了，就没有加密的意义了。首先AB不能通过网络来传递密钥，因为密钥确定以前，所有的网络通信都是不安全。如果通过网络传递密钥，密钥有可能被拦截。拦截了就没有加密的意义了。为了安全，A和B只能先见一面，私下商量好密钥，这样C就没办法获取密钥。如果因为任何原因，之前的密钥泄露了，那么AB还得再见一面，重新商量一个密钥。</p>
+<p>现在A和B之间，最私密的信息就是这个密钥了，只要保证密钥的安全，那么AB之间整个网络通信都是安全的。</p>
+
+        <h1 id="中古时代"   >
+          <a href="#中古时代" class="heading-link"><i class="fas fa-link"></i></a>中古时代</h1>
+      
+<p>A和B小心的保护着密钥，不让C知道。但是道高一尺，魔高一丈。随着工作的发展，计算机速度变得很快，快到可以通过暴力破解的方法来解密经过DES加密的信息。不就是56bit的密钥吗？C找了一个好点的计算机，尝试每一个可能的值，这样总能找到一个密钥破解A和B之间的加密信息。倒不是说DES在提出时没有考虑过这种情况，只是在上古时代，计算机没这么快，破解56bit的密钥需要的时间非常长。但是现在是中古时代，可能只需要几天就可以破解56bit的密钥。</p>
+<p>为了应对这个情况，新的协议被提出，例如triple-DES（最长168bit的密钥），AES（最高256bit的密钥）。经过这些改进，至少在可以预见的未来，计算机是没有办法在有限的时间内，暴力破解这个长度的密钥。所以，在中古时代，将对称加密算法的密钥长度变长，来应对中间人攻击。但是A和B还是需要见面商量一个密钥。</p>
+
+        <h1 id="现代"   >
+          <a href="#现代" class="heading-link"><i class="fas fa-link"></i></a>现代</h1>
+      
+
+        <h2 id="非对称加密"   >
+          <a href="#非对称加密" class="heading-link"><i class="fas fa-link"></i></a>非对称加密</h2>
+      
+<p>时间到了现代。网络通信变得十分发达，A不只与B通信，还同时还跟其他10000个人进行网络通信。A不可能每个人都跑去跟他们见个面，商量一个密钥。</p>
+<p>所以一种新的加密算法被提出，这就是非对称加密算法。非对称加密使用两个密钥，一个是public key，一个是private key。通过一个特殊的数学算法，使得数据的加密和解密使用不同的密钥。因为用的是不同的密钥，所以称为<strong>非对称加密</strong>。非对称加密最著名的是RSA算法，这是以其发明者Rivest, Shamir 和Adleman命名。<span style='color:red;background:yellow;font-size:文字大小;font-weight:bold'>非对称加密算法里面的public key和private key在数学上是相关的，这样才能用一个加密，用另一个解密。</span>不过，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>尽管是相关的，但以现有的数学算法，又没有办法从一个密钥，算出另一个密钥</span>。</p>
+<p>非对称加密的好处在于，现在A可以保留private key，通过网络传递public key。这样，就算public key被C拦截了，因为没有private key，C还是没有办法完成信息的破解。既然不怕C知道public key，那现在A和B不用再见面商量密钥，直接通过网络传递public key就行。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>具体在使用中，A和B都各有一个public key和一个private key，这些key根据相应的算法已经生成好了。</span><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>private key只保留在各自的本地，public key传给对方。</span>A要给B发送网络数据，那么A先使用自己的private key（只有A知道）加密数据的hash值，之后再用B的public key加密数据。之后，A将加密的hash值和加密的数据再加一些其他的信息，发送给B。B收到了之后，先用自己的private key（只有B知道）解密数据，本地运算一个hash值，之后用A的public key解密hash值，对比两个hash值，以检验数据的完整性。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828003411.png"  alt="" />
+      </p>
+<p>在这个过程中，总共有4个密钥，分别是A的public/private key，和B的public/private key。</p>
+<p>如果B的解密结果符合预期，那么至少可以证明，<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这个信息只有B能获取，因为B的private key参与了解密，而B的private key其他人都不知道</span>。并且，这个信息是来自A，而不是C伪造的，因为A的public key参与了解密。一切看起来似乎很美好。</p>
+
+        <h2 id="非对称加密的安全隐患"   >
+          <a href="#非对称加密的安全隐患" class="heading-link"><i class="fas fa-link"></i></a>非对称加密的安全隐患</h2>
+      
+<p>但是在一切的最开始，A和B要通过网络交换public key。如果C在中间拦截了呢？<span style='color:red;background:yellow;font-size:文字大小;font-weight:'>假设有这种情况，C拦截了A和B的public key，又分别用自己的public key发给A和B。</span>A和B并不知道，他们还以为这个public key来自对方。当A给B发消息时，A先用自己的private key加密数据的hash值，之后用C传来的假的public key加密数据，再发出去。C拦截到之后，先用C自己的private key解密数据，C就获取了A的原始信息！之后，C可以篡改数据内容，再用自己的private key加密数据的hash值，用之前拦截的B的public key加密数据，再发给B。B收到以后，先用自己的private key解密数据，再用C传来的假public key解密hash值，发现匹配。这样，B收到了一条来自C的假的信息，但是B还以为信息来自于A。中间人攻击仍然可能存在！</p>
+<p>完了，一切都崩了，加密搞的这么复杂，居然还不能保证网络数据的安全。回顾一下，问题出就出在最开始通过网络交换public key。看起来为了保证public key不被拦截，A和B似乎还是要见一面，交换一下public key。这一下就回到了上古时代。</p>
+<p>不过，虽然A和B现在还是要见一面，但见面的实质已经变了。在上古时代，见面是为了商量一个密钥，密钥的内容很重要，不能让别人知道密钥的内容。而在现代，见面是为了确认public key的真实性，public key的内容是可以公开的。</p>
+<p>那如果有其他办法能保证public key的真实性，A和B是可以不用见面交换public key的。</p>
+
+        <h2 id="ca"   >
+          <a href="#ca" class="heading-link"><i class="fas fa-link"></i></a>CA</h2>
+      
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>现实中，通过CA（Certificate Authority）来保证public key的真实性。</span>CA也是基于非对称加密算法来工作。有了CA，B会先把自己的public key（和一些其他信息）交给CA。<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>CA用自己的private key加密这些数据，加密完的数据称为B的<strong>数字证书</strong>。现在B要向A传递public key，B传递的是CA加密之后的数字证书。A收到以后，会通过CA发布的<strong>CA证书</strong>（包含了CA的public key），来解密B的数字证书，从而获得B的public key。</span></p>
+<p>但是等等，A怎么确保CA证书不被劫持。C完全可以把一个假的CA证书发给A，进而欺骗A。CA的大杀器就是，<span style='color:red;background:yellow;font-size:文字大小;font-weight:'>CA把自己的CA证书集成在了浏览器和操作系统里面。</span>A拿到浏览器或者操作系统的时候，已经有了CA证书，没有必要通过网络获取，那自然也不存在劫持的问题。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828003834.png"  alt="" />
+      </p>
+<p>现在A和B都有了CA认证的数字证书。在交换public key的阶段，直接交换彼此的数字证书就行。而中间人C，还是可以拦截A和B的public key，也可以用CA证书解密获得A和B的public key。但是，C没有办法伪造public key了。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>因为C不在CA体系里面，C没有CA的private key，所以C是没有办法伪造出一个可以通过CA认证的数字证书。</span>如果不能通过CA认证，A和B自然也不会相信这个伪造的证书。所以，采用CA认证以后，A和B的public key的真实性得到了保证，A和B可以通过网络交换public key（<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>实际是被CA加密之后的数字证书</span>）。</p>
+<p>除非有种情况，A内置的CA证书被篡改了，例如A使用了盗版的系统，“优化”了的非官方浏览器，或者被病毒攻击了，那这个时候，A<strong>有可能</strong>会认可非CA认证的数字证书，C就有机会发起中间人攻击。所以，用正版至少是安全的。</p>
+
+        <h2 id="实际使用"   >
+          <a href="#实际使用" class="heading-link"><i class="fas fa-link"></i></a>实际使用</h2>
+      
+<p>非对称加密算法比对称加密算法要复杂的多，处理起来也要慢得多。如果所有的网络数据都用非对称加密算法来加密，那效率会很低。所以<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在实际中，非对称加密只会用来传递一条信息，那就是用于对称加密的密钥。当用于对称加密的密钥确定了，A和B还是通过对称加密算法进行网络通信。这样，既保证了网络通信的安全性，又不影响效率，A和B也不用见面商量密钥了。</span></p>
+<p>所以，在现代，A和B之间要进行安全，省心的网络通信，需要经过以下几个步骤</p>
+<ol>
+<li>通过CA体系交换public key</li>
+<li>通过非对称加密算法，交换用于对称加密的密钥</li>
+<li>通过对称加密算法，加密正常的网络通信</li>
+</ol>
+<p>这基本就是SSL/TLS的工作过程了。</p>
+
+        <h2 id="ssl协议"   >
+          <a href="#ssl协议" class="heading-link"><i class="fas fa-link"></i></a>SSL协议</h2>
+      
+<p>SSL协议是一种安全传输协议，SSL是SecureSocketLayer的缩写，即安全套接层协议。该协议最初由Netscape企业发展而来，目前已经成为互联网上用来鉴别网站和网页浏览者的身份，以及在浏览器使用者及网页服务器之间进行加密通讯的全球化标准协议。由于SSL工作已建立到了所有主要的浏览器和WEB服务器程序当中，因此，仅需安装数字证书，或服务器证书就可以激活服务器功能了。</p>
+<p>SSL协议能够对信用卡和个人信息提供较安全的保护。SSL是对计算机之间整个会话进行加密的协议。在SSL中，采用了公开密钥和私有密钥两种加密方法。</p>
+<p>SSL协议的优势在于它是应用层协议确立无关的。高层的应用协议如HTTP、FTP、Telnet等能透明地建立于SSL协议之上。其在应用层协议通信之前就已经完成加密算法、通信密钥的协商以及服务器认证工作。在此之后应用层协议所传送的数据都会被加密，从而保证我们在互联网上通信的安全。</p>
+<p>SSL协议提供的安全服务有:</p>
+<ol>
+<li>认证用户和服务器，确保数据发送到正确的客户机和服务器;</li>
+<li>加密数据以防止数据中途被窃取;</li>
+<li>维护数据的完整性，确保数据在传输过程中不被改变。</li>
+</ol>
+<p>SSL的主要目的是在两个通信应用程序之间提供私密信和可靠性。这个过程通过3个元素来完成:</p>
+<ol>
+<li>
+<p>握手协议</p>
+<p>握手协议负责协商被用于客户机和服务器之间会话的加密参数。当一个SSL客户机和服务器第一次开始通信时，它们在一个协议版本上达成一致，选择加密算法，选择相互认证，并使用公钥工作来生成共享密钥（对称加密算法）。</p>
+</li>
+<li>
+<p>记录协议</p>
+<p>记录协议用于交换应用层数据。应用程序消息被分割成可管理的数据块，还可以压缩，并应用一个MAC(message authority code 消息认证代码);然后结果被加密并传输。接受方接受数据并对它解密，校验MAC，解压缩并重新组合它，并把结果提交给应用程序协议。</p>
+</li>
+<li>
+<p>警告协议</p>
+<p>这个协议用于指示在什么时候发生了错误或两个主机之间的会话在什么时候终止。</p>
+</li>
+</ol>
+<p>下面我们来看一个使用WEB客户机和服务器的范例。WEB客户机通过连接到一个支持SSL的服务器，启动一次SSL会话。支持SSL的典型WEB服务器在一个与标准HTTP请求(默认为端口80)不同的端口(默认为443)上接受SSL连接请求。当客户机连接到这个端口上时，它将启动一次建立SSL会话的握手。当握手完成之后，通信内容被加密，并且执行消息完整性检查，知道SSL会话过期。SSL创建一个会话，在此期间，握手必须只发生过一次。当SSL会话过程中出现了问题或端口设置出了问题，就会造成无法使用SSL连接现象。</p>
+<p>SSL握手过程步骤:</p>
+<ol>
+<li>SSL客户机连接到SSL服务器，并要求服务器验证它自身的身份。</li>
+<li>服务器通过发送它的数字证书证明其身份。这个交换还可以包括整个证书链，直到某个根证书权威机构(CA)。通过检查有效日期并确认证书包含有可信任CA的数字签名，来验证证书。</li>
+<li>服务器发出一个请求，对客户端的证书进行验证。但是，因为缺乏公钥体系结构，当今的大多数服务器不进行客户端认证。</li>
+<li>协商用于加密的消息加密算法和用于完整性检查的哈希函数。通常由客户机提供它支持的所有算法列表，然后由服务器选择最安全的加密算法。</li>
+<li>客户机和服务器通过下列步骤生成会话密钥:
+<ol>
+<li>客户机生成一个随机数，并使用服务器的公钥(从服务器的证书中获得)对它加密，然后发送到服务器上</li>
+<li>服务器用更加随机的数据(从客户机的密钥可用时则使用客户机密钥;否则以明文方式发送数据)响应。</li>
+<li>使用哈希函数，从随机数据生成安全密钥。</li>
+</ol>
+</li>
+</ol>
+<p>SSL协议的优点是它提供了连接安全，具有3个基本属性:</p>
+<ul>
+<li>连接是私有的。在初始握手定义了一个密钥之后，将使用加密算法。对于数据加密使用了对称加密(例如DES和RC4)。</li>
+<li>可以使用非对称加密或公钥加密(例如RSA和DSS)来验证对等实体的身份。</li>
+<li>连接时可靠的。消息传输使用一个密钥的MAC，包括了消息完整性检查。其中使用了安全哈希函数(例如SHA和MD5)来进行MAC计算。</li>
+</ul>
+<p>对于SSL的接受程度仅仅限于HTTP内。它在其他协议中曾被表明可以使用，但还没有被广泛应用。</p>
+
+        <h2 id="https"   >
+          <a href="#https" class="heading-link"><i class="fas fa-link"></i></a>HTTPS</h2>
+      
+<p>HTTPS全称是HTTP over SSL，也就是通过SSL/TLS加密HTTP数据，这或许是SSL最广泛的应用。</p>
+<p>前面提到了CA作为一个公证机构，能确保数字证书的真实性。但是在实际使用中，CA认证一般是要收费的，普通人不会去做CA认证，进而获得属于自己的数字证书。更多的是，一些大的机构，例如银行，网店，金融机构，它们去获得自己的数字证书。那这种情况如何保证网络通信的安全呢？</p>
+<p>这些机构获取到CA授予的数字证书之后，将数字证书加到自己的web服务器上。当用户要去访问它们的网页，例如<code>https://domain.com</code>，会经过下图所示的步骤。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200828004311.png"  alt="" />
+      </p>
+<ol>
+<li>
+<p>用户向web服务器发起一个安全连接的请求</p>
+</li>
+<li>
+<p>服务器返回经过CA认证的数字证书，证书里面包含了服务器的public key</p>
+</li>
+<li>
+<p>用户拿到数字证书，用自己浏览器内置的CA证书解密得到服务器的public key</p>
+</li>
+<li>
+<p>用户用服务器的public key加密一个用于接下来的对称加密算法的密钥，传给web服务器</p>
+<blockquote>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>因为只有服务器有private key可以解密，所以不用担心中间人拦截这个加密的密钥</span></p>
+</blockquote>
+</li>
+<li>
+<p>服务器拿到这个加密的密钥，解密获取密钥，再使用对称加密算法，和用户完成接下来的网络通信</p>
+</li>
+</ol>
+<p>现在用户知道自己访问的网站是正规的网站，否则用户浏览器会报错说不能用CA证书解析。服务器通过CA授予的数字证书自证了身份。但，这里的安全隐患在于，服务器怎么知道访问者就是真用户呢？<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>之前介绍的双向认证是可以通过数字证书验明用户的正身，现在用户为了省钱没有数字证书</span>。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>这种情况下一般是通过用户名密码来确认用户。所以，大家要保管好自己的密码。</span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/SSL-TLS/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/SSL-TLS/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/">网络通信</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/TCP%E7%B2%98%E5%8C%85%E6%8B%86%E5%8C%85/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">TCP粘包拆包</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/cookie%E3%80%81session%E3%80%81token%E3%80%81jwt/"><span class="paginator-prev__text">cookie、session、token、jwt</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#远古时代"><span class="toc-number">1.</span> <span class="toc-text">
+          远古时代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#上古时代"><span class="toc-number">2.</span> <span class="toc-text">
+          上古时代</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#对称加密"><span class="toc-number">2.1.</span> <span class="toc-text">
+          对称加密</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#中古时代"><span class="toc-number">3.</span> <span class="toc-text">
+          中古时代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#现代"><span class="toc-number">4.</span> <span class="toc-text">
+          现代</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#非对称加密"><span class="toc-number">4.1.</span> <span class="toc-text">
+          非对称加密</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#非对称加密的安全隐患"><span class="toc-number">4.2.</span> <span class="toc-text">
+          非对称加密的安全隐患</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ca"><span class="toc-number">4.3.</span> <span class="toc-text">
+          CA</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实际使用"><span class="toc-number">4.4.</span> <span class="toc-text">
+          实际使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ssl协议"><span class="toc-number">4.5.</span> <span class="toc-text">
+          SSL协议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#https"><span class="toc-number">4.6.</span> <span class="toc-text">
+          HTTPS</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>
