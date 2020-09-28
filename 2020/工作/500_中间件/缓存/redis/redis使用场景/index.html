@@ -1,13 +1,26 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta property="og:type" content="article">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="复习        redis的特点  基于内存，快 数据模型，KV，用来做缓存 单线程，单线程是指worker是单线程的，io是多线程的，收到的任务放到一个队列里去做 支持高并发，连接数很多，linux中使用epoll 本地方法：计算向数据移动，IO优化 整体模型是串行化&#x2F;原子 持久化 集群 主从复制">
+<meta property="og:type" content="article">
 <meta property="og:title" content="redis使用场景">
-<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/Redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/index.html">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/index.html">
 <meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="复习        redis的特点  基于内存，快 数据模型，KV，用来做缓存 单线程，单线程是指worker是单线程的，io是多线程的，收到的任务放到一个队列里去做 支持高并发，连接数很多，linux中使用epoll 本地方法：计算向数据移动，IO优化 整体模型是串行化&#x2F;原子 持久化 集群 主从复制">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-09-27T01:34:02.000Z">
-<meta property="article:modified_time" content="2020-09-28T05:38:03.519Z">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928140825344.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928140907552.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928141208362.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928142138334.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928142959434.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928214904207.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928221358384.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928223544753.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928234225746.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928234300328.png">
+<meta property="article:published_time" content="2020-09-28T01:34:02.000Z">
+<meta property="article:modified_time" content="2020-09-28T15:43:20.044Z">
 <meta property="article:author" content="lienhui68">
 <meta property="article:tag" content="redis">
-<meta name="twitter:card" content="summary"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>redis使用场景 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/Redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928140825344.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>redis使用场景 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
 var CONFIG = {
   root: '/',
   algolia: undefined,
@@ -30,8 +43,326 @@ var CONFIG = {
   sourcePath: {"js":"js","css":"css","images":"images"},
 };
 
-window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">redis使用场景</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-27</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-28</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">0</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">1分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><h1 id=""><a class="markdownIt-Anchor" href="#"></a> </h1>
-</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/Redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/Redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/redis/">redis</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/RESP%E5%8D%8F%E8%AE%AE/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">RESP协议</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/10_redis%E9%9B%86%E7%BE%A4%E6%96%B9%E6%A1%88/"><span class="paginator-prev__text">redis集群方案</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#"><span class="toc-number">1.</span> <span class="toc-text"> </span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">313</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">redis使用场景</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-28</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-09-28</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">21分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="复习"   >
+          <a href="#复习" class="heading-link"><i class="fas fa-link"></i></a>复习</h1>
+      
+<p><strong>redis的特点</strong></p>
+<ul>
+<li>基于内存，快</li>
+<li>数据模型，KV，用来做缓存</li>
+<li>单线程，单线程是指worker是单线程的，io是多线程的，收到的任务放到一个队列里去做</li>
+<li>支持高并发，连接数很多，linux中使用epoll</li>
+<li>本地方法：计算向数据移动，IO优化</li>
+<li>整体模型是串行化/原子</li>
+<li>持久化</li>
+<li>集群</li>
+<li>主从复制</li>
+</ul>
+<a id="more"></a>
+
+        <h2 id="本地方法计算向数据移动io优化"   >
+          <a href="#本地方法计算向数据移动io优化" class="heading-link"><i class="fas fa-link"></i></a>本地方法：计算向数据移动，IO优化</h2>
+      
+<p>本地方法：index、incr，decr</p>
+<p>redis的数据存储格式是bson，不像memcache是json</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928140825344.png"  alt="image-20200928140825344" />
+      </p>
+
+        <h2 id="线程模型worker-单线程"   >
+          <a href="#线程模型worker-单线程" class="heading-link"><i class="fas fa-link"></i></a>线程模型，worker 单线程</h2>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928140907552.png"  alt="image-20200928140907552" />
+      </p>
+<p>第一步：通过epoll知道哪些事件可以读</p>
+<p>第二步：IO读取，因为是单线程所以是串行化的读取</p>
+<p>第三步：计算，串行化，实际上io读取和写是多线程的。</p>
+
+        <h2 id="秒杀"   >
+          <a href="#秒杀" class="heading-link"><i class="fas fa-link"></i></a>秒杀</h2>
+      
+<p>redis的串行化比数据库的串行化(事务)要快。</p>
+<p>一个tomcat 几百或者千的连接数，当连接数达到几万，无法用一个tomcat解决</p>
+<p>解决不了这么高并发怎么办</p>
+<p>4层 lvs 7层 ngix 负载均衡</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928141208362.png"  alt="image-20200928141208362" />
+      </p>
+
+        <h2 id="redis-worker是单线程的如何充分利用cpu资源"   >
+          <a href="#redis-worker是单线程的如何充分利用cpu资源" class="heading-link"><i class="fas fa-link"></i></a>redis worker是单线程的，如何充分利用cpu资源</h2>
+      
+<p>先计算1还是2 没法保证，因为read是并行的</p>
+<p>工作线程是一个就满足串行/原子</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928142138334.png"  alt="image-20200928142138334" />
+      </p>
+<p>2个客户端连接，上面是6个时间片，下面只需要4个时间片，连接越多，cpu核数越多，这两者的差距也就越大。</p>
+<p>c1和c2是乱序的，但是同一个IO里读到的是有序的，在一个tcp连接是有序的。如果要保证有序的，客户端还需要保证串行化，上锁。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928142959434.png"  alt="image-20200928142959434" />
+      </p>
+<blockquote>
+<p>redis 6.x 以前，单线程</p>
+<p>redis 6.x 以后，worker单线程，io多线程，默认不开启，需要手动开启</p>
+</blockquote>
+
+        <h1 id="使用场景"   >
+          <a href="#使用场景" class="heading-link"><i class="fas fa-link"></i></a>使用场景</h1>
+      
+
+        <h2 id="数据类型"   >
+          <a href="#数据类型" class="heading-link"><i class="fas fa-link"></i></a>数据类型</h2>
+      
+
+        <h3 id="string"   >
+          <a href="#string" class="heading-link"><i class="fas fa-link"></i></a>string</h3>
+      
+<ul>
+<li>
+<p>字符串</p>
+<p>redis比较认字节，strlen返回字节数</p>
+</li>
+<li>
+<p>数值</p>
+<p>incr,decr</p>
+<blockquote>
+<p>上面这两个应用场景有：session共享，kv缓存，数值计算计数器，基于内存的fs文件系统（碎片文件，不能太大，<span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>如果不使用redis，并发很大，要访问的小文件很多，pagecache 又cache不住就会产生频繁磁盘IO，整体性能就拉胯很多</span>）</p>
+</blockquote>
+</li>
+<li>
+<p>二进制位</p>
+<blockquote>
+<p>可以使用help @string查看相关bit操作命令</p>
+</blockquote>
+<p><strong>位图</strong>，索引优化，内存压榨，数据传输或者类型判定都经常被用到。</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setbit k1 1 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">"@"</span><br><span class="line">127.0.0.1:6379&gt; setbit k1 7 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">"A"</span><br></pre></td></tr></table></div></figure>
+<p>ascii 64就表示 “@”，65表示A</p>
+<p>utf8是ascii码的扩展集。</p>
+<p>接着上面的k1继续执行</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setbit k1 9 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">"A@"</span><br><span class="line">127.0.0.1:6379&gt; strlen k1</span><br><span class="line">(integer) 2  # 此时显示2个字节数</span><br></pre></td></tr></table></div></figure>
+<p>让下标继续延长，往右继续延长，会自动扩展字节的宽度。</p>
+<p>如果此时再做如下操作</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setbit k1 8 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">"A\xc0"</span><br></pre></td></tr></table></div></figure>
+<p>因为是utf-8编码，前面1个字节是0打头正常显示ascii码，后面一个字节是110打头，表示有俩字节表示一个字符，但实际只有一个字符，所以只显示一个字节的16进制表示形式<code>\xc0</code>。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928214904207.png"  alt="image-20200928214904207" />
+      </p>
+<p><strong>BITCOUNT</strong></p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BITCOUNT key 开始字节下标 结束字节下标</span><br><span class="line">eg:</span><br><span class="line"><span class="meta">$</span><span class="bash"> BITCOUNT k1 0 0</span></span><br><span class="line">(integer) 2 # 第0个字节bit是1的bit个数有2个</span><br></pre></td></tr></table></div></figure>
+<p>BITCOUNT 还支持负向索引，-1表示倒数第一个字节，例如下面统计key对应的value所有字节的bit为1的个数</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; bitcount k1 0 -1</span><br><span class="line">(integer) 4</span><br></pre></td></tr></table></div></figure>
+<p><strong>BITOP</strong></p>
+<p>按位操作</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> BITOP and 与结果 k1 k2</span></span><br><span class="line">eg:</span><br><span class="line">127.0.0.1:6379&gt; setbit k1 7 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; SETBIT k1 1 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">"A"</span><br><span class="line">127.0.0.1:6379&gt; SETBIT k2 6 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; SETBIT k2 1 1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">"B"</span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; BITOP and andkey k1 k2</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; get andkey</span><br><span class="line">"@"</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> BITOP or 或结果 k1 k2</span></span><br><span class="line">127.0.0.1:6379&gt; BITOP or orkey k1 k2</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; get orkey</span><br><span class="line">"C"</span><br></pre></td></tr></table></div></figure>
+<p><strong>使用场景</strong></p>
+<ol>
+<li>
+<p>统计任意时间窗口一个用户的登录情况</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; SETBIT david 3 1 # 第4天登录</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; SETBIT david 6 1 # 第7天登录</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; SETBIT david 364 1 # 第365天登录</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; BITCOUNT david # 统计有多少天登录</span><br><span class="line">(integer) 3 # 3天</span><br><span class="line">127.0.0.1:6379&gt; STRLEN david # 查看占用了多少字节</span><br><span class="line">(integer) 46</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>统计活跃用户数，日活，环比等 -&gt; 业务决策</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash">SETBIT 日期 userId 1/0 <span class="comment"># 超过512M可以做分桶,512M可以表示5亿多的用户</span></span></span><br><span class="line">eg:</span><br><span class="line">127.0.0.1:6379&gt; SETBIT 20200928 123 1 # 用户123于20200928登录</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; SETBIT 20200928 124 1 # 用户124于20200928登录</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; SETBIT 20200929 123 1 # 用户123于20200929登录</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看这两天的活跃用户数，使用按位或即可</span></span><br><span class="line">127.0.0.1:6379&gt; BITOP or res 20200928 20200929</span><br><span class="line">(integer) 16</span><br><span class="line">127.0.0.1:6379&gt; bitcount res</span><br><span class="line">(integer) 2 # 这两天共有2个用户登录</span><br></pre></td></tr></table></div></figure>
+</li>
+</ol>
+</li>
+</ul>
+
+        <h3 id="list"   >
+          <a href="#list" class="heading-link"><i class="fas fa-link"></i></a>list</h3>
+      
+<p>数据结构：</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928221358384.png"  alt="image-20200928221358384" />
+      </p>
+<ul>
+<li>
+<p>同向 栈 lpush lpop</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt;</span><br><span class="line">127.0.0.1:6379&gt; LPUSH stack 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; LRANGE stack 0 -1</span><br><span class="line">1) "4"</span><br><span class="line">2) "3"</span><br><span class="line">3) "2"</span><br><span class="line">4) "1"</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>异向 队列 lpush rpop</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; RPUSH list 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; LRANGE list 0 -1</span><br><span class="line">1) "1"</span><br><span class="line">2) "2"</span><br><span class="line">3) "3"</span><br><span class="line">4) "4"</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>lindex 数组</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; LRANGE list 0 -1</span><br><span class="line">1) "1"</span><br><span class="line">2) "2"</span><br><span class="line">3) "3"</span><br><span class="line">4) "4"</span><br><span class="line">127.0.0.1:6379&gt; LINDEX list 2</span><br><span class="line">"3"</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>ltrime 字符串，清除两端的数据，优化redis内存量</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; LTRIM list 0 -2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; LRANGE list 0 -1</span><br><span class="line">1) "1"</span><br><span class="line">2) "2"</span><br><span class="line">3) "3"</span><br></pre></td></tr></table></div></figure>
+<blockquote>
+<p>比如评论，无需显示所有评论，只需要显示前面几条评论即可，这样就达到了热数据的目的。</p>
+</blockquote>
+</li>
+<li>
+<p>顺序概念，放入的顺序</p>
+</li>
+</ul>
+<p><strong>使用场景</strong></p>
+<ul>
+<li>
+<p>消息队列</p>
+<p>生产者消费者</p>
+</li>
+<li>
+<p>评论列表</p>
+</li>
+<li>
+<p>替代java的容器</p>
+<p>好处是可以让jvm的服务无状态，当jvm重启时可以继续使用容器里的数据。</p>
+</li>
+</ul>
+
+        <h3 id="hash"   >
+          <a href="#hash" class="heading-link"><i class="fas fa-link"></i></a>hash</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928223544753.png"  alt="image-20200928223544753" />
+      </p>
+<ul>
+<li>
+<p>如果没有hash</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set david::name eh</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; set david::age 18</span><br><span class="line">OK</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>有了hash</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; FLUSHALL</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; hset david name eh</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hset david age 18</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; HGETALL david</span><br><span class="line">1) "name"</span><br><span class="line">2) "eh"</span><br><span class="line">3) "age"</span><br><span class="line">4) "18"</span><br><span class="line"><span class="meta">#</span><span class="bash"> scheme</span></span><br><span class="line">127.0.0.1:6379&gt; hkeys david</span><br><span class="line">1) "name"</span><br><span class="line">2) "age"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 列值</span></span><br><span class="line">127.0.0.1:6379&gt; hvals david</span><br><span class="line">1) "eh"</span><br><span class="line">2) "18"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 还支持计算</span></span><br><span class="line">127.0.0.1:6379&gt; HINCRBY david age -1</span><br><span class="line">(integer) 17</span><br></pre></td></tr></table></div></figure>
+</li>
+</ul>
+<p><strong>使用场景</strong></p>
+<ul>
+<li>
+<p>详情页</p>
+<p>除了静态的字符串文本title、描述之外，还可以保存 收藏数、购买数、评论数，喜欢数，单线程原子的，支持在内存中计算速度极快</p>
+<blockquote>
+<p>ps:这些数据差一点也不是太重要</p>
+</blockquote>
+</li>
+<li>
+<p>聚集数据</p>
+<p>一个用户的数据来自好几个模块多个数据库的内容，当这些内容不怎么变化且被频繁访问的时候可以做一个聚集来缓存数据，可以先走个批处理将这些数据挨个查一遍，然后根据订单号或者某个商品或者userId聚集起来，之后用户来查的时候就很快，也减少了后端数据库访问的压力。</p>
+</li>
+<li>
+<p>用户好友数</p>
+</li>
+</ul>
+
+        <h3 id="set"   >
+          <a href="#set" class="heading-link"><i class="fas fa-link"></i></a>set</h3>
+      
+<p>集合</p>
+<p>无序（底层是hashmap，rehash之后顺序就不一样了），不重复</p>
+<ul>
+<li>
+<p>集合 交并差，单线程，后面的操作干不了。</p>
+<p>不推荐，但是也可以使用多个实例，让某些实例专门做集合交并差。</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; FLUSHALL</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; sadd k1 a b c d e</span><br><span class="line">(integer) 5</span><br><span class="line">127.0.0.1:6379&gt; sadd k2 c d e g f</span><br><span class="line">(integer) 5</span><br><span class="line">127.0.0.1:6379&gt; SUNION k1 k2 # 并集</span><br><span class="line">1) "f"</span><br><span class="line">2) "g"</span><br><span class="line">3) "d"</span><br><span class="line">4) "a"</span><br><span class="line">5) "c"</span><br><span class="line">6) "b"</span><br><span class="line">7) "e"</span><br><span class="line">127.0.0.1:6379&gt; SINTER k1 k2 # 交集</span><br><span class="line">1) "c"</span><br><span class="line">2) "d"</span><br><span class="line">3) "e"</span><br><span class="line">127.0.0.1:6379&gt; SDIFF k1 k2 # k1 - k2</span><br><span class="line">1) "a"</span><br><span class="line">2) "b"</span><br><span class="line">127.0.0.1:6379&gt; SDIFF k2 k1 # k2 - k1</span><br><span class="line">1) "f"</span><br><span class="line">2) "g"</span><br></pre></td></tr></table></div></figure>
+<p>使用场景：</p>
+<ul>
+<li>共同好友 并集</li>
+<li>好友推荐 差集</li>
+</ul>
+</li>
+<li>
+<p>随机事件</p>
+<p>抽奖</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 随机返回n个元素的集合</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> SRANDMEMBER key 正数/负数 <span class="comment"># 正数表示不重复，负数表示可以重复</span></span></span><br><span class="line">eg:</span><br><span class="line">127.0.0.1:6379&gt; SADD set a b c d e a b</span><br><span class="line">(integer) 5</span><br><span class="line">127.0.0.1:6379&gt; SMEMBERS set</span><br><span class="line">1) "d"</span><br><span class="line">2) "a"</span><br><span class="line">3) "b"</span><br><span class="line">4) "c"</span><br><span class="line">5) "e"</span><br><span class="line">127.0.0.1:6379&gt; SRANDMEMBER set -8</span><br><span class="line">1) "a"</span><br><span class="line">2) "d"</span><br><span class="line">3) "c"</span><br><span class="line">4) "e"</span><br><span class="line">5) "a"</span><br><span class="line">6) "b"</span><br><span class="line">7) "d"</span><br><span class="line">8) "d"</span><br><span class="line">127.0.0.1:6379&gt; SRANDMEMBER set 3</span><br><span class="line">1) "b"</span><br><span class="line">2) "c"</span><br><span class="line">3) "e"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 随机返回一个元素</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> SPOP key</span></span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>验证码</li>
+<li>扑克牌游戏</li>
+<li>…其他随机的事件</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="zset"   >
+          <a href="#zset" class="heading-link"><i class="fas fa-link"></i></a>zset</h3>
+      
+<p>有序集合</p>
+<p>去重，排序</p>
+<blockquote>
+<p>help @sorted_set</p>
+</blockquote>
+<p>根据分值在内存动态排序</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; FLUSHALL</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; zadd k1 22.5 apple 11 orange 33 banana</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; ZRANGE k1 0 -1 withscores</span><br><span class="line">1) "orange"</span><br><span class="line">2) "11"</span><br><span class="line">3) "apple"</span><br><span class="line">4) "22.5"</span><br><span class="line">5) "banana"</span><br><span class="line">6) "33"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 取出从小到大的前两名,如果分值相同会按字典序</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE k1 0 1</span><br><span class="line">1) "orange"</span><br><span class="line">2) "apple"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 取出从大到小的前两名</span></span><br><span class="line">127.0.0.1:6379&gt; ZREVRANGE k1 0 1</span><br><span class="line">1) "banana"</span><br><span class="line">2) "apple"</span><br><span class="line"><span class="meta">#</span><span class="bash"> 取出某个范围之内的，比如某段时间内的评论列表</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGEBYSCORE k1 20 40</span><br><span class="line">1) "apple"</span><br><span class="line">2) "banana"</span><br></pre></td></tr></table></div></figure>
+<p><strong>使用场景</strong></p>
+<ul>
+<li>排行榜</li>
+<li>评论： 排序/分页，动态排序，像内存</li>
+</ul>
+<p><strong>动态排序</strong></p>
+<ul>
+<li>
+<p>是否有重排序的过程？</p>
+<p>没有，只是从左向右取改成从右向左取。</p>
+</li>
+<li>
+<p>排序方式，数据结构</p>
+<p>每种数据类型在数据量小的时候都维持一些基本的数据结构，例如压缩表这种不怎么占内存的数据结构</p>
+<p>value的数量更大的时候，会牺牲空间换时间，切换到skiplist 跳表</p>
+<blockquote>
+<p>object help</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; object help</span><br><span class="line">1) OBJECT &lt;subcommand&gt; arg arg ... arg. Subcommands are:</span><br><span class="line">2) ENCODING &lt;key&gt; -- Return the kind of internal representation used in order to store the value associated with a key.</span><br><span class="line">3) FREQ &lt;key&gt; -- Return the access frequency index of the key. The returned integer is proportional to the logarithm of the recent access frequency of the key.</span><br><span class="line">4) IDLETIME &lt;key&gt; -- Return the idle time of the key, that is the approximated number of seconds elapsed since the last access to the key.</span><br><span class="line">5) REFCOUNT &lt;key&gt; -- Return the number of references of the value associated with the specified key.</span><br></pre></td></tr></table></div></figure>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; object encoding k1</span><br><span class="line">"ziplist" # 当前数据量小，使用压缩表的方式</span><br><span class="line">127.0.0.1:6379&gt; FLUSHALL</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; zadd k1 80 representationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentationrepresentation</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; OBJECT encoding k1</span><br><span class="line">"skiplist" # 切换成跳表了</span><br></pre></td></tr></table></div></figure>
+</blockquote>
+</li>
+<li>
+<p>跳表</p>
+<ul>
+<li>
+<p>什么是跳表</p>
+<p>站内引用: <a href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/%E7%90%86%E8%AE%BA/%E8%B7%B3%E8%A1%A8/" title="跳表">跳表</a></p>
+<blockquote>
+<p>只要往右看为空就降层，可以跳过一些元素访问</p>
+</blockquote>
+</li>
+<li>
+<p>为什么选择跳表</p>
+<p>跟红黑树的速度性能差不多，但是实现简单，当然占用的空间也多</p>
+</li>
+<li>
+<p>造层是层数是随机层数</p>
+<blockquote>
+<p>可以查看源码</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928234225746.png"  alt="image-20200928234225746" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200928234300328.png"  alt="image-20200928234300328" />
+      </p>
+<p>ZSKIPLIST_MAXLEVEL 的值 是64。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/redis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/redis/">redis</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/999_%E5%85%B6%E4%BB%96/%E5%AD%97%E7%AC%A6%E9%9B%86%E5%92%8C%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">字符集和字符编码（Charset &amp; Encoding）</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/100_%E8%AE%A1%E7%A7%91%E5%9F%BA%E7%A1%80/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PageCache/"><span class="paginator-prev__text">PageCache</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#复习"><span class="toc-number">1.</span> <span class="toc-text">
+          复习</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#本地方法计算向数据移动io优化"><span class="toc-number">1.1.</span> <span class="toc-text">
+          本地方法：计算向数据移动，IO优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#线程模型worker-单线程"><span class="toc-number">1.2.</span> <span class="toc-text">
+          线程模型，worker 单线程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#秒杀"><span class="toc-number">1.3.</span> <span class="toc-text">
+          秒杀</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#redis-worker是单线程的如何充分利用cpu资源"><span class="toc-number">1.4.</span> <span class="toc-text">
+          redis worker是单线程的，如何充分利用cpu资源</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#使用场景"><span class="toc-number">2.</span> <span class="toc-text">
+          使用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#数据类型"><span class="toc-number">2.1.</span> <span class="toc-text">
+          数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#string"><span class="toc-number">2.1.1.</span> <span class="toc-text">
+          string</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#list"><span class="toc-number">2.1.2.</span> <span class="toc-text">
+          list</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hash"><span class="toc-number">2.1.3.</span> <span class="toc-text">
+          hash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#set"><span class="toc-number">2.1.4.</span> <span class="toc-text">
+          set</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zset"><span class="toc-number">2.1.5.</span> <span class="toc-text">
+          zset</span></a></li></ol></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">314</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
   var isXML = true;
   var search_path = 'search.json';
 
@@ -64,242 +395,6 @@ window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></he
         // 根据空白字符分隔关键字
         var keywords = searchText.split(/[\s]+/);
         // 搜索结果
-        var matchPosts = [];
-
-        // 有多个关键字时，将原文字整个保存下来
-        if (keywords.length > 1) {
-          keywords.push(searchText);
-        }
-        // 防止未输入字符时搜索
-        if (searchText.length > 0) {
-          datas.forEach(function (data) {
-            var isMatch  = false;
-            // 没有标题的文章使用预设的 i18n 变量代替
-            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
-            var titleLower = title && title.toLowerCase();
-            // 删除 HTML 标签 和 所有空白字符
-            var content = data.content && data.content.replace(/<[^>]+>/g, '');
-            var contentLower = content && content.toLowerCase();
-            // 删除重复的 /
-            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
-            // 标题中匹配到的关键词
-            var titleHitSlice = [];
-            // 内容中匹配到的关键词
-            var contentHitSlice = [];
-
-            keywords.forEach(function (keyword) {
-              /**
-              * 获取匹配的关键词的索引
-              * @param {String} keyword 要匹配的关键字
-              * @param {String} text 原文字
-              * @param {Boolean} caseSensitive 是否区分大小写
-              * @param {Number} weight 匹配对象的权重。权重大的优先显示
-              * @return {Array}
-              */
-              function getIndexByword (word, text, caseSensitive, weight) {
-                if (!word || !text) {
-                  return [];
-                };
-
-                var startIndex = 0; // 每次匹配的开始索引
-                var index = -1;     // 匹配到的索引值
-                var result = [];    // 匹配结果
-
-                if (!caseSensitive) {
-                  word = word.toLowerCase();
-                  text = text.toLowerCase();
-                }
-
-                while((index = text.indexOf(word, startIndex)) !== -1) {
-                  var hasMatch = false;
-                  // 索引位置相同的关键词，保留长度较长的
-                  titleHitSlice.forEach(function (hit) {
-                    if (hit.index === index && hit.word.length < word.length) {
-                      hit.word = word;
-                      hasMatch = true;
-                    }
-                  });
-                  startIndex = index + word.length;
-                  !hasMatch && result.push({ index: index, word: word, weight: weight });
-                }
-                return result;
-              }
-              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
-              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
-            });
-
-            var hitTitle = titleHitSlice.length;
-            var hitContent = contentHitSlice.length;
-
-            if (hitTitle > 0 || hitContent > 0) {
-              isMatch = true;
-            }
-            if (isMatch) {
-              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
-                // 按照匹配文字的索引的递增顺序排序
-                hit.sort(function (left, right) {
-                  return left.index - right.index;
-                });
-              });
-              /**
-              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
-              * @param {String} text 原文本
-              * @param {Array} hitSlice 匹配项的索引信息
-              * @param {Number} start 开始索引
-              * @param {Number} end 结束索引
-              * @return {String}
-              */
-              function highlightKeyword (text, hitSlice, start, end) {
-                if (!text || !hitSlice || !hitSlice.length) {
-                  return;
-                }
-
-                var result = '';
-                var startIndex = start;
-                var endIndex = end;
-                hitSlice.forEach(function (hit) {
-                  if (hit.index < startIndex) {
-                    return;
-                  }
-
-                  var hitWordEnd = hit.index + hit.word.length;
-                  result += text.slice(startIndex, hit.index);
-                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
-                  startIndex = hitWordEnd;
-                });
-                result += text.slice(startIndex, endIndex);
-                return result;
-              }
-
-              var postData = {};
-              // 文章总的搜索权重
-              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
-              // 标记匹配关键词后的标题
-              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
-              // 标记匹配关键词后的内容
-              var postContent;
-              // 显示内容的长度
-              var SHOW_WORD_LENGTH = 200;
-              // 命中关键词前的字符显示长度
-              var SHOW_WORD_FRONT_LENGTH = 20;
-              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
-
-              // 截取匹配的第一个字符，前后共 200 个字符来显示
-              if (contentHitSlice.length > 0) {
-                var firstIndex = contentHitSlice[0].index;
-                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
-                var end = firstIndex + SHOW_WORD_END_LENGTH;
-                postContent = highlightKeyword(content, contentHitSlice, start, end);
-              } else { // 未匹配到内容，直接截取前 200 个字符来显示
-                postContent = content.slice(0, SHOW_WORD_LENGTH);
-              }
-              postData.title = postTitle;
-              postData.content = postContent;
-              postData.url = postURL;
-              postData.weight = postWeight;
-              matchPosts.push(postData);
-            }
-          });
-        }
-
-        var resultInnerHtml = '';
-        if (matchPosts.length) {
-          // 按权重递增的顺序排序，使权重大的优先显示
-          matchPosts.sort(function (left, right) {
-            return right.weight - left.weight;
-          });
-          resultInnerHtml += '<ul>';
-          matchPosts.forEach(function (post) {
-            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
-            resultInnerHtml += post.title;
-            resultInnerHtml += '</a><div class="search-results-content">';
-            resultInnerHtml += post.content;
-            resultInnerHtml += '</div></li>';
-          });
-          resultInnerHtml += '</ul>';
-        } else {
-          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
-        }
-        $result.html(resultInnerHtml);
-      };
-      $input.on('input', searchPost);
-      $input.on('keyup', function (e) {
-        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
-          searchPost();
-        }
-      });
-    }
-  });
-}
-
-function closeSearch () {
-  $('body').css({ overflow: 'auto' });
-  $('.search-popup').css({ display: 'none' });
-  $('.search-mask').css({ display: 'none' });
-}
-
-window.addEventListener('DOMContentLoaded', function () {
-  Stun.utils.pjaxReloadLocalSearch = function () {
-    $('.header-nav-search').on('click', function (e) {
-      e.stopPropagation();
-      $('body').css('overflow', 'hidden');
-      $('.search-popup')
-        .velocity('stop')
-        .velocity('transition.expandIn', {
-          duration: 300,
-          complete: function () {
-            $('.search-popup input').focus();
-          }
-        });
-      $('.search-mask')
-        .velocity('stop')
-        .velocity('transition.fadeIn', {
-          duration: 300
-        });
-
-      initSearch();
-    });
-    $('.search-mask, .search-close').on('click', function () {
-      closeSearch();
-    });
-    $(document).on('keydown', function (e) {
-      // Escape <=> 27
-      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
-        closeSearch();
-      }
-    });
-  };
-
-  Stun.utils.pjaxReloadLocalSearch();
-}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
-  var GUEST_INFO = ['nick', 'mail', 'link'];
-  var guest_info = 'nick,mail,link';
-
-  guest_info = guest_info.split(',').filter(function(item) {
-    return GUEST_INFO.indexOf(item) > -1;
-  });
-  new Valine({
-    el: '#valine-container',
-    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
-    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
-    notify: true,
-    verify: true,
-    placeholder: '欢迎评论',
-    avatar: 'mp',
-    meta: guest_info,
-    pageSize: '10' || 10,
-    visitor: false,
-    recordIP: false,
-    lang: '' || 'zh-cn',
-    path: window.location.pathname
-  });
-}
-
-if (false) {
-  loadValine();
-} else {
-  window.addEventListener('DOMContentLoaded', loadValine, false);
-}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>��索结果
         var matchPosts = [];
 
         // 有多个关键字时，将原文字整个保存下来
