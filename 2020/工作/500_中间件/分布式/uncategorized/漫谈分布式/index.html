@@ -1,0 +1,463 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="分布式思想： 类似于hashmap 为什么有hashmap hashtable？ 分治思想，提高查找效率。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="漫谈分布式">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E6%BC%AB%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="分布式思想： 类似于hashmap 为什么有hashmap hashtable？ 分治思想，提高查找效率。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929150151701.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929152635703.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929161143875.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20190929161219140.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929163824952.png">
+<meta property="article:published_time" content="2020-09-29T06:21:27.089Z">
+<meta property="article:modified_time" content="2020-09-30T18:14:02.421Z">
+<meta property="article:author" content="lienhui68">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929150151701.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>漫谈分布式 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E6%BC%AB%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">漫谈分布式</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-29</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-10-01</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">12分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body"><p>分布式思想：</p>
+<p>类似于hashmap</p>
+<p>为什么有hashmap hashtable？</p>
+<p>分治思想，提高查找效率。</p>
+<hr />
+<a id="more"></a>
+
+        <h1 id="hdfs"   >
+          <a href="#hdfs" class="heading-link"><i class="fas fa-link"></i></a>HDFS</h1>
+      
+<p>需求：</p>
+<p>很多的文件，1000w，放到一台机器上有问题，存不下/访问io瓶颈</p>
+<p>解决：集群 node01 node02 node03</p>
+<p>文件映射，需要一个管理员记账 x文件-&gt;node03，也可以包装成文件目录树 node03/x</p>
+<p>细节：</p>
+<p>客户单找管理员存一个文件</p>
+<p><strong>细节1</strong> 是管理员存还是管理员告诉客户端存哪个node？管理告诉客户端存哪个node，否则管理员就成io瓶颈了</p>
+<p>分布式里面有角色，大家分工各干自己的事。</p>
+<p><strong>细节2</strong> 管理员告诉客户端存哪个node，此时要不要记映射（x-&gt;node3）？</p>
+<p>不要记，因为会存在不一致性问题，管理员记了之后客户端挂了，结果是node3没有x，但是管理员有记映射就有问题。</p>
+<p>可以先存个临时映射，不是有效的记录，外接访问看不到，只有存完东西确认后才是有效。</p>
+<p><strong>细节3</strong> 确认这件事谁发起？node03</p>
+<p>管理员相当于主，node相当于从</p>
+<p>细节4：同步 副本机制，全量的一对一镜像存储</p>
+<p>细节5：大文件 碎片化成几个文件，然后再挨个存，最终散列到各个节点，管理员会记录清单，一个总的文件名下面挂着一个block list。</p>
+<p>细节6: 多个客户端，上传可以并行，细粒度锁</p>
+<p>细节7：文件整体存和文件分开存有很大的不同效果</p>
+<p>镜像副本 vs sharding分片</p>
+<p>sharding分片缺点：全量操作 需要从各个节点聚合，优点是分治，更均匀地分散到不同的节点。</p>
+<p>细节8：除了存储，还有计算</p>
+<p>计算形式？ 聚合计算框架 map-reduce</p>
+<ol>
+<li>无关性计算 可以并行计算， 例如过滤，男女 map</li>
+<li>关联性计算 统计，求一个聚合数据 男的个数  reduce</li>
+</ol>
+<p>如果是无关性计算可以在各个节点上并行计算，如果是关联性计算需要将各个节点上的数据拉取（shuffle）到某一个节点做统计。</p>
+<p>思路：这个世界不止存还有计算，数据分治的话可以达到并行</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929150151701.png"  alt="image-20200929150151701" />
+      </p>
+
+        <h1 id="redis"   >
+          <a href="#redis" class="heading-link"><i class="fas fa-link"></i></a>redis</h1>
+      
+<p>单机<strong>小程序</strong></p>
+<p>一台服务器装多个redis实例，redis实例占用内存不能太大，否则持久化会很慢，启动从rdb或aof恢复速度也很快。</p>
+<p>这个世界所有技术问题的根源：</p>
+<ul>
+<li>
+<p>单点</p>
+<p>高可用</p>
+<p>主从复制</p>
+<ul>
+<li>同步 强一致性 某台从节点挂了， 同步 客户端超时 一致性会破坏可用性</li>
+<li>异步 弱一致性，redis默认弱一致性 可能丢数据</li>
+</ul>
+<p>redis 做缓存，弱一致性就不是问题，数据是存在数据库</p>
+<p>评论列表前几页，热数据，只是为了提速而已，真正数据是存在mongodb</p>
+<p>如果做数据库那么就不行</p>
+<p>主从复制 主挂了，可以手动也可以自动，自动就是哨兵机制，客户端连哨兵，哨兵也就是注册发现中心</p>
+<p>哨兵也得做成集群，否则1台挂了就完蛋了。</p>
+<p>哨兵使用的raft协议，实现了paxos论文</p>
+<p>哨兵集群根据raft协议实现了分布式一致性的逻辑，保证了即使某些节点挂了，集群的数据一致性，并且对外提供统一的结果，说白了就是多数派。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929152635703.png"  alt="image-20200929152635703" />
+      </p>
+<p>哨兵和zk很类似，哨兵只给redis服务，zk给其他东西提供服务，转讲zk</p>
+<hr />
+<p>redis设计的时候没有考虑外部分布式的情况，它关注的是自己的内功，5种value，本地方法，用户怎么请求最快，单线程nio，epoll。多机的时候没有考虑主节点挂掉的情况，于是开发了一个哨兵，哨兵类似zk，哨兵集群内部是高可靠高内聚的，可以帮助人</p>
+<p>监控redis的健康状态，帮助人来做主从切换以及告诉客户端应该连谁。这个时候的redis集群（哨兵+主从）才算是一个稍微可靠的集群。</p>
+<p>至于redis主库和从库因为同步有延时 数据存在不一致的问题，常见有这么几种解决方案</p>
+<ol>
+<li>业务可以接受，系统不优化</li>
+<li>强制读主，高可用主库，用缓存提高读性能</li>
+<li>在cache里记录哪些记录发生过写请求，来路由读主还是读从</li>
+</ol>
+<p>如果使用redis cluster的话，最终一致性是由实现gossip协议保证的。</p>
+</li>
+</ul>
+
+        <h1 id="zookeeper"   >
+          <a href="#zookeeper" class="heading-link"><i class="fas fa-link"></i></a>zookeeper</h1>
+      
+<blockquote>
+<p>paxos算法允许系统在出现网络分区，只要其中一个分区的节点个数保持过半，对外就能保证可用以及数据的最终一致性（最终所有节点拥有相同的更新），解决单点失败故障的同时，尽可能减少对吞吐量和延迟的影响。</p>
+</blockquote>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929161143875.png"  alt="image-20200929161143875" style="zoom:50%;" />
+      
+<p>如果客户端使用zk，zk分两个角色（leader/follower）和两个状态（可用/不可用）</p>
+<p>客户端增删改，传给主，主再传递给从，对客户端来说，节点是单节点的</p>
+<p>这个和redis一样，为啥往redis也写是弱一致的，往zk写就是最终一致的？</p>
+<p>两阶段 选主 复制</p>
+<p>过半机制</p>
+<p>假设有3个节点，一主2从</p>
+<p>往zk主节点写数据，zk主节点一个人不算，于是zk主节点将数据传递给其他从节点，当要求写数据节点的个数</p>
+<p>3 一致性破坏了可用性</p>
+<p>1 弱一致性</p>
+<p>2 过半，可以给客户端返回一个成功</p>
+<p>此时客户端读不可用的节点会造成数据不一致，zk 分布式集群，里面的角色要两两通信</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>2 有两层意思（约束）</span></p>
+<p>客户端往zk写，满足过半才算写成功</p>
+<p>是否能对外提供服务，势力范围（分区中节点个数）要达到2</p>
+<p>如何知道自己的势力范围？ 维持心跳通信，势力范围为1就shutdown禁止对外提供服务，降级</p>
+<p>此时客户端连接这个节点连接不上，根据连接列表再重新连接其他节点就能取到正确的数据。</p>
+<p>所有的从节点必须都要和主节点（主挂了就重新选举）通信，且势力范围要过半，才能对外提供服务。</p>
+<p>从节点挂了然后又启动了，需要从主节点同步数据，最终这个节点的数据是一致的，同步的时候状态是不可用的。</p>
+<p>zk主节点往从节点同步数据的时候，客户端读从节点的数据也会存在不一致性，zk在一般使用场景下，数据版本可能会取到不一样的情况，但是zk提供了一个同步指令sync，也就是zk可以是弱一致的也可以是最终一致的（强一致），</p>
+<p>客户端如果想取集群里一致的数据时，先发出sync同步，sync返回成功后，客户端再告诉zk取哪个数据，sync超时会重新请求另一台zk</p>
+<p>如果是4台</p>
+
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20190929161219140.png"  style="zoom:50%;" />
+      
+<p>4  3  2  1</p>
+<p>如果是容忍2台，则有可能出现脑裂，2个分区 各2台的情况，所以4台必须达到3台才行，也就是说只能容忍一台挂掉</p>
+<p>只有过半才能防止脑裂的现象。除2+1。</p>
+<p>3台容忍一台挂掉，4台也是容忍一台挂掉，所以大家根据经验使用奇数的3 5 7…</p>
+<p>主挂了怎么办，选主</p>
+<p>官方压测是200ms 可以从剩余的节点中选出一个主节点</p>
+<p>怎么选？投票</p>
+<p>快速选择，加一个条件。嫡长子</p>
+<p>zk给每个节点分配一个数字，zk.1 zk.2 …</p>
+<p>存活下来的节点，谁数据版本大就选谁，如果数据版本一样则看谁的sererId大就选哪个</p>
+<p>根据这个条件就能很快选出新的主节点。</p>
+
+        <h1 id="kafka"   >
+          <a href="#kafka" class="heading-link"><i class="fas fa-link"></i></a>kafka</h1>
+      
+<p>分布式的消息队列</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200929163824952.png"  alt="image-20200929163824952" />
+      </p>
+<p>消息队列：生产者往里面生产消息，消费者从里面拿走消息进行消费。</p>
+<p>分布式的：解决高吞吐，高并发的问题， 多节点</p>
+<p>生产者将生产的消息数据弄成3个副本放到3个节点中？</p>
+<p>肯定不是这样，sharding，每个分片才会主从，kafka只会从主节点进行消费，kafka不支持主备都对外提供服务，也就是不支持读写分离，只是为了做恢复用的。也可以配置成强一致，数据同步时阻塞。弱一致就可能会失败，和redis多机集群一样。所以采取了折中方案，不支持读写分离。</p>
+<p>partition 分区（也称为分片，上图是3个分区）概念，分区有序</p>
+<p>如何保证有序性，把两个消息放到一个节点中</p>
+<p>分区就有单点的问题，一般会将这个分区的数据副本到其他分区中，也就是分区的数据会互相副本给其他分区。如果该分区挂了再从其他分区恢复。此时就有数据同步的问题，分布式的一致性解决方案，kafka通过zk管理集群配置。</p>
+
+        <h1 id="es"   >
+          <a href="#es" class="heading-link"><i class="fas fa-link"></i></a>ES</h1>
+      
+<p>分布式搜索引擎</p>
+<p>万变不离其宗，都是“hashmap”</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E6%BC%AB%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E6%BC%AB%E8%B0%88%E5%88%86%E5%B8%83%E5%BC%8F/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E5%88%86%E5%B8%83%E5%BC%8F/uncategorized/%E5%90%84%E7%A7%8D%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%8E%E8%81%94%E7%B3%BB/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">各种数据一致性的区别与联系</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/500_%E4%B8%AD%E9%97%B4%E4%BB%B6/%E7%BC%93%E5%AD%98/redis/redis%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F/"><span class="paginator-prev__text">redis与分布式</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#hdfs"><span class="toc-number">1.</span> <span class="toc-text">
+          HDFS</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#redis"><span class="toc-number">2.</span> <span class="toc-text">
+          redis</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#zookeeper"><span class="toc-number">3.</span> <span class="toc-text">
+          zookeeper</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#kafka"><span class="toc-number">4.</span> <span class="toc-text">
+          kafka</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#es"><span class="toc-number">5.</span> <span class="toc-text">
+          ES</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">325</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

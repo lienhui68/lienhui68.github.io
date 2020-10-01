@@ -1,0 +1,720 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="SQL性能下降的原因         查询语句写的差。 索引失效：索引建了，但是没有用上。 关联 查询太多join（设计缺陷或者不得已的需求）。 服务器调优以及各个参数的设置（缓冲、线程数等）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="性能分析">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/5_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="SQL性能下降的原因         查询语句写的差。 索引失效：索引建了，但是没有用上。 关联 查询太多join（设计缺陷或者不得已的需求）。 服务器调优以及各个参数的设置（缓冲、线程数等）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930172630703.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930172300453.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930172426356.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930224534938.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930225825.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930225911.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930233944.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930233956.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234040.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234055.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234104.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234115.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20200930235554.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001000543.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001003754.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001004815.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015316.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015334.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015509.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015715.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001102613.png">
+<meta property="article:published_time" content="2020-10-01T03:29:26.595Z">
+<meta property="article:modified_time" content="2020-10-01T12:02:04.905Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930172630703.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>性能分析 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/5_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">性能分析</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-10-01</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-10-01</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.6k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">22分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="sql性能下降的原因"   >
+          <a href="#sql性能下降的原因" class="heading-link"><i class="fas fa-link"></i></a>SQL性能下降的原因</h1>
+      
+<ul>
+<li>查询语句写的差。</li>
+<li>索引失效：索引建了，但是没有用上。</li>
+<li>关联 查询太多<code>join</code>（设计缺陷或者不得已的需求）。</li>
+<li>服务器调优以及各个参数的设置（缓冲、线程数等）</li>
+</ul>
+<a id="more"></a>
+
+        <h1 id="sql执行顺序"   >
+          <a href="#sql执行顺序" class="heading-link"><i class="fas fa-link"></i></a>SQL执行顺序</h1>
+      
+<p><strong>手写</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930172630703.png"  alt="image-20200930172630703" />
+      </p>
+<p><strong>机读</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930172300453.png"  alt="image-20200930172300453" />
+      </p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930172426356.png"  alt="image-20200930172426356" />
+      </p>
+
+        <h1 id="性能分析"   >
+          <a href="#性能分析" class="heading-link"><i class="fas fa-link"></i></a>性能分析</h1>
+      
+
+        <h2 id="mysql-query-optimizer"   >
+          <a href="#mysql-query-optimizer" class="heading-link"><i class="fas fa-link"></i></a>MySQL Query Optimizer</h2>
+      
+<p>在MySQL中有一个专门负责优化SELECT 语句的优化器模块，这就是我们本节将要重点分析的MySQL Optimizer，其主要的功能就是<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>通过计算分析系统中收集的各种统计信息，为客户端请求的Query 给出他认为最优的执行计划，也就是他认为最优的数据检索方式。</span></p>
+<p>当MySQLOptimizer 接收到从Query Parser （解析器）送过来的Query 之后，会根据MySQL Query 语句的相应语法对该Query 进行分解分析的同时，还会做很多其他的计算转化工作。如常量转化，无效内容删除，常量计算等等。<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>所有这些工作都只为了Optimizer 工作的唯一目的，分析出最优的数据检索方式，也就是我们常说的执行计划。</span></p>
+<p><strong>基本原理</strong></p>
+<p>当客户端向MySQL请求一条Query ，到命令解析器模块完成请求分类区别出是SELECT 并转发给Query Optimizer 之后，Query Optimizer 首先会对整条Query 进行，优化处理掉一些常量表达式的预算，直接换算成常量值。并对Query 中的查询条件进行简化和转换，如去掉一些无用或者显而易见的条件，结构调整等等。然后则是分析Query中的Hint 信息（如果有），看显示Hint信息是否可以完全确定该Query的执行计划。如果没有Hint或者Hint 信息还不足以完全确定执行计划，则会读取所涉及对象的统计信息，根据Query进行相应的计算分析，然后再得出最后的执行计划。</p>
+
+        <h2 id="mysql常见瓶颈"   >
+          <a href="#mysql常见瓶颈" class="heading-link"><i class="fas fa-link"></i></a>Mysql常见瓶颈</h2>
+      
+<p>CPU：CPU在饱和的时候一般发生在数据装入内存或从磁盘上读取数据的时候</p>
+<p>IO：磁盘IO瓶颈发生在装入数据远大于内存容量的时候</p>
+<p>服务器硬件的性能瓶颈：top,free.iostat和vmstat来查看系统的性能状态</p>
+
+        <h2 id="explain"   >
+          <a href="#explain" class="heading-link"><i class="fas fa-link"></i></a>Explain</h2>
+      
+
+        <h3 id="explain简介"   >
+          <a href="#explain简介" class="heading-link"><i class="fas fa-link"></i></a>Explain简介</h3>
+      
+<ul>
+<li>
+<p>EXPLAIN是什么</p>
+<p>EXPLAIN：SQL的执行计划，使用EXPLAIN关键字可以模拟优化器执行SQL查询语句，从而知道MySQL是如何处理SQL语句的。</p>
+</li>
+<li>
+<p>EXPLAIN怎么使用</p>
+<p>语法：explain + SQL。</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select * from pms_category \G;</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">           id: 1</span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        table: pms_category</span><br><span class="line">   partitions: NULL</span><br><span class="line">         type: ALL</span><br><span class="line">possible_keys: NULL</span><br><span class="line">          key: NULL</span><br><span class="line">      key_len: NULL</span><br><span class="line">          ref: NULL</span><br><span class="line">         rows: 1425</span><br><span class="line">     filtered: 100.00</span><br><span class="line">        Extra: NULL</span><br><span class="line">1 row in <span class="keyword">set</span>, <span class="number">1</span> <span class="keyword">warning</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+</li>
+<li>
+<p>EXPLAIN能干嘛</p>
+<p>可以查看以下信息：</p>
+<ul>
+<li><code>id</code>：表的读取顺序。</li>
+<li><code>select_type</code>：数据读取操作的操作类型。</li>
+<li><code>possible_keys</code>：哪些索引可以使用。</li>
+<li><code>key</code>：哪些索引被实际使用。</li>
+<li><code>ref</code>：表之间的引用。</li>
+<li><code>rows</code>：每张表有多少行被优化器查询。</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="explain字段"   >
+          <a href="#explain字段" class="heading-link"><i class="fas fa-link"></i></a>Explain字段</h3>
+      
+<p>id,type,key,rows,Extra 这个5个非常重要</p>
+<p><strong>概念</strong></p>
+<p>使用 EXPLAIN 关键字可以模拟优化器执行 SQL 查询语句，从而知道 MySQL 是如何处理你的 SQL 语句的。分 析你的查询语句或是表结构的性能瓶颈。 用法： Explain+SQL 语句。 Explain 执行后返回的信息：</p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> explain select 1 from dual;</span></span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra          |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">|  1 | SIMPLE      | NULL  | NULL       | NULL | NULL          | NULL | NULL    | NULL | NULL |     NULL | No tables used |</span><br><span class="line">+----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+</span><br><span class="line">1 row in set, 1 warning (0.01 sec)</span><br></pre></td></tr></table></div></figure>
+<p><strong>准备工作</strong></p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1 (<span class="keyword">id</span> <span class="built_in">INT</span> (<span class="number">10</span>) AUTO_INCREMENT,<span class="keyword">content</span> <span class="built_in">VARCHAR</span> (<span class="number">100</span>) <span class="literal">NULL</span>,PRIMARY <span class="keyword">KEY</span> (<span class="keyword">id</span>)); </span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t2 (<span class="keyword">id</span> <span class="built_in">INT</span> (<span class="number">10</span>) AUTO_INCREMENT,<span class="keyword">content</span> <span class="built_in">VARCHAR</span> (<span class="number">100</span>) <span class="literal">NULL</span>,PRIMARY <span class="keyword">KEY</span> (<span class="keyword">id</span>)); </span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t3 (<span class="keyword">id</span> <span class="built_in">INT</span> (<span class="number">10</span>) AUTO_INCREMENT,<span class="keyword">content</span> <span class="built_in">VARCHAR</span> (<span class="number">100</span>) <span class="literal">NULL</span>,PRIMARY <span class="keyword">KEY</span> (<span class="keyword">id</span>)); </span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t4 (<span class="keyword">id</span> <span class="built_in">INT</span> (<span class="number">10</span>) AUTO_INCREMENT,<span class="keyword">content</span> <span class="built_in">VARCHAR</span> (<span class="number">100</span>) <span class="literal">NULL</span>,PRIMARY <span class="keyword">KEY</span> (<span class="keyword">id</span>)); </span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t1 (<span class="keyword">content</span>) <span class="keyword">VALUES</span> (<span class="keyword">CONCAT</span>(<span class="string">'t1_'</span>,<span class="keyword">FLOOR</span>(<span class="number">1</span>+<span class="keyword">RAND</span> ()*<span class="number">1000</span>))); </span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t2 (<span class="keyword">content</span>) <span class="keyword">VALUES</span> (<span class="keyword">CONCAT</span>(<span class="string">'t2_'</span>,<span class="keyword">FLOOR</span>(<span class="number">1</span>+<span class="keyword">RAND</span> ()*<span class="number">1000</span>))); </span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t3 (<span class="keyword">content</span>) <span class="keyword">VALUES</span> (<span class="keyword">CONCAT</span>(<span class="string">'t3_'</span>,<span class="keyword">FLOOR</span>(<span class="number">1</span>+<span class="keyword">RAND</span> ()*<span class="number">1000</span>))); </span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t4 (<span class="keyword">content</span>) <span class="keyword">VALUES</span> (<span class="keyword">CONCAT</span>(<span class="string">'t4_'</span>,<span class="keyword">FLOOR</span>(<span class="number">1</span>+<span class="keyword">RAND</span> ()*<span class="number">1000</span>)));</span><br></pre></td></tr></table></div></figure>
+
+        <h4 id="id"   >
+          <a href="#id" class="heading-link"><i class="fas fa-link"></i></a>id</h4>
+      
+<p>select 查询的序列号,包含一组数字，表示查询中执行 select 子句或操作表的顺序。</p>
+<ol>
+<li>
+<p>id 相同，执行顺序由上至下</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">explain</span> <span class="keyword">select</span> * <span class="keyword">from</span> t1, t2, t3 <span class="keyword">where</span> t1.id = t2.id <span class="keyword">and</span> t2.id = t3.id;</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/image-20200930224534938.png"  alt="image-20200930224534938" />
+      </p>
+</li>
+<li>
+<p>id 不同，如果是子查询， id 的序号会递增， id 值越大优先级越高，越先被执行</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930225825.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>有相同也有不同</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930225911.png"  alt="" />
+      </p>
+<blockquote>
+<p>id 如果相同，可以认为是一组，从上往下顺序执行；在所有组中， id 值越大，优先级越高，越先执行衍生 = DERIVED</p>
+<p>DERIVED衍生虚表，延伸的ID是2的表</p>
+<p>小表永远驱动大表</p>
+</blockquote>
+</li>
+</ol>
+
+        <h4 id="select_type"   >
+          <a href="#select_type" class="heading-link"><i class="fas fa-link"></i></a>select_type</h4>
+      
+<p><code>select_type</code>：数据查询的类型，主要是用于区别，普通查询、联合查询、子查询等的复杂查询。</p>
+<ul>
+<li><code>SIMPLE</code>：简单的<code>SELECT</code>查询，查询中不包含子查询或者<code>UNION</code>。</li>
+<li><code>PRIMARY</code>：查询中如果包含任何复杂的子部分，最外层查询则被标记为<code>PRIMARY</code>。</li>
+<li><code>SUBQUERY</code>：在<code>SELECT</code>或者<code>WHERE</code>子句中包含了子查询。</li>
+<li><code>DERIVED</code>：在<code>FROM</code>子句中包含的子查询被标记为<code>DERIVED(衍生)</code>，MySQL会递归执行这些子查询，把结果放在临时表中。</li>
+<li><code>UNION</code>：如果第二个<code>SELECT</code>出现在<code>UNION</code>之后，则被标记为<code>UNION</code>；若<code>UNION</code>包含在<code>FROM</code>子句的子查询中，外层<code>SELECT</code>将被标记为<code>DERIVED</code>。</li>
+<li><code>UNION RESULT</code>：从<code>UNION</code>表获取结果的<code>SELECT</code>。</li>
+</ul>
+
+        <h4 id="table"   >
+          <a href="#table" class="heading-link"><i class="fas fa-link"></i></a>table</h4>
+      
+<p>显示这一行数据属于哪个表</p>
+
+        <h4 id="type"   >
+          <a href="#type" class="heading-link"><i class="fas fa-link"></i></a>type</h4>
+      
+<p><strong>访问类型排列，显示查询使用了何种类型</strong></p>
+<ol>
+<li>type显示的是访问类型，是较为重要的一个指标，结果值从最好到最坏依次是：<code>system&gt;const&gt;eq_ref&gt;ref&gt;fultext&gt;ref_or_null&gt;index_merge&gt;unique_subquery&gt;index_subquery&gt;range&gt;index&gt;ALL</code></li>
+<li>挑重要的来说：<code>system&gt;const&gt;eq_ref&gt;ref&gt;range&gt;index&gt;ALL</code>，一般来说，得保证查询至少达到range级别，最好能达到ref。</li>
+</ol>
+<p><strong>从最好到最差依次是：system&gt;const&gt;eq_ref&gt;ref&gt;range&gt;index&gt;ALL</strong></p>
+<ol>
+<li>
+<p>system：表只有一行记录（等于系统表），这是const类型的特例，平时不会出现，这个也可以忽略不计</p>
+</li>
+<li>
+<p>const：表示通过索引一次就找到了，const用于比较primary key或者unique索引。因为只匹配一行数据，所以很快。如将主键置于where列表中，MySQL就能将该查询转换为一个常量</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930233944.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>eq_ref：唯一性索引，对于每个索引键，表中只有一条记录与之匹配，常见于主键或唯一索引扫描</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930233956.png"  alt="" />
+      </p>
+</li>
+<li>
+<p>ref：非唯一索引扫描，返回匹配某个单独值的所有行。本质上也是一种索引访问，它返回所有匹配某个单独值的行，然而，它可能会找到多个符合条件的行，所以他应该属于查找和扫描的混合体</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234040.png"  alt="" />
+      </p>
+</li>
+<li>
+<p><strong>range</strong>：只检索给定范围的行，使用一个索引来选择行。key列显示使用了哪个索引一般就是在你的where语句中出现了<code>between</code>、<code>&lt;</code>、<code>&gt;</code>、<code>in</code>等的查询这种范围扫描索引扫描比全表扫描要好，因为他<strong>只需要开始索引的某一点，而结束于另一点，不用扫描全部索引</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234055.png"  alt="" />
+      </p>
+</li>
+<li>
+<p><strong>index</strong>：Full Index Scan，index与ALL区别为index类型<strong>只遍历索引树</strong>。这通常比ALL快，因为索引文件通常比数据文件小。（也就是说<strong>虽然all和index都是读全表，但index是从索引中读取的，而all是从硬盘数据库文件中读的</strong>）</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234104.png"  alt="" />
+      </p>
+</li>
+<li>
+<p><strong>all</strong>：FullTable Scan，<strong>将遍历全表以找到匹配的行（全表扫描）</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930234115.png"  alt="" />
+      </p>
+</li>
+</ol>
+<blockquote>
+<p>const只有一条记录，eq_ref是可能多条，但是A表的外键对应B表中只有一条记录，可以想象一个圆规，当一个脚（t2）固定时另一个脚可以画圈（t1）。ref就是一对多，指单表，eq_ref是圆规，一个脚固定时，另一个脚可以画圈</p>
+</blockquote>
+
+        <h4 id="possible_keys"   >
+          <a href="#possible_keys" class="heading-link"><i class="fas fa-link"></i></a>possible_keys</h4>
+      
+<ol>
+<li>显示<strong>可能</strong>应用在这张表中的索引，一个或多个</li>
+<li>若查询涉及的字段上存在索引，则该索引将被列出，但不一定被查询实际使用</li>
+</ol>
+
+        <h4 id="key"   >
+          <a href="#key" class="heading-link"><i class="fas fa-link"></i></a>key</h4>
+      
+<ol>
+<li>
+<p><strong>实际</strong>使用的索引，如果为null，则没有使用索引</p>
+</li>
+<li>
+<p><strong>若查询中使用了覆盖索引，则该索引仅出现在key列表中</strong></p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20200930235554.png"  alt="" />
+      </p>
+<blockquote>
+<p>possible_key为空，因为没有带where条件，但是使用上了覆盖索引</p>
+</blockquote>
+</li>
+</ol>
+
+        <h4 id="key_len"   >
+          <a href="#key_len" class="heading-link"><i class="fas fa-link"></i></a>key_len</h4>
+      
+<ol>
+<li><strong>表示索引中使用的字节数</strong>，可通过该列计算查询中使用的索引的长度。在不损失精确性的情况下，长度越短越好</li>
+<li>key_len显示的值为<strong>索引最大可能长度</strong>，并非实际使用长度，即key_len是根据表定义计算而得，不是通过表内检索出的</li>
+</ol>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001000543.png"  alt="" />
+      </p>
+<p><strong>key_len计算规则</strong></p>
+<p><strong>各种数据类型计算规则如下：</strong></p>
+<figure class="highlight shell"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> char和varchar类型key_len计算公式:</span></span><br><span class="line"></span><br><span class="line">varchr(N)变长字段且允许NULL = N * ( character set：utf8=3,gbk=2,latin1=1)+1(NULL)+2(变长字段)</span><br><span class="line"></span><br><span class="line">varchr(N)变长字段且不允许NULL = N * ( character set：utf8=3,gbk=2,latin1=1)+2(变长字段)</span><br><span class="line"></span><br><span class="line">char(N)固定字段且允许NULL = N * ( character set：utf8=3,gbk=2,latin1=1)+1(NULL)</span><br><span class="line"></span><br><span class="line">char(N)固定字段且允许NULL = N * ( character set：utf8=3,gbk=2,latin1=1)</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 数值数据的key_len计算公式：</span></span><br><span class="line"></span><br><span class="line">TINYINT允许NULL = 1 + 1(NULL)</span><br><span class="line"></span><br><span class="line">TINYINT不允许NULL = 1</span><br><span class="line"></span><br><span class="line">SMALLINT允许为NULL = 2+1(NULL)</span><br><span class="line"></span><br><span class="line">SMALLINT不允许为NULL = 2</span><br><span class="line"></span><br><span class="line">INT允许为NULL = 4+1(NULL)</span><br><span class="line"></span><br><span class="line">INT不允许为NULL = 4</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 日期时间型的key_len计算：（针对mysql5.5及之前版本）</span></span><br><span class="line"></span><br><span class="line">DATE 允许为NULL=3  +1(NULL)</span><br><span class="line"></span><br><span class="line">DATE 不允许为NULL=3</span><br><span class="line"></span><br><span class="line">DATETIME允许为NULL = 8 + 1(NULL)  #（DATETIME从mysql5.6开始 长度5）</span><br><span class="line"></span><br><span class="line">DATETIME不允许为NULL = 8</span><br><span class="line"></span><br><span class="line">TIMESTAMP允许为NULL = 4 + 1(NULL)</span><br><span class="line"></span><br><span class="line">TIMESTAMP不允许为NULL = 4</span><br><span class="line"><span class="meta">#</span><span class="bash"> 组合索引遵循索引最左原则</span></span><br><span class="line">key_len以最左边的索引字段长度为计算准则</span><br></pre></td></tr></table></div></figure>
+
+        <h4 id="ref"   >
+          <a href="#ref" class="heading-link"><i class="fas fa-link"></i></a>ref</h4>
+      
+<ol>
+<li><strong>显示表中哪一列被使用了</strong>，如果可能的话，最好是一个常数。哪些列或常量被用于查找索引列上的值</li>
+<li>由key_len可知t1表的索引idx_col1_col2被充分使用，t1表的col1匹配t2表的col1，t1表的col2匹配了一个常量，即’ac’</li>
+</ol>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001003754.png"  alt="" />
+      </p>
+<blockquote>
+<p>圆规花圆，先固定一脚（t2）再转动另一角（t1），所以t2的ref是null</p>
+<p>可以理解为条件中等号后面的字段或常量</p>
+</blockquote>
+
+        <h4 id="rows"   >
+          <a href="#rows" class="heading-link"><i class="fas fa-link"></i></a>rows</h4>
+      
+<p>根据表统计信息及索引选用情况，大致估算出找到所需的记录所需要读取的行数</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001004815.png"  alt="" />
+      </p>
+
+        <h4 id="extra"   >
+          <a href="#extra" class="heading-link"><i class="fas fa-link"></i></a>Extra</h4>
+      
+
+        <h5 id="using-filesort"   >
+          <a href="#using-filesort" class="heading-link"><i class="fas fa-link"></i></a>Using filesort</h5>
+      
+<ul>
+<li>MySQL中无法利用索引完成排序操作成为“文件排序”</li>
+<li>说明mysql会对数据使用一个外部的索引排序，而不是按照表内的索引顺序进行读取</li>
+<li><strong>出现 Using filesort 不好（九死一生），需要尽快优化 SQL</strong></li>
+<li>示例中第一个查询只使用了 col1 和 col3，原有索引派不上用场，所以进行了外部文件排序</li>
+<li>示例中第二个查询使用了 col1、col2 和 col3，原有索引派上用场，无需进行文件排序</li>
+</ul>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015316.png"  alt="" />
+      </p>
+
+        <h5 id="using-temporary"   >
+          <a href="#using-temporary" class="heading-link"><i class="fas fa-link"></i></a>Using temporary</h5>
+      
+<ul>
+<li>使用了临时表保存中间结果，MySQL在对查询结果排序时使用临时表。常见于排序 order by 和分组查询 group by同时使用</li>
+<li><strong>出现 Using temporary 超级不好（十死无生），需要立即优化 SQL</strong></li>
+<li>示例中第一个查询只使用了 col1，原有索引派不上用场，所以创建了临时表进行分组</li>
+<li>示例中第二个查询使用了 col1、col2，原有索引派上用场，无需创建临时表</li>
+</ul>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015334.png"  alt="" />
+      </p>
+
+        <h5 id="using-index"   >
+          <a href="#using-index" class="heading-link"><i class="fas fa-link"></i></a>Using index</h5>
+      
+<ul>
+<li>表示相应的select操作中使用了覆盖索引（Coveing Index），避免访问了表的数据行，效率不错！</li>
+<li>如果同时出现using where，表明索引被用来执行索引键值的查找</li>
+<li>如果没有同时出现using where，表明索引用来读取数据而非执行查找动作</li>
+</ul>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015509.png"  alt="" />
+      </p>
+<p>同时出现Using where 表明索引被用来执行查找动作，select list list里不仅有该索引列还有其他内容</p>
+<p>如果没有出现Using where 表明索引被用来读取数据，select list list里仅有该索引列</p>
+<blockquote>
+<p><strong>覆盖索引（Covering Index），也说为索引覆盖</strong></p>
+<ul>
+<li>理解方式一：就是<strong>select的数据列只用从索引中就能够取得，不必读取数据行</strong>，MySQL可以<strong>利用索引返回select列表中的字段，而不必根据索引再次读取数据文件</strong>，换句话说查询列要被所建的索引覆盖。</li>
+<li>理解方式二：索引是高效找到行的一个方法，但是一般数据库也能使用索引找到一个列的数据，因此它不必读取整个行。毕竟索引叶子节点存储了它们索引的数据；当能通过读取索引就可以得到想要的数据，那就不需要读取行了。一个索引包含了（或覆盖了）满足查询结果的数据就叫做覆盖索引。</li>
+<li>注意：<strong>如果要使用覆盖索引，一定要注意select列表中只取出需要的列，不可select *</strong> ，因为如果将所有字段一起做索引会导致索引文件过大，查询性能下降。</li>
+</ul>
+</blockquote>
+
+        <h5 id="using-where"   >
+          <a href="#using-where" class="heading-link"><i class="fas fa-link"></i></a>Using where</h5>
+      
+<p>表明使用了where过滤</p>
+
+        <h5 id="using-join-buffer"   >
+          <a href="#using-join-buffer" class="heading-link"><i class="fas fa-link"></i></a>Using join buffer</h5>
+      
+<p>表明使用了连接缓存</p>
+
+        <h5 id="using-impossible-where"   >
+          <a href="#using-impossible-where" class="heading-link"><i class="fas fa-link"></i></a>Using impossible where</h5>
+      
+<p>where子句的值总是false，不能用来获取任何元组</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001015715.png"  alt="" />
+      </p>
+
+        <h5 id="select-tables-optimized-away"   >
+          <a href="#select-tables-optimized-away" class="heading-link"><i class="fas fa-link"></i></a>select tables optimized away</h5>
+      
+<p>select tables optimized away：在没有GROUPBY子句的情况下，基于索引优化MIN/MAX操作或者对于MyISAM存储引擎优化<code>COUNT(*)</code>操作，不必等到执行阶段再进行计算，查询执行计划生成的阶段即完成优化。</p>
+
+        <h5 id="distinct"   >
+          <a href="#distinct" class="heading-link"><i class="fas fa-link"></i></a>distinct</h5>
+      
+<p>优化distinct，在找到第一匹配的元组后即停止找同样值的工作</p>
+
+        <h3 id="explain-case"   >
+          <a href="#explain-case" class="heading-link"><i class="fas fa-link"></i></a>Explain Case</h3>
+      
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001102613.png"  alt="" />
+      </p>
+<ol>
+<li>第一行（执行顺序4）：id列为1，表示是union里的第一个select，select_type列的primary表示该查询为外层查询，table列被标记为<code>&lt;derived3&gt;</code>，表示查询结果来自一个衍生表，其中derived3中3代表该查询衍生自第三个select查询，即id为3的select。【<code>select d1.name ...</code>】</li>
+<li>第二行（执行顺序2）：id为3，是整个查询中第三个select的一部分。因查询包含在from中，所以为derived。【<code>select id, name from t1 where other_column= ' '</code>】</li>
+<li>第三行（执行顺序3）：select列表中的子查询select_type为subquery，为整个查询中的第二个select。【<code>select id from t3</code>】</li>
+<li>第四行（执行顺序1）：select_type为union，说明第四个select是union里的第二个select，最先执行【<code>select name, id from t2</code>】</li>
+<li>第五行（执行顺序5）：代表从union的临时表中读取行的阶段，table列的&lt;union1, 4&gt;表示用第一个和第四个select的结果进行union操作。【两个结果进行uinion操作】</li>
+</ol>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/5_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/5_%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/mysql/">mysql</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/2_%E4%B8%83%E7%A7%8DJOIN/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">七种JOIN</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/4_%E6%9C%80%E5%B7%A6%E5%8C%B9%E9%85%8D/"><span class="paginator-prev__text">最左匹配</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#sql性能下降的原因"><span class="toc-number">1.</span> <span class="toc-text">
+          SQL性能下降的原因</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#sql执行顺序"><span class="toc-number">2.</span> <span class="toc-text">
+          SQL执行顺序</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#性能分析"><span class="toc-number">3.</span> <span class="toc-text">
+          性能分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#mysql-query-optimizer"><span class="toc-number">3.1.</span> <span class="toc-text">
+          MySQL Query Optimizer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mysql常见瓶颈"><span class="toc-number">3.2.</span> <span class="toc-text">
+          Mysql常见瓶颈</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#explain"><span class="toc-number">3.3.</span> <span class="toc-text">
+          Explain</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#explain简介"><span class="toc-number">3.3.1.</span> <span class="toc-text">
+          Explain简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#explain字段"><span class="toc-number">3.3.2.</span> <span class="toc-text">
+          Explain字段</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#id"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">
+          id</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#select_type"><span class="toc-number">3.3.2.2.</span> <span class="toc-text">
+          select_type</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#table"><span class="toc-number">3.3.2.3.</span> <span class="toc-text">
+          table</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#type"><span class="toc-number">3.3.2.4.</span> <span class="toc-text">
+          type</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#possible_keys"><span class="toc-number">3.3.2.5.</span> <span class="toc-text">
+          possible_keys</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#key"><span class="toc-number">3.3.2.6.</span> <span class="toc-text">
+          key</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#key_len"><span class="toc-number">3.3.2.7.</span> <span class="toc-text">
+          key_len</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ref"><span class="toc-number">3.3.2.8.</span> <span class="toc-text">
+          ref</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#rows"><span class="toc-number">3.3.2.9.</span> <span class="toc-text">
+          rows</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#extra"><span class="toc-number">3.3.2.10.</span> <span class="toc-text">
+          Extra</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#using-filesort"><span class="toc-number">3.3.2.10.1.</span> <span class="toc-text">
+          Using filesort</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#using-temporary"><span class="toc-number">3.3.2.10.2.</span> <span class="toc-text">
+          Using temporary</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#using-index"><span class="toc-number">3.3.2.10.3.</span> <span class="toc-text">
+          Using index</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#using-where"><span class="toc-number">3.3.2.10.4.</span> <span class="toc-text">
+          Using where</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#using-join-buffer"><span class="toc-number">3.3.2.10.5.</span> <span class="toc-text">
+          Using join buffer</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#using-impossible-where"><span class="toc-number">3.3.2.10.6.</span> <span class="toc-text">
+          Using impossible where</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#select-tables-optimized-away"><span class="toc-number">3.3.2.10.7.</span> <span class="toc-text">
+          select tables optimized away</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#distinct"><span class="toc-number">3.3.2.10.8.</span> <span class="toc-text">
+          distinct</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#explain-case"><span class="toc-number">3.3.3.</span> <span class="toc-text">
+          Explain Case</span></a></li></ol></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">325</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>

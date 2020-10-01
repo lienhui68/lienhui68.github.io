@@ -1,0 +1,949 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="索引优化                            单表优化案例        创建表  建表 SQL  123456789101112131415CREATE TABLE IF NOT EXISTS article(	id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,	author_id INT(10">
+<meta property="og:type" content="article">
+<meta property="og:title" content="索引优化">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/6_%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="索引优化                            单表优化案例        创建表  建表 SQL  123456789101112131415CREATE TABLE IF NOT EXISTS article(	id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,	author_id INT(10">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001122751.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001123049.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001123505.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001125652.png">
+<meta property="article:published_time" content="2020-09-30T06:16:14.957Z">
+<meta property="article:modified_time" content="2020-10-01T12:14:19.870Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201001122751.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>索引优化 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/6_%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">索引优化</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-09-30</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-10-01</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">67分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="索引优化"   >
+          <a href="#索引优化" class="heading-link"><i class="fas fa-link"></i></a>索引优化</h1>
+      
+
+        <h2 id="单表优化案例"   >
+          <a href="#单表优化案例" class="heading-link"><i class="fas fa-link"></i></a>单表优化案例</h2>
+      
+<p><strong>创建表</strong></p>
+<ul>
+<li>建表 SQL</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> article(</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> PRIMARY <span class="keyword">KEY</span> AUTO_INCREMENT,</span><br><span class="line">	author_id <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	category_id <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	views <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	comments <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	title <span class="built_in">VARCHAR</span>(<span class="number">255</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	<span class="keyword">content</span> <span class="built_in">TEXT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> article(author_id,category_id,views,comments,title,<span class="keyword">content</span>)</span><br><span class="line"><span class="keyword">VALUES</span></span><br><span class="line">(<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="number">1</span>,<span class="string">'1'</span>,<span class="string">'1'</span>),</span><br><span class="line">(<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="number">2</span>,<span class="string">'2'</span>,<span class="string">'2'</span>),</span><br><span class="line">(<span class="number">1</span>,<span class="number">1</span>,<span class="number">3</span>,<span class="number">3</span>,<span class="string">'3'</span>,<span class="string">'3'</span>);</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>表中的测试数据</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT * FROM article;</span><br><span class="line">+<span class="comment">----+-----------+-------------+-------+----------+-------+---------+</span></span><br><span class="line">| id | author_id | category_id | views | comments | title | content |</span><br><span class="line">+<span class="comment">----+-----------+-------------+-------+----------+-------+---------+</span></span><br><span class="line">|  1 |         1 |           1 |     1 |        1 | 1     | 1       |</span><br><span class="line">|  2 |         2 |           2 |     2 |        2 | 2     | 2       |</span><br><span class="line">|  3 |         1 |           1 |     3 |        3 | 3     | 3       |</span><br><span class="line">+<span class="comment">----+-----------+-------------+-------+----------+-------+---------+</span></span><br><span class="line">3 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<a id="more"></a>
+<p><strong>查询案例</strong></p>
+<ul>
+<li>查询category_id为1且comments 大于1的情况下，views最多的article_id。</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT id, author_id FROM article WHERE category_id = 1 AND comments &gt; 1 ORDER BY views DESC LIMIT 1;</span><br><span class="line">+<span class="comment">----+-----------+</span></span><br><span class="line">| id | author_id |</span><br><span class="line">+<span class="comment">----+-----------+</span></span><br><span class="line">|  3 |         1 |</span><br><span class="line">+<span class="comment">----+-----------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>此时 article 表中只有一个主键索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW INDEX FROM article;</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table   | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| article |          <span class="number">0</span> | PRIMARY  |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>使用 explain 分析 SQL 语句的执行效率：<code>EXPLAIN SELECT id, author_id FROM article WHERE category_id = 1 AND comments &gt; 1 ORDER BY views DESC LIMIT 1;</code></li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT id, author_id FROM article WHERE category_id = 1 AND comments &gt; 1 ORDER BY views DESC LIMIT 1;</span><br><span class="line">+<span class="comment">----+-------------+---------+------+---------------+------+---------+------+------+-----------------------------+</span></span><br><span class="line">| id | select_type | table   | type | possible_keys | key  | key_len | ref  | rows | Extra                       |</span><br><span class="line">+<span class="comment">----+-------------+---------+------+---------------+------+---------+------+------+-----------------------------+</span></span><br><span class="line">|  1 | SIMPLE      | article | ALL  | NULL          | NULL | NULL    | NULL |    3 | Using where; Using filesort |</span><br><span class="line">+<span class="comment">----+-------------+---------+------+---------------+------+---------+------+------+-----------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>结论：
+<ul>
+<li>很显然，type是ALL，即最坏的情况。</li>
+<li>Extra 里还出现了Using filesort，也是最坏的情况。</li>
+<li>优化是必须的。</li>
+</ul>
+</li>
+</ul>
+<hr />
+<p><strong>开始优化：新建索引</strong></p>
+<ul>
+<li>创建索引的 SQL 命令</li>
+</ul>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># ALTER TABLE article ADD INDEX idx_article_ccv(&#39;category_id&#39;, &#39;comments&#39;, &#39;views&#39;); </span><br><span class="line">create index idx_article_ccv on article(category_id, comments, views);</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>在 category_id 列、comments 列和 views 列上建立联合索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create index idx_article_ccv on article(category_id, comments, views);</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM article;</span><br><span class="line">+<span class="comment">---------+------------+-----------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table   | Non_unique | Key_name        | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">---------+------------+-----------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| article |          <span class="number">0</span> | PRIMARY         |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| article |          <span class="number">1</span> | idx_article_ccv |            <span class="number">1</span> | category_id | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| article |          <span class="number">1</span> | idx_article_ccv |            <span class="number">2</span> | comments    | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| article |          <span class="number">1</span> | idx_article_ccv |            <span class="number">3</span> | views       | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">---------+------------+-----------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>再次执行查询：type变成了range，这是可以忍受的。但是extra里使用Using filesort仍是无法接受的。</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT id, author_id FROM article WHERE category_id = 1 AND comments &gt; 1 ORDER BY views DESC LIMIT 1;</span><br><span class="line">+<span class="comment">----+-------------+---------+-------+-----------------+-----------------+---------+------+------+---------------------------------------+</span></span><br><span class="line">| id | select_type | table   | type  | possible_keys   | key             | key_len | ref  | rows | Extra                                 |</span><br><span class="line">+<span class="comment">----+-------------+---------+-------+-----------------+-----------------+---------+------+------+---------------------------------------+</span></span><br><span class="line">|  1 | SIMPLE      | article | range | idx_article_ccv | idx_article_ccv | 8       | NULL |    1 | Using index condition; Using filesort |</span><br><span class="line">+<span class="comment">----+-------------+---------+-------+-----------------+-----------------+---------+------+------+---------------------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>分析：
+<ul>
+<li>但是我们已经建立了索引，为啥没用呢？</li>
+<li>这是因为按照B+Tree索引的工作原理，先排序 category_id，如果遇到相同的 category_id 则再排序comments，如果遇到相同的 comments 则再排序 views。</li>
+<li>当comments字段在联合索引里处于中间位置时，<strong>因为<code>comments&gt;1</code>条件是一个范围值</strong>（所谓 range），MySQL 无法利用索引再对后面的views部分进行检索，即 <strong>range 类型查询字段后面的索引无效</strong>。</li>
+</ul>
+</li>
+<li>将查询条件中的 <code>comments &gt; 1</code> 改为 <code>comments = 1</code> ，发现 Use filesort 神奇地消失了，从这点可以验证：范围后的索引会导致索引失效</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT id, author_id FROM article WHERE category_id = 1 AND comments = 1 ORDER BY views DESC LIMIT 1;</span><br><span class="line">+<span class="comment">----+-------------+---------+------+-----------------+-----------------+---------+-------------+------+-------------+</span></span><br><span class="line">| id | select_type | table   | type | possible_keys   | key             | key_len | ref         | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+---------+------+-----------------+-----------------+---------+-------------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | article | ref  | idx_article_ccv | idx_article_ccv | 8       | const,const |    1 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+---------+------+-----------------+-----------------+---------+-------------+------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<hr />
+<p><strong>删除索引</strong></p>
+<ul>
+<li>删除索引的 SQL 指令</li>
+</ul>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP INDEX idx_article_ccv ON article;</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>删除刚才创建的 idx_article_ccv 索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; DROP INDEX idx_article_ccv ON article;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM article;</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table   | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| article |          <span class="number">0</span> | PRIMARY  |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<hr />
+<p><strong>再次创建索引</strong></p>
+<ul>
+<li>创建索引的 SQL 指令</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ALTER TABLE article ADD INDEX idx_article_ccv('category_id',  'views'); </span></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">index</span> idx_article_ccv <span class="keyword">on</span> article(category_id, views);</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>由于 range 后（<code>comments &gt; 1</code>）的索引会失效，这次我们建立索引时，直接抛弃 comments 列，先利用 category_id 和 views 的联合索引查询所需要的数据，再从其中取出 <code>comments &gt; 1</code> 的数据（我觉着应该是这样的）</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create index idx_article_ccv on article(category_id, views);</span><br><span class="line">Query OK, 0 rows affected (0.30 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM article;</span><br><span class="line">+<span class="comment">---------+------------+-----------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table   | Non_unique | Key_name        | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">---------+------------+-----------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| article |          <span class="number">0</span> | PRIMARY         |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| article |          <span class="number">1</span> | idx_article_ccv |            <span class="number">1</span> | category_id | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| article |          <span class="number">1</span> | idx_article_ccv |            <span class="number">2</span> | views       | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">---------+------------+-----------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">3</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>再次执行查询：可以看到，type变为了ref，Extra中的Using filesort也消失了，结果非常理想</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ysql&gt; EXPLAIN SELECT id, author_id FROM article WHERE category_id = 1 AND comments &gt; 1 ORDER BY views DESC LIMIT 1;</span><br><span class="line">+<span class="comment">----+-------------+---------+------+-----------------+-----------------+---------+-------+------+-------------+</span></span><br><span class="line">| id | select_type | table   | type | possible_keys   | key             | key_len | ref   | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+---------+------+-----------------+-----------------+---------+-------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | article | ref  | idx_article_ccv | idx_article_ccv | 4       | const |    2 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+---------+------+-----------------+-----------------+---------+-------+------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>为了不影响之后的测试，删除该表的 idx_article_ccv 索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; DROP INDEX idx_article_ccv ON article;</span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM article;</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table   | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| article |          <span class="number">0</span> | PRIMARY  |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">---------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="两表索引优化"   >
+          <a href="#两表索引优化" class="heading-link"><i class="fas fa-link"></i></a>两表索引优化</h2>
+      
+<p><strong>创建表</strong></p>
+<ul>
+<li>建表 SQL</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> <span class="keyword">class</span>(</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">	card <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	PRIMARY <span class="keyword">KEY</span>(<span class="keyword">id</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> book(</span><br><span class="line">	bookid <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">	card <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	PRIMARY <span class="keyword">KEY</span>(bookid)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">class</span>(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> book(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>class 表中的测试数据</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from class;</span><br><span class="line">+<span class="comment">----+------+</span></span><br><span class="line">| id | card |</span><br><span class="line">+<span class="comment">----+------+</span></span><br><span class="line">|  1 |   12 |</span><br><span class="line">|  2 |   13 |</span><br><span class="line">|  3 |   12 |</span><br><span class="line">|  4 |   17 |</span><br><span class="line">|  5 |   11 |</span><br><span class="line">|  6 |    3 |</span><br><span class="line">|  7 |    1 |</span><br><span class="line">|  8 |   16 |</span><br><span class="line">|  9 |   17 |</span><br><span class="line">| 10 |   16 |</span><br><span class="line">| 11 |    9 |</span><br><span class="line">| 12 |   17 |</span><br><span class="line">| 13 |   18 |</span><br><span class="line">| 14 |   16 |</span><br><span class="line">| 15 |    7 |</span><br><span class="line">| 16 |    8 |</span><br><span class="line">| 17 |   19 |</span><br><span class="line">| 18 |    9 |</span><br><span class="line">| 19 |    6 |</span><br><span class="line">| 20 |    5 |</span><br><span class="line">| 21 |    6 |</span><br><span class="line">+<span class="comment">----+------+</span></span><br><span class="line">21 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>book 表中的测试数据</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from book;</span><br><span class="line">+<span class="comment">--------+------+</span></span><br><span class="line">| bookid | card |</span><br><span class="line">+<span class="comment">--------+------+</span></span><br><span class="line">|      1 |   16 |</span><br><span class="line">|      2 |    1 |</span><br><span class="line">|      3 |   17 |</span><br><span class="line">|      4 |    3 |</span><br><span class="line">|      5 |   20 |</span><br><span class="line">|      6 |   12 |</span><br><span class="line">|      7 |   18 |</span><br><span class="line">|      8 |   13 |</span><br><span class="line">|      9 |   13 |</span><br><span class="line">|     10 |    4 |</span><br><span class="line">|     11 |    1 |</span><br><span class="line">|     12 |   13 |</span><br><span class="line">|     13 |   20 |</span><br><span class="line">|     14 |   20 |</span><br><span class="line">|     15 |    1 |</span><br><span class="line">|     16 |    2 |</span><br><span class="line">|     17 |    9 |</span><br><span class="line">|     18 |   16 |</span><br><span class="line">|     19 |   14 |</span><br><span class="line">|     20 |    2 |</span><br><span class="line">+<span class="comment">--------+------+</span></span><br><span class="line">20 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<hr />
+<p><strong>查询案例</strong></p>
+<ul>
+<li>实现两表的连接，连接条件是 class.card = book.card</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT * FROM class LEFT JOIN book ON class.card = book.card;</span><br><span class="line">+<span class="comment">----+------+--------+------+</span></span><br><span class="line">| id | card | bookid | card |</span><br><span class="line">+<span class="comment">----+------+--------+------+</span></span><br><span class="line">|  1 |   12 |      6 |   12 |</span><br><span class="line">|  2 |   13 |      8 |   13 |</span><br><span class="line">|  2 |   13 |      9 |   13 |</span><br><span class="line">|  2 |   13 |     12 |   13 |</span><br><span class="line">|  3 |   12 |      6 |   12 |</span><br><span class="line">|  4 |   17 |      3 |   17 |</span><br><span class="line">|  5 |   11 |   NULL | NULL |</span><br><span class="line">|  6 |    3 |      4 |    3 |</span><br><span class="line">|  7 |    1 |      2 |    1 |</span><br><span class="line">|  7 |    1 |     11 |    1 |</span><br><span class="line">|  7 |    1 |     15 |    1 |</span><br><span class="line">|  8 |   16 |      1 |   16 |</span><br><span class="line">|  8 |   16 |     18 |   16 |</span><br><span class="line">|  9 |   17 |      3 |   17 |</span><br><span class="line">| 10 |   16 |      1 |   16 |</span><br><span class="line">| 10 |   16 |     18 |   16 |</span><br><span class="line">| 11 |    9 |     17 |    9 |</span><br><span class="line">| 12 |   17 |      3 |   17 |</span><br><span class="line">| 13 |   18 |      7 |   18 |</span><br><span class="line">| 14 |   16 |      1 |   16 |</span><br><span class="line">| 14 |   16 |     18 |   16 |</span><br><span class="line">| 15 |    7 |   NULL | NULL |</span><br><span class="line">| 16 |    8 |   NULL | NULL |</span><br><span class="line">| 17 |   19 |   NULL | NULL |</span><br><span class="line">| 18 |    9 |     17 |    9 |</span><br><span class="line">| 19 |    6 |   NULL | NULL |</span><br><span class="line">| 20 |    5 |   NULL | NULL |</span><br><span class="line">| 21 |    6 |   NULL | NULL |</span><br><span class="line">+<span class="comment">----+------+--------+------+</span></span><br><span class="line">28 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>使用 explain 分析 SQL 语句的性能，可以看到：驱动表是左表 class 表</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT * FROM class LEFT JOIN book ON class.card = book.card;</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | Extra                                              |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">|  1 | SIMPLE      | class | ALL  | NULL          | NULL | NULL    | NULL |   21 | NULL                                               |</span><br><span class="line">|  1 | SIMPLE      | book  | ALL  | NULL          | NULL | NULL    | NULL |   20 | Using where; Using join buffer (Block Nested Loop) |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>结论：
+<ul>
+<li><strong>type 有 All ，rows 为表中数据总行数，说明 class 和 book 进行了全表检索</strong></li>
+<li>即每次 class 表对 book 表进行左外连接时，都需要在 book 表中进行一次全表检索</li>
+</ul>
+</li>
+</ul>
+<hr />
+<p><strong>添加索引：在右表添加索引</strong></p>
+<ul>
+<li>添加索引的 SQL 指令</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> <span class="string">'book'</span> <span class="keyword">ADD</span> <span class="keyword">INDEX</span> Y (<span class="string">'card'</span>);</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>在 book 的 card 字段上添加索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; ALTER TABLE book ADD INDEX Y (card);</span><br><span class="line">Query OK, 0 rows affected (0.30 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM book;</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| book  |          <span class="number">0</span> | PRIMARY  |            <span class="number">1</span> | bookid      | A         |          <span class="number">20</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| book  |          <span class="number">1</span> | Y        |            <span class="number">1</span> | card        | A         |          <span class="number">20</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>测试结果：可以看到第二行的type变为了ref，rows也变成了优化比较明显。</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT * FROM class LEFT JOIN book ON class.card = book.card;</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+-----------------+------+-------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref             | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+-----------------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | class | ALL  | NULL          | NULL | NULL    | NULL            |   21 | NULL        |</span><br><span class="line">|  1 | SIMPLE      | book  | ref  | Y             | Y    | 4       | db01.class.card |    1 | Using index |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+-----------------+------+-------------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>分析：
+<ul>
+<li><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>这是由左连接特性决定的。LEFT JOIN条件用于确定如何从右表搜索行，左边一定都有(左表示全量数据，圆规固定一脚是左表，右表转动需要建立索引)，所以右边是我们的关键点，一定需要建立索引。</span></li>
+<li><strong>左表连接右表，则需要拿着左表的数据去右表里面查，索引需要在右表中建立索引</strong></li>
+</ul>
+</li>
+</ul>
+<hr />
+<p><strong>添加索引：在右表添加索引</strong></p>
+<ul>
+<li>删除之前 book 表中的索引</li>
+</ul>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP INDEX Y ON book;</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>在 class 表的 card 字段上建立索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> <span class="keyword">class</span> <span class="keyword">ADD</span> <span class="keyword">INDEX</span> X(card);</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>再次执行左连接，凉凉~~~</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT * FROM class LEFT JOIN book ON class.card = book.card;</span><br><span class="line">+<span class="comment">----+-------------+-------+-------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">| id | select_type | table | type  | possible_keys | key  | key_len | ref  | rows | Extra                                              |</span><br><span class="line">+<span class="comment">----+-------------+-------+-------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">|  1 | SIMPLE      | class | index | NULL          | X    | 4       | NULL |   21 | Using index                                        |</span><br><span class="line">|  1 | SIMPLE      | book  | ALL   | NULL          | NULL | NULL    | NULL |   20 | Using where; Using join buffer (Block Nested Loop) |</span><br><span class="line">+<span class="comment">----+-------------+-------+-------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>别怕，我们来执行右连接：可以看到第二行的type变为了ref，rows也变成了优化比较明显。</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT * FROM class RIGHT JOIN book ON class.card = book.card;</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+----------------+------+-------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref            | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+----------------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | book  | ALL  | NULL          | NULL | NULL    | NULL           |   20 | NULL        |</span><br><span class="line">|  1 | SIMPLE      | class | ref  | X             | X    | 4       | db01.book.card |    1 | Using index |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+----------------+------+-------------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>分析：
+<ul>
+<li>这是因为RIGHT JOIN条件用于确定如何从左表搜索行，右边一定都有，所以左边是我们的关键点，一定需要建立索引。</li>
+<li>class RIGHT JOIN book ：book 里面的数据一定存在于结果集中，我们需要拿着 book 表中的数据，去 class 表中搜索，所以索引需要建立在 class 表中</li>
+</ul>
+</li>
+<li>为了不影响之后的测试，删除该表的 idx_article_ccv 索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; DROP INDEX X ON class;</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM class;</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| <span class="keyword">class</span> |          <span class="number">0</span> | PRIMARY  |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |          <span class="number">21</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="三表索引优化"   >
+          <a href="#三表索引优化" class="heading-link"><i class="fas fa-link"></i></a>三表索引优化</h2>
+      
+<p><strong>创建表</strong></p>
+<ul>
+<li>建表 SQL</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> phone(</span><br><span class="line">	phoneid <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">	card <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">UNSIGNED</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">	PRIMARY <span class="keyword">KEY</span>(phoneid)</span><br><span class="line">)<span class="keyword">ENGINE</span>=<span class="keyword">INNODB</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> phone(card) <span class="keyword">VALUES</span>(<span class="keyword">FLOOR</span>(<span class="number">1</span>+(<span class="keyword">RAND</span>()*<span class="number">20</span>)));</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>phone 表中的测试数据</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from phone;</span><br><span class="line">+<span class="comment">---------+------+</span></span><br><span class="line">| phoneid | card |</span><br><span class="line">+<span class="comment">---------+------+</span></span><br><span class="line">|       1 |    7 |</span><br><span class="line">|       2 |    7 |</span><br><span class="line">|       3 |   13 |</span><br><span class="line">|       4 |    6 |</span><br><span class="line">|       5 |    8 |</span><br><span class="line">|       6 |    4 |</span><br><span class="line">|       7 |   16 |</span><br><span class="line">|       8 |    4 |</span><br><span class="line">|       9 |   15 |</span><br><span class="line">|      10 |    1 |</span><br><span class="line">|      11 |   20 |</span><br><span class="line">|      12 |   18 |</span><br><span class="line">|      13 |    9 |</span><br><span class="line">|      14 |    9 |</span><br><span class="line">|      15 |   20 |</span><br><span class="line">|      16 |   11 |</span><br><span class="line">|      17 |   15 |</span><br><span class="line">|      18 |    3 |</span><br><span class="line">|      19 |    8 |</span><br><span class="line">|      20 |   10 |</span><br><span class="line">+<span class="comment">---------+------+</span></span><br><span class="line">20 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<hr />
+<p><strong>查询案例</strong></p>
+<ul>
+<li>实现三表的连接查询：</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT * FROM class LEFT JOIN book ON class.card = book.card LEFT JOIN phone ON book.card = phone.card;</span><br><span class="line">+<span class="comment">----+------+--------+------+---------+------+</span></span><br><span class="line">| id | card | bookid | card | phoneid | card |</span><br><span class="line">+<span class="comment">----+------+--------+------+---------+------+</span></span><br><span class="line">|  2 |   13 |      8 |   13 |       3 |   13 |</span><br><span class="line">|  2 |   13 |      9 |   13 |       3 |   13 |</span><br><span class="line">|  2 |   13 |     12 |   13 |       3 |   13 |</span><br><span class="line">|  8 |   16 |      1 |   16 |       7 |   16 |</span><br><span class="line">| 10 |   16 |      1 |   16 |       7 |   16 |</span><br><span class="line">| 14 |   16 |      1 |   16 |       7 |   16 |</span><br><span class="line">|  8 |   16 |     18 |   16 |       7 |   16 |</span><br><span class="line">| 10 |   16 |     18 |   16 |       7 |   16 |</span><br><span class="line">| 14 |   16 |     18 |   16 |       7 |   16 |</span><br><span class="line">|  7 |    1 |      2 |    1 |      10 |    1 |</span><br><span class="line">|  7 |    1 |     11 |    1 |      10 |    1 |</span><br><span class="line">|  7 |    1 |     15 |    1 |      10 |    1 |</span><br><span class="line">| 13 |   18 |      7 |   18 |      12 |   18 |</span><br><span class="line">| 11 |    9 |     17 |    9 |      13 |    9 |</span><br><span class="line">| 18 |    9 |     17 |    9 |      13 |    9 |</span><br><span class="line">| 11 |    9 |     17 |    9 |      14 |    9 |</span><br><span class="line">| 18 |    9 |     17 |    9 |      14 |    9 |</span><br><span class="line">|  6 |    3 |      4 |    3 |      18 |    3 |</span><br><span class="line">|  4 |   17 |      3 |   17 |    NULL | NULL |</span><br><span class="line">|  9 |   17 |      3 |   17 |    NULL | NULL |</span><br><span class="line">| 12 |   17 |      3 |   17 |    NULL | NULL |</span><br><span class="line">|  1 |   12 |      6 |   12 |    NULL | NULL |</span><br><span class="line">|  3 |   12 |      6 |   12 |    NULL | NULL |</span><br><span class="line">|  5 |   11 |   NULL | NULL |    NULL | NULL |</span><br><span class="line">| 15 |    7 |   NULL | NULL |    NULL | NULL |</span><br><span class="line">| 16 |    8 |   NULL | NULL |    NULL | NULL |</span><br><span class="line">| 17 |   19 |   NULL | NULL |    NULL | NULL |</span><br><span class="line">| 19 |    6 |   NULL | NULL |    NULL | NULL |</span><br><span class="line">| 20 |    5 |   NULL | NULL |    NULL | NULL |</span><br><span class="line">| 21 |    6 |   NULL | NULL |    NULL | NULL |</span><br><span class="line">+<span class="comment">----+------+--------+------+---------+------+</span></span><br><span class="line">30 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>使用 explain 分析 SQL 指令：</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT * FROM class LEFT JOIN book ON class.card = book.card LEFT JOIN phone ON book.card = phone.card;</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | Extra                                              |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">|  1 | SIMPLE      | class | ALL  | NULL          | NULL | NULL    | NULL |   21 | NULL                                               |</span><br><span class="line">|  1 | SIMPLE      | book  | ALL  | NULL          | NULL | NULL    | NULL |   20 | Using where; Using join buffer (Block Nested Loop) |</span><br><span class="line">|  1 | SIMPLE      | phone | ALL  | NULL          | NULL | NULL    | NULL |   20 | Using where; Using join buffer (Block Nested Loop) |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+----------------------------------------------------+</span></span><br><span class="line">3 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>结论：
+<ul>
+<li><strong>type 有All ，rows 为表数据总行数，说明 class、 book 和 phone 表都进行了全表检索</strong></li>
+<li>Extra 中 Using join buffer ，表明连接过程中使用了 join 缓冲区</li>
+</ul>
+</li>
+</ul>
+<hr />
+<p><strong>创建索引</strong></p>
+<ul>
+<li>创建索引的 SQL 语句</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> book <span class="keyword">ADD</span> <span class="keyword">INDEX</span> Y (card);</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> phone <span class="keyword">ADD</span> <span class="keyword">INDEX</span> Z (card);</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li><strong>进行 LEFT JOIN ，永远都在右表的字段上建立索引</strong></li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; ALTER TABLE book ADD INDEX Y (card);</span><br><span class="line">Query OK, 0 rows affected (0.06 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM book;</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| book  |          <span class="number">0</span> | PRIMARY  |            <span class="number">1</span> | bookid      | A         |          <span class="number">20</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| book  |          <span class="number">1</span> | Y        |            <span class="number">1</span> | card        | A         |          <span class="number">20</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">ALTER</span> <span class="keyword">TABLE</span> phone <span class="keyword">ADD</span> <span class="keyword">INDEX</span> Z (card);</span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br><span class="line">Records: 0  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; SHOW INDEX FROM phone;</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| phone |          <span class="number">0</span> | PRIMARY  |            <span class="number">1</span> | phoneid     | A         |          <span class="number">20</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| phone |          <span class="number">1</span> | Z        |            <span class="number">1</span> | card        | A         |          <span class="number">20</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>执行查询：后2行的type都是ref，且总rows优化很好，效果不错。因此索引最好设置在需要经常查询的字段中。</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT * FROM class LEFT JOIN book ON class.card=book.card LEFT JOIN phone ON book.card = phone.card;</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+-----------------+------+-------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref             | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+-----------------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | class | ALL  | NULL          | NULL | NULL    | NULL            |   21 | NULL        |</span><br><span class="line">|  1 | SIMPLE      | book  | ref  | Y             | Y    | 4       | db01.class.card |    1 | Using index |</span><br><span class="line">|  1 | SIMPLE      | phone | ref  | Z             | Z    | 4       | db01.book.card  |    1 | Using index |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+-----------------+------+-------------+</span></span><br><span class="line">3 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="join-语句优化的结论"   >
+          <a href="#join-语句优化的结论" class="heading-link"><i class="fas fa-link"></i></a>Join 语句优化的结论</h2>
+      
+<p><strong>将 left join 看作是两层嵌套 for 循环</strong></p>
+<ol>
+<li>
+<p>尽可能减少Join语句中的NestedLoop（嵌套勋魂）的循环总次数；</p>
+</li>
+<li>
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:bold'>永远用小结果集驱动大的结果集（在大结果集中建立索引，在小结果集中遍历全表）；</span></p>
+<p>使用小表（商品类别）驱动大表（商品），因为小表是全量，大表是部分，所以需要在大表上建立索引。</p>
+</li>
+<li>
+<p>优先优化NestedLoop的内层循环；</p>
+</li>
+<li>
+<p>保证Join语句中被驱动表上Join条件字段已经被索引；</p>
+</li>
+<li>
+<p>当无法保证被驱动表的Join条件字段被索引且内存资源充足的前提下，不要太吝惜JoinBuffer的设置；</p>
+</li>
+</ol>
+
+        <h1 id="索引失效"   >
+          <a href="#索引失效" class="heading-link"><i class="fas fa-link"></i></a>索引失效</h1>
+      
+<p><strong>数据准备</strong></p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`staffs`</span>(</span><br><span class="line"><span class="string">`id`</span> <span class="built_in">INT</span>(<span class="number">10</span>) PRIMARY <span class="keyword">KEY</span> AUTO_INCREMENT,</span><br><span class="line"><span class="string">`name`</span> <span class="built_in">VARCHAR</span>(<span class="number">24</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">''</span> <span class="keyword">COMMENT</span> <span class="string">'姓名'</span>,</span><br><span class="line"><span class="string">`age`</span> <span class="built_in">INT</span>(<span class="number">10</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="number">0</span> <span class="keyword">COMMENT</span> <span class="string">'年龄'</span>,</span><br><span class="line"><span class="string">`pos`</span> <span class="built_in">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">''</span> <span class="keyword">COMMENT</span> <span class="string">'职位'</span>,</span><br><span class="line"><span class="string">`add_time`</span> <span class="built_in">TIMESTAMP</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">CURRENT_TIMESTAMP</span> <span class="keyword">COMMENT</span> <span class="string">'入职时间'</span></span><br><span class="line">)<span class="keyword">COMMENT</span> <span class="string">'员工记录表'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="string">`staffs`</span>(<span class="string">`name`</span>,<span class="string">`age`</span>,<span class="string">`pos`</span>) <span class="keyword">VALUES</span>(<span class="string">'Ringo'</span>, <span class="number">18</span>, <span class="string">'manager'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="string">`staffs`</span>(<span class="string">`name`</span>,<span class="string">`age`</span>,<span class="string">`pos`</span>) <span class="keyword">VALUES</span>(<span class="string">'张三'</span>, <span class="number">20</span>, <span class="string">'dev'</span>);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="string">`staffs`</span>(<span class="string">`name`</span>,<span class="string">`age`</span>,<span class="string">`pos`</span>) <span class="keyword">VALUES</span>(<span class="string">'李四'</span>, <span class="number">21</span>, <span class="string">'dev'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 创建索引 */</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">INDEX</span> idx_staffs_name_age_pos <span class="keyword">ON</span> <span class="string">`staffs`</span>(<span class="string">`name`</span>,<span class="string">`age`</span>,<span class="string">`pos`</span>);</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="索引失效的情况"   >
+          <a href="#索引失效的情况" class="heading-link"><i class="fas fa-link"></i></a>索引失效的情况</h2>
+      
+<ul>
+<li>全值匹配我最爱。</li>
+<li>最佳左前缀法则。</li>
+<li><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>不在索引列上做任何操作（计算、函数、(自动or手动)类型转换），会导致索引失效而转向全表扫描。</span></li>
+<li>索引中范围条件右边的字段会全部失效。</li>
+<li>尽量使用覆盖索引（只访问索引的查询，索引列和查询列一致），减少<code>SELECT *</code>。</li>
+<li>MySQL在使用<code>!=</code>或者<code>&lt;&gt;</code>的时候无法使用索引会导致全表扫描。</li>
+<li><code>is null</code>、<code>is not null</code>也无法使用索引。</li>
+<li><code>like</code>以通配符开头<code>%abc</code>索引失效会变成全表扫描。</li>
+<li>字符串不加单引号索引失效。</li>
+<li>少用<code>or</code>，用它来连接时会索引失效。</li>
+</ul>
+
+        <h2 id="最佳左前缀法则"   >
+          <a href="#最佳左前缀法则" class="heading-link"><i class="fas fa-link"></i></a>最佳左前缀法则</h2>
+      
+<p><strong>案例</strong></p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 用到了idx_staffs_name_age_pos索引中的name字段 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'Ringo'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 用到了idx_staffs_name_age_pos索引中的name, age字段 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'Ringo'</span> <span class="keyword">AND</span> <span class="string">`age`</span> = <span class="number">18</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 用到了idx_staffs_name_age_pos索引中的name，age，pos字段 这是属于全值匹配的情况！！！*/</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'Ringo'</span> <span class="keyword">AND</span> <span class="string">`age`</span> = <span class="number">18</span> <span class="keyword">AND</span> <span class="string">`pos`</span> = <span class="string">'manager'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 索引没用上，ALL全表扫描 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`age`</span> = <span class="number">18</span> <span class="keyword">AND</span> <span class="string">`pos`</span> = <span class="string">'manager'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 索引没用上，ALL全表扫描 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`pos`</span> = <span class="string">'manager'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 用到了idx_staffs_name_age_pos索引中的name字段，pos字段索引失效 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'Ringo'</span> <span class="keyword">AND</span> <span class="string">`pos`</span> = <span class="string">'manager'</span>;</span><br></pre></td></tr></table></div></figure>
+<p><strong>概念</strong></p>
+<p><strong>最佳左前缀法则：如果索引是多字段的复合索引，要遵守最佳左前缀法则。指的是查询从索引的最左前列开始并且不跳过索引中的字段。</strong></p>
+<p><strong>口诀：带头大哥不能死，中间兄弟不能断。</strong></p>
+
+        <h2 id="索引列上不计算"   >
+          <a href="#索引列上不计算" class="heading-link"><i class="fas fa-link"></i></a>索引列上不计算</h2>
+      
+<p>不在索引列上做任何操作（计算、函数、(自动or手动)类型转换），会导致索引失效而转向全表扫描。</p>
+<p><strong>案例</strong></p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 现在要查询`name` = 'Ringo'的记录下面有两种方式来查询！</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1、直接使用 字段 = 值的方式来计算</span></span><br><span class="line">mysql&gt; SELECT * FROM `staffs` WHERE `name` = 'Ringo';</span><br><span class="line">+<span class="comment">----+-------+-----+---------+---------------------+</span></span><br><span class="line">| id | name  | age | pos     | add_time            |</span><br><span class="line">+<span class="comment">----+-------+-----+---------+---------------------+</span></span><br><span class="line">|  1 | Ringo |  18 | manager | 2020-08-03 08:30:39 |</span><br><span class="line">+<span class="comment">----+-------+-----+---------+---------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2、使用MySQL内置的函数</span></span><br><span class="line">mysql&gt; <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="keyword">LEFT</span>(<span class="string">`name`</span>, <span class="number">5</span>) = <span class="string">'Ringo'</span>;</span><br><span class="line">+<span class="comment">----+-------+-----+---------+---------------------+</span></span><br><span class="line">| id | name  | age | pos     | add_time            |</span><br><span class="line">+<span class="comment">----+-------+-----+---------+---------------------+</span></span><br><span class="line">|  1 | Ringo |  18 | manager | 2020-08-03 08:30:39 |</span><br><span class="line">+<span class="comment">----+-------+-----+---------+---------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<p>我们发现以上两条SQL的执行结果都是一样的，但是执行效率有没有差距呢？？？</p>
+<p>通过分析两条SQL的执行计划来分析性能。</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001122751.png"  alt="" />
+      </p>
+<p><strong>由此可见，在索引列上进行计算，会使索引失效。</strong></p>
+<p><strong>口诀：索引列上不计算。</strong></p>
+
+        <h2 id="范围之后全失效"   >
+          <a href="#范围之后全失效" class="heading-link"><i class="fas fa-link"></i></a>范围之后全失效</h2>
+      
+<p><strong>案例</strong></p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 用到了idx_staffs_name_age_pos索引中的name，age，pos字段 这是属于全值匹配的情况！！！*/</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'Ringo'</span> <span class="keyword">AND</span> <span class="string">`age`</span> = <span class="number">18</span> <span class="keyword">AND</span> <span class="string">`pos`</span> = <span class="string">'manager'</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 用到了idx_staffs_name_age_pos索引中的name，age字段，pos字段索引失效 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'张三'</span> <span class="keyword">AND</span> <span class="string">`age`</span> &gt; <span class="number">18</span> <span class="keyword">AND</span> <span class="string">`pos`</span> = <span class="string">'dev'</span>;</span><br></pre></td></tr></table></div></figure>
+<p>查看上述SQL的执行计划</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001123049.png"  alt="" />
+      </p>
+<p><strong>由此可知，查询范围的字段使用到了索引，但是范围之后的索引字段会失效。</strong></p>
+<p><strong>口诀：范围之后全失效。</strong></p>
+
+        <h2 id="覆盖索引尽量用"   >
+          <a href="#覆盖索引尽量用" class="heading-link"><i class="fas fa-link"></i></a>覆盖索引尽量用</h2>
+      
+<p>在写SQL的不要使用<code>SELECT *</code>，用什么字段就查询什么字段。</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 没有用到覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'Ringo'</span> <span class="keyword">AND</span> <span class="string">`age`</span> = <span class="number">18</span> <span class="keyword">AND</span> <span class="string">`pos`</span> = <span class="string">'manager'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`name`</span>, <span class="string">`age`</span>, <span class="string">`pos`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> = <span class="string">'Ringo'</span> <span class="keyword">AND</span> <span class="string">`age`</span> = <span class="number">18</span> <span class="keyword">AND</span> <span class="string">`pos`</span> = <span class="string">'manager'</span>;</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001123505.png"  alt="" />
+      </p>
+<p><strong>口诀：查询一定不用*</strong>。</p>
+
+        <h2 id="不等会失效"   >
+          <a href="#不等会失效" class="heading-link"><i class="fas fa-link"></i></a>不等会失效</h2>
+      
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 会使用到覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`name`</span>, <span class="string">`age`</span>, <span class="string">`pos`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> != <span class="string">'Ringo'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 索引失效 全表扫描 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> != <span class="string">'Ringo'</span>;</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="is-nullis-not-null-也无法使用索引"   >
+          <a href="#is-nullis-not-null-也无法使用索引" class="heading-link"><i class="fas fa-link"></i></a>is null，is not null 也无法使用索引</h2>
+      
+<ul>
+<li>is null，is not null 会导致索引失效：key = null 表示索引失效</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; EXPLAIN SELECT * FROM staffs WHERE name is null;</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+------------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | Extra            |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+------------------+</span></span><br><span class="line">|  1 | SIMPLE      | NULL  | NULL | NULL          | NULL | NULL    | NULL | NULL | Impossible WHERE |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> staffs <span class="keyword">WHERE</span> <span class="keyword">name</span> <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">null</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys           | key  | key_len | ref  | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | staffs | ALL  | index_staffs_nameAgePos | NULL | NULL    | NULL |    3 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="like"   >
+          <a href="#like" class="heading-link"><i class="fas fa-link"></i></a>like</h2>
+      
+
+        <h3 id="百分加右边"   >
+          <a href="#百分加右边" class="heading-link"><i class="fas fa-link"></i></a>百分加右边</h3>
+      
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 索引失效 全表扫描 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%ing%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 索引失效 全表扫描 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%ing'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用索引范围查询 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'Rin%'</span>;</span><br></pre></td></tr></table></div></figure>
+<p><strong>口诀：<code>like</code>百分加右边。</strong></p>
+
+        <h3 id="百分加左边"   >
+          <a href="#百分加左边" class="heading-link"><i class="fas fa-link"></i></a>百分加左边</h3>
+      
+<p>如果一定要使用<code>%like</code>，而且还要保证索引不失效，那么使用覆盖索引来编写SQL。</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`id`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`name`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`age`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`pos`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`id`</span>, <span class="string">`name`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`id`</span>, <span class="string">`age`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`id`</span>,<span class="string">`name`</span>, <span class="string">`age`</span>, <span class="string">`pos`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 使用到了覆盖索引 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`id`</span>, <span class="string">`name`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`pos`</span> <span class="keyword">LIKE</span> <span class="string">'%na'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 索引失效 全表扫描 */</span></span><br><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> <span class="string">`name`</span>, <span class="string">`age`</span>, <span class="string">`pos`</span>, <span class="string">`add_time`</span> <span class="keyword">FROM</span> <span class="string">`staffs`</span> <span class="keyword">WHERE</span> <span class="string">`name`</span> <span class="keyword">LIKE</span> <span class="string">'%in'</span>;</span><br></pre></td></tr></table></div></figure>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201001125652.png"  alt="" />
+      </p>
+<p><strong>口诀：覆盖索引保两边。</strong></p>
+<blockquote>
+<p>如果还需要其他列的内容，可以先把id查找出来，再用id去查找某一条具体的数据，这样就可以使用索引覆盖不回表了。</p>
+</blockquote>
+
+        <h2 id="字符串不加单引号索引失效"   >
+          <a href="#字符串不加单引号索引失效" class="heading-link"><i class="fas fa-link"></i></a>字符串不加单引号索引失效</h2>
+      
+<ul>
+<li>正常操作，索引没有失效</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW INDEX FROM staffs;</span><br><span class="line">+<span class="comment">--------+------------+-------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table  | Non_unique | Key_name                | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">--------+------------+-------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| staffs |          <span class="number">0</span> | PRIMARY                 |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| staffs |          <span class="number">1</span> | index_staffs_nameAgePos |            <span class="number">1</span> | <span class="keyword">name</span>        | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| staffs |          <span class="number">1</span> | index_staffs_nameAgePos |            <span class="number">2</span> | age         | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| staffs |          <span class="number">1</span> | index_staffs_nameAgePos |            <span class="number">3</span> | pos         | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">--------+------------+-------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">explain</span> <span class="keyword">select</span> * <span class="keyword">from</span> staffs <span class="keyword">where</span> <span class="keyword">name</span>=<span class="string">'2000'</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+-------------------------+---------+-------+------+-----------------------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys           | key                     | key_len | ref   | rows | Extra                 |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+-------------------------+---------+-------+------+-----------------------+</span></span><br><span class="line">|  1 | SIMPLE      | staffs | ref  | index_staffs_nameAgePos | index_staffs_nameAgePos | 74      | const |    1 | Using index condition |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+-------------------------+---------+-------+------+-----------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>如果字符串忘记写 <code>''</code> ，那么 mysql 会为我们进行隐式的类型转换，但凡进行了类型转换，索引都会失效</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; explain select * from staffs where name=2000;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys           | key  | key_len | ref  | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | staffs | ALL  | index_staffs_nameAgePos | NULL | NULL    | NULL |    3 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="使用-or-连接会导致索引失效"   >
+          <a href="#使用-or-连接会导致索引失效" class="heading-link"><i class="fas fa-link"></i></a>使用 or 连接，会导致索引失效</h2>
+      
+<blockquote>
+<p>5.5以上版本，使用or 是range查询</p>
+</blockquote>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW INDEX FROM staffs;</span><br><span class="line">+<span class="comment">--------+------------+-------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table  | Non_unique | Key_name                | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">--------+------------+-------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| staffs |          <span class="number">0</span> | PRIMARY                 |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| staffs |          <span class="number">1</span> | index_staffs_nameAgePos |            <span class="number">1</span> | <span class="keyword">name</span>        | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| staffs |          <span class="number">1</span> | index_staffs_nameAgePos |            <span class="number">2</span> | age         | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| staffs |          <span class="number">1</span> | index_staffs_nameAgePos |            <span class="number">3</span> | pos         | A         |           <span class="number">3</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">+<span class="comment">--------+------------+-------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">explain</span> <span class="keyword">select</span> * <span class="keyword">from</span> staffs <span class="keyword">where</span> <span class="keyword">name</span>=<span class="string">'z3'</span> <span class="keyword">or</span> <span class="keyword">name</span> = <span class="string">'v '</span>;</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">| id | select_type | table  | type | possible_keys           | key  | key_len | ref  | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | staffs | ALL  | index_staffs_nameAgePos | NULL | NULL    | NULL |    3 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+--------+------+-------------------------+------+---------+------+------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h2 id="小结"   >
+          <a href="#小结" class="heading-link"><i class="fas fa-link"></i></a>小结</h2>
+      
+<p><strong>假设index(a,b,c)</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Where语句</th>
+<th>索引是否被使用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>where a = 3</td>
+<td>Y，使用到a</td>
+</tr>
+<tr>
+<td>where a = 3 and b = 5</td>
+<td>Y，使用到a，b</td>
+</tr>
+<tr>
+<td>where a = 3 and b = 5</td>
+<td>Y，使用到a，b，c</td>
+</tr>
+<tr>
+<td>where b = 3 或者 where b = 3 and c = 4 或者 where c = 4</td>
+<td>N，没有用到a字段</td>
+</tr>
+<tr>
+<td>where a = 3 and c = 5</td>
+<td>使用到a，但是没有用到c，因为b断了</td>
+</tr>
+<tr>
+<td>where a = 3 and b &gt; 4 and c = 5</td>
+<td>使用到a，b，但是没有用到c，因为c在范围之后</td>
+</tr>
+<tr>
+<td>where a = 3 and b like ‘kk%’ and c = 4</td>
+<td>Y，a，b，c都用到</td>
+</tr>
+<tr>
+<td>where a = 3 and b like ‘%kk’ and c = 4</td>
+<td>只用到a</td>
+</tr>
+<tr>
+<td>where a = 3 and b like ‘%kk%’ and c = 4</td>
+<td>只用到a</td>
+</tr>
+<tr>
+<td>where a = 3 and b like ‘k%kk%’ and c = 4</td>
+<td>Y，a，b，c都用到</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>like 后面以常量开头，比如 like ‘kk%’ 和 like ‘k%kk%’ ，可以理解为就是常量，注意区分范围查询，like 'kk%'的type虽然也是range，但是后面的索引列照样可以命中。</p>
+<p><code>%kk</code>，前面有<code>%</code>等于查所有，因为%表示任意。</p>
+<p><code>kk%</code>， 用到了索引</p>
+</blockquote>
+
+        <h1 id="索引优化面试题"   >
+          <a href="#索引优化面试题" class="heading-link"><i class="fas fa-link"></i></a>索引优化面试题</h1>
+      
+<p><strong>创建表</strong></p>
+<ul>
+<li>建表 SQL</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> test03(</span><br><span class="line">    <span class="keyword">id</span> <span class="built_in">int</span> primary <span class="keyword">key</span> <span class="keyword">not</span> <span class="literal">null</span> auto_increment,</span><br><span class="line">    c1 <span class="built_in">char</span>(<span class="number">10</span>),</span><br><span class="line">    c2 <span class="built_in">char</span>(<span class="number">10</span>),</span><br><span class="line">    c3 <span class="built_in">char</span>(<span class="number">10</span>),</span><br><span class="line">    c4 <span class="built_in">char</span>(<span class="number">10</span>),</span><br><span class="line">    c5 <span class="built_in">char</span>(<span class="number">10</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> test03(c1,c2,c3,c4,c5) <span class="keyword">values</span> (<span class="string">'a1'</span>,<span class="string">'a2'</span>,<span class="string">'a3'</span>,<span class="string">'a4'</span>,<span class="string">'a5'</span>);</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> test03(c1,c2,c3,c4,c5) <span class="keyword">values</span> (<span class="string">'b1'</span>,<span class="string">'b2'</span>,<span class="string">'b3'</span>,<span class="string">'b4'</span>,<span class="string">'b5'</span>);</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> test03(c1,c2,c3,c4,c5) <span class="keyword">values</span> (<span class="string">'c1'</span>,<span class="string">'c2'</span>,<span class="string">'c3'</span>,<span class="string">'c4'</span>,<span class="string">'c5'</span>);</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> test03(c1,c2,c3,c4,c5) <span class="keyword">values</span> (<span class="string">'d1'</span>,<span class="string">'d2'</span>,<span class="string">'d3'</span>,<span class="string">'d4'</span>,<span class="string">'d5'</span>);</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> test03(c1,c2,c3,c4,c5) <span class="keyword">values</span> (<span class="string">'e1'</span>,<span class="string">'e2'</span>,<span class="string">'e3'</span>,<span class="string">'e4'</span>,<span class="string">'e5'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">index</span> idx_test03_c1234 <span class="keyword">on</span> test03(c1,c2,c3,c4);</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>test03 表中的测试数据</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from test03;</span><br><span class="line">+<span class="comment">----+------+------+------+------+------+</span></span><br><span class="line">| id | c1   | c2   | c3   | c4   | c5   |</span><br><span class="line">+<span class="comment">----+------+------+------+------+------+</span></span><br><span class="line">|  1 | a1   | a2   | a3   | a4   | a5   |</span><br><span class="line">|  2 | b1   | b2   | b3   | b4   | b5   |</span><br><span class="line">|  3 | c1   | c2   | c3   | c4   | c5   |</span><br><span class="line">|  4 | d1   | d2   | d3   | d4   | d5   |</span><br><span class="line">|  5 | e1   | e2   | e3   | e4   | e5   |</span><br><span class="line">+<span class="comment">----+------+------+------+------+------+</span></span><br><span class="line">5 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<ul>
+<li>test03 表中的索引</li>
+</ul>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW INDEX FROM test03;</span><br><span class="line">+<span class="comment">--------+------------+------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| Table  | Non_unique | Key_name         | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | <span class="keyword">Comment</span> | Index_comment |</span><br><span class="line">+<span class="comment">--------+------------+------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line">| test03 |          <span class="number">0</span> | PRIMARY          |            <span class="number">1</span> | <span class="keyword">id</span>          | A         |           <span class="number">5</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   |      | BTREE      |         |               |</span><br><span class="line">| test03 |          <span class="number">1</span> | idx_test03_c1234 |            <span class="number">1</span> | c1          | A         |           <span class="number">5</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   | YES  | BTREE      |         |               |</span><br><span class="line">| test03 |          <span class="number">1</span> | idx_test03_c1234 |            <span class="number">2</span> | c2          | A         |           <span class="number">5</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   | YES  | BTREE      |         |               |</span><br><span class="line">| test03 |          <span class="number">1</span> | idx_test03_c1234 |            <span class="number">3</span> | c3          | A         |           <span class="number">5</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   | YES  | BTREE      |         |               |</span><br><span class="line">| test03 |          <span class="number">1</span> | idx_test03_c1234 |            <span class="number">4</span> | c4          | A         |           <span class="number">5</span> |     <span class="literal">NULL</span> | <span class="literal">NULL</span>   | YES  | BTREE      |         |               |</span><br><span class="line">+<span class="comment">--------+------------+------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<p><strong>问题：我们创建了复合索引idx_test03_c1234，根据以下SQL分析下索引使用情况？</strong></p>
+<ol>
+<li>
+<p><code>EXPLAIN SELECT * FROM test03 WHERE c1='a1' AND c2='a2' AND c3='a3' AND c4='a4';</code></p>
+<ul>
+<li>
+<p>即全值匹配</p>
+</li>
+<li>
+<pre class="highlight"><code class="sql">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> test03 <span class="keyword">WHERE</span> c1=<span class="string">'a1'</span> <span class="keyword">AND</span> c2=<span class="string">'a2'</span> <span class="keyword">AND</span> c3=<span class="string">'a3'</span> <span class="keyword">AND</span> c4=<span class="string">'a4'</span>;
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------------------+------+-----------------------+</span>
+| id | select_type | table  | type | possible_keys    | key              | key_len | ref                     | rows | Extra                 |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------------------+------+-----------------------+</span>
+|  1 | SIMPLE      | test03 | ref  | idx_test03_c1234 | idx_test03_c1234 | 124     | const,const,const,const |    1 | Using index condition |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------------------+------+-----------------------+</span>
+1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)
+&lt;!<span class="comment">--￼50--&gt;</span>
+
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>EXPLAIN SELECT * FROM test03 WHERE c1='a1' AND c2='a2' AND c3&gt;'a3' AND c4='a4';</code></p>
+<ul>
+<li>
+<p>c3 列使用了索引进行排序，并没有进行查找，导致 c4 无法用索引进行查找</p>
+</li>
+<li>
+<pre class="highlight"><code class="sql">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> test03 <span class="keyword">WHERE</span> c1=<span class="string">'a1'</span> <span class="keyword">AND</span> c2=<span class="string">'a2'</span> <span class="keyword">AND</span> c3&gt;<span class="string">'a3'</span> <span class="keyword">AND</span> c4=<span class="string">'a4'</span>; 
++<span class="comment">----+-------------+--------+-------+------------------+------------------+---------+------+------+-----------------------+</span>
+| id | select_type | table  | type  | possible_keys    | key              | key_len | ref  | rows | Extra                 |
++<span class="comment">----+-------------+--------+-------+------------------+------------------+---------+------+------+-----------------------+</span>
+|  1 | SIMPLE      | test03 | range | idx_test03_c1234 | idx_test03_c1234 | 93      | NULL |    1 | Using index condition |
++<span class="comment">----+-------------+--------+-------+------------------+------------------+---------+------+------+-----------------------+</span>
+1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)
+&lt;!<span class="comment">--￼51--&gt;</span>
+
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>EXPLAIN SELECT * FROM test03 WHERE c1='a1' AND c2='a2' AND c4='a4' ORDER BY c3;</code></p>
+<ul>
+<li>
+<p>c3 列将索引用于排序，而不是查找，c4 列没有用到索引</p>
+</li>
+<li>
+<pre class="highlight"><code class="sql">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> test03 <span class="keyword">WHERE</span> c1=<span class="string">'a1'</span> <span class="keyword">AND</span> c2=<span class="string">'a2'</span> <span class="keyword">AND</span> c4=<span class="string">'a4'</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> c3; 
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------+------+------------------------------------+</span>
+| id | select_type | table  | type | possible_keys    | key              | key_len | ref         | rows | Extra                              |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------+------+------------------------------------+</span>
+|  1 | SIMPLE      | test03 | ref  | idx_test03_c1234 | idx_test03_c1234 | 62      | const,const |    1 | Using index condition; Using where |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------+------+------------------------------------+</span>
+1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)
+&lt;!<span class="comment">--￼52--&gt;</span>
+
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>EXPLAIN SELECT * FROM test03 WHERE c1='a1' AND c5='a5' ORDER BY c2, c3;</code></p>
+<ul>
+<li>
+<p>只用 c1 一个字段索引，但是c2、c3用于排序，无filesort</p>
+</li>
+<li>
+<pre class="highlight"><code class="sql">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> test03 <span class="keyword">WHERE</span> c1=<span class="string">'a1'</span> <span class="keyword">AND</span> c5=<span class="string">'a5'</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> c2, c3; 
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+------------------------------------+</span>
+| id | select_type | table  | type | possible_keys    | key              | key_len | ref   | rows | Extra                              |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+------------------------------------+</span>
+|  1 | SIMPLE      | test03 | ref  | idx_test03_c1234 | idx_test03_c1234 | 31      | const |    1 | Using index condition; Using where |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+------------------------------------+</span>
+1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)
+&lt;!<span class="comment">--￼53--&gt;</span>
+
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>EXPLAIN SELECT * FROM test03 WHERE c1='a1' AND c2='a2' ORDER BY c2, c3;</code></p>
+<ul>
+<li>
+<p>用c1、c2两个字段索引，但是c2、c3用于排序，无filesort</p>
+</li>
+<li>
+<pre class="highlight"><code class="sql">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> test03 <span class="keyword">WHERE</span> c1=<span class="string">'a1'</span> <span class="keyword">AND</span> c2=<span class="string">'a2'</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> c2, c3; 
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------+------+------------------------------------+</span>
+| id | select_type | table  | type | possible_keys    | key              | key_len | ref         | rows | Extra                              |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------+------+------------------------------------+</span>
+|  1 | SIMPLE      | test03 | ref  | idx_test03_c1234 | idx_test03_c1234 | 62      | const,const |    1 | Using index condition; Using where |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------------+------+------------------------------------+</span>
+1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)
+&lt;!<span class="comment">--￼54--&gt;</span>
+
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>EXPLAIN SELECT * FROM test03 WHERE c1='a1' AND c2='a2' AND c5='a5' ORDER BY c3, c2;</code></p>
+<ul>
+<li>
+<p>注意查询条件 c2=‘a2’ ，我都把 c2 查出来了（c2 为常量），我还给它排序作甚，所以没有产生 filesort</p>
+</li>
+<li>
+<pre class="highlight"><code class="sql">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> test03 <span class="keyword">WHERE</span> c1=<span class="string">'a1'</span> <span class="keyword">AND</span> c4=<span class="string">'a4'</span> <span class="keyword">GROUP</span> <span class="keyword">BY</span> c2, c3; 
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+------------------------------------+</span>
+| id | select_type | table  | type | possible_keys    | key              | key_len | ref   | rows | Extra                              |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+------------------------------------+</span>
+|  1 | SIMPLE      | test03 | ref  | idx_test03_c1234 | idx_test03_c1234 | 31      | const |    1 | Using index condition; Using where |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+------------------------------------+</span>
+1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)
+&lt;!<span class="comment">--￼55--&gt;</span>
+
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>EXPLAIN SELECT * FROM test03 WHERE c1='a1' AND c4='a4' GROUP BY c3, c2;</code></p>
+<ul>
+<li>
+<p>group by 表面上叫分组，分组之前必排序，group by 和 order by 在索引上的问题基本是一样的</p>
+</li>
+<li>
+<p>Using temporary; Using filesort 两个都有</p>
+</li>
+<li>
+<pre class="highlight"><code class="sql">mysql&gt; <span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> test03 <span class="keyword">WHERE</span> c1=<span class="string">'a1'</span> <span class="keyword">AND</span> c4=<span class="string">'a4'</span> <span class="keyword">GROUP</span> <span class="keyword">BY</span> c3, c2; 
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+---------------------------------------------------------------------+</span>
+| id | select_type | table  | type | possible_keys    | key              | key_len | ref   | rows | Extra                                                               |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+---------------------------------------------------------------------+</span>
+|  1 | SIMPLE      | test03 | ref  | idx_test03_c1234 | idx_test03_c1234 | 31      | const |    1 | Using index condition; Using where; Using temporary; Using filesort |
++<span class="comment">----+-------------+--------+------+------------------+------------------+---------+-------+------+---------------------------------------------------------------------+</span>
+1 row in <span class="keyword">set</span> (<span class="number">0.01</span> sec)
+</code></pre>
+</li>
+</ul>
+<blockquote>
+<ul>
+<li>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>group的本质是排序，分组之前必排序，group by和order by排序的算法和优化的原则是一样的，区别是group by有having</span></p>
+</li>
+<li>
+<p>group by报错是sql_mod配置需要改一下，full group 要求select只能有group by的字段，不能包含别的。</p>
+</li>
+<li>
+<p>group by 基本上都需要进行排序，但凡使用不当，会有临时表产生</p>
+</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<p><strong>建议</strong></p>
+<ol>
+<li>对于单键索引，尽量选择针对当前query过滤性更好的索引</li>
+<li>在选择组合索引的时候，当前query中过滤性最好的字段在索引字段顺序中，位置越靠左越好。</li>
+<li>在选择组合索引的时候，尽量选择可以能包含当前query中的where子句中更多字段的索引</li>
+<li>尽可能通过分析统计信息和调整query的写法来达到选择合适索引的目的</li>
+</ol>
+
+        <h1 id="总结"   >
+          <a href="#总结" class="heading-link"><i class="fas fa-link"></i></a>总结</h1>
+      
+<p>索引优化</p>
+<p>建与不建，如何建（组合&gt;单值）</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/6_%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/6_%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/mysql/">mysql</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/4_%E6%9C%80%E5%B7%A6%E5%8C%B9%E9%85%8D/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">最左匹配</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/1_mysql%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D/"><span class="paginator-prev__text">mysql架构介绍</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#索引优化"><span class="toc-number">1.</span> <span class="toc-text">
+          索引优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#单表优化案例"><span class="toc-number">1.1.</span> <span class="toc-text">
+          单表优化案例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#两表索引优化"><span class="toc-number">1.2.</span> <span class="toc-text">
+          两表索引优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三表索引优化"><span class="toc-number">1.3.</span> <span class="toc-text">
+          三表索引优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#join-语句优化的结论"><span class="toc-number">1.4.</span> <span class="toc-text">
+          Join 语句优化的结论</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#索引失效"><span class="toc-number">2.</span> <span class="toc-text">
+          索引失效</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#索引失效的情况"><span class="toc-number">2.1.</span> <span class="toc-text">
+          索引失效的情况</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最佳左前缀法则"><span class="toc-number">2.2.</span> <span class="toc-text">
+          最佳左前缀法则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#索引列上不计算"><span class="toc-number">2.3.</span> <span class="toc-text">
+          索引列上不计算</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#范围之后全失效"><span class="toc-number">2.4.</span> <span class="toc-text">
+          范围之后全失效</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#覆盖索引尽量用"><span class="toc-number">2.5.</span> <span class="toc-text">
+          覆盖索引尽量用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#不等会失效"><span class="toc-number">2.6.</span> <span class="toc-text">
+          不等会失效</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#is-nullis-not-null-也无法使用索引"><span class="toc-number">2.7.</span> <span class="toc-text">
+          is null，is not null 也无法使用索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#like"><span class="toc-number">2.8.</span> <span class="toc-text">
+          like</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#百分加右边"><span class="toc-number">2.8.1.</span> <span class="toc-text">
+          百分加右边</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#百分加左边"><span class="toc-number">2.8.2.</span> <span class="toc-text">
+          百分加左边</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#字符串不加单引号索引失效"><span class="toc-number">2.9.</span> <span class="toc-text">
+          字符串不加单引号索引失效</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-or-连接会导致索引失效"><span class="toc-number">2.10.</span> <span class="toc-text">
+          使用 or 连接，会导致索引失效</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">2.11.</span> <span class="toc-text">
+          小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#索引优化面试题"><span class="toc-number">3.</span> <span class="toc-text">
+          索引优化面试题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">
+          总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">325</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>
