@@ -1,0 +1,555 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="16x16"><link rel="icon" href="/assets/1.png?v=2.0.1" type="image/png" sizes="32x32"><meta name="description" content="Record lock        单条索引记录上加锁，record lock锁住的永远是索引，而非记录本身，即使该表上没有任何索引，那么innodb会在后台创建一个隐藏的聚集主键索引，那么锁住的就是这个隐藏的聚集主键索引。所以说当一条sql没有走任何索引时，那么将会在每一条聚集索引后面加X锁。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InnoDB的锁种类">
+<meta property="og:url" content="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/InnoDB%E7%9A%84%E9%94%81%E7%A7%8D%E7%B1%BB/index.html">
+<meta property="og:site_name" content="lienhui68の博客">
+<meta property="og:description" content="Record lock        单条索引记录上加锁，record lock锁住的永远是索引，而非记录本身，即使该表上没有任何索引，那么innodb会在后台创建一个隐藏的聚集主键索引，那么锁住的就是这个隐藏的聚集主键索引。所以说当一条sql没有走任何索引时，那么将会在每一条聚集索引后面加X锁。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201002123424.png">
+<meta property="og:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201002123153.png">
+<meta property="article:published_time" content="2020-10-02T02:11:19.528Z">
+<meta property="article:modified_time" content="2020-10-02T08:45:14.273Z">
+<meta property="article:author" content="lienhui68">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/lienhui68/picStore/raw/master/null/20201002123424.png"><meta name="keywords" content="lienhui68, lienhui68の博客"><meta name="description" content=""><title>InnoDB的锁种类 | lienhui68の博客</title><link ref="canonical" href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/InnoDB%E7%9A%84%E9%94%81%E7%A7%8D%E7%B1%BB/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.0.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: undefined,
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"carbon","highlight":"ocean","wordWrap":false},
+  reward: true,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: {"colWidth":"220px","gapX":"10px"},
+  lazyload: true,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 4.2.1"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner header-inner--height header-inner--bgcolor"><nav class="header-nav header-nav--sticky"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="javascript:;" onclick="return false;"><span class="header-nav-menu-item__icon"><i class="fas fa-flask"></i></span><span class="header-nav-menu-item__text">实验室</span></a><div class="header-nav-submenu"><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/photo/"><span class="header-nav-submenu-item__icon"><i class="fas fa-images"></i></span><span class="header-nav-submenu-item__text">相册</span></a></div><div class="header-nav-submenu-item"><a class="header-nav-submenu-item__link" href="/music/"><span class="header-nav-submenu-item__icon"><i class="fas fa-music"></i></span><span class="header-nav-submenu-item__text">音乐</span></a></div></div></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/about/"><span class="header-nav-menu-item__icon"><i class="fas fa-user"></i></span><span class="header-nav-menu-item__text">关于</span></a></div></div><div class="header-nav-search"><span class="header-nav-search__icon"><i class="fas fa-search"></i></span><span class="header-nav-search__text">搜索</span></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">InnoDB的锁种类</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2020-10-02</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2020-10-02</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">32分</span></span><span class="post-meta-item post-meta-item--visitors"><span class="post-meta-item__icon"><i class="fas fa-eye"></i></span><span class="post-meta-item__info">阅读次数</span><span class="post-meta-item__value" id="busuanzi_value_page_pv"></span></span></div></header><div class="post-body">
+        <h1 id="record-lock"   >
+          <a href="#record-lock" class="heading-link"><i class="fas fa-link"></i></a>Record lock</h1>
+      
+<p>单条索引记录上加锁，record lock锁住的永远是索引，而非记录本身，即使该表上没有任何索引，那么innodb会在后台创建一个隐藏的聚集主键索引，那么锁住的就是这个隐藏的聚集主键索引。所以说当一条sql没有走任何索引时，那么将会在每一条聚集索引后面加X锁。</p>
+<a id="more"></a>
+
+        <h1 id="gap-lock"   >
+          <a href="#gap-lock" class="heading-link"><i class="fas fa-link"></i></a>Gap lock</h1>
+      
+<p>在索引记录之间的间隙中加锁，或者是在某一条索引记录之前或者之后加锁，并不包括该索引记录本身。gap lock的机制主要是解决可重复读模式下的幻读问题，关于幻读的演示和gap锁如何解决了幻读。关于这一块，先给出几个定义</p>
+
+        <h2 id="快照读"   >
+          <a href="#快照读" class="heading-link"><i class="fas fa-link"></i></a>快照读</h2>
+      
+<p>简单的select操作，没有lock in share mode或for update，快照读不会加任何的锁，而且由于mysql的一致性非锁定读的机制存在，任何快照读也不会被阻塞。但是如果事务的隔离级别是SERIALIZABLE的话，那么快照读也会被加上共享的next-key锁，本文不对SERIALIZABLE隔离级别做叙述。</p>
+
+        <h2 id="当前读"   >
+          <a href="#当前读" class="heading-link"><i class="fas fa-link"></i></a>当前读</h2>
+      
+<p>官方文档的术语叫locking read，也就是insert，update，delete,select…in share mode和select…for update,当前读会在所有扫描到的索引记录上加锁，不管它后面的where条件到底有没有命中对应的行记录。当前读可能会引起死锁。</p>
+
+        <h2 id="意向锁"   >
+          <a href="#意向锁" class="heading-link"><i class="fas fa-link"></i></a>意向锁</h2>
+      
+<p>innodb的意向锁主要用户多粒度的锁并存的情况。比如事务A要在一个表上加S锁，如果表中的一行已被事务B加了X锁，那么该锁的申请也应被阻塞。如果表中的数据很多，逐行检查锁标志的开销将很大，系统的性能将会受到影响。为了解决这个问题，可以在表级上引入新的锁类型来表示其所属行的加锁情况，这就引出了“意向锁”的概念。</p>
+<p>举个例子，如果表中记录1亿，事务A把其中有几条记录上了行锁了，这时事务B需要给这个表加表级锁，如果没有意向锁的话，那就要去表中查找这一亿条记录是否上锁了。如果存在意向锁，那么假如事务Ａ在更新一条记录之前，先加意向锁，再加Ｘ锁，事务B先检查该表上是否存在意向锁，存在的意向锁是否与自己准备加的锁冲突，如果有冲突，则等待直到事务Ａ释放，而无须逐条记录去检测。事务Ｂ更新表时，其实无须知道到底哪一行被锁了，它只要知道反正有一行被锁了就行了。</p>
+<p><span style='color:red;background:背景颜色;font-size:文字大小;font-weight:bold'>说白了意向锁的主要作用是处理行锁和表锁之间的矛盾，能够显示“某个事务正在某一行上持有了锁，或者准备去持有锁”</span></p>
+<blockquote>
+<p>innodb的意向锁有什么作用？</p>
+<p>参考：<span class="exturl"><a class="exturl__link"   href="https://www.zhihu.com/question/51513268"  target="_blank" rel="noopener">https://www.zhihu.com/question/51513268</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<ul>
+<li>在mysql中有表锁，LOCK TABLE my_tabl_name READ;  用读锁锁表，会阻塞其他事务修改表数据。LOCK TABLE my_table_name WRITe; 用写锁锁表，会阻塞其他事务读和写。</li>
+<li>Innodb引擎又支持行锁，行锁分为共享锁，一个事务对一行的共享只读锁。排它锁，一个事务对一行的排他读写锁。</li>
+</ul>
+<p>这两中类型的锁共存的问题考虑这个例子：</p>
+<p>事务A锁住了表中的一行，让这一行只能读，不能写。之后，事务B申请整个表的写锁。如果事务B申请成功，那么理论上它就能修改表中的任意一行，这与A持有的行锁是冲突的。<br />
+数据库需要避免这种冲突，就是说要让B的申请被阻塞，直到A释放了行锁。</p>
+<p>数据库要怎么判断这个冲突呢？</p>
+<p>step1：判断表是否已被其他事务用表锁锁表<br />
+step2：判断表中的每一行是否已被行锁锁住。<br />
+注意step2，这样的判断方法效率实在不高，因为需要遍历整个表。<br />
+于是就有了意向锁。在意向锁存在的情况下，事务A必须先申请表的意向共享锁，成功后再申请一行的行锁。在意向锁存在的情况下，<br />
+上面的判断可以改成<br />
+step1：不变<br />
+step2：发现表上有意向共享锁，说明表中有些行被共享行锁锁住了，因此，事务B申请表的写锁会被阻塞。</p>
+<p>注意：<span style='color:red;background:背景颜色;font-size:文字大小;font-weight:'>申请意向锁的动作是数据库完成的，就是说，事务A申请一行的行锁的时候，数据库会自动先开始申请表的意向锁，不需要我们程序员使用代码来申请。</span></p>
+<p>总结：为了实现多粒度锁机制（白话：为了表锁和行锁都能用）</p>
+</blockquote>
+
+        <h2 id="不可重复读"   >
+          <a href="#不可重复读" class="heading-link"><i class="fas fa-link"></i></a>不可重复读</h2>
+      
+<p>指的是在同一个事务中，连续几次快照读，读取的记录应该是一样的</p>
+<p>不可重复读的演示较为简单，本文不做讨论。</p>
+
+        <h2 id="幻读"   >
+          <a href="#幻读" class="heading-link"><i class="fas fa-link"></i></a>幻读</h2>
+      
+<p>指的是在一个事务A中执行了一个当前读操作，而另外一个事务B在事务A的影响区间内insert了一条记录，这时事务A再执行一个当前读操作时，出现了幻行。这和不可重复读的主要区别就在与事务A中一个是快照读，一个当前读；并且事务B中一个是任何的dml操作，一个只是insert。比如在A中select * from test where id&lt;10 lock in share mode结果集为（1,2,3），这时在B中对test表插入了一条记录4，这时在A中重新查询结果集就是(1,2,3,4），和事务A在第一次查询出来的结果集不一致，这里的4就是幻行。</p>
+<p>演示条件：由于可重读的隔离级别下，默认采用Next-Key Locks，就是Record lock和gap lock的结合，即除了锁住记录本身，还要再锁住索引之间的间隙，所以这个gap lock机制默认打开，并不会产生幻行，那么我们要演示幻行的话，要么将隔离级别改为read-commited，要么在REPEATABLE-READ模式下禁用掉gap lock，这里我们采用的是第二种方式。</p>
+
+        <h3 id="幻读的演示"   >
+          <a href="#幻读的演示" class="heading-link"><i class="fas fa-link"></i></a>幻读的演示</h3>
+      
+<p><span style='color:LimeGreen;background:背景颜色;font-size:文字大小;font-weight:'>在演示之前又引入了innodb_locks_unsafe_for_binlog参数，该参数可以禁用gap lock。</span></p>
+<p>innodb_locks_unsafe_for_binlog：静态参数，默认为0，表示启动gap lock，如果设置为1，表示禁用gap lock，这时mysql就只有record lock了，不过值得注意的是，即使了设置了1，关于外键和唯一键重复检查方面用到的gap lock依旧有效。这时可以简单地理解成事务的隔离级别退化成可重复读，然后两者应该还是有所区别的。建议是不要随便设置，我们这里设置只是做个简单的幻读演示，mysql后续的版本可能都会废弃掉这个参数了。</p>
+<p>session 1 先将myid&gt;95的记录加一个当前读</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show create table test_gap_lock\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">       Table: test_gap_lock</span><br><span class="line"><span class="keyword">Create</span> <span class="keyword">Table</span>: <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`test_gap_lock`</span> (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`name`</span> <span class="built_in">varchar</span>(<span class="number">100</span>) <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`myid`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>),</span><br><span class="line">  <span class="keyword">UNIQUE</span> <span class="keyword">KEY</span> <span class="string">`uniq_name`</span> (<span class="string">`name`</span>),</span><br><span class="line">  <span class="keyword">KEY</span> <span class="string">`idex_myid`</span> (<span class="string">`myid`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8</span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line">mysql&gt; <span class="keyword">begin</span>;</span><br><span class="line">mysql&gt; select * from test_gap_lock where myid&gt;95 for update;</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">| id | name       | myid |</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">|  1 | jiang      |   99 |</span><br><span class="line">|  2 | hubingmei  |   99 |</span><br><span class="line">|  5 | hubingmei4 |  100 |</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">3 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<p>session 2  这时session 2插入myid=98的记录成功了。</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> test_gap_lock <span class="keyword">values</span>(<span class="number">6</span>,<span class="string">'jiang2'</span>,<span class="number">98</span>);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br></pre></td></tr></table></div></figure>
+<p>session 1 这时session 1再次查看时发现记录myid=98的记录已经存在了，这条记录就是幻行。</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from test_gap_lock where myid&gt;95 for update;</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">| id | name       | myid |</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">|  1 | jiang      |   99 |</span><br><span class="line">|  2 | hubingmei  |   99 |</span><br><span class="line">|  5 | hubingmei4 |  100 |</span><br><span class="line">|  6 | jiang2     |   98 |</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">4 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="gap-lock机制解决幻读问题演示"   >
+          <a href="#gap-lock机制解决幻读问题演示" class="heading-link"><i class="fas fa-link"></i></a>gap lock机制解决幻读问题演示</h3>
+      
+<p>条件：我们再把innodb_locks_unsafe_for_binlog值改回默认值0，并且tx_isolation为REPEATABLE-READ，演示时务必explain下，确保该sql走了非唯一索引idx_myid(因为如果测试数据较少的话，可能优化器直接走全表扫描，那就导致锁住所有记录，无法模拟出gap锁)</p>
+
+        <h4 id="演示范例-1非唯一索引范围当前读"   >
+          <a href="#演示范例-1非唯一索引范围当前读" class="heading-link"><i class="fas fa-link"></i></a>演示范例 1（非唯一索引+范围当前读）</h4>
+      
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show create table test_gap_lock\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">       Table: test_gap_lock</span><br><span class="line"><span class="keyword">Create</span> <span class="keyword">Table</span>: <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`test_gap_lock`</span> (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`name`</span> <span class="built_in">varchar</span>(<span class="number">100</span>) <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  <span class="string">`myid`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">DEFAULT</span> <span class="literal">NULL</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>),</span><br><span class="line">  <span class="keyword">UNIQUE</span> <span class="keyword">KEY</span> <span class="string">`uniq_name`</span> (<span class="string">`name`</span>),</span><br><span class="line">  <span class="keyword">KEY</span> <span class="string">`idex_myid`</span> (<span class="string">`myid`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8</span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<p>session 1 先explain确保session的当前读sql执行走了索引idx_myid</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; begin;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">mysql&gt; explain select * from test_gap_lock where myid&gt;100 for update;</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+-----------+---------+------+------+-----------------------+</span></span><br><span class="line">| id | select_type | table         | type  | possible_keys | key       | key_len | ref  | rows | Extra                 |</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+-----------+---------+------+------+-----------------------+</span></span><br><span class="line">|  1 | SIMPLE      | test_gap_lock | range | idex_myid     | idex_myid | 5       | NULL |    2 | Using index condition |</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+-----------+---------+------+------+-----------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line">mysql&gt;  <span class="keyword">select</span> * <span class="keyword">from</span> test_gap_lock <span class="keyword">where</span> myid&gt;<span class="number">100</span> <span class="keyword">for</span> <span class="keyword">update</span>;</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">| id | name       | myid |</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">|  5 | hubingmei4 |  101 |</span><br><span class="line">| 98 | test       |  105 |</span><br><span class="line">+<span class="comment">----+------------+------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<p>session 2 先插入myid=56的成功，因为锁住的间隙是myid&gt;100,56不在该范围内；再插入myid=109时，会一直卡住直到session 1commit，rollback或者直接锁等待超时，在锁等待超时前在session 1中执行同样的sql，得到的结果依旧只有id=5,98的记录，这样就避免了幻读问题</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into test_gap_lock values(999,'test2',56);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line">mysql&gt; insert into test_gap_lock values(123,'test4',109);</span><br><span class="line">ERROR 1205 (HY000): <span class="keyword">Lock</span> <span class="keyword">wait</span> <span class="keyword">timeout</span> exceeded; try restarting transaction</span><br></pre></td></tr></table></div></figure>
+
+        <h4 id="演示范例2非唯一索引等值当前读"   >
+          <a href="#演示范例2非唯一索引等值当前读" class="heading-link"><i class="fas fa-link"></i></a>演示范例2（非唯一索引+等值当前读）</h4>
+      
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from test_gap_lock;</span><br><span class="line">+<span class="comment">-----+------------+------+</span></span><br><span class="line">| id  | name       | myid |</span><br><span class="line">+<span class="comment">-----+------------+------+</span></span><br><span class="line">|   1 | jiang      |   98 |</span><br><span class="line">|   2 | hubingmei  |   99 |</span><br><span class="line">|   5 | hubingmei4 |  101 |</span><br><span class="line">|   6 | jiang2     |  100 |</span><br><span class="line">|   7 | jiang22    |   70 |</span><br><span class="line">|  67 | jiang222   |   80 |</span><br><span class="line">|  98 | test       |  105 |</span><br><span class="line">| 123 | test4      |  109 |</span><br><span class="line">| 999 | test2      |   56 |</span><br><span class="line">+<span class="comment">-----+------------+------+</span></span><br><span class="line">9 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"><span class="keyword">session</span> <span class="number">1</span></span><br><span class="line">mysql&gt; <span class="keyword">begin</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">mysql&gt; explain delete from test_gap_lock where myid=100;</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+-----------+---------+-------+------+-------------+</span></span><br><span class="line">| id | select_type | table         | type  | possible_keys | key       | key_len | ref   | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+-----------+---------+-------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | test_gap_lock | range | idex_myid     | idex_myid | 5       | const |    2 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+-----------+---------+-------+------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line">mysql&gt; <span class="keyword">delete</span> <span class="keyword">from</span> test_gap_lock <span class="keyword">where</span> myid=<span class="number">100</span>;</span><br><span class="line">Query OK, 2 rows affected (0.00 sec)</span><br></pre></td></tr></table></div></figure>
+<p>session 2 插入myid=99的记录依旧阻塞，存在gap锁；插入myid=97的记录成功</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into test_gap_lock values(676,'gap recored test',99);</span><br><span class="line">ERROR 1205 (HY000): <span class="keyword">Lock</span> <span class="keyword">wait</span> <span class="keyword">timeout</span> exceeded; try restarting transaction</span><br><span class="line">mysql&gt; insert into test_gap_lock values(675,'gap recored test1',97);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br></pre></td></tr></table></div></figure>
+
+        <h4 id="范例3主键索引范围当前读"   >
+          <a href="#范例3主键索引范围当前读" class="heading-link"><i class="fas fa-link"></i></a>范例3（主键索引+范围当前读）</h4>
+      
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from test_gap_lock ;</span><br><span class="line">+<span class="comment">-----+------------+------+</span></span><br><span class="line">| id  | name       | myid |</span><br><span class="line">+<span class="comment">-----+------------+------+</span></span><br><span class="line">|   1 | jiang      |   98 |</span><br><span class="line">|   2 | hubingmei  |   98 |</span><br><span class="line">|   5 | hubingmei4 |  100 |</span><br><span class="line">|   6 | jiang2     |  100 |</span><br><span class="line">|   7 | jiang22    |   70 |</span><br><span class="line">|  67 | jiang222   |   80 |</span><br><span class="line">|  98 | test       |  105 |</span><br><span class="line">| 123 | test4      |  109 |</span><br><span class="line">| 999 | test2      |   56 |</span><br><span class="line">+<span class="comment">-----+------------+------+</span></span><br><span class="line">9 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"><span class="keyword">session</span> <span class="number">1</span> </span><br><span class="line">mysql&gt; <span class="keyword">begin</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">mysql&gt; explain select * from test_gap_lock where id &gt; 100 for update;</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+---------+---------+------+------+-------------+</span></span><br><span class="line">| id | select_type | table         | type  | possible_keys | key     | key_len | ref  | rows | Extra       |</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+---------+---------+------+------+-------------+</span></span><br><span class="line">|  1 | SIMPLE      | test_gap_lock | range | PRIMARY       | PRIMARY | 4       | NULL |    2 | Using where |</span><br><span class="line">+<span class="comment">----+-------------+---------------+-------+---------------+---------+---------+------+------+-------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line">mysql&gt;  <span class="keyword">select</span> * <span class="keyword">from</span> test_gap_lock <span class="keyword">where</span> <span class="keyword">id</span> &gt; <span class="number">100</span> <span class="keyword">for</span> <span class="keyword">update</span>;</span><br><span class="line">+<span class="comment">-----+-------+------+</span></span><br><span class="line">| id  | name  | myid |</span><br><span class="line">+<span class="comment">-----+-------+------+</span></span><br><span class="line">| 123 | test4 |  109 |</span><br><span class="line">| 999 | test2 |   56 |</span><br><span class="line">+<span class="comment">-----+-------+------+</span></span><br><span class="line">2 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<p>session 2(id=3可插入；id=108无法插入，存在gap lock；id=125可以被select…in share mode和update,这点比较奇怪，应该这也算是当前读，不过后来查看官方文档得知，gap锁只会阻塞insert操作，因为gap间隙中是不存在任何记录的，除了insert操作，其他的操作结果应该都等价于空操作，mysql就不去阻塞它了)</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; insert into test_gap_lock values(108,'gap lock test3',123);</span><br><span class="line">ERROR 1205 (HY000): <span class="keyword">Lock</span> <span class="keyword">wait</span> <span class="keyword">timeout</span> exceeded; try restarting transaction</span><br><span class="line">mysql&gt; insert into test_gap_lock values(3,'gap lock test3',123);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line">mysql&gt; select * from test_gap_lock where id=125 lock in share mode;</span><br><span class="line">Empty <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line">mysql&gt; <span class="keyword">explain</span> <span class="keyword">select</span> * <span class="keyword">from</span> test_gap_lock <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">125</span> <span class="keyword">lock</span> <span class="keyword">in</span> <span class="keyword">share</span> <span class="keyword">mode</span>;</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+-----------------------------------------------------+</span></span><br><span class="line">| id | select_type | table | type | possible_keys | key  | key_len | ref  | rows | Extra                                               |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+-----------------------------------------------------+</span></span><br><span class="line">|  1 | SIMPLE      | NULL  | NULL | NULL          | NULL | NULL    | NULL | NULL | Impossible WHERE noticed after reading const tables |</span><br><span class="line">+<span class="comment">----+-------------+-------+------+---------------+------+---------+------+------+-----------------------------------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line">mysql&gt; <span class="keyword">update</span> test_gap_lock <span class="keyword">set</span> myid=<span class="number">12345</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">125</span>;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">Rows matched: 0  Changed: 0  Warnings: 0</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="gap-lock的内部加锁原理"   >
+          <a href="#gap-lock的内部加锁原理" class="heading-link"><i class="fas fa-link"></i></a>gap lock的内部加锁原理</h3>
+      
+
+        <h4 id="gap-lock的前置条件"   >
+          <a href="#gap-lock的前置条件" class="heading-link"><i class="fas fa-link"></i></a>gap lock的前置条件：</h4>
+      
+<p>1 事务隔离级别为REPEATABLE-READ，innodb_locks_unsafe_for_binlog参数为0，且sql走的索引为<strong>非唯一索引</strong></p>
+<p>2 事务隔离级别为REPEATABLE-READ，innodb_locks_unsafe_for_binlog参数为0，且<strong>sql是一个范围的当前读操作，这时即使不是非唯一索引也会加gap lock</strong></p>
+
+        <h4 id="gap-lock的加锁步骤"   >
+          <a href="#gap-lock的加锁步骤" class="heading-link"><i class="fas fa-link"></i></a>gap lock的加锁步骤</h4>
+      
+<p>针对上面的范例1（非唯一索引+范围当前读）和范例3（主键索引+范围当前读）比较好理解，那为什么范例2（非主键索引+等值当前读）为什么也会产生gap lock，这要从btree 索引的原理讲起，我们都知道，btree索引是按照顺序排列的，并且innodb存在主键聚集索引，本人绘图能力有限，已范例2的加锁过程分析举例，手写加锁过程如下图</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201002123424.png"  alt="" />
+      </p>
+<p>从图中的数据组织顺序可以看出，myid=100的记录有两条，如果加gap锁就会产生三个间隙，分别是gap1（98,100），gap2（100,100），gap3（100,105），在这三个开区间（如果我高中数学没记错的话）内的myid数值无法插入，显然gap1还有(myid=99，id=3)(myid</p>
+<p>=99,id=4)等记录，gap2无实际的间隙，gap3还有（myid=101，id=7）等记录。并且，在myid=100的两条记录上加了record lock，也就是这两条数据业务无法被其他session进行当前读操作（范例三可以看出）</p>
+
+        <h1 id="next-kye-lock"   >
+          <a href="#next-kye-lock" class="heading-link"><i class="fas fa-link"></i></a>Next-Kye lock</h1>
+      
+<p>在默认情况下，mysql的事务隔离级别是可重复读，并且innodb_locks_unsafe_for_binlog参数为0，这时默认采用next-key locks。所谓Next-Key Locks，就是Record lock和gap lock的结合，即除了锁住记录本身，还要再锁住索引之间的间隙。</p>
+<p>下面我们针对大部分的SQL类型分析是如何加锁的，假设事务隔离级别为<strong>可重复读</strong>。</p>
+
+        <h2 id="select-from"   >
+          <a href="#select-from" class="heading-link"><i class="fas fa-link"></i></a>select … from</h2>
+      
+<p>不加任何类型的锁</p>
+
+        <h2 id="selectfrom-lock-in-share-mode"   >
+          <a href="#selectfrom-lock-in-share-mode" class="heading-link"><i class="fas fa-link"></i></a>select…from lock in share mode</h2>
+      
+<p>在扫描到的任何索引记录上加共享的（shared）next-key lock，还有主键聚集索引加排它锁</p>
+
+        <h2 id="selectfrom-for-update"   >
+          <a href="#selectfrom-for-update" class="heading-link"><i class="fas fa-link"></i></a>select…from for update</h2>
+      
+<p>在扫描到的任何索引记录上加排它的next-key lock，还有主键聚集索引加排它锁</p>
+
+        <h2 id="updatewhere-delete-fromwhere"   >
+          <a href="#updatewhere-delete-fromwhere" class="heading-link"><i class="fas fa-link"></i></a>update…where  delete from…where</h2>
+      
+<p>在扫描到的任何索引记录上加next-key lock，还有主键聚集索引加排它锁</p>
+
+        <h2 id="insert-into"   >
+          <a href="#insert-into" class="heading-link"><i class="fas fa-link"></i></a>insert into…</h2>
+      
+<p>简单的insert会在insert的行对应的索引记录上加一个排它锁，这是一个record lock，并没有gap，所以并不会阻塞其他session在gap间隙里插入记录。不过在insert操作之前，还会加一种锁，官方文档称它为insertion intention gap lock，也就是意向的gap锁。这个意向gap锁的作用就是预示着当多事务并发插入相同的gap空隙时，只要插入的记录不是gap间隙中的相同位置，则无需等待其他session就可完成，这样就使得insert操作无须加真正的gap lock。想象一下，如果一个表有一个索引idx_test，表中有记录1和8，那么每个事务都可以在2和7之间插入任何记录，只会对当前插入的记录加record lock，并不会阻塞其他session插入与自己不同的记录，因为他们并没有任何冲突。</p>
+<p>假设发生了一个唯一键冲突错误，那么将会在重复的索引记录上加读锁。当有多个session同时插入相同的行记录时，如果另外一个session已经获得改行的排它锁，那么将会导致死锁。</p>
+
+        <h3 id="insert导致的死锁现象演示1"   >
+          <a href="#insert导致的死锁现象演示1" class="heading-link"><i class="fas fa-link"></i></a>insert导致的死锁现象演示1</h3>
+      
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show create table t1\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">       Table: t1</span><br><span class="line"><span class="keyword">Create</span> <span class="keyword">Table</span>: <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`t1`</span> (</span><br><span class="line">  <span class="string">`i`</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">'0'</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`i`</span>)</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8</span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></div></figure>
+<p>session1</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; begin;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">mysql&gt; INSERT INTO t1 VALUES(1);</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br></pre></td></tr></table></div></figure>
+<p>session 2 这时session2一直被卡住</p>
+<figure class="highlight"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; begin;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">mysql&gt; INSERT INTO t1 VALUES(1);</span><br></pre></td></tr></table></div></figure>
+<p>session 3 这时session3也一直被卡住</p>
+<figure class="highlight"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; begin;</span><br><span class="line"></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; INSERT INTO t1 VALUES(1);</span><br></pre></td></tr></table></div></figure>
+<p>session 1 这时我们回滚session1</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; rollback;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></div></figure>
+<p>发现session 2的insert成功，而session3检测到死锁回滚</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">session 2 Query OK, 1 row affected (28.87 sec)</span><br><span class="line">session 3  ERROR 1213 (40001): Deadlock found when trying to get <span class="keyword">lock</span>; try restarting transaction</span><br></pre></td></tr></table></div></figure>
+
+        <h3 id="死锁原因分析"   >
+          <a href="#死锁原因分析" class="heading-link"><i class="fas fa-link"></i></a>死锁原因分析：</h3>
+      
+<p>首先session1插入一条记录，获得该记录的排它锁，这时session2和session3都检测到了主键冲突错误，但是由于session1并没有提交，所以session1并不算插入成功，于是它并不能直接报错吧，于是session2和session3都申请了该记录的共享锁，这时还没获取到共享锁，处于等待队列中。这时session1 rollback了，也就释放了该行记录的排它锁，那么session2和session3都获取了该行上的共享锁。而session2和session3想要插入记录，必须获取排它锁，但由于他们自己都拥有了共享锁，于是永远无法获取到排它锁，于是死锁就发生了。如果这时session1是commit而不是rollback的话，那么session2和session3都直接报错主键冲突错误。查看死锁日志也是一目了然</p>
+<p>
+        <img   class="lazyload lazyload-gif"
+          src="/images/loading.svg" data-src="https://gitee.com/lienhui68/picStore/raw/master/null/20201002123153.png"  alt="" />
+      </p>
+
+        <h3 id="insert导致的死锁现象2"   >
+          <a href="#insert导致的死锁现象2" class="heading-link"><i class="fas fa-link"></i></a>insert导致的死锁现象2</h3>
+      
+<p>另外一个类似的死锁是session1删除了id=1的记录并未提交，这时session2和session3插入id=1的记录。这时session1 commit了，session2和session3需要insert的话，就需要获取排它锁，那么死锁也就发生了；session1 rollback，则session2和session3报错主键冲突。这里不再做演示。</p>
+
+        <h2 id="insert-on-duplicate-key-update"   >
+          <a href="#insert-on-duplicate-key-update" class="heading-link"><i class="fas fa-link"></i></a>INSERT … ON DUPLICATE KEY UPDATE</h2>
+      
+<p>这种sql和insert加锁的不同的是，如果检测到键冲突，它直接申请加排它锁，而不是共享锁。</p>
+
+        <h2 id="replace"   >
+          <a href="#replace" class="heading-link"><i class="fas fa-link"></i></a>replace</h2>
+      
+<p>replace操作如果没有检测到键冲突的话，那么它的加锁策略和insert相似；如果检测到键冲突，那么它也是直接再申请加排它锁</p>
+
+        <h2 id="insert-into-t-select-from-s-where"   >
+          <a href="#insert-into-t-select-from-s-where" class="heading-link"><i class="fas fa-link"></i></a>INSERT INTO T SELECT … FROM S WHERE …</h2>
+      
+<p>在T表上的加锁策略和普通insert一致，另外还会在S表上的相关记录上加共享的next-key lock。（如果是可重复读模式，则不会加锁）</p>
+
+        <h2 id="create-table-select"   >
+          <a href="#create-table-select" class="heading-link"><i class="fas fa-link"></i></a>CREATE TABLE … SELECT …</h2>
+      
+<p>在select的表上加共享的next-key lock</p>
+
+        <h2 id="自增id的加锁策略"   >
+          <a href="#自增id的加锁策略" class="heading-link"><i class="fas fa-link"></i></a>自增id的加锁策略</h2>
+      
+<p>当一张表的某个字段是自增列时，innodb会在该索引的末位加一个排它锁。为了访问这个自增的数值，需要加一个表级锁，不过这个表级锁的持续时间只有当前sql，而不是整个事务，即当前sql执行完，该表级锁就释放了。其他session无法在这个表级锁持有时插入任何记录。</p>
+
+        <h2 id="外键检测的加锁策略"   >
+          <a href="#外键检测的加锁策略" class="heading-link"><i class="fas fa-link"></i></a>外键检测的加锁策略</h2>
+      
+<p>如果存在外键约束，任何的insert，update，delete将会检测约束条件，将会在相应的记录上加共享的record lock，无论是否存在外键冲突。</p>
+
+        <h1 id="参考"   >
+          <a href="#参考" class="heading-link"><i class="fas fa-link"></i></a>参考</h1>
+      
+<p><span class="exturl"><a class="exturl__link"   href="https://www.cnblogs.com/crazylqy/p/7773492.html"  target="_blank" rel="noopener">https://www.cnblogs.com/crazylqy/p/7773492.html</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="http://lienhui68.gitee.io">lienhui68</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/InnoDB%E7%9A%84%E9%94%81%E7%A7%8D%E7%B1%BB/">http://lienhui68.gitee.io/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/InnoDB%E7%9A%84%E9%94%81%E7%A7%8D%E7%B1%BB/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="http://lienhui68.gitee.io/tags/mysql/">mysql</a></span></div><div class="post-reward reward"><div class="reward-button">请我喝杯咖啡~</div><div class="reward-qrcode"><span class="reward-qrcode-alipay"><img class="reward-qrcode-alipay__img" src="/assets/6.jpeg"><div class="reward-qrcode-alipay__text">支付宝打赏</div></span><span class="reward-qrcode-wechat"><img class="reward-qrcode-wechat__img" src="/assets/5.jpeg"><div class="reward-qrcode-wechat__text">微信打赏</div></span></div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/%E5%8A%A0%E9%94%81%E8%BF%87%E7%A8%8B/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">加锁过程</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2020/%E5%B7%A5%E4%BD%9C/400_%E6%95%B0%E6%8D%AE%E5%BA%93/mysql/%E4%BA%8B%E5%8A%A1%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/"><span class="paginator-prev__text">事务实现原理</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="valine-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#record-lock"><span class="toc-number">1.</span> <span class="toc-text">
+          Record lock</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#gap-lock"><span class="toc-number">2.</span> <span class="toc-text">
+          Gap lock</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#快照读"><span class="toc-number">2.1.</span> <span class="toc-text">
+          快照读</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#当前读"><span class="toc-number">2.2.</span> <span class="toc-text">
+          当前读</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#意向锁"><span class="toc-number">2.3.</span> <span class="toc-text">
+          意向锁</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#不可重复读"><span class="toc-number">2.4.</span> <span class="toc-text">
+          不可重复读</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#幻读"><span class="toc-number">2.5.</span> <span class="toc-text">
+          幻读</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#幻读的演示"><span class="toc-number">2.5.1.</span> <span class="toc-text">
+          幻读的演示</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gap-lock机制解决幻读问题演示"><span class="toc-number">2.5.2.</span> <span class="toc-text">
+          gap lock机制解决幻读问题演示</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#演示范例-1非唯一索引范围当前读"><span class="toc-number">2.5.2.1.</span> <span class="toc-text">
+          演示范例 1（非唯一索引+范围当前读）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#演示范例2非唯一索引等值当前读"><span class="toc-number">2.5.2.2.</span> <span class="toc-text">
+          演示范例2（非唯一索引+等值当前读）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#范例3主键索引范围当前读"><span class="toc-number">2.5.2.3.</span> <span class="toc-text">
+          范例3（主键索引+范围当前读）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gap-lock的内部加锁原理"><span class="toc-number">2.5.3.</span> <span class="toc-text">
+          gap lock的内部加锁原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#gap-lock的前置条件"><span class="toc-number">2.5.3.1.</span> <span class="toc-text">
+          gap lock的前置条件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#gap-lock的加锁步骤"><span class="toc-number">2.5.3.2.</span> <span class="toc-text">
+          gap lock的加锁步骤</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#next-kye-lock"><span class="toc-number">3.</span> <span class="toc-text">
+          Next-Kye lock</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#select-from"><span class="toc-number">3.1.</span> <span class="toc-text">
+          select … from</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#selectfrom-lock-in-share-mode"><span class="toc-number">3.2.</span> <span class="toc-text">
+          select…from lock in share mode</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#selectfrom-for-update"><span class="toc-number">3.3.</span> <span class="toc-text">
+          select…from for update</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#updatewhere-delete-fromwhere"><span class="toc-number">3.4.</span> <span class="toc-text">
+          update…where  delete from…where</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#insert-into"><span class="toc-number">3.5.</span> <span class="toc-text">
+          insert into…</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#insert导致的死锁现象演示1"><span class="toc-number">3.5.1.</span> <span class="toc-text">
+          insert导致的死锁现象演示1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#死锁原因分析"><span class="toc-number">3.5.2.</span> <span class="toc-text">
+          死锁原因分析：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#insert导致的死锁现象2"><span class="toc-number">3.5.3.</span> <span class="toc-text">
+          insert导致的死锁现象2</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#insert-on-duplicate-key-update"><span class="toc-number">3.6.</span> <span class="toc-text">
+          INSERT … ON DUPLICATE KEY UPDATE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#replace"><span class="toc-number">3.7.</span> <span class="toc-text">
+          replace</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#insert-into-t-select-from-s-where"><span class="toc-number">3.8.</span> <span class="toc-text">
+          INSERT INTO T SELECT … FROM S WHERE …</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#create-table-select"><span class="toc-number">3.9.</span> <span class="toc-text">
+          CREATE TABLE … SELECT …</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自增id的加锁策略"><span class="toc-number">3.10.</span> <span class="toc-text">
+          自增id的加锁策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#外键检测的加锁策略"><span class="toc-number">3.11.</span> <span class="toc-text">
+          外键检测的加锁策略</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">
+          参考</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="/assets/3.png" alt="avatar"></div><p class="sidebar-ov-author__text">人类的悲欢并不相通</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/lienhui68" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://www.facebook.com/profile.php?id=100009351871465" target="_blank" rel="noopener" data-popover="Facebook" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-facebook"></i></span></a><a class="sidebar-ov-social-item" href="https://www.zhihu.com/people/lienhui68" target="_blank" rel="noopener" data-popover="知乎" data-popover-pos="up"><span class="sidebar-ov-social-item__icon">知</span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">335</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">47</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">51</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2020</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>lienhui68 All Rights Reserved</span></div><div class="busuanzi"><span class="busuanzi-siteuv"><span class="busuanzi-siteuv__icon"><i class="fas fa-user"></i></span><span class="busuanzi-siteuv__info">访问人数</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_uv"></span></span><span class="busuanzi-sitepv"><span class="busuanzi-siteuv__icon"><i class="fas fa-eye"></i></span><span class="busuanzi-siteuv__info">浏览总量</span><span class="busuanzi-siteuv__value" id="busuanzi_value_site_pv"></span></span></div><div>我抓不住世间的美好，只好装作万事顺遂的样子</div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><div class="search-mask"></div><div class="search-popup"><span class="search-close"></span><div class="search-input"><input placeholder="搜索文章（支持多关键词，请用空格分隔）"></div><div class="search-results"></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.min.js"></script><script>function initSearch() {
+  var isXML = true;
+  var search_path = 'search.json';
+
+  if (!search_path) {
+    search_path = 'search.xml';
+  } else if (/json$/i.test(search_path)) {
+    isXML = false;
+  }
+
+  var path = '/' + search_path;
+  $.ajax({
+    url: path,
+    dataType: isXML ? 'xml' : 'json',
+    async: true,
+    success: function (res) {
+      var datas = isXML ? $('entry', res).map(function () {
+        // 将 XML 转为 JSON
+        return {
+          title: $('title', this).text(),
+          content: $('content', this).text(),
+          url: $('url', this).text()
+        };
+      }).get() : res;
+      var $input = $('.search-input input');
+      var $result = $('.search-results');
+      // 搜索对象（标题、内容）的权重，影响显示顺序
+      var WEIGHT = { title: 100, content: 1 };
+      var searchPost = function () {
+        var searchText = $input.val().toLowerCase().trim();
+        // 根据空白字符分隔关键字
+        var keywords = searchText.split(/[\s]+/);
+        // 搜索结果
+        var matchPosts = [];
+
+        // 有多个关键字时，将原文字整个保存下来
+        if (keywords.length > 1) {
+          keywords.push(searchText);
+        }
+        // 防止未输入字符时搜索
+        if (searchText.length > 0) {
+          datas.forEach(function (data) {
+            var isMatch  = false;
+            // 没有标题的文章使用预设的 i18n 变量代替
+            var title = (data.title && data.title.trim()) || '[ 文章无标题 ]';
+            var titleLower = title && title.toLowerCase();
+            // 删除 HTML 标签 和 所有空白字符
+            var content = data.content && data.content.replace(/<[^>]+>/g, '');
+            var contentLower = content && content.toLowerCase();
+            // 删除重复的 /
+            var postURL = data.url && decodeURI(data.url).replace(/\/{2,}/g, '/');
+            // 标题中匹配到的关键词
+            var titleHitSlice = [];
+            // 内容中匹配到的关键词
+            var contentHitSlice = [];
+
+            keywords.forEach(function (keyword) {
+              /**
+              * 获取匹配的关键词的索引
+              * @param {String} keyword 要匹配的关键字
+              * @param {String} text 原文字
+              * @param {Boolean} caseSensitive 是否区分大小写
+              * @param {Number} weight 匹配对象的权重。权重大的优先显示
+              * @return {Array}
+              */
+              function getIndexByword (word, text, caseSensitive, weight) {
+                if (!word || !text) {
+                  return [];
+                };
+
+                var startIndex = 0; // 每次匹配的开始索引
+                var index = -1;     // 匹配到的索引值
+                var result = [];    // 匹配结果
+
+                if (!caseSensitive) {
+                  word = word.toLowerCase();
+                  text = text.toLowerCase();
+                }
+
+                while((index = text.indexOf(word, startIndex)) !== -1) {
+                  var hasMatch = false;
+                  // 索引位置相同的关键词，保留长度较长的
+                  titleHitSlice.forEach(function (hit) {
+                    if (hit.index === index && hit.word.length < word.length) {
+                      hit.word = word;
+                      hasMatch = true;
+                    }
+                  });
+                  startIndex = index + word.length;
+                  !hasMatch && result.push({ index: index, word: word, weight: weight });
+                }
+                return result;
+              }
+              titleHitSlice = titleHitSlice.concat(getIndexByword(keyword, titleLower, false, WEIGHT.title));
+              contentHitSlice = contentHitSlice.concat(getIndexByword(keyword, contentLower, false, WEIGHT.content));
+            });
+
+            var hitTitle = titleHitSlice.length;
+            var hitContent = contentHitSlice.length;
+
+            if (hitTitle > 0 || hitContent > 0) {
+              isMatch = true;
+            }
+            if (isMatch) {
+              ;[titleHitSlice, contentHitSlice].forEach(function (hit) {
+                // 按照匹配文字的索引的递增顺序排序
+                hit.sort(function (left, right) {
+                  return left.index - right.index;
+                });
+              });
+              /**
+              * 给文本中匹配到的关键词添加标记，从而进行高亮显示
+              * @param {String} text 原文本
+              * @param {Array} hitSlice 匹配项的索引信息
+              * @param {Number} start 开始索引
+              * @param {Number} end 结束索引
+              * @return {String}
+              */
+              function highlightKeyword (text, hitSlice, start, end) {
+                if (!text || !hitSlice || !hitSlice.length) {
+                  return;
+                }
+
+                var result = '';
+                var startIndex = start;
+                var endIndex = end;
+                hitSlice.forEach(function (hit) {
+                  if (hit.index < startIndex) {
+                    return;
+                  }
+
+                  var hitWordEnd = hit.index + hit.word.length;
+                  result += text.slice(startIndex, hit.index);
+                  result += '<b>' + text.slice(hit.index, hitWordEnd) + '</b>';
+                  startIndex = hitWordEnd;
+                });
+                result += text.slice(startIndex, endIndex);
+                return result;
+              }
+
+              var postData = {};
+              // 文章总的搜索权重
+              var postWeight = titleHitSlice.length * WEIGHT.title + contentHitSlice.length * WEIGHT.content;
+              // 标记匹配关键词后的标题
+              var postTitle = highlightKeyword(title, titleHitSlice, 0, title.length) || title;
+              // 标记匹配关键词后的内容
+              var postContent;
+              // 显示内容的长度
+              var SHOW_WORD_LENGTH = 200;
+              // 命中关键词前的字符显示长度
+              var SHOW_WORD_FRONT_LENGTH = 20;
+              var SHOW_WORD_END_LENGTH = SHOW_WORD_LENGTH - SHOW_WORD_FRONT_LENGTH;
+
+              // 截取匹配的第一个字符，前后共 200 个字符来显示
+              if (contentHitSlice.length > 0) {
+                var firstIndex = contentHitSlice[0].index;
+                var start = firstIndex > SHOW_WORD_FRONT_LENGTH ? firstIndex - SHOW_WORD_FRONT_LENGTH : 0;
+                var end = firstIndex + SHOW_WORD_END_LENGTH;
+                postContent = highlightKeyword(content, contentHitSlice, start, end);
+              } else { // 未匹配到内容，直接截取前 200 个字符来显示
+                postContent = content.slice(0, SHOW_WORD_LENGTH);
+              }
+              postData.title = postTitle;
+              postData.content = postContent;
+              postData.url = postURL;
+              postData.weight = postWeight;
+              matchPosts.push(postData);
+            }
+          });
+        }
+
+        var resultInnerHtml = '';
+        if (matchPosts.length) {
+          // 按权重递增的顺序排序，使权重大的优先显示
+          matchPosts.sort(function (left, right) {
+            return right.weight - left.weight;
+          });
+          resultInnerHtml += '<ul>';
+          matchPosts.forEach(function (post) {
+            resultInnerHtml += '<li><a class="search-results-title" href="' + post.url + '">';
+            resultInnerHtml += post.title;
+            resultInnerHtml += '</a><div class="search-results-content">';
+            resultInnerHtml += post.content;
+            resultInnerHtml += '</div></li>';
+          });
+          resultInnerHtml += '</ul>';
+        } else {
+          resultInnerHtml += '<div class="search-results-none"><i class="far fa-meh"></i></div>';
+        }
+        $result.html(resultInnerHtml);
+      };
+      $input.on('input', searchPost);
+      $input.on('keyup', function (e) {
+        if (e.keyCode === Stun.utils.codeToKeyCode('Enter')) {
+          searchPost();
+        }
+      });
+    }
+  });
+}
+
+function closeSearch () {
+  $('body').css({ overflow: 'auto' });
+  $('.search-popup').css({ display: 'none' });
+  $('.search-mask').css({ display: 'none' });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  Stun.utils.pjaxReloadLocalSearch = function () {
+    $('.header-nav-search').on('click', function (e) {
+      e.stopPropagation();
+      $('body').css('overflow', 'hidden');
+      $('.search-popup')
+        .velocity('stop')
+        .velocity('transition.expandIn', {
+          duration: 300,
+          complete: function () {
+            $('.search-popup input').focus();
+          }
+        });
+      $('.search-mask')
+        .velocity('stop')
+        .velocity('transition.fadeIn', {
+          duration: 300
+        });
+
+      initSearch();
+    });
+    $('.search-mask, .search-close').on('click', function () {
+      closeSearch();
+    });
+    $(document).on('keydown', function (e) {
+      // Escape <=> 27
+      if (e.keyCode === Stun.utils.codeToKeyCode('Escape')) {
+        closeSearch();
+      }
+    });
+  };
+
+  Stun.utils.pjaxReloadLocalSearch();
+}, false);</script><link href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" rel="stylesheet" type="text/css"><script src="https://cdn.jsdelivr.net/gh/sukkaw/busuanzi@latest/bsz.pure.mini.js" async></script><script src="https://cdn.jsdelivr.net/npm/leancloud-storage@latest/dist/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@latest/dist/Valine.min.js"></script><script>function loadValine () {
+  var GUEST_INFO = ['nick', 'mail', 'link'];
+  var guest_info = 'nick,mail,link';
+
+  guest_info = guest_info.split(',').filter(function(item) {
+    return GUEST_INFO.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#valine-container',
+    appId: 'iTixDcNjX1XLIDnENLxM9F1E-gzGzoHsz',
+    appKey: 'hKBKmiysmFkqF2ik6yCcEATU',
+    notify: true,
+    verify: true,
+    placeholder: '欢迎评论',
+    avatar: 'mp',
+    meta: guest_info,
+    pageSize: '10' || 10,
+    visitor: false,
+    recordIP: false,
+    lang: '' || 'zh-cn',
+    path: window.location.pathname
+  });
+}
+
+if (false) {
+  loadValine();
+} else {
+  window.addEventListener('DOMContentLoaded', loadValine, false);
+}</script><script src="/js/utils.js?v=2.0.1"></script><script src="/js/stun-boot.js?v=2.0.1"></script><script src="/js/scroll.js?v=2.0.1"></script><script src="/js/header.js?v=2.0.1"></script><script src="/js/sidebar.js?v=2.0.1"></script></body></html>
